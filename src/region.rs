@@ -1,6 +1,6 @@
 use toasty::{BelongsTo, HasMany};
 
-use crate::taxonomy::Taxon;
+use crate::{collection::Phenology, taxonomy::Taxon};
 
 #[derive(Debug, toasty::Embed)]
 pub enum WetlandIndicator {
@@ -43,6 +43,8 @@ pub struct Region {
     statuses: HasMany<RegionStatus>,
     #[has_many]
     npcs: HasMany<NativePlantCommunity>,
+    #[has_many]
+    phenologies: HasMany<Phenology>,
 }
 
 #[derive(Debug, toasty::Model)]

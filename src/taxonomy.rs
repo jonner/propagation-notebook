@@ -1,6 +1,9 @@
-use toasty::{BelongsTo, HasMany};
+use toasty::{BelongsTo, HasMany, HasOne};
 
-use crate::region::RegionStatus;
+use crate::{
+    collection::{CleaningProcedure, CollectionData, Phenology},
+    region::RegionStatus,
+};
 
 #[derive(Debug, toasty::Embed)]
 pub enum Rank {
@@ -126,6 +129,12 @@ pub struct Taxon {
     synonyms: HasMany<Synonym>,
     #[has_many]
     region_statuses: HasMany<RegionStatus>,
+    #[has_one]
+    collection_data: HasOne<Option<CollectionData>>,
+    #[has_one]
+    cleaning_procedure: HasOne<Option<CleaningProcedure>>,
+    #[has_many]
+    phenologies: HasMany<Phenology>,
 }
 
 #[derive(Debug, toasty::Model)]
