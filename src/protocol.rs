@@ -1,3 +1,7 @@
+use toasty::{BelongsTo, HasMany};
+
+use crate::taxonomy::Taxon;
+
 #[derive(Debug, toasty::Embed)]
 pub enum CitationType {
     #[column(variant = 1)]
@@ -15,7 +19,7 @@ pub enum CitationType {
 }
 
 #[derive(Debug, toasty::Model)]
-pub struct Citations {
+pub struct Citation {
     #[auto]
     #[key]
     id: u64,
@@ -49,16 +53,23 @@ pub enum DifficultyLevel {
 }
 
 #[derive(Debug, toasty::Model)]
-pub struct Protocol {
+pub struct Procedure {
     #[auto]
     #[key]
     id: u64,
-    taxon_id: u64,
-    citation_id: u64,
+
     propagation_type: PropagationType,
     difficulty: DifficultyLevel,
     // link to an external table of notes?
     notes: Option<String>,
+
+    #[has_many]
+    sexual_steps: HasMany<SexualMethodStep>,
+    #[has_many]
+    asexual_steps: HasMany<AsexualMethodStep>,
+
+    #[has_many]
+    protocols: HasMany<Protocol>,
 }
 
 #[derive(Debug, toasty::Embed)]
@@ -92,7 +103,12 @@ pub struct SexualMethodStep {
     #[auto]
     #[key]
     id: u64,
-    protocol_id: u64,
+
+    #[index]
+    procedure_id: u64,
+    #[belongs_to(key=procedure_id, references=id)]
+    procedure: BelongsTo<Procedure>,
+
     step_order: u64,
     treatment_type: TreatmentType,
     duration_days: u64,
@@ -122,7 +138,12 @@ pub struct AsexualMethodStep {
     #[auto]
     #[key]
     id: u64,
-    protocol_id: u64,
+
+    #[index]
+    procedure_id: u64,
+    #[belongs_to(key=procedure_id, references=id)]
+    procedure: BelongsTo<Procedure>,
+
     method_type: AsexualMethodType,
     hormone_treatment: Option<String>,
     substrate_media: Option<String>,
@@ -135,7 +156,7 @@ pub struct CultureEnvironment {
     #[auto]
     #[key]
     id: u64,
-    taxon_id: u64,
+
     // mm
     sowing_depth: u64,
     depth_description: Option<String>, // (Enum/Text: e.g., "Surface Sown," "1x Seed Diameter," "1/4 inch")
@@ -146,15 +167,37 @@ pub struct CultureEnvironment {
     is_experimental: bool,
     // link to an external table of notes?
     notes: Option<String>,
+
+    #[has_many(pair=environment)]
+    procedures: HasMany<Protocol>,
 }
 
 // a combination of seed prep and sowing
 #[derive(Debug, toasty::Model)]
-pub struct Procedure {
+pub struct Protocol {
     #[auto]
     #[key]
     id: u64,
+
+    #[index]
+    taxon_id: u64,
+    #[belongs_to(key=taxon_id, references=id)]
+    taxon: BelongsTo<Taxon>,
+
+    #[index]
     protocol_id: u64,
+    #[belongs_to(key=protocol_id, references=id)]
+    procedure: BelongsTo<Procedure>,
+
+    #[index]
     environment_id: u64,
+    #[belongs_to(key=environment_id, references=id)]
+    environment: BelongsTo<CultureEnvironment>,
+
+    #[index]
+    citation_id: u64,
+    #[belongs_to(key=citation_id, references=id)]
+    citation: BelongsTo<Citation>,
+
     notes: Option<String>,
 }

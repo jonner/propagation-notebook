@@ -2,6 +2,7 @@ use toasty::{BelongsTo, HasMany, HasOne};
 
 use crate::{
     collection::{CleaningProcedure, CollectionData, Phenology},
+    protocol::Protocol,
     region::RegionStatus,
 };
 
@@ -135,6 +136,8 @@ pub struct Taxon {
     cleaning_procedure: HasOne<Option<CleaningProcedure>>,
     #[has_many]
     phenologies: HasMany<Phenology>,
+    #[has_many]
+    protocols: HasMany<Protocol>,
 }
 
 #[derive(Debug, toasty::Model)]
