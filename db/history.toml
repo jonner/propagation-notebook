@@ -1,26 +1,6 @@
 version = 1
 
 [[migrations]]
-id = 4659468136191909097
+id = 6333421595118415997
 name = "0000_migration.sql"
 snapshot_name = "0000_snapshot.toml"
-
-[[migrations]]
-id = 1583288424996543777
-name = "0001_add_taxon_relations.sql"
-snapshot_name = "0001_snapshot.toml"
-
-[[migrations]]
-id = 8225607214207993519
-name = "0002_add_region_relations.sql"
-snapshot_name = "0002_snapshot.toml"
-
-[[migrations]]
-id = 6724925265537163319
-name = "0003_add_collection_relations.sql"
-snapshot_name = "0003_snapshot.toml"
-
-[[migrations]]
-id = 561449815949449745
-name = "0004_add_protocol_relations.sql"
-snapshot_name = "0004_snapshot.toml"
