@@ -83,7 +83,8 @@ async fn main() -> anyhow::Result<()> {
         .connect(our_db_path)
         .await?;
 
-    let mut itis_to_ours: HashMap<u64, u64> = HashMap::default();
+    let mut tsn_to_id: HashMap<u64, u64> = HashMap::default();
+
     let mut page = TaxonomicUnit::filter_by_name_usage("accepted")
         // need to sort by taxonomic sequence to guarantee that the parent will
         // be added to the database before the child that refers to it.
@@ -106,7 +107,7 @@ async fn main() -> anyhow::Result<()> {
             creates.push(query);
         }
         let objs = toasty::batch(creates).exec(&mut ourdb).await?;
-        itis_to_ours.extend(objs.into_iter().map(|obj| (obj.itis_id, obj.id)));
+        tsn_to_id.extend(objs.into_iter().map(|obj| (obj.itis_id, obj.id)));
         print!(".");
         stdout().flush().unwrap();
 
@@ -135,7 +136,7 @@ async fn main() -> anyhow::Result<()> {
             let our_parent_id = theirs
                 .parent_tsn
                 .filter(|id| id != &0)
-                .map(|id| *itis_to_ours.get(&id).expect(&errmsg));
+                .map(|id| *tsn_to_id.get(&id).expect(&errmsg));
             updates.push(
                 propagation_notebook::taxonomy::Taxon::filter_by_itis_id(theirs.tsn)
                     .update()
@@ -162,7 +163,7 @@ async fn main() -> anyhow::Result<()> {
     loop {
         let mut creates = Vec::new();
         for v in page.iter() {
-            if let Some(ourid) = itis_to_ours.get(&v.tsn) {
+            if let Some(ourid) = tsn_to_id.get(&v.tsn) {
                 creates.push(
                     propagation_notebook::taxonomy::VernacularName::create()
                         .name(&v.vernacular_name)
@@ -192,7 +193,7 @@ async fn main() -> anyhow::Result<()> {
         for theirs in page.iter() {
             match SynonymLink::get_by_tsn(&mut itisdb, theirs.tsn).await {
                 Ok(link) => {
-                    let ourid = itis_to_ours
+                    let ourid = tsn_to_id
                         .get(&link.tsn_accepted)
                         .expect("Failed to find id of accepted taxon");
                     let synonym = propagation_notebook::taxonomy::Synonym::create()
