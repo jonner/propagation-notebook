@@ -1,3 +1,5 @@
+use toasty::{BelongsTo, HasMany};
+
 #[derive(Debug, toasty::Embed)]
 pub enum Rank {
     #[column(variant = 0)]
@@ -94,22 +96,45 @@ pub struct Taxon {
     #[auto]
     #[key]
     pub id: u64,
+    #[index]
     name1: String,
+    #[index]
     name2: Option<String>,
+    #[index]
     name3: Option<String>,
+    #[index]
     complete_name: String,
+
+    #[index]
     parent_id: Option<u64>,
+    #[belongs_to(key=parent_id, references=id)]
+    parent: BelongsTo<Option<Taxon>>,
+
+    // #[index]
     rank: Rank,
+
     life_form: Option<LifeForm>,
     life_cycle: Option<LifeCycle>,
+
+    #[has_many(pair=parent)]
+    children: HasMany<Taxon>,
+    #[has_many]
+    vernaculars: HasMany<VernacularName>,
+    #[has_many]
+    synonyms: HasMany<Synonym>,
 }
 
 #[derive(Debug, toasty::Model)]
-pub struct VernacularNames {
+pub struct VernacularName {
     #[auto]
     #[key]
     id: u64,
+
+    #[index]
     taxon_id: u64,
+    #[belongs_to(key=taxon_id, references=id)]
+    taxon: BelongsTo<Taxon>,
+
     name: String,
 }
 
@@ -118,10 +143,19 @@ pub struct Synonym {
     #[auto]
     #[key]
     id: u64,
+
+    #[index]
     taxon_id: u64,
+    #[belongs_to(key=taxon_id, references=id)]
+    taxon: BelongsTo<Taxon>,
+
+    #[index]
     name1: String,
+    #[index]
     name2: Option<String>,
+    #[index]
     name3: Option<String>,
+    #[index]
     pub complete_name: String,
     // is_accepted: bool,
 }

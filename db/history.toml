@@ -4,3 +4,8 @@ version = 1
 id = 4659468136191909097
 name = "0000_migration.sql"
 snapshot_name = "0000_snapshot.toml"
+
+[[migrations]]
+id = 1583288424996543777
+name = "0001_add_taxon_relations.sql"
+snapshot_name = "0001_snapshot.toml"
