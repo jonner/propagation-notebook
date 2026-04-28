@@ -111,7 +111,7 @@ async fn main() -> anyhow::Result<()> {
                 vernaculars
                     .into_iter()
                     .map(|v| {
-                        propagation_notebook::taxonomy::VernacularNames::create()
+                        propagation_notebook::taxonomy::VernacularName::create()
                             .name(v.vernacular_name)
                             .taxon_id(ourtaxon.id)
                     })
