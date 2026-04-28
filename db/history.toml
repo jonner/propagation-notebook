@@ -9,3 +9,8 @@ snapshot_name = "0000_snapshot.toml"
 id = 1583288424996543777
 name = "0001_add_taxon_relations.sql"
 snapshot_name = "0001_snapshot.toml"
+
+[[migrations]]
+id = 8225607214207993519
+name = "0002_add_region_relations.sql"
+snapshot_name = "0002_snapshot.toml"

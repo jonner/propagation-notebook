@@ -1,5 +1,7 @@
 use toasty::{BelongsTo, HasMany};
 
+use crate::region::RegionStatus;
+
 #[derive(Debug, toasty::Embed)]
 pub enum Rank {
     #[column(variant = 0)]
@@ -122,6 +124,8 @@ pub struct Taxon {
     vernaculars: HasMany<VernacularName>,
     #[has_many]
     synonyms: HasMany<Synonym>,
+    #[has_many]
+    region_statuses: HasMany<RegionStatus>,
 }
 
 #[derive(Debug, toasty::Model)]
