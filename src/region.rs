@@ -32,55 +32,55 @@ pub enum ConservationStatus {
 pub struct Region {
     #[auto]
     #[key]
-    id: u64,
+    pub id: u64,
 
     #[index]
-    name: String,
+    pub name: String,
     // FIXME: geojson??
-    bound: String,
+    pub bounds: String,
 
     #[has_many]
-    statuses: HasMany<RegionStatus>,
+    pub statuses: HasMany<RegionStatus>,
     #[has_many]
-    npcs: HasMany<NativePlantCommunity>,
+    pub npcs: HasMany<NativePlantCommunity>,
     #[has_many]
-    phenologies: HasMany<Phenology>,
+    pub phenologies: HasMany<Phenology>,
 }
 
 #[derive(Debug, toasty::Model)]
 pub struct RegionStatus {
     #[auto]
     #[key]
-    id: u64,
+    pub id: u64,
 
     #[index]
-    taxon_id: u64,
+    pub taxon_id: u64,
     #[belongs_to(key=taxon_id, references=id)]
-    taxon: BelongsTo<Taxon>,
+    pub taxon: BelongsTo<Taxon>,
 
     #[index]
-    region_id: u64,
+    pub region_id: u64,
     #[belongs_to(key=region_id, references=id)]
-    region: BelongsTo<Region>,
+    pub region: BelongsTo<Region>,
 
     // generally 0-10?
-    c_value: Option<u64>,
-    conservation_status: ConservationStatus,
-    wetland_indicator: WetlandIndicator,
-    native_plant_community_id: u64,
+    pub c_value: Option<u64>,
+    pub conservation_status: ConservationStatus,
+    pub wetland_indicator: WetlandIndicator,
+    pub native_plant_community_id: u64,
 }
 
 #[derive(Debug, toasty::Model)]
 pub struct NativePlantCommunity {
     #[auto]
     #[key]
-    id: u64,
+    pub id: u64,
 
     #[index]
-    region_id: u64,
+    pub region_id: u64,
     #[belongs_to(key=region_id, references=id)]
-    region: BelongsTo<Region>,
+    pub region: BelongsTo<Region>,
 
     #[index]
-    name: String,
+    pub name: String,
 }

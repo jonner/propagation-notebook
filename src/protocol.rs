@@ -22,14 +22,15 @@ pub enum CitationType {
 pub struct Citation {
     #[auto]
     #[key]
-    id: u64,
-    r#type: CitationType,
-    title: String,
-    author: String,
-    author_organization: Option<String>,
-    publication_year: Option<u16>,
-    url_doi: Option<String>,
-    reliability: Option<u8>,
+    pub id: u64,
+
+    pub r#type: CitationType,
+    pub title: String,
+    pub author: String,
+    pub author_organization: Option<String>,
+    pub publication_year: Option<u16>,
+    pub url_doi: Option<String>,
+    pub reliability: Option<u8>,
 }
 
 #[derive(Debug, toasty::Embed)]
@@ -56,20 +57,19 @@ pub enum DifficultyLevel {
 pub struct Procedure {
     #[auto]
     #[key]
-    id: u64,
+    pub id: u64,
 
-    propagation_type: PropagationType,
-    difficulty: DifficultyLevel,
+    pub propagation_type: PropagationType,
+    pub difficulty: DifficultyLevel,
     // link to an external table of notes?
-    notes: Option<String>,
+    pub notes: Option<String>,
 
     #[has_many]
-    sexual_steps: HasMany<SexualMethodStep>,
+    pub sexual_steps: HasMany<SexualMethodStep>,
     #[has_many]
-    asexual_steps: HasMany<AsexualMethodStep>,
-
+    pub asexual_steps: HasMany<AsexualMethodStep>,
     #[has_many]
-    protocols: HasMany<Protocol>,
+    pub protocols: HasMany<Protocol>,
 }
 
 #[derive(Debug, toasty::Embed)]
@@ -102,19 +102,19 @@ pub enum LightRequirement {
 pub struct SexualMethodStep {
     #[auto]
     #[key]
-    id: u64,
+    pub id: u64,
 
     #[index]
-    procedure_id: u64,
+    pub procedure_id: u64,
     #[belongs_to(key=procedure_id, references=id)]
-    procedure: BelongsTo<Procedure>,
+    pub procedure: BelongsTo<Procedure>,
 
-    step_order: u64,
-    treatment_type: TreatmentType,
-    duration_days: u64,
-    temp_day: u64,
-    temp_night: u64,
-    light_requirements: LightRequirement,
+    pub step_order: u64,
+    pub treatment_type: TreatmentType,
+    pub duration_days: u64,
+    pub temp_day: u64,
+    pub temp_night: u64,
+    pub light_requirements: LightRequirement,
 }
 
 #[derive(Debug, toasty::Embed)]
@@ -137,39 +137,39 @@ pub enum AsexualMethodType {
 pub struct AsexualMethodStep {
     #[auto]
     #[key]
-    id: u64,
+    pub id: u64,
 
     #[index]
-    procedure_id: u64,
+    pub procedure_id: u64,
     #[belongs_to(key=procedure_id, references=id)]
-    procedure: BelongsTo<Procedure>,
+    pub procedure: BelongsTo<Procedure>,
 
-    method_type: AsexualMethodType,
-    hormone_treatment: Option<String>,
-    substrate_media: Option<String>,
-    moise_humidity_requirement: Option<String>,
-    optimal_timing: Option<String>,
+    pub method_type: AsexualMethodType,
+    pub hormone_treatment: Option<String>,
+    pub substrate_media: Option<String>,
+    pub moise_humidity_requirement: Option<String>,
+    pub optimal_timing: Option<String>,
 }
 
 #[derive(Debug, toasty::Model)]
 pub struct CultureEnvironment {
     #[auto]
     #[key]
-    id: u64,
+    pub id: u64,
 
     // mm
-    sowing_depth: u64,
-    depth_description: Option<String>, // (Enum/Text: e.g., "Surface Sown," "1x Seed Diameter," "1/4 inch")
-    media_type: Option<String>,        // enum?
-    compaction_level: Option<String>,  // (Enum: Lightly pressed, Firmly packed, Loose)
-    moisture_regime: Option<String>, // (Enum: Saturated/Wet, Consistently Moist, Dry-out between waterings)
-    container_type: Option<String>,  // (Enum: Plug tray, Deep conetainer, Open flat, Soil block)
-    is_experimental: bool,
+    pub sowing_depth: u64,
+    pub depth_description: Option<String>, // (Enum/Text: e.g., "Surface Sown," "1x Seed Diameter," "1/4 inch")
+    pub media_type: Option<String>,        // enum?
+    pub compaction_level: Option<String>,  // (Enum: Lightly pressed, Firmly packed, Loose)
+    pub moisture_regime: Option<String>, // (Enum: Saturated/Wet, Consistently Moist, Dry-out between waterings)
+    pub container_type: Option<String>, // (Enum: Plug tray, Deep conetainer, Open flat, Soil block)
+    pub is_experimental: bool,
     // link to an external table of notes?
-    notes: Option<String>,
+    pub notes: Option<String>,
 
     #[has_many(pair=environment)]
-    procedures: HasMany<Protocol>,
+    pub procedures: HasMany<Protocol>,
 }
 
 // a combination of seed prep and sowing
@@ -177,27 +177,27 @@ pub struct CultureEnvironment {
 pub struct Protocol {
     #[auto]
     #[key]
-    id: u64,
+    pub id: u64,
 
     #[index]
-    taxon_id: u64,
+    pub taxon_id: u64,
     #[belongs_to(key=taxon_id, references=id)]
-    taxon: BelongsTo<Taxon>,
+    pub taxon: BelongsTo<Taxon>,
 
     #[index]
-    protocol_id: u64,
+    pub protocol_id: u64,
     #[belongs_to(key=protocol_id, references=id)]
-    procedure: BelongsTo<Procedure>,
+    pub procedure: BelongsTo<Procedure>,
 
     #[index]
-    environment_id: u64,
+    pub environment_id: u64,
     #[belongs_to(key=environment_id, references=id)]
-    environment: BelongsTo<CultureEnvironment>,
+    pub environment: BelongsTo<CultureEnvironment>,
 
     #[index]
-    citation_id: u64,
+    pub citation_id: u64,
     #[belongs_to(key=citation_id, references=id)]
-    citation: BelongsTo<Citation>,
+    pub citation: BelongsTo<Citation>,
 
-    notes: Option<String>,
+    pub notes: Option<String>,
 }

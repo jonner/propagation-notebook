@@ -103,74 +103,74 @@ pub struct Taxon {
     #[key]
     pub id: u64,
     #[index]
-    name1: String,
+    pub name1: String,
     #[index]
-    name2: Option<String>,
+    pub name2: Option<String>,
     #[index]
-    name3: Option<String>,
+    pub name3: Option<String>,
     #[index]
-    complete_name: String,
+    pub complete_name: String,
 
     #[index]
-    parent_id: Option<u64>,
+    pub parent_id: Option<u64>,
     #[belongs_to(key=parent_id, references=id)]
-    parent: BelongsTo<Option<Taxon>>,
+    pub parent: BelongsTo<Option<Taxon>>,
 
     // #[index]
-    rank: Rank,
+    pub rank: Rank,
 
-    life_form: Option<LifeForm>,
-    life_cycle: Option<LifeCycle>,
+    pub life_form: Option<LifeForm>,
+    pub life_cycle: Option<LifeCycle>,
 
     #[has_many(pair=parent)]
-    children: HasMany<Taxon>,
+    pub children: HasMany<Taxon>,
     #[has_many]
-    vernaculars: HasMany<VernacularName>,
+    pub vernaculars: HasMany<VernacularName>,
     #[has_many]
-    synonyms: HasMany<Synonym>,
+    pub synonyms: HasMany<Synonym>,
     #[has_many]
-    region_statuses: HasMany<RegionStatus>,
+    pub region_statuses: HasMany<RegionStatus>,
     #[has_one]
-    collection_data: HasOne<Option<CollectionData>>,
+    pub collection_data: HasOne<Option<CollectionData>>,
     #[has_one]
-    cleaning_procedure: HasOne<Option<CleaningProcedure>>,
+    pub cleaning_procedure: HasOne<Option<CleaningProcedure>>,
     #[has_many]
-    phenologies: HasMany<Phenology>,
+    pub phenologies: HasMany<Phenology>,
     #[has_many]
-    protocols: HasMany<Protocol>,
+    pub protocols: HasMany<Protocol>,
 }
 
 #[derive(Debug, toasty::Model)]
 pub struct VernacularName {
     #[auto]
     #[key]
-    id: u64,
+    pub id: u64,
 
     #[index]
-    taxon_id: u64,
+    pub taxon_id: u64,
     #[belongs_to(key=taxon_id, references=id)]
-    taxon: BelongsTo<Taxon>,
+    pub taxon: BelongsTo<Taxon>,
 
-    name: String,
+    pub name: String,
 }
 
 #[derive(Debug, toasty::Model)]
 pub struct Synonym {
     #[auto]
     #[key]
-    id: u64,
+    pub id: u64,
 
     #[index]
-    taxon_id: u64,
+    pub taxon_id: u64,
     #[belongs_to(key=taxon_id, references=id)]
-    taxon: BelongsTo<Taxon>,
+    pub taxon: BelongsTo<Taxon>,
 
     #[index]
-    name1: String,
+    pub name1: String,
     #[index]
-    name2: Option<String>,
+    pub name2: Option<String>,
     #[index]
-    name3: Option<String>,
+    pub name3: Option<String>,
     #[index]
     pub complete_name: String,
     // is_accepted: bool,

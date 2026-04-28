@@ -6,32 +6,32 @@ use crate::{region::Region, taxonomy::Taxon};
 pub struct CollectionData {
     #[auto]
     #[key]
-    id: u64,
+    pub id: u64,
 
     #[index]
-    taxon_id: u64,
+    pub taxon_id: u64,
     #[belongs_to(key=taxon_id, references=id)]
-    taxon: BelongsTo<Taxon>,
+    pub taxon: BelongsTo<Taxon>,
 
-    ripening_indicators: String,
-    storage: Option<String>,
+    pub ripening_indicators: String,
+    pub storage: Option<String>,
 }
 
 #[derive(Debug, toasty::Model)]
 pub struct CleaningProcedure {
     #[auto]
     #[key]
-    id: u64,
+    pub id: u64,
 
     #[index]
-    taxon_id: u64,
+    pub taxon_id: u64,
     #[belongs_to(key=taxon_id, references=id)]
-    taxon: BelongsTo<Taxon>,
+    pub taxon: BelongsTo<Taxon>,
 
-    notes: Option<String>,
+    pub notes: Option<String>,
 
     #[has_many(pair=procedure)]
-    steps: HasMany<CleaningProcedureStep>,
+    pub steps: HasMany<CleaningProcedureStep>,
 }
 
 #[derive(Debug, toasty::Embed)]
@@ -50,17 +50,17 @@ pub enum CleaningType {
 pub struct CleaningProcedureStep {
     #[auto]
     #[key]
-    id: u64,
+    pub id: u64,
 
     #[index]
-    procedure_id: u64,
+    pub procedure_id: u64,
     #[belongs_to(key=procedure_id, references=id)]
-    procedure: BelongsTo<CleaningProcedure>,
+    pub procedure: BelongsTo<CleaningProcedure>,
 
-    order: u64,
-    cleaning_type: CleaningType,
-    equipment: String,
-    notes: Option<String>, // e.g screen size
+    pub order: u64,
+    pub cleaning_type: CleaningType,
+    pub equipment: String,
+    pub notes: Option<String>, // e.g screen size
 }
 
 // Add a way to import phenology information from inaturalist?
@@ -68,18 +68,18 @@ pub struct CleaningProcedureStep {
 pub struct Phenology {
     #[auto]
     #[key]
-    id: u64,
+    pub id: u64,
 
     #[index]
-    taxon_id: u64,
+    pub taxon_id: u64,
     #[belongs_to(key=taxon_id, references=id)]
-    taxon: BelongsTo<Taxon>,
+    pub taxon: BelongsTo<Taxon>,
 
     #[index]
-    region_id: u64,
+    pub region_id: u64,
     #[belongs_to(key=region_id, references=id)]
-    region: BelongsTo<Region>,
+    pub region: BelongsTo<Region>,
 
-    window_start: jiff::civil::Date,
-    window_end: jiff::civil::Date,
+    pub window_start: jiff::civil::Date,
+    pub window_end: jiff::civil::Date,
 }
