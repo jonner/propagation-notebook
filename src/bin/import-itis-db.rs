@@ -81,6 +81,8 @@ async fn main() -> anyhow::Result<()> {
 
     let mut itis_to_ours: HashMap<u64, u64> = HashMap::default();
     let mut page = TaxonomicUnit::filter_by_name_usage("accepted")
+        // need to sort by taxonomic sequence to guarantee that the parent will
+        // be added to the database before the child that refers to it.
         .order_by(TaxonomicUnit::fields().phylo_sort_seq().asc())
         .paginate(100)
         .exec(&mut itisdb)
@@ -105,19 +107,24 @@ async fn main() -> anyhow::Result<()> {
                 .parent_id(our_parent_id)
                 .exec(&mut ourdb)
                 .await?;
+            println!("Inserted '{}'", theirs.complete_name);
             itis_to_ours.insert(theirs.tsn, ourtaxon.id);
             let vernaculars = theirs.vernaculars().exec(&mut itisdb).await?;
-            toasty::batch(
-                vernaculars
-                    .into_iter()
-                    .map(|v| {
-                        propagation_notebook::taxonomy::VernacularName::create()
-                            .name(v.vernacular_name)
-                            .taxon_id(ourtaxon.id)
-                    })
-                    .collect::<Vec<_>>(),
-            );
-            println!("Inserted '{}'", theirs.complete_name);
+            if !vernaculars.is_empty() {
+                println!("Inserting {} vernacular names...", vernaculars.len());
+                toasty::batch(
+                    vernaculars
+                        .into_iter()
+                        .map(|v| {
+                            propagation_notebook::taxonomy::VernacularName::create()
+                                .name(v.vernacular_name)
+                                .taxon_id(ourtaxon.id)
+                        })
+                        .collect::<Vec<_>>(),
+                )
+                .exec(&mut ourdb)
+                .await?;
+            }
         }
 
         match page.next(&mut itisdb).await? {
