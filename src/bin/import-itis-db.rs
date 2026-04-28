@@ -70,16 +70,17 @@ pub struct Vernacular {
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt::init();
+    let itis_db_path = std::env::var("ITIS_DB_URI").with_context(|| " Please set the ITIS_DB_URI environment variable to the uri to connect to the ITIS database (download from https://www.itis.gov/downloads/index.html)")?;
+    let our_db_path = &std::env::var("DB_URI").with_context(|| "Please set the DB_URI environment variable to the uri to connect to the propagation notebook database")?;
+
     let mut itisdb = toasty::Db::builder()
         .models(toasty::models!(crate::*))
-        .connect("sqlite:///home/jjongsma/Projects/seedcollection/db/itis/seedcollection.sqlite")
+        .connect(&itis_db_path)
         .await?;
 
     let mut ourdb = toasty::Db::builder()
         .models(propagation_notebook::models())
-        .connect(
-            &std::env::var("DB_URI").with_context(|| "Please set DB_URI environment variable")?,
-        )
+        .connect(our_db_path)
         .await?;
 
     let mut itis_to_ours: HashMap<u64, u64> = HashMap::default();
