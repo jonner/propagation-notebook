@@ -1,0 +1,5 @@
+[migration]
+path = "db"
+prefix_style = "Sequential"
+checksums = false
+statement_breakpoints = true
