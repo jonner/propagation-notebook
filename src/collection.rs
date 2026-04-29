@@ -1,6 +1,6 @@
 use toasty::{BelongsTo, HasMany};
 
-use crate::{region::Region, taxonomy::Taxon};
+use crate::taxonomy::Taxon;
 
 #[derive(Debug, toasty::Model)]
 pub struct CollectionData {
