@@ -103,52 +103,58 @@ auto_increment = true
 
 [[schema.tables.columns]]
 id = { table = 1, index = 1 }
+name = "itis_id"
+ty = "U64"
+storage_ty = { UnsignedInteger = 8 }
+
+[[schema.tables.columns]]
+id = { table = 1, index = 2 }
 name = "name1"
 ty = "String"
 storage_ty = "Text"
 
 [[schema.tables.columns]]
-id = { table = 1, index = 2 }
+id = { table = 1, index = 3 }
 name = "name2"
 ty = "String"
 storage_ty = "Text"
 nullable = true
 
 [[schema.tables.columns]]
-id = { table = 1, index = 3 }
+id = { table = 1, index = 4 }
 name = "name3"
 ty = "String"
 storage_ty = "Text"
 nullable = true
 
 [[schema.tables.columns]]
-id = { table = 1, index = 4 }
+id = { table = 1, index = 5 }
 name = "complete_name"
 ty = "String"
 storage_ty = "Text"
 
 [[schema.tables.columns]]
-id = { table = 1, index = 5 }
+id = { table = 1, index = 6 }
 name = "parent_id"
 ty = "U64"
 storage_ty = { UnsignedInteger = 8 }
 nullable = true
 
 [[schema.tables.columns]]
-id = { table = 1, index = 6 }
+id = { table = 1, index = 7 }
 name = "rank"
 ty = "I64"
 storage_ty = { Integer = 8 }
 
 [[schema.tables.columns]]
-id = { table = 1, index = 7 }
+id = { table = 1, index = 8 }
 name = "life_form"
 ty = "I64"
 storage_ty = { Integer = 8 }
 nullable = true
 
 [[schema.tables.columns]]
-id = { table = 1, index = 8 }
+id = { table = 1, index = 9 }
 name = "life_cycle"
 ty = "I64"
 storage_ty = { Integer = 8 }
@@ -164,33 +170,39 @@ primary_key = true
 
 [[schema.tables.indices]]
 id = { table = 1, index = 1 }
-name = "index_taxa_by_name1"
+name = "index_taxa_by_itis_id"
 on = 1
 columns = [{ column = { table = 1, index = 1 }, op = "Eq", scope = "Partition" }]
 
 [[schema.tables.indices]]
 id = { table = 1, index = 2 }
-name = "index_taxa_by_name2"
+name = "index_taxa_by_name1"
 on = 1
 columns = [{ column = { table = 1, index = 2 }, op = "Eq", scope = "Partition" }]
 
 [[schema.tables.indices]]
 id = { table = 1, index = 3 }
-name = "index_taxa_by_name3"
+name = "index_taxa_by_name2"
 on = 1
 columns = [{ column = { table = 1, index = 3 }, op = "Eq", scope = "Partition" }]
 
 [[schema.tables.indices]]
 id = { table = 1, index = 4 }
-name = "index_taxa_by_complete_name"
+name = "index_taxa_by_name3"
 on = 1
 columns = [{ column = { table = 1, index = 4 }, op = "Eq", scope = "Partition" }]
 
 [[schema.tables.indices]]
 id = { table = 1, index = 5 }
-name = "index_taxa_by_parent_id"
+name = "index_taxa_by_complete_name"
 on = 1
 columns = [{ column = { table = 1, index = 5 }, op = "Eq", scope = "Partition" }]
+
+[[schema.tables.indices]]
+id = { table = 1, index = 6 }
+name = "index_taxa_by_parent_id"
+on = 1
+columns = [{ column = { table = 1, index = 6 }, op = "Eq", scope = "Partition" }]
 
 [[schema.tables]]
 id = 2

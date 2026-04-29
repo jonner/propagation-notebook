@@ -103,6 +103,8 @@ pub struct Taxon {
     #[key]
     pub id: u64,
     #[index]
+    pub itis_id: u64,
+    #[index]
     pub name1: String,
     #[index]
     pub name2: Option<String>,
