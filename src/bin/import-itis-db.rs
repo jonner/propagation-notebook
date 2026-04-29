@@ -1,4 +1,7 @@
-use std::collections::HashMap;
+use std::{
+    collections::HashMap,
+    io::{Write, stdout},
+};
 
 use anyhow::Context;
 use propagation_notebook::taxonomy::Rank;
@@ -88,6 +91,7 @@ async fn main() -> anyhow::Result<()> {
         .exec(&mut itisdb)
         .await?;
 
+    println!("Importing accepted taxa...");
     loop {
         for theirs in page.iter() {
             let errmsg = format!(
@@ -107,11 +111,11 @@ async fn main() -> anyhow::Result<()> {
                 .parent_id(our_parent_id)
                 .exec(&mut ourdb)
                 .await?;
-            println!("Inserted '{}'", theirs.complete_name);
+            print!("*");
             itis_to_ours.insert(theirs.tsn, ourtaxon.id);
             let vernaculars = theirs.vernaculars().exec(&mut itisdb).await?;
             if !vernaculars.is_empty() {
-                println!("Inserting {} vernacular names...", vernaculars.len());
+                print!(".");
                 toasty::batch(
                     vernaculars
                         .into_iter()
@@ -124,8 +128,11 @@ async fn main() -> anyhow::Result<()> {
                 )
                 .exec(&mut ourdb)
                 .await?;
+            } else {
+                print!(" ");
             }
         }
+        stdout().flush().unwrap();
 
         match page.next(&mut itisdb).await? {
             Some(next) => page = next,
@@ -133,6 +140,7 @@ async fn main() -> anyhow::Result<()> {
         }
     }
 
+    println!("Importing synonyms...");
     let mut page = TaxonomicUnit::filter_by_name_usage("not accepted")
         .order_by(TaxonomicUnit::fields().tsn().asc())
         .paginate(100)
@@ -159,11 +167,14 @@ async fn main() -> anyhow::Result<()> {
         }
 
         toasty::batch(creates).exec(&mut ourdb).await?;
+        print!(".");
+        stdout().flush().unwrap();
         match page.next(&mut itisdb).await? {
             Some(next) => page = next,
             None => break,
         }
     }
+    println!();
 
     Ok(())
 }

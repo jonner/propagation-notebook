@@ -1,11 +1,6 @@
 version = 1
 
 [[migrations]]
-id = 6333421595118415997
+id = 5534058361131958416
 name = "0000_migration.sql"
 snapshot_name = "0000_snapshot.toml"
-
-[[migrations]]
-id = 6609543217889414672
-name = "0001_migration.sql"
-snapshot_name = "0001_snapshot.toml"
