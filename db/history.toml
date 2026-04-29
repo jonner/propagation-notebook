@@ -4,3 +4,8 @@ version = 1
 id = 3690858933858132773
 name = "0000_migration.sql"
 snapshot_name = "0000_snapshot.toml"
+
+[[migrations]]
+id = 6616777484384390779
+name = "0001_nullify_region_status_fields.sql"
+snapshot_name = "0001_snapshot.toml"

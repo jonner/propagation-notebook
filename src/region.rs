@@ -37,7 +37,7 @@ pub struct Region {
     #[index]
     pub name: String,
     // FIXME: geojson??
-    pub bounds: String,
+    pub bounds: Option<String>,
 
     #[has_many]
     pub taxon_statuses: HasMany<RegionalTaxonStatus>,
@@ -70,12 +70,12 @@ pub struct RegionalTaxonStatus {
 
     // generally 0-10?
     pub c_value: Option<u64>,
-    pub conservation_status: ConservationStatus,
-    pub wetland_indicator: WetlandIndicator,
+    pub conservation_status: Option<ConservationStatus>,
+    pub wetland_indicator: Option<WetlandIndicator>,
     phenology: Phenology,
 
     #[index]
-    pub native_plant_community_id: u64,
+    pub native_plant_community_id: Option<u64>,
     #[belongs_to(key=native_plant_community_id, references=id)]
     pub native_plant_community: BelongsTo<NativePlantCommunity>,
 }
