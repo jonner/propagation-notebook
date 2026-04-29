@@ -93,6 +93,39 @@ async fn main() -> anyhow::Result<()> {
 
     println!("Importing accepted taxa...");
     loop {
+        let mut creates = Vec::new();
+        for theirs in page.iter() {
+            let query = propagation_notebook::taxonomy::Taxon::create()
+                .itis_id(theirs.tsn)
+                .name1(&theirs.unit_name1)
+                .name2(&theirs.unit_name2)
+                .name3(&theirs.unit_name3)
+                .complete_name(&theirs.complete_name)
+                .rank(&theirs.rank_id);
+            creates.push(query);
+        }
+        let objs = toasty::batch(creates).exec(&mut ourdb).await?;
+        itis_to_ours.extend(objs.into_iter().map(|obj| (obj.itis_id, obj.id)));
+        print!(".");
+        stdout().flush().unwrap();
+
+        match page.next(&mut itisdb).await? {
+            Some(next) => page = next,
+            None => break,
+        }
+    }
+    println!();
+
+    println!("Setting parent taxa...");
+    let mut page = TaxonomicUnit::filter_by_name_usage("accepted")
+        // need to sort by taxonomic sequence to guarantee that the parent will
+        // be added to the database before the child that refers to it.
+        .order_by(TaxonomicUnit::fields().phylo_sort_seq().asc())
+        .paginate(100)
+        .exec(&mut itisdb)
+        .await?;
+    loop {
+        let mut updates = Vec::new();
         for theirs in page.iter() {
             let errmsg = format!(
                 "Failed to find parent of {} (id={}, parent={:?})",
@@ -102,36 +135,14 @@ async fn main() -> anyhow::Result<()> {
                 .parent_tsn
                 .filter(|id| id != &0)
                 .map(|id| *itis_to_ours.get(&id).expect(&errmsg));
-            let ourtaxon = propagation_notebook::taxonomy::Taxon::create()
-                .name1(&theirs.unit_name1)
-                .name2(&theirs.unit_name2)
-                .name3(&theirs.unit_name3)
-                .complete_name(&theirs.complete_name)
-                .rank(&theirs.rank_id)
-                .parent_id(our_parent_id)
-                .exec(&mut ourdb)
-                .await?;
-            print!("*");
-            itis_to_ours.insert(theirs.tsn, ourtaxon.id);
-            let vernaculars = theirs.vernaculars().exec(&mut itisdb).await?;
-            if !vernaculars.is_empty() {
-                print!(".");
-                toasty::batch(
-                    vernaculars
-                        .into_iter()
-                        .map(|v| {
-                            propagation_notebook::taxonomy::VernacularName::create()
-                                .name(v.vernacular_name)
-                                .taxon_id(ourtaxon.id)
-                        })
-                        .collect::<Vec<_>>(),
-                )
-                .exec(&mut ourdb)
-                .await?;
-            } else {
-                print!(" ");
-            }
+            updates.push(
+                propagation_notebook::taxonomy::Taxon::filter_by_itis_id(theirs.tsn)
+                    .update()
+                    .parent_id(our_parent_id),
+            );
         }
+        toasty::batch(updates).exec(&mut ourdb).await?;
+        print!(".");
         stdout().flush().unwrap();
 
         match page.next(&mut itisdb).await? {
@@ -139,6 +150,35 @@ async fn main() -> anyhow::Result<()> {
             None => break,
         }
     }
+    println!();
+
+    println!("Importing vernacular names...");
+    let mut page = Vernacular::all()
+        .order_by(Vernacular::fields().tsn().asc())
+        .paginate(100)
+        .exec(&mut itisdb)
+        .await?;
+    loop {
+        let mut creates = Vec::new();
+        for v in page.iter() {
+            if let Some(ourid) = itis_to_ours.get(&v.tsn) {
+                creates.push(
+                    propagation_notebook::taxonomy::VernacularName::create()
+                        .name(&v.vernacular_name)
+                        .taxon_id(ourid),
+                )
+            }
+        }
+        toasty::batch(creates).exec(&mut ourdb).await?;
+        print!(".");
+        stdout().flush().unwrap();
+
+        match page.next(&mut itisdb).await? {
+            Some(next) => page = next,
+            None => break,
+        }
+    }
+    println!();
 
     println!("Importing synonyms...");
     let mut page = TaxonomicUnit::filter_by_name_usage("not accepted")
