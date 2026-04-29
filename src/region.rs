@@ -52,6 +52,16 @@ pub struct Phenology {
     pub window_end: jiff::civil::Date,
 }
 
+#[derive(Debug, toasty::Embed)]
+pub enum NativeStatus {
+    #[column(variant = 1)]
+    Native,
+    #[column(variant = 2)]
+    Introduced,
+    #[column(variant = 3)]
+    Unknown,
+}
+
 #[derive(Debug, toasty::Model)]
 pub struct RegionalTaxonStatus {
     #[auto]
@@ -68,6 +78,7 @@ pub struct RegionalTaxonStatus {
     #[belongs_to(key=region_id, references=id)]
     pub region: BelongsTo<Region>,
 
+    pub native_status: Option<NativeStatus>,
     // generally 0-10?
     pub c_value: Option<u64>,
     pub conservation_status: Option<ConservationStatus>,
