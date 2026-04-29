@@ -1,5 +1,8 @@
 use clap::Parser;
-use propagation_notebook::taxonomy::{Synonym, Taxon, VernacularName};
+use propagation_notebook::{
+    region::Region,
+    taxonomy::{Synonym, Taxon, VernacularName},
+};
 use toasty::Db;
 
 use crate::cli::Options;
@@ -146,6 +149,19 @@ async fn main() -> anyhow::Result<()> {
                         println!(" - {}: {} ({})", child.id, child.complete_name, child.rank);
                     }
                 }
+            }
+        },
+        cli::MainCommand::Region { command } => match command {
+            cli::RegionCommands::List => {
+                let regions = Region::all().exec(&mut db).await?;
+                println!("{} regions found", regions.len());
+                for region in regions {
+                    dbg!(&region);
+                }
+            }
+            cli::RegionCommands::Add { region_name } => {
+                let new_region = Region::create().name(region_name).exec(&mut db).await?;
+                println!("Added new region {}: {}", new_region.id, new_region.name);
             }
         },
     }

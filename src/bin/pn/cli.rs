@@ -11,6 +11,10 @@ pub enum MainCommand {
         #[command(subcommand)]
         command: TaxonCommands,
     },
+    Region {
+        #[command(subcommand)]
+        command: RegionCommands,
+    },
 }
 
 #[derive(Debug, clap::Subcommand)]
@@ -19,4 +23,10 @@ pub enum TaxonCommands {
     Search { search_string: String },
     #[command(about = "Show detailed information about a Taxon")]
     Info { id: u64 },
+}
+
+#[derive(Debug, clap::Subcommand)]
+pub enum RegionCommands {
+    List,
+    Add { region_name: String },
 }
