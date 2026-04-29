@@ -62,24 +62,3 @@ pub struct CleaningProcedureStep {
     pub equipment: String,
     pub notes: Option<String>, // e.g screen size
 }
-
-// Add a way to import phenology information from inaturalist?
-#[derive(Debug, toasty::Model)]
-pub struct Phenology {
-    #[auto]
-    #[key]
-    pub id: u64,
-
-    #[index]
-    pub taxon_id: u64,
-    #[belongs_to(key=taxon_id, references=id)]
-    pub taxon: BelongsTo<Taxon>,
-
-    #[index]
-    pub region_id: u64,
-    #[belongs_to(key=region_id, references=id)]
-    pub region: BelongsTo<Region>,
-
-    pub window_start: jiff::civil::Date,
-    pub window_end: jiff::civil::Date,
-}

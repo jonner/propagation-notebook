@@ -1,6 +1,6 @@
 use toasty::{BelongsTo, HasMany};
 
-use crate::{collection::Phenology, taxonomy::Taxon};
+use crate::taxonomy::Taxon;
 
 #[derive(Debug, toasty::Embed)]
 pub enum WetlandIndicator {
@@ -40,15 +40,20 @@ pub struct Region {
     pub bounds: String,
 
     #[has_many]
-    pub statuses: HasMany<RegionStatus>,
+    pub taxon_statuses: HasMany<RegionalTaxonStatus>,
     #[has_many]
     pub npcs: HasMany<NativePlantCommunity>,
-    #[has_many]
-    pub phenologies: HasMany<Phenology>,
+}
+
+// Add a way to import phenology information from inaturalist?
+#[derive(Debug, toasty::Embed)]
+pub struct Phenology {
+    pub window_start: jiff::civil::Date,
+    pub window_end: jiff::civil::Date,
 }
 
 #[derive(Debug, toasty::Model)]
-pub struct RegionStatus {
+pub struct RegionalTaxonStatus {
     #[auto]
     #[key]
     pub id: u64,
@@ -67,7 +72,12 @@ pub struct RegionStatus {
     pub c_value: Option<u64>,
     pub conservation_status: ConservationStatus,
     pub wetland_indicator: WetlandIndicator,
+    phenology: Phenology,
+
+    #[index]
     pub native_plant_community_id: u64,
+    #[belongs_to(key=native_plant_community_id, references=id)]
+    pub native_plant_community: BelongsTo<NativePlantCommunity>,
 }
 
 #[derive(Debug, toasty::Model)]
@@ -83,4 +93,7 @@ pub struct NativePlantCommunity {
 
     #[index]
     pub name: String,
+
+    #[has_many]
+    regional_taxon_statuses: HasMany<RegionalTaxonStatus>,
 }
