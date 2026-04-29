@@ -111,6 +111,42 @@ async fn main() -> anyhow::Result<()> {
                     }
                 }
             }
+            cli::TaxonCommands::Info { id } => {
+                let taxon = Taxon::filter_by_id(id)
+                    .include(Taxon::fields().parent())
+                    .include(Taxon::fields().children())
+                    .include(Taxon::fields().vernaculars())
+                    .include(Taxon::fields().synonyms())
+                    .one()
+                    .exec(&mut db)
+                    .await?;
+                // dbg!(&taxon);
+                println!("{}", taxon.complete_name);
+                println!("{}", "=".repeat(taxon.complete_name.len()));
+                println!("ID: {}", taxon.id);
+                println!("Rank: {}", taxon.rank);
+                if let Some(parent) = taxon.parent.get() {
+                    println!("Parent: {} ({})", parent.complete_name, parent.rank)
+                }
+                if !taxon.synonyms.get().is_empty() {
+                    println!("Synonym(s):");
+                    for syn in taxon.synonyms.get() {
+                        println!(" - {}", syn.complete_name);
+                    }
+                }
+                if !taxon.vernaculars.get().is_empty() {
+                    println!("Common Name(s):");
+                    for vernacular in taxon.vernaculars.get() {
+                        println!(" - {}", vernacular.name);
+                    }
+                }
+                if !taxon.children.get().is_empty() {
+                    println!("Child taxa:");
+                    for child in taxon.children.get() {
+                        println!(" - {}: {} ({})", child.id, child.complete_name, child.rank);
+                    }
+                }
+            }
         },
     }
     Ok(())

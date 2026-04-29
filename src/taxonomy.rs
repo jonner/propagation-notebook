@@ -6,7 +6,7 @@ use crate::{
     region::RegionStatus,
 };
 
-#[derive(Debug, toasty::Embed)]
+#[derive(Debug, toasty::Embed, strum::Display)]
 pub enum Rank {
     #[column(variant = 0)]
     Unknown,

@@ -17,4 +17,6 @@ pub enum MainCommand {
 pub enum TaxonCommands {
     #[command(about = "Search for a taxon")]
     Search { search_string: String },
+    #[command(about = "Show detailed information about a Taxon")]
+    Info { id: u64 },
 }
