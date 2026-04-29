@@ -6,7 +6,7 @@ use crate::{
     region::RegionalTaxonStatus,
 };
 
-#[derive(Debug, toasty::Embed, strum::Display)]
+#[derive(Debug, Clone, Copy, toasty::Embed, strum::Display)]
 pub enum Rank {
     #[column(variant = 0)]
     Unknown,
@@ -68,7 +68,7 @@ pub enum Rank {
     Subform,
 }
 
-#[derive(Debug, toasty::Embed)]
+#[derive(Debug, Clone, Copy, toasty::Embed)]
 pub enum LifeForm {
     #[column(variant = 1)]
     Tree,
@@ -84,7 +84,7 @@ pub enum LifeForm {
     Other,
 }
 
-#[derive(Debug, toasty::Embed)]
+#[derive(Debug, Clone, Copy, toasty::Embed)]
 pub enum LifeCycle {
     #[column(variant = 1)]
     Annual,
@@ -96,7 +96,7 @@ pub enum LifeCycle {
     Other,
 }
 
-#[derive(Debug, toasty::Model)]
+#[derive(Debug, Clone, toasty::Model)]
 #[table = "taxa"]
 pub struct Taxon {
     #[auto]
@@ -140,7 +140,7 @@ pub struct Taxon {
     pub protocols: HasMany<Protocol>,
 }
 
-#[derive(Debug, toasty::Model)]
+#[derive(Debug, Clone, toasty::Model)]
 pub struct VernacularName {
     #[auto]
     #[key]
@@ -154,7 +154,7 @@ pub struct VernacularName {
     pub name: String,
 }
 
-#[derive(Debug, toasty::Model)]
+#[derive(Debug, Clone, toasty::Model)]
 pub struct Synonym {
     #[auto]
     #[key]

@@ -2,7 +2,7 @@ use toasty::{BelongsTo, HasMany};
 
 use crate::taxonomy::Taxon;
 
-#[derive(Debug, toasty::Embed)]
+#[derive(Debug, Clone, Copy, toasty::Embed)]
 pub enum CitationType {
     #[column(variant = 1)]
     PeerReviewedPaper,
@@ -18,7 +18,7 @@ pub enum CitationType {
     Other,
 }
 
-#[derive(Debug, toasty::Model)]
+#[derive(Debug, Clone, toasty::Model)]
 pub struct Citation {
     #[auto]
     #[key]
@@ -33,7 +33,7 @@ pub struct Citation {
     pub reliability: Option<u8>,
 }
 
-#[derive(Debug, toasty::Embed)]
+#[derive(Debug, Clone, Copy, toasty::Embed)]
 pub enum PropagationType {
     #[column(variant = 1)]
     Sexual,
@@ -41,7 +41,7 @@ pub enum PropagationType {
     Asexual,
 }
 
-#[derive(Debug, toasty::Embed)]
+#[derive(Debug, Clone, Copy, toasty::Embed)]
 pub enum DifficultyLevel {
     #[column(variant = 1)]
     Easy,
@@ -53,7 +53,7 @@ pub enum DifficultyLevel {
     Expert,
 }
 
-#[derive(Debug, toasty::Model)]
+#[derive(Debug, Clone, toasty::Model)]
 pub struct Procedure {
     #[auto]
     #[key]
@@ -72,7 +72,7 @@ pub struct Procedure {
     pub protocols: HasMany<Protocol>,
 }
 
-#[derive(Debug, toasty::Embed)]
+#[derive(Debug, Clone, Copy, toasty::Embed)]
 pub enum TreatmentType {
     #[column(variant = 1)]
     ColdMoistStratification,
@@ -88,7 +88,7 @@ pub enum TreatmentType {
     PreSoak,
 }
 
-#[derive(Debug, toasty::Embed)]
+#[derive(Debug, Clone, Copy, toasty::Embed)]
 pub enum LightRequirement {
     #[column(variant = 1)]
     LightRequired,
@@ -98,7 +98,7 @@ pub enum LightRequirement {
     NoPreference,
 }
 
-#[derive(Debug, toasty::Model)]
+#[derive(Debug, Clone, toasty::Model)]
 pub struct SexualMethodStep {
     #[auto]
     #[key]
@@ -117,7 +117,7 @@ pub struct SexualMethodStep {
     pub light_requirements: LightRequirement,
 }
 
-#[derive(Debug, toasty::Embed)]
+#[derive(Debug, Clone, Copy, toasty::Embed)]
 pub enum AsexualMethodType {
     #[column(variant = 1)]
     RhizomeDivision,
@@ -133,7 +133,7 @@ pub enum AsexualMethodType {
     Other,
 }
 
-#[derive(Debug, toasty::Model)]
+#[derive(Debug, Clone, toasty::Model)]
 pub struct AsexualMethodStep {
     #[auto]
     #[key]
@@ -151,7 +151,7 @@ pub struct AsexualMethodStep {
     pub optimal_timing: Option<String>,
 }
 
-#[derive(Debug, toasty::Model)]
+#[derive(Debug, Clone, toasty::Model)]
 pub struct CultureEnvironment {
     #[auto]
     #[key]
@@ -173,7 +173,7 @@ pub struct CultureEnvironment {
 }
 
 // a combination of seed prep and sowing
-#[derive(Debug, toasty::Model)]
+#[derive(Debug, Clone, toasty::Model)]
 pub struct Protocol {
     #[auto]
     #[key]

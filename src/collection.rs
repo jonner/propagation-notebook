@@ -2,7 +2,7 @@ use toasty::{BelongsTo, HasMany};
 
 use crate::taxonomy::Taxon;
 
-#[derive(Debug, toasty::Model)]
+#[derive(Debug, Clone, toasty::Model)]
 pub struct CollectionData {
     #[auto]
     #[key]
@@ -17,7 +17,7 @@ pub struct CollectionData {
     pub storage: Option<String>,
 }
 
-#[derive(Debug, toasty::Model)]
+#[derive(Debug, Clone, toasty::Model)]
 pub struct CleaningProcedure {
     #[auto]
     #[key]
@@ -34,7 +34,7 @@ pub struct CleaningProcedure {
     pub steps: HasMany<CleaningProcedureStep>,
 }
 
-#[derive(Debug, toasty::Embed)]
+#[derive(Debug, Clone, Copy, toasty::Embed)]
 pub enum CleaningType {
     #[column(variant = 1)]
     Rub, // remove fuzz?
@@ -46,7 +46,7 @@ pub enum CleaningType {
     Other,
 }
 
-#[derive(Debug, toasty::Model)]
+#[derive(Debug, Clone, toasty::Model)]
 pub struct CleaningProcedureStep {
     #[auto]
     #[key]

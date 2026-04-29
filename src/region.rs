@@ -2,7 +2,7 @@ use toasty::{BelongsTo, HasMany};
 
 use crate::taxonomy::Taxon;
 
-#[derive(Debug, toasty::Embed)]
+#[derive(Debug, Clone, Copy, toasty::Embed)]
 pub enum WetlandIndicator {
     #[column(variant = 1)]
     ObligateWetland,
@@ -18,7 +18,7 @@ pub enum WetlandIndicator {
     Other,
 }
 
-#[derive(Debug, toasty::Embed)]
+#[derive(Debug, Clone, Copy, toasty::Embed)]
 pub enum ConservationStatus {
     #[column(variant = 1)]
     Endangered,
@@ -28,7 +28,7 @@ pub enum ConservationStatus {
     SpecialConcern,
 }
 
-#[derive(Debug, toasty::Model)]
+#[derive(Debug, Clone, toasty::Model)]
 pub struct Region {
     #[auto]
     #[key]
@@ -46,13 +46,13 @@ pub struct Region {
 }
 
 // Add a way to import phenology information from inaturalist?
-#[derive(Debug, toasty::Embed)]
+#[derive(Debug, Clone, toasty::Embed)]
 pub struct Phenology {
     pub window_start: jiff::civil::Date,
     pub window_end: jiff::civil::Date,
 }
 
-#[derive(Debug, toasty::Embed)]
+#[derive(Debug, Clone, Copy, toasty::Embed)]
 pub enum NativeStatus {
     #[column(variant = 1)]
     Native,
@@ -62,7 +62,7 @@ pub enum NativeStatus {
     Unknown,
 }
 
-#[derive(Debug, toasty::Model)]
+#[derive(Debug, Clone, toasty::Model)]
 pub struct RegionalTaxonStatus {
     #[auto]
     #[key]
@@ -91,7 +91,7 @@ pub struct RegionalTaxonStatus {
     pub native_plant_community: BelongsTo<NativePlantCommunity>,
 }
 
-#[derive(Debug, toasty::Model)]
+#[derive(Debug, Clone, toasty::Model)]
 pub struct NativePlantCommunity {
     #[auto]
     #[key]
