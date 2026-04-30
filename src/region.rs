@@ -48,8 +48,8 @@ pub struct Region {
 // Add a way to import phenology information from inaturalist?
 #[derive(Debug, Clone, toasty::Embed)]
 pub struct Phenology {
-    pub window_start: jiff::civil::Date,
-    pub window_end: jiff::civil::Date,
+    pub window_start: Option<jiff::civil::Date>,
+    pub window_end: Option<jiff::civil::Date>,
 }
 
 #[derive(Debug, Clone, Copy, toasty::Embed)]

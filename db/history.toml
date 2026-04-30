@@ -14,3 +14,8 @@ snapshot_name = "0001_snapshot.toml"
 id = 5571489313160621835
 name = "0002_add_native_status_to_region.sql"
 snapshot_name = "0002_snapshot.toml"
+
+[[migrations]]
+id = 4127146045474982408
+name = "0003_make_phenology_optional.sql"
+snapshot_name = "0003_snapshot.toml"
