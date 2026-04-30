@@ -1,0 +1,141 @@
+use std::{collections::HashMap, path::PathBuf};
+
+use anyhow::Context;
+use clap::Parser;
+use propagation_notebook::{
+    region::{Region, RegionalTaxonStatus},
+    taxonomy::Synonym,
+};
+use tokio::io::AsyncReadExt;
+
+#[derive(Debug, Clone, Copy, PartialEq, serde::Serialize, serde::Deserialize)]
+enum NativeStatus {
+    Native,
+    Introduced,
+    Unknown,
+}
+
+impl From<NativeStatus> for propagation_notebook::region::NativeStatus {
+    fn from(value: NativeStatus) -> Self {
+        match value {
+            NativeStatus::Native => propagation_notebook::region::NativeStatus::Native,
+            NativeStatus::Introduced => propagation_notebook::region::NativeStatus::Introduced,
+            NativeStatus::Unknown => propagation_notebook::region::NativeStatus::Unknown,
+        }
+    }
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+struct TaxonInfo {
+    name: String,
+    c_value: Option<u64>,
+    status: NativeStatus,
+    // conservation_status: Option<ConservationStatus>,
+    // wetland_indicator: Option<WetlandIndicator>,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+struct RegionInfo {
+    name: String,
+    bounds: Option<String>,
+    taxa: Vec<TaxonInfo>,
+    // npcs: Vec<NativePlantCommunityInfo>,
+}
+
+#[derive(Debug, clap::Parser)]
+struct Args {
+    region_file: PathBuf,
+}
+
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    tracing_subscriber::fmt::init();
+    let args = Args::parse();
+    let db_path =
+        std::env::var("DB_URI").with_context(|| "Please set DB_URI environment variable")?;
+
+    let mut db = toasty::Db::builder()
+        .models(propagation_notebook::models())
+        .connect(&db_path)
+        .await?;
+
+    let mut f = tokio::fs::OpenOptions::new()
+        .read(true)
+        .open(args.region_file)
+        .await?;
+    let mut info_string = String::new();
+    f.read_to_string(&mut info_string).await?;
+
+    let info: RegionInfo = serde_yaml::from_str(&info_string)?;
+
+    // loop through the input list and search for names from our taxonomy that
+    // match the given name. Some of these input names may map to the same name in our
+    // taxonomy, so we need to eliminate duplicates at the end. We do this by storing
+    // the result in a hashmap by result taxon id
+    let mut lookups: HashMap<u64, TaxonInfo> = HashMap::default();
+    for taxon_info in info.taxa {
+        let t = find_taxon_for_name(&mut db, &taxon_info.name).await?;
+        lookups
+            .entry(t.id)
+            .and_modify(|existing| {
+                // if any of the lumped taxa is native, consider the whole thing native
+                if taxon_info.status == NativeStatus::Native {
+                    existing.status = taxon_info.status;
+                } else if existing.status == NativeStatus::Unknown {
+                    // any new status overrides unknown
+                    existing.status = taxon_info.status;
+                }
+            })
+            .or_insert(taxon_info);
+    }
+
+    // now insert all unique taxa into the region table
+    let mut taxa_create = Vec::new();
+    for (id, taxon_info) in lookups.iter() {
+        taxa_create.push(
+            RegionalTaxonStatus::create()
+                .taxon_id(id)
+                .native_status(std::convert::Into::<
+                    propagation_notebook::region::NativeStatus,
+                >::into(taxon_info.status))
+                .c_value(taxon_info.c_value),
+        );
+    }
+
+    let n_taxa = taxa_create.len();
+    let region = Region::create()
+        .name(info.name)
+        .taxon_statuses(taxa_create)
+        .exec(&mut db)
+        .await?;
+
+    println!(
+        "Created region {}: '{}' with {} taxa",
+        region.id, region.name, n_taxa
+    );
+
+    todo!()
+}
+
+async fn find_taxon_for_name(
+    db: &mut dyn toasty::Executor,
+    name: &str,
+) -> anyhow::Result<propagation_notebook::taxonomy::Taxon> {
+    use propagation_notebook::taxonomy::Taxon;
+    Ok(match name.parse::<u64>() {
+        Ok(val) => Taxon::get_by_id(db, val).await?,
+        Err(_) => match Taxon::get_by_complete_name(db, name).await {
+            Ok(taxon) => taxon,
+            Err(_e) => {
+                // tracing::warn!(?e);
+                Synonym::filter_by_complete_name(name)
+                    .include(Synonym::fields().taxon())
+                    .one()
+                    .exec(db)
+                    .await
+                    .map_err(|_| anyhow::anyhow!("Couldn't find a taxon matching {name}"))
+                    .map(|synonym| synonym.taxon.get().clone())?
+            }
+        },
+    })
+}
