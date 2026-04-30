@@ -45,13 +45,6 @@ pub struct Region {
     pub npcs: HasMany<NativePlantCommunity>,
 }
 
-// Add a way to import phenology information from inaturalist?
-#[derive(Debug, Clone, toasty::Embed)]
-pub struct Phenology {
-    pub window_start: Option<jiff::civil::Date>,
-    pub window_end: Option<jiff::civil::Date>,
-}
-
 #[derive(Debug, Clone, Copy, toasty::Embed)]
 pub enum NativeStatus {
     #[column(variant = 1)]
@@ -83,7 +76,9 @@ pub struct RegionalTaxonStatus {
     pub c_value: Option<u64>,
     pub conservation_status: Option<ConservationStatus>,
     pub wetland_indicator: Option<WetlandIndicator>,
-    phenology: Phenology,
+    // harvest phenology
+    pub window_start: Option<jiff::civil::Date>,
+    pub window_end: Option<jiff::civil::Date>,
 
     #[index]
     pub native_plant_community_id: Option<u64>,

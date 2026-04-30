@@ -19,3 +19,8 @@ snapshot_name = "0002_snapshot.toml"
 id = 4127146045474982408
 name = "0003_make_phenology_optional.sql"
 snapshot_name = "0003_snapshot.toml"
+
+[[migrations]]
+id = 8305146977783418290
+name = "0004_unembed_phenology.sql"
+snapshot_name = "0004_snapshot.toml"
