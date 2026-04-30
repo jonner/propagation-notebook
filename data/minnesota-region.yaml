@@ -1,0 +1,4831 @@
+name: Minnesota
+taxa:
+  - name: Abies balsamea
+    status: Native
+  - name: Abutilon theophrasti
+    status: Introduced
+  - name: Acalypha rhomboidea
+    status: Native
+  - name: Acer ginnala
+    status: Introduced
+  - name: Acer negundo
+    status: Native
+  - name: Acer negundo var. negundo
+    status: Native
+  - name: Acer negundo var. texanum
+    status: Native
+  - name: Acer nigrum
+    status: Native
+  - name: Acer platanoides
+    status: Introduced
+  - name: Acer rubrum var. rubrum
+    status: Native
+  - name: Acer saccharinum
+    status: Native
+  - name: Acer saccharum
+    status: Native
+  - name: Acer spicatum
+    status: Native
+  - name: Achillea alpina
+    status: Native
+  - name: Achillea millefolium
+    status: Native
+  - name: Achillea ptarmica
+    status: Introduced
+  - name: Achnatherum hymenoides
+    status: Native
+  - name: Acmispon americanus var. americanus
+    status: Native
+  - name: Acorus americanus
+    status: Native
+  - name: Actaea pachypoda
+    status: Native
+  - name: Actaea rubra
+    status: Native
+  - name: Adiantum pedatum
+    status: Native
+  - name: Adlumia fungosa
+    status: Native
+  - name: Adoxa moschatellina
+    status: Native
+  - name: Aegopodium podagraria
+    status: Introduced
+  - name: Aesculus glabra var. glabra
+    status: Introduced
+  - name: Aethusa cynapium
+    status: Introduced
+  - name: Agalinis aspera
+    status: Native
+  - name: Agalinis auriculata
+    status: Native
+  - name: Agalinis gattingeri
+    status: Native
+  - name: Agalinis purpurea
+    status: Native
+  - name: Agalinis purpurea var. parviflora
+    status: Native
+  - name: Agalinis purpurea var. purpurea
+    status: Native
+  - name: Agalinis tenuifolia
+    status: Native
+  - name: Agastache foeniculum
+    status: Native
+  - name: Agastache nepetoides
+    status: Native
+  - name: Agastache scrophulariifolia
+    status: Native
+  - name: Ageratina altissima var. altissima
+    status: Native
+  - name: Agoseris glauca var. glauca
+    status: Native
+  - name: Agrimonia gryposepala
+    status: Native
+  - name: Agrimonia pubescens
+    status: Native
+  - name: Agrimonia striata
+    status: Native
+  - name: Agropyron cristatum
+    status: Introduced
+  - name: Agrostemma githago var. githago
+    status: Introduced
+  - name: Agrostis gigantea
+    status: Introduced
+  - name: Agrostis hyemalis
+    status: Native
+  - name: Agrostis perennans
+    status: Native
+  - name: Agrostis scabra
+    status: Native
+  - name: Agrostis stolonifera
+    status: Introduced
+  - name: Ailanthus altissima
+    status: Introduced
+  - name: Alisma gramineum
+    status: Native
+  - name: Alisma subcordatum
+    status: Native
+  - name: Alisma triviale
+    status: Native
+  - name: Alliaria petiolata
+    status: Introduced
+  - name: Allium canadense var. canadense
+    status: Native
+  - name: Allium cernuum
+    status: Native
+  - name: Allium schoenoprasum
+    status: Native
+  - name: Allium stellatum
+    status: Native
+  - name: Allium textile
+    status: Native
+  - name: Allium tricoccum
+    status: Native
+  - name: Allium tricoccum var. burdickii
+    status: Native
+  - name: Allium tricoccum var. tricoccum
+    status: Native
+  - name: Allium tuberosum
+    status: Introduced
+  - name: Alnus incana ssp. rugosa
+    status: Native
+  - name: Alnus viridis ssp. crispa
+    status: Native
+  - name: Alopecurus aequalis var. aequalis
+    status: Native
+  - name: Alopecurus arundinaceus
+    status: Introduced
+  - name: Alopecurus carolinianus
+    status: Native
+  - name: Alopecurus pratensis
+    status: Introduced
+  - name: Althaea officinalis
+    status: Introduced
+  - name: Alyssum alyssoides
+    status: Introduced
+  - name: Alyssum desertorum
+    status: Introduced
+  - name: Amaranthus albus
+    status: Native
+  - name: Amaranthus blitoides
+    status: Introduced
+  - name: Amaranthus hybridus
+    status: Introduced
+  - name: Amaranthus palmeri
+    status: Introduced
+  - name: Amaranthus powellii
+    status: Introduced
+  - name: Amaranthus retroflexus
+    status: Introduced
+  - name: Amaranthus tuberculatus
+    status: Native
+  - name: Ambrosia acanthicarpa
+    status: Introduced
+  - name: Ambrosia artemisiifolia
+    status: Native
+  - name: Ambrosia psilostachya
+    status: Native
+  - name: Ambrosia trifida
+    status: Native
+  - name: Amelanchier alnifolia
+    status: Native
+  - name: Amelanchier arborea
+    status: Native
+  - name: Amelanchier bartramiana
+    status: Native
+  - name: Amelanchier humilis
+    status: Native
+  - name: Amelanchier interior
+    status: Native
+  - name: Amelanchier intermedia
+    status: Native
+  - name: Amelanchier laevis
+    status: Native
+  - name: Amelanchier sanguinea
+    status: Native
+  - name: Amelanchier spicata
+    status: Native
+  - name: Amerorchis rotundifolia
+    status: Native
+  - name: Ammannia robusta
+    status: Native
+  - name: Ammophila breviligulata
+    status: Native
+  - name: Amorpha canescens
+    status: Native
+  - name: Amorpha fruticosa
+    status: Native
+  - name: Amorpha nana
+    status: Native
+  - name: Amphicarpaea bracteata
+    status: Native
+  - name: Anagallis arvensis
+    status: Introduced
+  - name: Anagallis minima
+    status: Native
+  - name: Anaphalis margaritacea
+    status: Native
+  - name: Anchusa arvensis
+    status: Introduced
+  - name: Andromeda polifolia var. latifolia
+    status: Native
+  - name: Andropogon gerardii
+    status: Native
+  - name: Androsace occidentalis
+    status: Native
+  - name: Androsace septentrionalis
+    status: Native
+  - name: Anemone acutiloba
+    status: Native
+  - name: Anemone americana
+    status: Native
+  - name: Anemone canadensis
+    status: Native
+  - name: Anemone caroliniana
+    status: Native
+  - name: Anemone cylindrica
+    status: Native
+  - name: Anemone multifida var. multifida
+    status: Unknown
+  - name: Anemone patens var. multifida
+    status: Native
+  - name: Anemone quinquefolia var. quinquefolia
+    status: Native
+  - name: Anemone virginiana
+    status: Native
+  - name: Anemone virginiana var. alba
+    status: Native
+  - name: Anemone virginiana var. cylindroidea
+    status: Native
+  - name: Anemone virginiana var. virginiana
+    status: Native
+  - name: Anethum graveolens
+    status: Introduced
+  - name: Angelica atropurpurea
+    status: Native
+  - name: Antennaria howellii
+    status: Native
+  - name: Antennaria howellii ssp. canadensis
+    status: Native
+  - name: Antennaria howellii ssp. neodioica
+    status: Native
+  - name: Antennaria howellii ssp. petaloidea
+    status: Native
+  - name: Antennaria microphylla
+    status: Native
+  - name: Antennaria neglecta
+    status: Native
+  - name: Antennaria parlinii
+    status: Native
+  - name: Antennaria parlinii ssp. fallax
+    status: Native
+  - name: Antennaria parlinii ssp. parlinii
+    status: Native
+  - name: Antennaria parvifolia
+    status: Native
+  - name: Antennaria plantaginifolia
+    status: Native
+  - name: Anthemis cotula
+    status: Introduced
+  - name: Anthoxanthum hirtum
+    status: Native
+  - name: Anthoxanthum odoratum
+    status: Introduced
+  - name: Anthriscus sylvestris
+    status: Introduced
+  - name: Apios americana
+    status: Native
+  - name: Aplectrum hyemale
+    status: Native
+  - name: Apocynum androsaemifolium
+    status: Native
+  - name: Apocynum cannabinum
+    status: Native
+  - name: Aquilegia canadensis
+    status: Native
+  - name: Arabidopsis lyrata ssp. lyrata
+    status: Native
+  - name: Arabidopsis thaliana
+    status: Introduced
+  - name: Arabis pycnocarpa var. pycnocarpa
+    status: Native
+  - name: Aralia elata
+    status: Introduced
+  - name: Aralia hispida
+    status: Native
+  - name: Aralia nudicaulis
+    status: Native
+  - name: Aralia racemosa
+    status: Native
+  - name: Arceuthobium pusillum
+    status: Native
+  - name: Arctium lappa
+    status: Introduced
+  - name: Arctium minus
+    status: Introduced
+  - name: Arctium tomentosum
+    status: Introduced
+  - name: Arctostaphylos uva-ursi
+    status: Native
+  - name: Arenaria serpyllifolia var. serpyllifolia
+    status: Introduced
+  - name: Arethusa bulbosa
+    status: Native
+  - name: Arisaema dracontium
+    status: Native
+  - name: Arisaema triphyllum
+    status: Native
+  - name: Aristida basiramea
+    status: Native
+  - name: Aristida dichotoma var. curtissii
+    status: Native
+  - name: Aristida longespica var. geniculata
+    status: Native
+  - name: Aristida oligantha
+    status: Native
+  - name: Aristida purpurea var. longiseta
+    status: Native
+  - name: Aristida tuberculosa
+    status: Native
+  - name: Armoracia rusticana
+    status: Introduced
+  - name: Arnica lonchophylla
+    status: Native
+  - name: Arnoglossum plantagineum
+    status: Native
+  - name: Arnoglossum reniforme
+    status: Native
+  - name: Aronia melanocarpa
+    status: Native
+  - name: Artemisia abrotanum
+    status: Introduced
+  - name: Artemisia absinthium
+    status: Introduced
+  - name: Artemisia biennis
+    status: Introduced
+  - name: Artemisia campestris ssp. caudata
+    status: Native
+  - name: Artemisia dracunculus
+    status: Native
+  - name: Artemisia frigida
+    status: Native
+  - name: Artemisia ludoviciana ssp. ludoviciana
+    status: Native
+  - name: Artemisia serrata
+    status: Native
+  - name: Artemisia vulgaris
+    status: Introduced
+  - name: Asarum canadense
+    status: Native
+  - name: Asclepias amplexicaulis
+    status: Native
+  - name: Asclepias exaltata
+    status: Native
+  - name: Asclepias hirtella
+    status: Native
+  - name: Asclepias incarnata ssp. incarnata
+    status: Native
+  - name: Asclepias lanuginosa
+    status: Native
+  - name: Asclepias ovalifolia
+    status: Native
+  - name: Asclepias speciosa
+    status: Native
+  - name: Asclepias stenophylla
+    status: Native
+  - name: Asclepias sullivantii
+    status: Native
+  - name: Asclepias syriaca
+    status: Native
+  - name: Asclepias tuberosa ssp. interior
+    status: Native
+  - name: Asclepias verticillata
+    status: Native
+  - name: Asclepias viridiflora
+    status: Native
+  - name: Asparagus officinalis
+    status: Introduced
+  - name: Asplenium platyneuron
+    status: Native
+  - name: Asplenium rhizophyllum
+    status: Native
+  - name: Asplenium trichomanes ssp. trichomanes
+    status: Native
+  - name: Astragalus agrestis
+    status: Native
+  - name: Astragalus alpinus var. alpinus
+    status: Native
+  - name: Astragalus canadensis var. canadensis
+    status: Native
+  - name: Astragalus cicer
+    status: Introduced
+  - name: Astragalus crassicarpus var. crassicarpus
+    status: Native
+  - name: Astragalus flexuosus var. flexuosus
+    status: Native
+  - name: Astragalus laxmannii var. robustior
+    status: Native
+  - name: Astragalus lotiflorus
+    status: Native
+  - name: Astragalus missouriensis var. missouriensis
+    status: Native
+  - name: Astragalus multiflorus
+    status: Native
+  - name: Astragalus neglectus
+    status: Native
+  - name: Astragalus racemosus var. racemosus
+    status: Native
+  - name: Athyrium filix-femina var. angustum
+    status: Native
+  - name: Atriplex patula
+    status: Introduced
+  - name: Atriplex prostrata
+    status: Native
+  - name: Aureolaria grandiflora
+    status: Native
+  - name: Aureolaria pedicularia
+    status: Native
+  - name: Avena fatua
+    status: Introduced
+  - name: Avena sativa
+    status: Introduced
+  - name: Avenula hookeri
+    status: Native
+  - name: Axyris amaranthoides
+    status: Introduced
+  - name: Azolla microphylla
+    status: Native
+  - name: Bacopa rotundifolia
+    status: Native
+  - name: Baptisia lactea var. lactea
+    status: Native
+  - name: Baptisia leucophaea
+    status: Native
+  - name: Barbarea orthoceras
+    status: Native
+  - name: Barbarea vulgaris
+    status: Introduced
+  - name: Bartonia virginica
+    status: Native
+  - name: Beckmannia syzigachne
+    status: Native
+  - name: Berberis thunbergii
+    status: Introduced
+  - name: Berberis vulgaris
+    status: Introduced
+  - name: Berteroa incana
+    status: Introduced
+  - name: Berula incisa
+    status: Native
+  - name: Betula alleghaniensis
+    status: Native
+  - name: Betula cordifolia
+    status: Native
+  - name: Betula nigra
+    status: Native
+  - name: Betula papyrifera
+    status: Native
+  - name: Betula pumila
+    status: Native
+  - name: Betula X purpusii
+    status: Native
+  # - name: Betula X rosendahlii
+  #   status: Native
+  - name: Betula X sandbergii
+    status: Native
+  - name: Bidens beckii
+    status: Native
+  - name: Bidens cernua
+    status: Native
+  - name: Bidens connata
+    status: Native
+  - name: Bidens discoidea
+    status: Native
+  - name: Bidens frondosa
+    status: Native
+  - name: Bidens trichosperma
+    status: Native
+  - name: Bidens tripartita
+    status: Native
+  - name: Bidens vulgata
+    status: Native
+  - name: Bistorta vivipara
+    status: Native
+  - name: Blephilia hirsuta
+    status: Native
+  - name: Boechera canadensis
+    status: Native
+  - name: Boechera collinsii
+    status: Native
+  - name: Boechera dentata
+    status: Native
+  - name: Boechera grahamii
+    status: Native
+  - name: Boechera laevigata
+    status: Native
+  - name: Boechera missouriensis
+    status: Native
+  - name: Boechera stricta
+    status: Native
+  - name: Boehmeria cylindrica
+    status: Native
+  - name: Bolboschoenus fluviatilis
+    status: Native
+  - name: Bolboschoenus maritimus ssp. paludosus
+    status: Native
+  - name: Boltonia asteroides
+    status: Native
+  - name: Boltonia asteroides var. latisquama
+    status: Native
+  - name: Boltonia asteroides var. recognita
+    status: Native
+  - name: Botrychium angustisegmentum
+    status: Native
+  - name: Botrychium ascendens
+    status: Native
+  - name: Botrychium campestre
+    status: Native
+  # - name: Botrychium campestre var. campestre
+  #   status: Native
+  # - name: Botrychium campestre var. lineare
+  #   status: Native
+  - name: Botrychium crenulatum
+    status: Native
+  - name: Botrychium gallicomontanum
+    status: Native
+  - name: Botrychium matricariifolium
+    status: Native
+  # - name: Botrychium michiganense
+  #   status: Native
+  - name: Botrychium minganense
+    status: Native
+  - name: Botrychium mormo
+    status: Native
+  - name: Botrychium neolunaria
+    status: Native
+  - name: Botrychium pallidum
+    status: Native
+  - name: Botrychium simplex var. simplex
+    status: Native
+  - name: Botrychium spathulatum
+    status: Native
+  - name: Botrychium tenebrosum
+    status: Native
+  - name: Botrypus virginianus
+    status: Native
+  - name: Bouteloua curtipendula var. curtipendula
+    status: Native
+  - name: Bouteloua gracilis
+    status: Native
+  - name: Bouteloua hirsuta var. hirsuta
+    status: Native
+  - name: Brachyelytrum aristosum
+    status: Native
+  - name: Brachyelytrum erectum
+    status: Native
+  - name: Brasenia schreberi
+    status: Native
+  - name: Brassica juncea
+    status: Introduced
+  - name: Brassica nigra
+    status: Introduced
+  - name: Brassica rapa
+    status: Introduced
+  - name: Brickellia eupatorioides var. corymbulosa
+    status: Native
+  - name: Bromus ciliatus
+    status: Native
+  - name: Bromus inermis
+    status: Introduced
+  - name: Bromus japonicus
+    status: Introduced
+  - name: Bromus kalmii
+    status: Native
+  - name: Bromus latiglumis
+    status: Native
+  - name: Bromus pubescens
+    status: Native
+  - name: Bromus secalinus
+    status: Introduced
+  - name: Bromus tectorum
+    status: Introduced
+  - name: Buchloe dactyloides
+    status: Native
+  - name: Bulbostylis capillaris
+    status: Native
+  - name: Butomus umbellatus
+    status: Introduced
+  - name: Calamagrostis canadensis
+    status: Native
+  - name: Calamagrostis canadensis var. canadensis
+    status: Native
+  - name: Calamagrostis canadensis var. langsdorfii
+    status: Native
+  - name: Calamagrostis canadensis var. macouniana
+    status: Native
+  - name: Calamagrostis montanensis
+    status: Native
+  - name: Calamagrostis purpurascens
+    status: Native
+  - name: Calamagrostis stricta
+    status: Native
+  - name: Calamagrostis stricta ssp. inexpansa
+    status: Native
+  - name: Calamagrostis stricta ssp. stricta
+    status: Native
+  - name: Calamovilfa longifolia var. longifolia
+    status: Native
+  - name: Calla palustris
+    status: Native
+  - name: Callirhoe triangulata
+    status: Native
+  - name: Callitriche hermaphroditica
+    status: Native
+  - name: Callitriche heterophylla
+    status: Native
+  - name: Callitriche palustris
+    status: Native
+  - name: Calopogon oklahomensis
+    status: Native
+  - name: Calopogon tuberosus var. tuberosus
+    status: Native
+  - name: Caltha natans
+    status: Native
+  - name: Caltha palustris
+    status: Native
+  - name: Calylophus serrulatus
+    status: Native
+  - name: Calypso bulbosa var. americana
+    status: Native
+  - name: Calystegia macounii
+    status: Native
+  - name: Calystegia sepium
+    status: Native
+  - name: Calystegia sepium ssp. angulata
+    status: Native
+  - name: Calystegia sepium ssp. appalachiana
+    status: Native
+  - name: Calystegia spithamaea
+    status: Native
+  - name: Calystegia spithamaea ssp. spithamaea
+    status: Native
+  - name: Calystegia spithamaea ssp. stans
+    status: Native
+  - name: Camelina alyssum
+    status: Introduced
+  - name: Camelina microcarpa
+    status: Introduced
+  - name: Camelina sativa
+    status: Introduced
+  - name: Campanula americana
+    status: Native
+  - name: Campanula aparinoides
+    status: Native
+  - name: Campanula aparinoides var. aparinoides
+    status: Native
+  - name: Campanula aparinoides var. grandiflora
+    status: Native
+  - name: Campanula cervicaria
+    status: Introduced
+  - name: Campanula rapunculoides
+    status: Introduced
+  - name: Campanula rotundifolia
+    status: Native
+  - name: Canadanthus modestus
+    status: Native
+  - name: Cannabis sativa
+    status: Introduced
+  - name: Capsella bursa-pastoris
+    status: Introduced
+  - name: Caragana arborescens
+    status: Introduced
+  - name: Cardamine bulbosa
+    status: Native
+  - name: Cardamine concatenata
+    status: Native
+  # - name: Cardamine dentata
+  - name: Cardamine pratensis
+    status: Native
+  - name: Cardamine diphylla
+    status: Unknown
+  - name: Cardamine douglassii
+    status: Native
+  - name: Cardamine impatiens
+    status: Introduced
+  - name: Cardamine parviflora
+    status: Native
+  - name: Cardamine pensylvanica
+    status: Native
+  - name: Cardamine pratensis
+    status: Introduced
+  - name: Carduus acanthoides ssp. acanthoides
+    status: Introduced
+  - name: Carduus nutans
+    status: Introduced
+  - name: Carex adusta
+    status: Native
+  - name: Carex albursina
+    status: Native
+  - name: Carex alopecoidea
+    status: Native
+  - name: Carex annectens
+    status: Native
+  - name: Carex aquatilis
+    status: Native
+  - name: Carex aquatilis var. aquatilis
+    status: Native
+  - name: Carex aquatilis var. substricta
+    status: Native
+  - name: Carex arcta
+    status: Native
+  - name: Carex arctata
+    status: Native
+  - name: Carex assiniboinensis
+    status: Native
+  - name: Carex atherodes
+    status: Native
+  - name: Carex aurea
+    status: Native
+  - name: Carex backii
+    status: Native
+  - name: Carex bebbii
+    status: Native
+  - name: Carex bicknellii
+    status: Native
+  - name: Carex blanda
+    status: Native
+  - name: Carex brevior
+    status: Native
+  - name: Carex bromoides ssp. bromoides
+    status: Native
+  - name: Carex brunnescens
+    status: Native
+  - name: Carex brunnescens ssp. brunnescens
+    status: Native
+  - name: Carex brunnescens ssp. sphaerostachya
+    status: Native
+  - name: Carex buxbaumii
+    status: Native
+  - name: Carex canescens
+    status: Native
+  - name: Carex canescens ssp. canescens
+    status: Native
+  - name: Carex canescens ssp. disjuncta
+    status: Native
+  - name: Carex capillaris
+    status: Native
+  - name: Carex careyana
+    status: Native
+  - name: Carex castanea
+    status: Native
+  - name: Carex cephaloidea
+    status: Native
+  - name: Carex cephalophora
+    status: Native
+  - name: Carex chordorrhiza
+    status: Native
+  - name: Carex communis var. communis
+    status: Native
+  - name: Carex comosa
+    status: Native
+  - name: Carex conjuncta
+    status: Native
+  - name: Carex conoidea
+    status: Native
+  - name: Carex crawei
+    status: Native
+  - name: Carex crawfordii
+    status: Native
+  - name: Carex crinita var. crinita
+    status: Native
+  - name: Carex cristatella
+    status: Native
+  - name: Carex crus-corvi
+    status: Native
+  - name: Carex cryptolepis
+    status: Native
+  - name: Carex davisii
+    status: Native
+  - name: Carex debilis var. rudgei
+    status: Native
+  - name: Carex deflexa var. deflexa
+    status: Native
+  - name: Carex deweyana var. deweyana
+    status: Native
+  - name: Carex diandra
+    status: Native
+  - name: Carex disperma
+    status: Native
+  - name: Carex duriuscula
+    status: Native
+  - name: Carex eburnea
+    status: Native
+  - name: Carex echinata ssp. echinata
+    status: Native
+  # - name: Carex echinodes
+  - name: Carex tenera var. echinodes
+    status: Native
+  - name: Carex emoryi
+    status: Native
+  - name: Carex exilis
+    status: Native
+  - name: Carex filifolia var. filifolia
+    status: Native
+  - name: Carex flava
+    status: Native
+  - name: Carex foenea
+    status: Native
+  - name: Carex formosa
+    status: Native
+  - name: Carex garberi
+    status: Native
+  - name: Carex gracillima
+    status: Native
+  - name: Carex granularis
+    status: Native
+  - name: Carex gravida
+    status: Native
+  - name: Carex grayi
+    status: Native
+  - name: Carex grisea
+    status: Native
+  - name: Carex gynandra
+    status: Native
+  - name: Carex gynocrates
+    status: Native
+  - name: Carex hallii
+    status: Native
+  - name: Carex haydenii
+    status: Native
+  - name: Carex hirtifolia
+    status: Native
+  - name: Carex hitchcockiana
+    status: Native
+  - name: Carex hookerana
+    status: Native
+  - name: Carex houghtoniana
+    status: Native
+  - name: Carex hystericina
+    status: Native
+  - name: Carex inops ssp. heliophila
+    status: Native
+  - name: Carex interior
+    status: Native
+  - name: Carex intumescens
+    status: Native
+  - name: Carex jamesii
+    status: Native
+  - name: Carex lacustris
+    status: Native
+  - name: Carex laeviconica
+    status: Native
+  - name: Carex laevivaginata
+    status: Native
+  - name: Carex lasiocarpa
+    status: Native
+  - name: Carex laxiculmis var. copulata
+    status: Native
+  - name: Carex lenticularis var. lenticularis
+    status: Native
+  - name: Carex leptalea
+    status: Native
+  - name: Carex leptonervia
+    status: Native
+  - name: Carex limosa
+    status: Native
+  - name: Carex livida
+    status: Native
+  - name: Carex lucorum var. lucorum
+    status: Native
+  - name: Carex lupulina
+    status: Native
+  - name: Carex lurida
+    status: Native
+  - name: Carex magellanica ssp. irrigua
+    status: Native
+  - name: Carex meadii
+    status: Native
+  - name: Carex media
+    status: Native
+  - name: Carex merritt-fernaldii
+    status: Native
+  - name: Carex michauxiana
+    status: Native
+  - name: Carex molesta
+    status: Native
+  - name: Carex muehlenbergii var. muehlenbergii
+    status: Native
+  - name: Carex muskingumensis
+    status: Native
+  - name: Carex normalis
+    status: Native
+  - name: Carex novae-angliae
+    status: Native
+  - name: Carex obtusata
+    status: Native
+  - name: Carex oligocarpa
+    status: Native
+  - name: Carex oligosperma
+    status: Native
+  - name: Carex ormostachya
+    status: Native
+  - name: Carex pallescens
+    status: Native
+  - name: Carex pauciflora
+    status: Native
+  - name: Carex peckii
+    status: Native
+  - name: Carex pedunculata
+    status: Native
+  - name: Carex pellita
+    status: Native
+  - name: Carex pensylvanica
+    status: Native
+  - name: Carex plantaginea
+    status: Native
+  - name: Carex praegracilis
+    status: Native
+  - name: Carex prairea
+    status: Native
+  - name: Carex praticola
+    status: Native
+  - name: Carex projecta
+    status: Native
+  - name: Carex pseudocyperus
+    status: Native
+  - name: Carex radiata
+    status: Native
+  - name: Carex retrorsa
+    status: Native
+  - name: Carex richardsonii
+    status: Native
+  - name: Carex rosea
+    status: Native
+  - name: Carex rossii
+    status: Native
+  - name: Carex rostrata
+    status: Native
+  - name: Carex sartwellii
+    status: Native
+  - name: Carex saximontana
+    status: Native
+  - name: Carex scabrata
+    status: Native
+  - name: Carex scirpoidea ssp. scirpoidea
+    status: Native
+  - name: Carex scoparia
+    status: Native
+  - name: Carex siccata
+    status: Native
+  - name: Carex sparganioides
+    status: Native
+  - name: Carex sprengelii
+    status: Native
+  - name: Carex sterilis
+    status: Native
+  - name: Carex stipata var. stipata
+    status: Native
+  - name: Carex stricta
+    status: Native
+  - name: Carex suberecta
+    status: Native
+  - name: Carex supina ssp. spaniocarpa
+    status: Native
+  - name: Carex sychnocephala
+    status: Native
+  - name: Carex tenera
+    status: Native
+  - name: Carex tenuiflora
+    status: Native
+  - name: Carex tetanica
+    status: Native
+  - name: Carex tonsa
+    status: Native
+  - name: Carex tonsa var. rugosperma
+    status: Native
+  - name: Carex tonsa var. tonsa
+    status: Native
+  - name: Carex torreyi
+    status: Native
+  - name: Carex tribuloides var. tribuloides
+    status: Native
+  - name: Carex trichocarpa
+    status: Native
+  - name: Carex trisperma
+    status: Native
+  - name: Carex tuckermanii
+    status: Native
+  - name: Carex typhina
+    status: Native
+  - name: Carex umbellata
+    status: Native
+  - name: Carex utriculata
+    status: Native
+  - name: Carex vaginata
+    status: Native
+  - name: Carex vesicaria
+    status: Native
+  - name: Carex viridula ssp. viridula
+    status: Native
+  - name: Carex vulpinoidea
+    status: Native
+  - name: Carex woodii
+    status: Native
+  - name: Carex xerantica
+    status: Native
+  - name: Carex X knieskernii
+    status: Native
+  - name: Carpinus caroliniana ssp. virginiana
+    status: Native
+  - name: Carum carvi
+    status: Introduced
+  - name: Carya cordiformis
+    status: Native
+  - name: Carya ovata var. ovata
+    status: Native
+  - name: Castilleja coccinea
+    status: Native
+  - name: Castilleja septentrionalis
+    status: Native
+  - name: Castilleja sessiliflora
+    status: Native
+  - name: Catalpa speciosa
+    status: Introduced
+  - name: Caulophyllum thalictroides
+    status: Native
+  - name: Ceanothus americanus
+    status: Native
+  - name: Ceanothus herbaceus
+    status: Native
+  - name: Celastrus orbiculatus
+    status: Introduced
+  - name: Celastrus scandens
+    status: Native
+  - name: Celtis occidentalis
+    status: Native
+  - name: Cenchrus longispinus
+    status: Native
+  - name: Cenchrus spinifex
+    status: Native
+  - name: Centaurea cyanus
+    status: Introduced
+  - name: Centaurea jacea
+    status: Introduced
+  - name: Centaurea montana
+    status: Introduced
+  - name: Centaurea nigrescens
+    status: Introduced
+  - name: Centaurea stoebe ssp. micranthos
+    status: Introduced
+  - name: Centaurea X moncktonii
+    status: Introduced
+  - name: Centaurium pulchellum
+    status: Introduced
+  - name: Cephalanthus occidentalis
+    status: Native
+  - name: Cerastium arvense
+    status: Native
+  - name: Cerastium arvense ssp. arvense
+    status: Introduced
+  - name: Cerastium arvense ssp. strictum
+    status: Native
+  - name: Cerastium brachypodum
+    status: Native
+  - name: Cerastium fontanum ssp. vulgare
+    status: Introduced
+  - name: Cerastium nutans var. nutans
+    status: Native
+  - name: Ceratophyllum demersum
+    status: Native
+  - name: Ceratophyllum echinatum
+    status: Native
+  - name: Chaenorhinum minus
+    status: Introduced
+  - name: Chamaecrista fasciculata
+    status: Native
+  - name: Chamaedaphne calyculata
+    status: Native
+  # - name: Chamaenerion angustifolium
+  - name: Chamerion angustifolium
+    status: Native
+  # - name: Chamaenerion angustifolium ssp. angustifolium
+  - name: Chamerion angustifolium ssp. angustifolium
+    status: Native
+  # - name: Chamaenerion angustifolium ssp. circumvagum
+  - name: Chamerion angustifolium ssp. circumvagum
+    status: Native
+  - name: Chamaerhodos erecta
+    status: Native
+  - name: Chelidonium majus
+    status: Introduced
+  - name: Chelone glabra
+    status: Native
+  - name: Chenopodium album
+    status: Introduced
+  - name: Chenopodium berlandieri
+    status: Native
+  - name: Chenopodium berlandieri var. bushianum
+    status: Native
+  - name: Chenopodium berlandieri var. zschackei
+    status: Native
+  - name: Chenopodium capitatum var. capitatum
+    status: Native
+  - name: Chenopodium desiccatum
+    status: Native
+  - name: Chenopodium glaucum
+    status: Native
+  - name: Chenopodium glaucum var. glaucum
+    status: Native
+  - name: Chenopodium glaucum var. salinum
+    status: Native
+  - name: Chenopodium leptophyllum
+    status: Introduced
+  - name: Chenopodium pratericola
+    status: Native
+  - name: Chenopodium rubrum
+    status: Native
+  - name: Chenopodium rubrum var. humile
+    status: Native
+  - name: Chenopodium rubrum var. rubrum
+    status: Native
+  - name: Chenopodium simplex
+    status: Native
+  - name: Chenopodium standleyanum
+    status: Native
+  # - name: Chimaphila umbellata ssp. umbellata
+  - name: Chimaphila umbellata
+    status: Native
+  - name: Chrysosplenium americanum
+    status: Native
+  - name: Chrysosplenium iowense
+    status: Native
+  - name: Cichorium intybus
+    status: Introduced
+  - name: Cicuta bulbifera
+    status: Native
+  - name: Cicuta maculata
+    status: Native
+  - name: Cicuta maculata var. angustifolia
+    status: Native
+  - name: Cicuta maculata var. bolanderi
+    status: Native
+  - name: Cicuta maculata var. maculata
+    status: Native
+  - name: Cinna arundinacea
+    status: Native
+  - name: Cinna latifolia
+    status: Native
+  - name: Circaea alpina ssp. alpina
+    status: Native
+  - name: Circaea canadensis ssp. canadensis
+    status: Native
+  # - name: Circaea X sterilis
+  - name: Circaea X intermedia
+    status: Native
+  - name: Cirsium altissimum
+    status: Native
+  - name: Cirsium arvense
+    status: Introduced
+  - name: Cirsium discolor
+    status: Native
+  - name: Cirsium flodmanii
+    status: Native
+  - name: Cirsium muticum
+    status: Native
+  - name: Cirsium palustre
+    status: Introduced
+  - name: Cirsium pumilum var. hillii
+    status: Native
+  - name: Cirsium vulgare
+    status: Introduced
+  - name: Cladium mariscoides
+    status: Native
+  - name: Claytonia caroliniana
+    status: Native
+  - name: Claytonia virginica
+    status: Native
+  - name: Claytosmunda claytoniana
+    status: Native
+  - name: Clematis occidentalis var. occidentalis
+    status: Native
+  - name: Clematis virginiana
+    status: Native
+  - name: Clintonia borealis
+    status: Native
+  - name: Coeloglossum viride var. virescens
+    status: Native
+  - name: Collomia linearis
+    status: Native
+  - name: Comandra umbellata ssp. umbellata
+    status: Native
+  - name: Comarum palustre
+    status: Native
+  - name: Commelina communis
+    status: Introduced
+  - name: Commelina erecta
+    status: Native
+  - name: Comptonia peregrina
+    status: Native
+  - name: Conium maculatum
+    status: Introduced
+  - name: Conringia orientalis
+    status: Introduced
+  - name: Convallaria majalis var. majalis
+    status: Introduced
+  - name: Convolvulus arvensis
+    status: Introduced
+  - name: Conyza canadensis
+    status: Native
+  - name: Conyza ramosissima
+    status: Native
+  - name: Coptis trifolia
+    status: Native
+  - name: Corallorhiza maculata
+    status: Native
+  - name: Corallorhiza maculata var. maculata
+    status: Native
+  - name: Corallorhiza maculata var. occidentalis
+    status: Native
+  - name: Corallorhiza odontorhiza var. odontorhiza
+    status: Native
+  - name: Corallorhiza striata var. striata
+    status: Native
+  - name: Corallorhiza trifida
+    status: Native
+  - name: Coreopsis lanceolata
+    status: Introduced
+  - name: Coreopsis palmata
+    status: Native
+  - name: Coreopsis tinctoria
+    status: Introduced
+  - name: Corispermum americanum var. americanum
+    status: Native
+  - name: Corispermum pallasii
+    status: Native
+  - name: Corispermum villosum
+    status: Native
+  - name: Cornus alternifolia
+    status: Native
+  - name: Cornus canadensis
+    status: Native
+  - name: Cornus drummondii
+    status: Native
+  - name: Cornus obliqua
+    status: Native
+  - name: Cornus racemosa
+    status: Native
+  - name: Cornus rugosa
+    status: Native
+  - name: Cornus sericea
+    status: Native
+  # - name: Corydalis aurea var. aurea
+  - name: Corydalis aurea ssp. aurea
+    status: Native
+  # - name: Corydalis micrantha var. micrantha
+  - name: Corydalis micrantha ssp. micrantha
+    status: Native
+  # - name: Corydalis nobilis
+  #   status: Introduced
+  - name: Corydalis sempervirens
+    status: Native
+  - name: Corylus americana
+    status: Native
+  - name: Corylus cornuta ssp. cornuta
+    status: Native
+  - name: Coryphantha vivipara
+    status: Native
+  - name: Cota tinctoria
+    status: Introduced
+  - name: Crassula aquatica
+    status: Native
+  - name: Crataegus calpodendron
+    status: Native
+  - name: Crataegus chrysocarpa
+    status: Native
+  - name: Crataegus chrysocarpa var. blanchardii
+    status: Native
+  - name: Crataegus chrysocarpa var. chrysocarpa
+    status: Native
+  - name: Crataegus chrysocarpa var. faxonii
+    status: Native
+  - name: Crataegus coccinea
+    status: Native
+  - name: Crataegus douglasii
+    status: Native
+  - name: Crataegus fluviatilis
+    status: Native
+  - name: Crataegus laurentiana
+    status: Native
+  - name: Crataegus macracantha
+    status: Native
+  - name: Crataegus macrosperma
+    status: Native
+  - name: Crataegus mollis
+    status: Native
+  - name: Crataegus punctata
+    status: Native
+  - name: Crataegus scabrida
+    status: Native
+  - name: Crataegus schuettei
+    status: Native
+  - name: Crataegus sheridana
+    status: Native
+  - name: Crataegus submollis
+    status: Native
+  - name: Crataegus succulenta var. succulenta
+    status: Native
+  - name: Crepis runcinata ssp. runcinata
+    status: Native
+  - name: Crepis tectorum
+    status: Introduced
+  - name: Crocanthemum bicknellii
+    status: Native
+  - name: Crocanthemum canadense
+    status: Native
+  # - name: Crotalaria sagittalis var. sagittalis
+  - name: Crotalaria sagittalis
+    status: Native
+  - name: Croton glandulosus var. septentrionalis
+    status: Introduced
+  - name: Cryptogramma acrostichoides
+    status: Native
+  - name: Cryptogramma stelleri
+    status: Native
+  - name: Cryptotaenia canadensis
+    status: Native
+  - name: Cuscuta campestris
+    status: Native
+  - name: Cuscuta cephalanthi
+    status: Native
+  - name: Cuscuta coryli
+    status: Native
+  - name: Cuscuta glomerata
+    status: Native
+  - name: Cuscuta gronovii
+    status: Native
+  - name: Cuscuta gronovii var. gronovii
+    status: Native
+  - name: Cuscuta gronovii var. latiflora
+    status: Native
+  - name: Cuscuta indecora var. indecora
+    status: Native
+  - name: Cuscuta obtusiflora var. glandulosa
+    status: Native
+  - name: Cuscuta pentagona
+    status: Native
+  - name: Cuscuta polygonorum
+    status: Native
+  - name: Cuscuta umbrosa
+    status: Native
+  - name: Cyclachaena xanthiifolia
+    status: Native
+  - name: Cycloloma atriplicifolium
+    status: Native
+  # - name: Cymopterus glomeratus var. glomeratus
+  - name: Cymopterus glomeratus
+    status: Native
+  - name: Cynoglossum officinale
+    status: Introduced
+  - name: Cynoglossum virginianum var. boreale
+    status: Native
+  - name: Cyperus acuminatus
+    status: Native
+  - name: Cyperus bipartitus
+    status: Native
+  - name: Cyperus diandrus
+    status: Native
+  - name: Cyperus engelmannii
+    status: Native
+  - name: Cyperus erythrorhizos
+    status: Native
+  - name: Cyperus esculentus var. leptostachyus
+    status: Introduced
+  - name: Cyperus fuscus
+    status: Introduced
+  - name: Cyperus houghtonii
+    status: Native
+  - name: Cyperus lupulinus
+    status: Native
+  - name: Cyperus lupulinus ssp. lupulinus
+    status: Native
+  - name: Cyperus lupulinus ssp. macilentus
+    status: Native
+  - name: Cyperus odoratus
+    status: Native
+  - name: Cyperus schweinitzii
+    status: Native
+  - name: Cyperus squarrosus
+    status: Native
+  - name: Cyperus strigosus
+    status: Native
+  # - name: Cyperus subsquarrosus
+  - name: Lipocarpha micrantha
+    status: Native
+  - name: Cyperus X mesochorus
+    status: Native
+  - name: Cypripedium acaule
+    status: Native
+  - name: Cypripedium arietinum
+    status: Native
+  - name: Cypripedium candidum
+    status: Native
+  - name: Cypripedium parviflorum
+    status: Native
+  - name: Cypripedium parviflorum var. makasin
+    status: Native
+  - name: Cypripedium parviflorum var. pubescens
+    status: Native
+  - name: Cypripedium reginae
+    status: Native
+  - name: Cypripedium X andrewsii
+    status: Native
+  - name: Cystopteris bulbifera
+    status: Native
+  - name: Cystopteris fragilis
+    status: Native
+  - name: Cystopteris laurentiana
+    status: Native
+  - name: Cystopteris protrusa
+    status: Native
+  - name: Cystopteris tennesseensis
+    status: Native
+  - name: Cystopteris tenuis
+    status: Native
+  - name: Dactylis glomerata
+    status: Introduced
+  - name: Dalea candida
+    status: Native
+  - name: Dalea candida var. candida
+    status: Native
+  - name: Dalea candida var. oligophylla
+    status: Native
+  - name: Dalea leporina
+    status: Native
+  - name: Dalea purpurea var. purpurea
+    status: Native
+  - name: Dalea villosa var. villosa
+    status: Native
+  - name: Danthonia spicata
+    status: Native
+  - name: Dasiphora fruticosa
+    status: Native
+  - name: Datura stramonium
+    status: Introduced
+  - name: Datura wrightii
+    status: Introduced
+  - name: Daucus carota
+    status: Introduced
+  - name: Decodon verticillatus
+    status: Native
+  - name: Delphinium carolinianum ssp. virescens
+    status: Native
+  # - name: Dendrolycopodium dendroideum
+  - name: Lycopodium dendroideum
+    status: Native
+  # - name: Dendrolycopodium hickeyi
+  - name: Lycopodium hickeyi
+    status: Native
+  - name: Dendrolycopodium obscurum
+    status: Native
+  - name: Deparia acrostichoides
+    status: Native
+  - name: Deschampsia cespitosa ssp. cespitosa
+    status: Native
+  - name: Deschampsia flexuosa
+    status: Native
+  - name: Descurainia incana
+    status: Native
+  - name: Descurainia pinnata ssp. brachycarpa
+    status: Native
+  - name: Descurainia sophia
+    status: Introduced
+  - name: Desmanthus illinoensis
+    status: Native
+  - name: Desmodium canadense
+    status: Native
+  - name: Desmodium cuspidatum
+    status: Native
+  - name: Desmodium illinoense
+    status: Native
+  - name: Dianthus armeria ssp. armeria
+    status: Introduced
+  - name: Dianthus barbatus ssp. barbatus
+    status: Introduced
+  - name: Dianthus deltoides ssp. deltoides
+    status: Introduced
+  - name: Diarrhena obovata
+    status: Native
+  - name: Dicentra canadensis
+    status: Native
+  - name: Dicentra cucullaria
+    status: Native
+  - name: Dichanthelium acuminatum
+    status: Native
+  - name: Dichanthelium acuminatum ssp. fasciculatum
+    status: Native
+  - name: Dichanthelium acuminatum ssp. implicatum
+    status: Native
+  - name: Dichanthelium acuminatum ssp. lindheimeri
+    status: Native
+  - name: Dichanthelium boreale
+    status: Native
+  - name: Dichanthelium depauperatum
+    status: Native
+  - name: Dichanthelium latifolium
+    status: Native
+  - name: Dichanthelium leibergii
+    status: Native
+  - name: Dichanthelium linearifolium
+    status: Native
+  - name: Dichanthelium oligosanthes
+    status: Native
+  # - name: Dichanthelium oligosanthes ssp. oligosanthes
+  - name: Dichanthelium oligosanthes var. oligosanthes
+    status: Native
+  # - name: Dichanthelium oligosanthes ssp. scribnerianum
+  - name: Dichanthelium oligosanthes var. scribnerianum
+    status: Native
+  - name: Dichanthelium ovale
+    status: Native
+  # - name: Dichanthelium ovale ssp. praecocius
+  #   status: Native
+  # - name: Dichanthelium ovale ssp. pseudopubescens
+  #   status: Native
+  # - name: Dichanthelium ovale ssp. villosissimum
+  #   status: Native
+  - name: Dichanthelium perlongum
+    status: Native
+  - name: Dichanthelium wilcoxianum
+    status: Native
+  - name: Dichanthelium xanthophysum
+    status: Native
+  - name: Didiplis diandra
+    status: Native
+  - name: Diervilla lonicera
+    status: Native
+  - name: Digitalis grandiflora
+    status: Introduced
+  - name: Digitalis lanata
+    status: Introduced
+  - name: Digitaria cognata
+    status: Native
+  - name: Digitaria ischaemum
+    status: Introduced
+  - name: Digitaria sanguinalis
+    status: Introduced
+  - name: Dioscorea villosa
+    status: Native
+  - name: Diphasiastrum complanatum
+    status: Native
+  - name: Diphasiastrum digitatum
+    status: Native
+  - name: Diphasiastrum tristachyum
+    status: Native
+  - name: Diphasiastrum X habereri
+    status: Native
+  - name: Diphasiastrum X verecundum
+    status: Native
+  - name: Diphasiastrum X zeilleri
+    status: Native
+  - name: Dipsacus fullonum
+    status: Introduced
+  - name: Dipsacus laciniatus
+    status: Introduced
+  - name: Dirca palustris
+    status: Native
+  - name: Distichlis spicata
+    status: Native
+  - name: Dodecatheon amethystinum
+    status: Native
+  - name: Dodecatheon meadia
+    status: Native
+  - name: Doellingeria umbellata
+    status: Native
+  - name: Doellingeria umbellata var. pubens
+    status: Native
+  - name: Doellingeria umbellata var. umbellata
+    status: Native
+  - name: Draba arabisans
+    status: Native
+  - name: Draba cana
+    status: Native
+  - name: Draba nemorosa
+    status: Native
+  - name: Draba norvegica
+    status: Native
+  - name: Draba reptans
+    status: Native
+  - name: Draba verna
+    status: Introduced
+  - name: Dracocephalum parviflorum
+    status: Native
+  - name: Drosera anglica
+    status: Native
+  - name: Drosera intermedia
+    status: Native
+  - name: Drosera linearis
+    status: Native
+  - name: Drosera rotundifolia
+    status: Native
+  - name: Drosera X obovata
+    status: Native
+  - name: Drymocallis arguta
+    status: Native
+  - name: Dryopteris carthusiana
+    status: Native
+  - name: Dryopteris cristata
+    status: Native
+  - name: Dryopteris expansa
+    status: Native
+  - name: Dryopteris filix-mas
+    status: Native
+  - name: Dryopteris fragrans
+    status: Native
+  # - name: Dryopteris goldieana
+  - name: Dryopteris goldiana
+    status: Native
+  - name: Dryopteris intermedia
+    status: Native
+  - name: Dryopteris marginalis
+    status: Native
+  - name: Dryopteris X boottii
+    status: Native
+  - name: Dryopteris X triploidea
+    status: Native
+  - name: Dryopteris X uliginosa
+    status: Native
+  - name: Duchesnea indica var. indica
+    status: Introduced
+  - name: Dulichium arundinaceum var. arundinaceum
+    status: Native
+  - name: Dysphania botrys
+    status: Introduced
+  - name: Dyssodia papposa
+    status: Native
+  - name: Echinacea angustifolia
+    status: Native
+  - name: Echinochloa crus-galli
+    status: Introduced
+  - name: Echinochloa muricata
+    status: Native
+  - name: Echinochloa muricata var. microstachya
+    status: Native
+  - name: Echinochloa muricata var. muricata
+    status: Native
+  - name: Echinochloa walteri
+    status: Native
+  - name: Echinocystis lobata
+    status: Native
+  - name: Echinodorus berteroi
+    status: Native
+  - name: Echinops sphaerocephalus
+    status: Introduced
+  - name: Echium vulgare
+    status: Introduced
+  - name: Eclipta prostrata
+    status: Native
+  - name: Elaeagnus angustifolia
+    status: Introduced
+  - name: Elaeagnus commutata
+    status: Native
+  - name: Elaeagnus umbellata
+    status: Introduced
+  - name: Elatine americana
+    status: Native
+  - name: Elatine brachysperma
+    status: Native
+  - name: Elatine minima
+    status: Native
+  - name: Elatine triandra
+    status: Native
+  - name: Eleocharis acicularis
+    status: Native
+  - name: Eleocharis coloradoensis
+    status: Native
+  - name: Eleocharis compressa
+    status: Native
+  - name: Eleocharis compressa var. acutisquamata
+    status: Native
+  - name: Eleocharis compressa var. compressa
+    status: Native
+  - name: Eleocharis elliptica
+    status: Native
+  - name: Eleocharis engelmannii
+    status: Native
+  - name: Eleocharis erythropoda
+    status: Native
+  - name: Eleocharis flavescens var. olivacea
+    status: Native
+  - name: Eleocharis intermedia
+    status: Native
+  - name: Eleocharis macrostachya
+    status: Native
+  # - name: Eleocharis mamillata var. mamillata
+  - name: Eleocharis mamillata ssp. mamillata
+    status: Native
+  - name: Eleocharis nitida
+    status: Native
+  - name: Eleocharis obtusa
+    status: Native
+  - name: Eleocharis ovata
+    status: Native
+  - name: Eleocharis palustris
+    status: Native
+  - name: Eleocharis quinqueflora
+    status: Native
+  - name: Eleocharis robbinsii
+    status: Native
+  - name: Eleocharis rostellata
+    status: Native
+  - name: Eleocharis wolfii
+    status: Native
+  - name: Eleusine indica
+    status: Introduced
+  - name: Eleutherococcus sieboldianus
+    status: Introduced
+  - name: Ellisia nyctelea
+    status: Native
+  - name: Elodea bifoliata
+    status: Native
+  - name: Elodea canadensis
+    status: Native
+  - name: Elodea nuttallii
+    status: Native
+  - name: Elymus canadensis var. canadensis
+    status: Native
+  - name: Elymus curvatus
+    status: Native
+  - name: Elymus diversiglumis
+    status: Native
+  - name: Elymus hystrix
+    status: Native
+  - name: Elymus repens
+    status: Introduced
+  - name: Elymus riparius
+    status: Native
+  - name: Elymus trachycaulus
+    status: Native
+  - name: Elymus trachycaulus ssp. subsecundus
+    status: Native
+  - name: Elymus trachycaulus ssp. trachycaulus
+    status: Native
+  - name: Elymus villosus
+    status: Native
+  - name: Elymus virginicus
+    status: Native
+  - name: Elymus virginicus var. jejunus
+    status: Native
+  - name: Elymus virginicus var. virginicus
+    status: Native
+  - name: Elymus wiegandii
+    status: Native
+  - name: Empetrum atropurpureum
+    status: Native
+  - name: Empetrum nigrum
+    status: Native
+  - name: Enemion biternatum
+    status: Native
+  - name: Epigaea repens
+    status: Native
+  - name: Epilobium ciliatum
+    status: Native
+  - name: Epilobium ciliatum ssp. ciliatum
+    status: Native
+  - name: Epilobium ciliatum ssp. glandulosum
+    status: Native
+  - name: Epilobium coloratum
+    status: Native
+  - name: Epilobium densum
+    status: Native
+  - name: Epilobium leptophyllum
+    status: Native
+  - name: Epilobium palustre
+    status: Native
+  # - name: Epilobium xwisconsinense
+  - name: Epilobium X wisconsinense
+    status: Native
+  - name: Epipactis helleborine
+    status: Introduced
+  - name: Equisetum arvense
+    status: Native
+  - name: Equisetum fluviatile
+    status: Native
+  - name: Equisetum laevigatum
+    status: Native
+  - name: Equisetum palustre
+    status: Native
+  - name: Equisetum praealtum
+    status: Native
+  - name: Equisetum pratense
+    status: Native
+  - name: Equisetum scirpoides
+    status: Native
+  - name: Equisetum sylvaticum
+    status: Native
+  - name: Equisetum variegatum ssp. variegatum
+    status: Native
+  - name: Equisetum X ferrissii
+    status: Native
+  # - name: Equisetum X jesupii
+  #   status: Native
+  - name: Equisetum X litorale
+    status: Native
+  # - name: Equisetum X mildeanum
+  #   status: Native
+  - name: Equisetum X nelsonii
+    status: Native
+  - name: Eragrostis cilianensis
+    status: Introduced
+  - name: Eragrostis frankii
+    status: Native
+  - name: Eragrostis hypnoides
+    status: Native
+  - name: Eragrostis minor
+    status: Introduced
+  - name: Eragrostis pectinacea var. pectinacea
+    status: Native
+  - name: Eragrostis pilosa
+    status: Introduced
+  - name: Eragrostis pilosa var. perplexa
+    status: Introduced
+  - name: Eragrostis pilosa var. pilosa
+    status: Introduced
+  - name: Eragrostis spectabilis
+    status: Native
+  - name: Eragrostis trichodes
+    status: Native
+  - name: Erechtites hieraciifolius var. hieraciifolius
+    status: Native
+  - name: Erigeron acris var. kamtschaticus
+    status: Native
+  - name: Erigeron annuus
+    status: Native
+  - name: Erigeron glabellus var. pubescens
+    status: Native
+  - name: Erigeron lonchophyllus
+    status: Native
+  - name: Erigeron philadelphicus var. philadelphicus
+    status: Native
+  - name: Erigeron pulchellus
+    status: Native
+  - name: Erigeron pulchellus var. pulchellus
+    status: Native
+  - name: Erigeron pulchellus var. tolsteadii
+    status: Native
+  - name: Erigeron strigosus
+    status: Native
+  - name: Erigeron strigosus var. septentrionalis
+    status: Native
+  - name: Erigeron strigosus var. strigosus
+    status: Native
+  - name: Eriocaulon aquaticum
+    status: Native
+  - name: Eriochloa villosa
+    status: Introduced
+  - name: Eriophorum angustifolium ssp. angustifolium
+    status: Native
+  - name: Eriophorum gracile
+    status: Native
+  - name: Eriophorum russeolum ssp. leiocarpum
+    status: Native
+  - name: Eriophorum tenellum
+    status: Native
+  - name: Eriophorum vaginatum
+    status: Native
+  - name: Eriophorum virginicum
+    status: Native
+  - name: Eriophorum viridicarinatum
+    status: Native
+  - name: Erodium cicutarium
+    status: Introduced
+  - name: Erucastrum gallicum
+    status: Introduced
+  - name: Eryngium yuccifolium var. yuccifolium
+    status: Native
+  - name: Erysimum asperum
+    status: Native
+  - name: Erysimum cheiranthoides
+    status: Introduced
+  - name: Erysimum inconspicuum
+    status: Native
+  # - name: Erythranthe geyeri
+  - name: Mimulus glabratus var. fremontii
+    status: Native
+  - name: Erythronium albidum
+    status: Native
+  # - name: Erythronium albidum x propullans
+  #   status: Native
+  - name: Erythronium americanum ssp. americanum
+    status: Native
+  - name: Erythronium propullans
+    status: Native
+  - name: Euonymus alatus
+    status: Introduced
+  - name: Euonymus atropurpureus
+    status: Native
+  - name: Eupatorium altissimum
+    status: Native
+  - name: Eupatorium perfoliatum
+    status: Native
+  - name: Eupatorium sessilifolium
+    status: Native
+  - name: Euphorbia corollata
+    status: Native
+  - name: Euphorbia cyathophora
+    status: Native
+  - name: Euphorbia cyparissias
+    status: Introduced
+  - name: Euphorbia davidii
+    status: Introduced
+  - name: Euphorbia dentata
+    status: Native
+  - name: Euphorbia geyeri var. geyeri
+    status: Native
+  - name: Euphorbia glyptosperma
+    status: Native
+  - name: Euphorbia hexagona
+    status: Native
+  - name: Euphorbia maculata
+    status: Native
+  - name: Euphorbia marginata
+    status: Native
+  - name: Euphorbia missurica
+    status: Native
+  - name: Euphorbia nutans
+    status: Native
+  # - name: Euphorbia serpillifolia ssp. serpillifolia
+  - name: Euphorbia serpyllifolia var. serpyllifolia
+    status: Native
+  - name: Euphorbia spathulata
+    status: Native
+  - name: Euphorbia virgata
+    status: Introduced
+  - name: Euphrasia hudsoniana
+    status: Native
+  - name: Euphrasia hudsoniana var. ramosior
+    status: Native
+  - name: Euphrasia nemorosa
+    status: Introduced
+  # - name: Euphrasia stricta var. stricta
+  #   status: Introduced
+  - name: Eurybia macrophylla
+    status: Native
+  - name: Euthamia graminifolia
+    status: Native
+  - name: Euthamia gymnospermoides
+    status: Native
+  - name: Eutrochium maculatum
+    status: Native
+  - name: Eutrochium maculatum var. bruneri
+    status: Native
+  - name: Eutrochium maculatum var. foliosum
+    status: Native
+  - name: Eutrochium maculatum var. maculatum
+    status: Native
+  - name: Eutrochium purpureum var. holzingeri
+    status: Native
+  - name: Fagopyrum esculentum
+    status: Introduced
+  - name: Fallopia cilinodis
+    status: Native
+  - name: Fallopia convolvulus
+    status: Introduced
+  - name: Fallopia japonica var. japonica
+    status: Introduced
+  - name: Fallopia scandens
+    status: Native
+  - name: Fallopia X bohemica
+    status: Introduced
+  - name: Festuca rubra
+    status: Introduced
+  - name: Festuca rubra ssp. fallax
+    status: Introduced
+  - name: Festuca rubra ssp. rubra
+    status: Introduced
+  - name: Festuca saximontana var. saximontana
+    status: Native
+  - name: Festuca subverticillata
+    status: Native
+  - name: Festuca trachyphylla
+    status: Introduced
+  - name: Filipendula ulmaria
+    status: Introduced
+  - name: Fimbristylis autumnalis
+    status: Native
+  - name: Fimbristylis puberula var. interior
+    status: Native
+  - name: Floerkea proserpinacoides
+    status: Native
+  - name: Fragaria vesca ssp. americana
+    status: Native
+  - name: Fragaria virginiana
+    status: Native
+  - name: Fragaria virginiana ssp. glauca
+    status: Native
+  - name: Fragaria virginiana ssp. virginiana
+    status: Native
+  - name: Frangula alnus
+    status: Introduced
+  - name: Fraxinus americana
+    status: Native
+  - name: Fraxinus nigra
+    status: Native
+  - name: Fraxinus pennsylvanica
+    status: Native
+  - name: Froelichia floridana
+    status: Native
+  - name: Gaillardia aristata
+    status: Native
+  - name: Gaillardia pulchella
+    status: Introduced
+  - name: Galearis spectabilis
+    status: Native
+  - name: Galeopsis tetrahit
+    status: Introduced
+  - name: Galeopsis tetrahit var. bifida
+    status: Introduced
+  - name: Galeopsis tetrahit var. tetrahit
+    status: Introduced
+  - name: Galinsoga parviflora var. parviflora
+    status: Introduced
+  - name: Galinsoga quadriradiata
+    status: Introduced
+  - name: Galium aparine
+    status: Native
+  - name: Galium asprellum
+    status: Native
+  - name: Galium boreale
+    status: Native
+  - name: Galium circaezans var. hypomalacum
+    status: Native
+  - name: Galium concinnum
+    status: Native
+  - name: Galium labradoricum
+    status: Native
+  - name: Galium mollugo
+    status: Introduced
+  # - name: Galium obtusum var. obtusum
+  - name: Galium obtusum ssp. obtusum
+    status: Native
+  - name: Galium palustre
+    status: Native
+  - name: Galium tinctorium var. tinctorium
+    status: Native
+  # - name: Galium trifidum var. trifidum
+  - name: Galium trifidum ssp. trifidum
+    status: Native
+  # - name: Galium triflorum var. triflorum
+  - name: Galium triflorum
+    status: Native
+  - name: Galium verum
+    status: Introduced
+  - name: Gaultheria hispidula
+    status: Native
+  - name: Gaultheria procumbens
+    status: Native
+  - name: Gaylussacia baccata
+    status: Native
+  # - name: Gentiana affinis var. affinis
+  - name: Gentiana affinis
+    status: Native
+  - name: Gentiana andrewsii
+    status: Native
+  - name: Gentiana andrewsii var. andrewsii
+    status: Native
+  - name: Gentiana andrewsii var. dakotica
+    status: Native
+  - name: Gentiana flavida
+    status: Native
+  - name: Gentiana puberulenta
+    status: Native
+  - name: Gentiana rubricaulis
+    status: Native
+  - name: Gentiana X billingtonii
+    status: Native
+  - name: Gentianella amarella ssp. acuta
+    status: Native
+  - name: Gentianella quinquefolia ssp. occidentalis
+    status: Native
+  - name: Gentianopsis crinita
+    status: Native
+  - name: Gentianopsis virgata
+    status: Native
+  - name: Gentianopsis virgata ssp. macounii
+    status: Native
+  - name: Gentianopsis virgata ssp. virgata
+    status: Native
+  - name: Geocaulon lividum
+    status: Native
+  - name: Geranium bicknellii
+    status: Native
+  - name: Geranium carolinianum
+    status: Native
+  - name: Geranium maculatum
+    status: Native
+  - name: Geranium sibiricum
+    status: Introduced
+  - name: Geum aleppicum
+    status: Native
+  - name: Geum canadense
+    status: Native
+  - name: Geum laciniatum
+    status: Native
+  - name: Geum macrophyllum var. perincisum
+    status: Native
+  - name: Geum rivale
+    status: Native
+  - name: Geum triflorum var. triflorum
+    status: Native
+  - name: Geum vernum
+    status: Native
+  - name: Glechoma hederacea
+    status: Introduced
+  - name: Gleditsia triacanthos
+    status: Native
+  - name: Glyceria borealis
+    status: Native
+  - name: Glyceria canadensis var. canadensis
+    status: Native
+  - name: Glyceria grandis var. grandis
+    status: Native
+  - name: Glyceria maxima
+    status: Introduced
+  - name: Glyceria striata
+    status: Native
+  - name: Glycyrrhiza lepidota
+    status: Native
+  - name: Gnaphalium uliginosum
+    status: Introduced
+  - name: Goodyera pubescens
+    status: Native
+  - name: Goodyera repens
+    status: Native
+  - name: Goodyera tesselata
+    status: Native
+  - name: Gratiola neglecta
+    status: Native
+  - name: Grindelia hirsutula
+    status: Native
+  - name: Grindelia squarrosa
+    status: Native
+  # - name: Gymnocarpium continentale
+  #   status: Native
+  - name: Gymnocarpium dryopteris
+    status: Native
+  - name: Gymnocarpium robertianum
+    status: Native
+  - name: Gymnocarpium X brittonianum
+    status: Native
+  - name: Gymnocarpium X intermedium
+    status: Native
+  - name: Gymnocladus dioicus
+    status: Native
+  - name: Gypsophila muralis
+    status: Introduced
+  - name: Gypsophila paniculata
+    status: Introduced
+  - name: Hackelia deflexa var. americana
+    status: Native
+  - name: Hackelia virginiana
+    status: Native
+  - name: Halenia deflexa
+    status: Native
+  - name: Hamamelis virginiana
+    status: Native
+  - name: Hasteola suaveolens
+    status: Native
+  - name: Hedeoma hispida
+    status: Native
+  - name: Hedeoma pulegioides
+    status: Native
+  - name: Hedyotis longifolia
+    status: Native
+  - name: Helenium autumnale
+    status: Native
+  - name: Helianthus annuus
+    status: Native
+  - name: Helianthus giganteus
+    status: Native
+  - name: Helianthus grosseserratus
+    status: Native
+  - name: Helianthus hirsutus
+    status: Native
+  - name: Helianthus maximiliani
+    status: Native
+  - name: Helianthus nuttallii ssp. rydbergii
+    status: Native
+  - name: Helianthus occidentalis ssp. occidentalis
+    status: Native
+  - name: Helianthus pauciflorus
+    status: Native
+  - name: Helianthus pauciflorus ssp. pauciflorus
+    status: Native
+  - name: Helianthus pauciflorus ssp. subrhomboideus
+    status: Native
+  - name: Helianthus petiolaris ssp. petiolaris
+    status: Native
+  - name: Helianthus strumosus
+    status: Native
+  - name: Helianthus tuberosus
+    status: Native
+  - name: Helianthus X laetiflorus
+    status: Native
+  - name: Heliopsis helianthoides var. scabra
+    status: Native
+  - name: Hemerocallis fulva
+    status: Introduced
+  - name: Heracleum maximum
+    status: Native
+  - name: Hesperis matronalis
+    status: Introduced
+  - name: Hesperostipa comata ssp. comata
+    status: Native
+  - name: Hesperostipa curtiseta
+    status: Native
+  - name: Hesperostipa spartea
+    status: Native
+  - name: Heteranthera dubia
+    status: Native
+  - name: Heteranthera limosa
+    status: Native
+  - name: Heterotheca stenophylla var. angustifolia
+    status: Native
+  - name: Heterotheca villosa
+    status: Native
+  - name: Heterotheca villosa var. ballardii
+    status: Native
+  - name: Heterotheca villosa var. foliosa
+    status: Native
+  - name: Heterotheca villosa var. minor
+    status: Native
+  - name: Heterotheca villosa var. villosa
+    status: Native
+  - name: Heuchera richardsonii
+    status: Native
+  - name: Hibiscus laevis
+    status: Native
+  - name: Hibiscus trionum
+    status: Introduced
+  - name: Hieracium aurantiacum
+    status: Introduced
+  - name: Hieracium caespitosum
+    status: Introduced
+  - name: Hieracium longipilum
+    status: Native
+  - name: Hieracium pilosella
+    status: Introduced
+  - name: Hieracium piloselloides
+    status: Introduced
+  - name: Hieracium scabrum
+    status: Native
+  - name: Hieracium umbellatum
+    status: Native
+  - name: Hieracium vulgatum
+    status: Introduced
+  - name: Hieracium X floribundum
+    status: Native
+  - name: Hippuris vulgaris
+    status: Native
+  # - name: Homalosorus pycnocarpos
+  - name: Homalosorus pynocarpos
+    status: Native
+  - name: Hordeum jubatum ssp. jubatum
+    status: Native
+  - name: Hordeum pusillum
+    status: Native
+  # - name: Hordeum vulgare ssp. vulgare
+  - name: Hordeum vulgare
+    status: Introduced
+  - name: Hudsonia tomentosa
+    status: Native
+  - name: Humulus japonicus
+    status: Introduced
+  - name: Humulus lupulus
+    status: Native
+  - name: Humulus lupulus var. lupuloides
+    status: Native
+  - name: Humulus lupulus var. pubescens
+    status: Native
+  # - name: Huperzia appressa
+  - name: Lycopodiella appressa
+    status: Native
+  - name: Huperzia lucidula
+    status: Native
+  - name: Huperzia porophila
+    status: Native
+  - name: Huperzia selago
+    status: Native
+  - name: Huperzia X bartleyi
+    status: Native
+  - name: Huperzia X buttersii
+    status: Native
+  - name: Huperzia X josephbeitelii
+    status: Native
+  # - name: Huperzia X protoporophila
+  #   status: Native
+  - name: Hybanthus concolor
+    status: Native
+  - name: Hydrastis canadensis
+    status: Native
+  - name: Hydrocotyle americana
+    status: Native
+  - name: Hydrocotyle ranunculoides
+    status: Unknown
+  - name: Hydrophyllum appendiculatum
+    status: Native
+  - name: Hydrophyllum virginianum var. virginianum
+    status: Native
+  # - name: Hylodesmum glutinosum
+  - name: Desmodium glutinosum
+    status: Native
+  # - name: Hylodesmum nudiflorum
+  - name: Desmodium nudiflorum
+    status: Native
+  - name: Hylotelephium telephium
+    status: Introduced
+  - name: Hypericum ascyron ssp. pyramidatum
+    status: Native
+  - name: Hypericum boreale
+    status: Native
+  - name: Hypericum ellipticum
+    status: Native
+  - name: Hypericum kalmianum
+    status: Unknown
+  - name: Hypericum majus
+    status: Native
+  # - name: Hypericum perforatum ssp. perforatum
+  - name: Hypericum perforatum
+    status: Introduced
+  - name: Hypericum punctatum
+    status: Native
+  - name: Hypoxis hirsuta
+    status: Native
+  # - name: Ilex verticillata var. verticillata
+  - name: Ilex verticillata
+    status: Native
+  - name: Impatiens balfourii
+    status: Introduced
+  - name: Impatiens capensis
+    status: Native
+  - name: Impatiens pallida
+    status: Native
+  - name: Inula helenium
+    status: Introduced
+  - name: Iodanthus pinnatifidus
+    status: Native
+  - name: Ipomoea hederacea
+    status: Unknown
+  - name: Iris pseudacorus
+    status: Introduced
+  - name: Iris versicolor
+    status: Native
+  - name: Iris virginica
+    status: Native
+  - name: Isanthus brachiatus
+    status: Native
+  - name: Isoetes echinospora
+    status: Native
+  - name: Isoetes lacustris
+    status: Native
+  - name: Isoetes melanopoda ssp. melanopoda
+    status: Native
+  - name: Jeffersonia diphylla
+    status: Native
+  - name: Juglans cinerea
+    status: Native
+  - name: Juglans nigra
+    status: Native
+  - name: Juglans X bixbyi
+    status: Introduced
+  - name: Juncus alpinoarticulatus
+    status: Native
+  - name: Juncus anthelatus
+    status: Native
+  - name: Juncus articulatus
+    status: Native
+  - name: Juncus balticus ssp. littoralis
+    status: Native
+  - name: Juncus brachycarpus
+    status: Unknown
+  - name: Juncus brevicaudatus
+    status: Native
+  - name: Juncus bufonius
+    status: Native
+  - name: Juncus canadensis
+    status: Native
+  - name: Juncus compressus
+    status: Introduced
+  - name: Juncus dudleyi
+    status: Native
+  - name: Juncus effusus ssp. solutus
+    status: Native
+  - name: Juncus filiformis
+    status: Native
+  - name: Juncus gerardii
+    status: Native
+  - name: Juncus greenei
+    status: Native
+  - name: Juncus interior
+    status: Native
+  - name: Juncus longistylis
+    status: Native
+  - name: Juncus marginatus
+    status: Native
+  - name: Juncus nodosus
+    status: Native
+  - name: Juncus pelocarpus
+    status: Native
+  - name: Juncus pylaei
+    status: Native
+  - name: Juncus stygius var. americanus
+    status: Native
+  - name: Juncus subtilis
+    status: Native
+  - name: Juncus tenuis
+    status: Native
+  - name: Juncus torreyi
+    status: Native
+  - name: Juncus vaseyi
+    status: Native
+  - name: Juncus X gracilescens
+    status: Native
+  - name: Juniperus communis var. depressa
+    status: Native
+  - name: Juniperus horizontalis
+    status: Native
+  - name: Juniperus virginiana var. virginiana
+    status: Native
+  - name: Kalmia polifolia
+    status: Native
+  - name: Knautia arvensis
+    status: Introduced
+  - name: Kochia scoparia ssp. scoparia
+    status: Introduced
+  - name: Koeleria macrantha
+    status: Native
+  - name: Krigia biflora
+    status: Native
+  - name: Lactuca biennis
+    status: Native
+  - name: Lactuca canadensis
+    status: Native
+  - name: Lactuca floridana
+    status: Native
+  - name: Lactuca ludoviciana
+    status: Native
+  - name: Lactuca serriola
+    status: Introduced
+  - name: Lamium amplexicaule
+    status: Introduced
+  - name: Lamium galeobdolon
+    status: Introduced
+  - name: Laportea canadensis
+    status: Native
+  - name: Lappula redowskii
+    status: Introduced
+  - name: Lappula squarrosa
+    status: Introduced
+  - name: Lapsana communis
+    status: Introduced
+  - name: Larix laricina
+    status: Native
+  - name: Lathyrus japonicus var. maritimus
+    status: Native
+  - name: Lathyrus latifolius
+    status: Introduced
+  - name: Lathyrus ochroleucus
+    status: Native
+  - name: Lathyrus palustris
+    status: Native
+  - name: Lathyrus sylvestris
+    status: Introduced
+  - name: Lathyrus tuberosus
+    status: Introduced
+  - name: Lathyrus venosus var. intonsus
+    status: Native
+  - name: Lechea intermedia var. intermedia
+    status: Native
+  - name: Lechea stricta
+    status: Native
+  - name: Lechea tenuifolia
+    status: Native
+  - name: Leersia lenticularis
+    status: Native
+  - name: Leersia oryzoides
+    status: Native
+  - name: Leersia virginica
+    status: Native
+  - name: Lemna minor
+    status: Native
+  - name: Lemna obscura
+    status: Native
+  - name: Lemna perpusilla
+    status: Native
+  - name: Lemna trisulca
+    status: Native
+  - name: Lemna turionifera
+    status: Native
+  - name: Leontodon autumnalis
+    status: Introduced
+  - name: Leonurus cardiaca
+    status: Introduced
+  - name: Leonurus marrubiastrum
+    status: Introduced
+  - name: Leonurus sibiricus
+    status: Introduced
+  - name: Lepidium campestre
+    status: Introduced
+  - name: Lepidium densiflorum
+    status: Native
+  - name: Lepidium draba
+    status: Introduced
+  - name: Lepidium virginicum ssp. virginicum
+    status: Native
+  - name: Leptochloa fusca ssp. fascicularis
+    status: Native
+  - name: Lespedeza capitata
+    status: Native
+  - name: Lespedeza cuneata
+    status: Introduced
+  - name: Lespedeza leptostachya
+    status: Native
+  - name: Leucanthemella serotina
+    status: Introduced
+  - name: Leucanthemum vulgare
+    status: Introduced
+  - name: Leucophysalis grandiflora
+    status: Native
+  - name: Leucospora multifida
+    status: Native
+  - name: Levisticum officinale
+    status: Introduced
+  - name: Liatris aspera
+    status: Native
+  - name: Liatris cylindracea
+    status: Native
+  - name: Liatris ligulistylis
+    status: Native
+  - name: Liatris punctata var. punctata
+    status: Native
+  - name: Liatris pycnostachya var. pycnostachya
+    status: Native
+  - name: Lilium lancifolium
+    status: Introduced
+  - name: Lilium michiganense
+    status: Native
+  - name: Lilium philadelphicum
+    status: Native
+  - name: Limosella aquatica
+    status: Native
+  - name: Linaria dalmatica ssp. dalmatica
+    status: Introduced
+  - name: Linaria vulgaris
+    status: Introduced
+  - name: Lindernia dubia
+    status: Native
+  - name: Linnaea borealis var. longiflora
+    status: Native
+  - name: Linum lewisii var. lewisii
+    status: Native
+  - name: Linum perenne
+    status: Introduced
+  - name: Linum rigidum
+    status: Native
+  - name: Linum rigidum var. rigidum
+    status: Native
+  - name: Linum rigidum var. simulans
+    status: Native
+  - name: Linum sulcatum
+    status: Native
+  - name: Linum usitatissimum
+    status: Introduced
+  - name: Liparis liliifolia
+    status: Native
+  - name: Liparis loeselii
+    status: Native
+  - name: Listera auriculata
+    status: Native
+  - name: Listera convallarioides
+    status: Native
+  - name: Listera cordata var. cordata
+    status: Native
+  - name: Lithospermum canescens
+    status: Native
+  - name: Lithospermum caroliniense var. croceum
+    status: Native
+  - name: Lithospermum incisum
+    status: Native
+  - name: Lithospermum latifolium
+    status: Native
+  - name: Littorella americana
+    status: Native
+  # - name: Lobelia cardinalis var. cardinalis
+  - name: Lobelia cardinalis
+    status: Native
+  - name: Lobelia dortmanna
+    status: Native
+  - name: Lobelia inflata
+    status: Native
+  - name: Lobelia kalmii
+    status: Native
+  - name: Lobelia siphilitica
+    status: Native
+  - name: Lobelia siphilitica var. ludoviciana
+    status: Native
+  - name: Lobelia siphilitica var. siphilitica
+    status: Native
+  - name: Lobelia spicata
+    status: Native
+  - name: Lobelia spicata var. hirtella
+    status: Native
+  - name: Lobelia spicata var. spicata
+    status: Native
+  - name: Lobularia maritima
+    status: Introduced
+  - name: Logfia arvensis
+    status: Introduced
+  - name: Lolium multiflorum
+    status: Introduced
+  - name: Lolium perenne
+    status: Introduced
+  - name: Lomatium orientale
+    status: Native
+  - name: Lonicera caerulea var. villosa
+    status: Native
+  - name: Lonicera canadensis
+    status: Native
+  - name: Lonicera dioica
+    status: Native
+  - name: Lonicera dioica var. dioica
+    status: Native
+  - name: Lonicera dioica var. glaucescens
+    status: Native
+  - name: Lonicera hirsuta
+    status: Native
+  - name: Lonicera morrowii
+    status: Introduced
+  - name: Lonicera oblongifolia
+    status: Native
+  - name: Lonicera reticulata
+    status: Native
+  - name: Lonicera tatarica
+    status: Introduced
+  - name: Lonicera X bella
+    status: Introduced
+  - name: Lotus corniculatus
+    status: Introduced
+  - name: Ludwigia palustris
+    status: Native
+  - name: Ludwigia polycarpa
+    status: Native
+  - name: Lupinus perennis
+    status: Native
+  - name: Lupinus polyphyllus
+    status: Introduced
+  - name: Luzula acuminata var. acuminata
+    status: Native
+  - name: Luzula luzuloides ssp. luzuloides
+    status: Introduced
+  - name: Luzula multiflora ssp. multiflora
+    status: Native
+  - name: Luzula parviflora ssp. melanocarpa
+    status: Native
+  - name: Lycium barbarum
+    status: Introduced
+  - name: Lycopodiella inundata
+    status: Native
+  - name: Lycopodium clavatum
+    status: Native
+  - name: Lycopodium lagopus
+    status: Native
+  - name: Lycopus americanus
+    status: Native
+  - name: Lycopus asper
+    status: Native
+  - name: Lycopus uniflorus
+    status: Native
+  - name: Lycopus virginicus
+    status: Native
+  - name: Lycopus X sherardii
+    status: Native
+  - name: Lygodesmia juncea
+    status: Native
+  - name: Lysimachia ciliata
+    status: Native
+  - name: Lysimachia hybrida
+    status: Native
+  - name: Lysimachia lanceolata
+    status: Native
+  - name: Lysimachia maritima
+    status: Native
+  - name: Lysimachia nummularia
+    status: Introduced
+  - name: Lysimachia quadriflora
+    status: Native
+  - name: Lysimachia quadrifolia
+    status: Native
+  - name: Lysimachia terrestris
+    status: Native
+  - name: Lysimachia thyrsiflora
+    status: Native
+  - name: Lysimachia vulgaris
+    status: Introduced
+  - name: Lysimachia X commixta
+    status: Native
+  - name: Lythrum alatum var. alatum
+    status: Native
+  - name: Lythrum salicaria
+    status: Introduced
+  - name: Madia glomerata
+    status: Introduced
+  - name: Maianthemum canadense
+    status: Native
+  - name: Maianthemum racemosum ssp. racemosum
+    status: Native
+  - name: Maianthemum stellatum
+    status: Native
+  - name: Maianthemum trifolium
+    status: Native
+  - name: Malaxis monophyllos var. brachypoda
+    status: Native
+  - name: Malaxis paludosa
+    status: Native
+  - name: Malaxis unifolia
+    status: Native
+  - name: Malus ioensis
+    status: Native
+  - name: Malva neglecta
+    status: Introduced
+  - name: Malva pusilla
+    status: Introduced
+  - name: Marsilea vestita
+    status: Native
+  - name: Matricaria chamomilla
+    status: Introduced
+  - name: Matricaria discoidea
+    status: Introduced
+  - name: Matteuccia struthiopteris var. pensylvanica
+    status: Native
+  - name: Medicago lupulina
+    status: Introduced
+  - name: Medicago sativa
+    status: Introduced
+  - name: Medicago sativa ssp. falcata
+    status: Introduced
+  - name: Medicago sativa ssp. sativa
+    status: Introduced
+  - name: Melampyrum lineare
+    status: Native
+  - name: Melampyrum lineare var. americanum
+    status: Native
+  - name: Melampyrum lineare var. lineare
+    status: Native
+  - name: Melica nitens
+    status: Native
+  - name: Melilotus albus
+    status: Introduced
+  - name: Melilotus officinalis
+    status: Introduced
+  - name: Menispermum canadense
+    status: Native
+  - name: Mentha arvensis var. canadensis
+    status: Native
+  - name: Mentha spicata
+    status: Introduced
+  - name: Mentha X gentilis
+    status: Introduced
+  - name: Menyanthes trifoliata
+    status: Native
+  - name: Mertensia paniculata
+    status: Native
+  - name: Mertensia virginica
+    status: Native
+  - name: Micranthes pensylvanica
+    status: Native
+  - name: Micranthes virginiensis
+    status: Native
+  - name: Milium effusum var. cisatlanticum
+    status: Native
+  - name: Mimulus ringens var. ringens
+    status: Native
+  - name: Minuartia dawsonensis
+    status: Native
+  - name: Mirabilis albida
+    status: Native
+  - name: Mirabilis linearis var. linearis
+    status: Native
+  - name: Mirabilis nyctaginea
+    status: Native
+  - name: Miscanthus sacchariflorus
+    status: Introduced
+  - name: Mitchella repens
+    status: Native
+  - name: Mitella diphylla
+    status: Native
+  - name: Mitella nuda
+    status: Native
+  - name: Moehringia lateriflora
+    status: Native
+  - name: Moehringia macrophylla
+    status: Native
+  - name: Mollugo verticillata
+    status: Native
+  - name: Monarda fistulosa
+    status: Native
+  - name: Monarda fistulosa var. fistulosa
+    status: Native
+  # - name: Monarda fistulosa var. menthaefolia
+  - name: Monarda fistulosa var. menthifolia
+    status: Native
+  - name: Monarda punctata var. villicaulis
+    status: Native
+  - name: Moneses uniflora
+    status: Native
+  - name: Monolepis nuttalliana
+    status: Native
+  - name: Monotropa hypopitys
+    status: Native
+  - name: Monotropa uniflora
+    status: Native
+  - name: Montia chamissoi
+    status: Native
+  - name: Morus alba
+    status: Introduced
+  - name: Morus rubra
+    status: Native
+  - name: Muhlenbergia asperifolia
+    status: Native
+  - name: Muhlenbergia cuspidata
+    status: Native
+  - name: Muhlenbergia frondosa
+    status: Native
+  - name: Muhlenbergia glomerata
+    status: Native
+  - name: Muhlenbergia mexicana
+    status: Native
+  - name: Muhlenbergia mexicana var. filiformis
+    status: Native
+  - name: Muhlenbergia mexicana var. mexicana
+    status: Native
+  - name: Muhlenbergia racemosa
+    status: Native
+  - name: Muhlenbergia richardsonis
+    status: Native
+  - name: Muhlenbergia schreberi
+    status: Native
+  - name: Muhlenbergia sylvatica
+    status: Native
+  - name: Muhlenbergia uniflora
+    status: Native
+  - name: Mulgedium pulchellum
+    status: Native
+  - name: Myosotis arvensis
+    status: Introduced
+  - name: Myosotis laxa
+    status: Native
+  - name: Myosotis scorpioides
+    status: Introduced
+  - name: Myosotis sylvatica
+    status: Introduced
+  - name: Myosotis verna
+    status: Native
+  - name: Myosoton aquaticum
+    status: Introduced
+  - name: Myosurus minimus
+    status: Native
+  - name: Myrica gale
+    status: Native
+  - name: Myriophyllum alterniflorum
+    status: Native
+  - name: Myriophyllum farwellii
+    status: Native
+  - name: Myriophyllum heterophyllum
+    status: Native
+  - name: Myriophyllum pinnatum
+    status: Unknown
+  - name: Myriophyllum sibiricum
+    status: Native
+  - name: Myriophyllum spicatum
+    status: Introduced
+  - name: Myriophyllum tenellum
+    status: Native
+  - name: Myriophyllum verticillatum
+    status: Native
+  # - name: Myriopteris gracilis
+  - name: Cheilanthes feei
+    status: Native
+  - name: Najas flexilis
+    status: Native
+  - name: Najas gracillima
+    status: Native
+  - name: Najas guadalupensis
+    status: Native
+  - name: Najas guadalupensis ssp. guadalupensis
+    status: Native
+  - name: Najas guadalupensis ssp. olivacea
+    status: Native
+  - name: Najas marina
+    status: Native
+  - name: Najas minor
+    status: Introduced
+  - name: Napaea dioica
+    status: Native
+  - name: Nassella viridula
+    status: Native
+  - name: Nasturtium microphyllum
+    status: Introduced
+  - name: Nasturtium officinale
+    status: Introduced
+  - name: Nelumbo lutea
+    status: Native
+  - name: Nemopanthus mucronatus
+    status: Native
+  - name: Nepeta cataria
+    status: Introduced
+  - name: Neslia paniculata
+    status: Introduced
+  - name: Nothocalais cuspidata
+    status: Native
+  - name: Nuphar microphylla
+    status: Native
+  - name: Nuphar rubrodisca
+    status: Native
+  - name: Nuphar variegata
+    status: Native
+  - name: Nuttallanthus canadensis
+    status: Native
+  - name: Nymphaea leibergii
+    status: Native
+  - name: Nymphaea odorata
+    status: Native
+  - name: Nymphaea odorata ssp. odorata
+    status: Native
+  - name: Nymphaea odorata ssp. tuberosa
+    status: Native
+  - name: Odontites vulgaris
+    status: Introduced
+  - name: Oenanthe javanica
+    status: Introduced
+  - name: Oenothera biennis
+    status: Native
+  - name: Oenothera clelandii
+    status: Native
+  - name: Oenothera curtiflora
+    status: Introduced
+  - name: Oenothera gaura
+    status: Native
+  - name: Oenothera laciniata
+    status: Native
+  - name: Oenothera nuttallii
+    status: Native
+  - name: Oenothera oakesiana
+    status: Native
+  - name: Oenothera parviflora
+    status: Native
+  - name: Oenothera perennis
+    status: Native
+  - name: Oenothera rhombipetala
+    status: Native
+  - name: Oenothera suffrutescens
+    status: Native
+  - name: Oenothera villosa
+    status: Native
+  - name: Oenothera villosa ssp. strigosa
+    status: Native
+  - name: Oenothera villosa ssp. villosa
+    status: Native
+  - name: Onoclea sensibilis
+    status: Native
+  - name: Onosmodium molle
+    status: Native
+  - name: Onosmodium molle var. hispidissimum
+    status: Native
+  - name: Onosmodium molle var. occidentale
+    status: Native
+  - name: Ophioglossum pusillum
+    status: Native
+  - name: Opuntia fragilis
+    status: Native
+  - name: Opuntia humifusa
+    status: Native
+  - name: Ornithogalum umbellatum
+    status: Introduced
+  - name: Orobanche fasciculata
+    status: Native
+  - name: Orobanche ludoviciana
+    status: Native
+  # - name: Orobanche uniflora ssp. uniflora
+  - name: Orobanche uniflora var. uniflora
+    status: Native
+  - name: Orthilia secunda
+    status: Native
+  - name: Orthocarpus luteus
+    status: Native
+  - name: Oryzopsis asperifolia
+    status: Native
+  - name: Osmorhiza berteroi
+    status: Native
+  - name: Osmorhiza claytonii
+    status: Native
+  - name: Osmorhiza depauperata
+    status: Native
+  - name: Osmorhiza longistylis
+    status: Native
+  - name: Osmunda regalis var. spectabilis
+    status: Native
+  - name: Osmundastrum cinnamomeum
+    status: Native
+  - name: Ostrya virginiana
+    status: Native
+  - name: Oxalis dillenii
+    status: Native
+  - name: Oxalis montana
+    status: Native
+  - name: Oxalis stricta
+    status: Native
+  - name: Oxalis violacea
+    status: Native
+  - name: Oxypolis rigidior
+    status: Native
+  - name: Oxytropis borealis var. viscida
+    status: Native
+  - name: Oxytropis campestris var. dispar
+    status: Native
+  - name: Oxytropis lambertii var. lambertii
+    status: Native
+  - name: Packera aurea
+    status: Native
+  - name: Packera cana
+    status: Native
+  - name: Packera indecora
+    status: Native
+  - name: Packera paupercula
+    status: Native
+  - name: Packera plattensis
+    status: Native
+  - name: Packera pseudaurea var. semicordata
+    status: Native
+  - name: Panax quinquefolius
+    status: Native
+  - name: Panax trifolius
+    status: Native
+  - name: Panicum capillare ssp. capillare
+    status: Native
+  - name: Panicum dichotomiflorum ssp. dichotomiflorum
+    status: Native
+  - name: Panicum miliaceum ssp. ruderale
+    status: Introduced
+  # - name: Panicum philadelphicum ssp. philadelphicum
+  - name: Panicum philadelphicum var. philadelphicum
+    status: Native
+  - name: Panicum virgatum
+    status: Native
+  - name: Parietaria pensylvanica
+    status: Native
+  - name: Parnassia glauca
+    status: Native
+  - name: Parnassia palustris
+    status: Native
+  - name: Paronychia canadensis
+    status: Native
+  - name: Paronychia fastigiata var. fastigiata
+    status: Native
+  - name: Parthenium integrifolium
+    status: Native
+  - name: Parthenocissus quinquefolia
+    status: Native
+  - name: Parthenocissus vitacea
+    status: Native
+  - name: Pascopyrum smithii
+    status: Native
+  - name: Paspalum setaceum
+    status: Native
+  - name: Paspalum setaceum var. muhlenbergii
+    status: Native
+  - name: Paspalum setaceum var. stramineum
+    status: Native
+  - name: Pastinaca sativa
+    status: Introduced
+  - name: Pedicularis canadensis
+    status: Native
+  - name: Pedicularis lanceolata
+    status: Native
+  - name: Pediomelum argophyllum
+    status: Native
+  - name: Pediomelum esculentum
+    status: Native
+  # - name: Pediomelum tenuiflorum
+  - name: Psoralidium tenuiflorum
+    status: Native
+  - name: Pellaea atropurpurea
+    status: Native
+  - name: Pellaea glabella ssp. glabella
+    status: Native
+  - name: Peltandra virginica
+    status: Introduced
+  - name: Penstemon albidus
+    status: Native
+  - name: Penstemon digitalis
+    status: Native
+  - name: Penstemon gracilis
+    status: Native
+  - name: Penstemon grandiflorus
+    status: Native
+  - name: Penstemon pallidus
+    status: Native
+  - name: Penthorum sedoides
+    status: Native
+  - name: Peritoma serrulata
+    status: Introduced
+  - name: Persicaria amphibia
+    status: Native
+  - name: Persicaria amphibia var. emersa
+    status: Native
+  - name: Persicaria amphibia var. stipulacea
+    status: Native
+  - name: Persicaria arifolia
+    status: Native
+  - name: Persicaria careyi
+    status: Native
+  - name: Persicaria hydropiper
+    status: Introduced
+  - name: Persicaria hydropiperoides
+    status: Native
+  - name: Persicaria lapathifolia
+    status: Native
+  - name: Persicaria longiseta
+    status: Introduced
+  - name: Persicaria maculosa
+    status: Introduced
+  - name: Persicaria minor
+    status: Introduced
+  - name: Persicaria orientalis
+    status: Introduced
+  - name: Persicaria pensylvanica
+    status: Native
+  - name: Persicaria punctata
+    status: Native
+  - name: Persicaria sagittata
+    status: Native
+  - name: Persicaria virginiana
+    status: Native
+  - name: Petasites frigidus
+    status: Native
+  - name: Petasites frigidus var. palmatus
+    status: Native
+  - name: Petasites frigidus var. sagittatus
+    status: Native
+  - name: Petasites frigidus var. vitifolius
+    status: Native
+  - name: Petrorhagia saxifraga var. saxifraga
+    status: Introduced
+  - name: Phacelia franklinii
+    status: Native
+  - name: Phalaris arundinacea
+    status: Introduced
+  - name: Phalaris canariensis
+    status: Introduced
+  - name: Phedimus aizoon
+    status: Introduced
+  - name: Phedimus spurius
+    status: Introduced
+  - name: Phegopteris connectilis
+    status: Native
+  - name: Phegopteris hexagonoptera
+    status: Native
+  - name: Phellodendron amurense
+    status: Introduced
+  - name: Phemeranthus parviflorus
+    status: Native
+  - name: Phemeranthus rugospermus
+    status: Native
+  - name: Phleum pratense ssp. pratense
+    status: Introduced
+  - name: Phlox divaricata var. laphamii
+    status: Native
+  - name: Phlox maculata
+    status: Native
+  - name: Phlox paniculata
+    status: Introduced
+  - name: Phlox pilosa var. fulgida
+    status: Native
+  # - name: Phlox subulata var. subulata
+  - name: Phlox subulata ssp. subulata
+    status: Introduced
+  - name: Phragmites australis
+    status: Native
+  - name: Phragmites australis ssp. americanus
+    status: Native
+  - name: Phragmites australis ssp. australis
+    status: Introduced
+  - name: Phryma leptostachya var. leptostachya
+    status: Native
+  - name: Phyla lanceolata
+    status: Native
+  - name: Physalis heterophylla
+    status: Native
+  - name: Physalis longifolia
+    status: Native
+  - name: Physalis longifolia var. longifolia
+    status: Native
+  - name: Physalis longifolia var. subglabrata
+    status: Native
+  - name: Physalis virginiana
+    status: Native
+  - name: Physaria ludoviciana
+    status: Native
+  - name: Physocarpus intermedius
+    status: Native
+  - name: Physocarpus opulifolius
+    status: Native
+  # - name: Physostegia virginiana var. virginiana
+  - name: Physostegia virginiana ssp. virginiana
+    status: Native
+  - name: Picea glauca
+    status: Native
+  - name: Picea mariana
+    status: Native
+  - name: Pilea fontana
+    status: Native
+  - name: Pilea pumila
+    status: Native
+  - name: Pimpinella saxifraga ssp. saxifraga
+    status: Introduced
+  - name: Pinguicula vulgaris
+    status: Native
+  - name: Pinus banksiana
+    status: Native
+  - name: Pinus resinosa
+    status: Native
+  - name: Pinus strobus
+    status: Native
+  - name: Pinus sylvestris
+    status: Introduced
+  - name: Piptatherum canadense
+    status: Native
+  - name: Piptatherum pungens
+    status: Native
+  - name: Piptatherum racemosum
+    status: Native
+  - name: Plagiobothrys scouleri var. penicillatus
+    status: Native
+  - name: Plantago aristata
+    status: Native
+  - name: Plantago elongata
+    status: Native
+  - name: Plantago eriopoda
+    status: Native
+  - name: Plantago indica
+    status: Introduced
+  - name: Plantago lanceolata
+    status: Introduced
+  - name: Plantago major
+    status: Introduced
+  - name: Plantago major ssp. intermedia
+    status: Introduced
+  # - name: Plantago major ssp. major
+  #   status: Introduced
+  - name: Plantago patagonica
+    status: Native
+  - name: Plantago rugelii
+    status: Native
+  - name: Plantago virginica
+    status: Native
+  - name: Platanthera aquilonis
+    status: Native
+  - name: Platanthera clavellata
+    status: Native
+  - name: Platanthera dilatata var. dilatata
+    status: Native
+  - name: Platanthera flava var. herbiola
+    status: Native
+  - name: Platanthera hookeri
+    status: Native
+  - name: Platanthera huronensis
+    status: Native
+  - name: Platanthera lacera
+    status: Native
+  - name: Platanthera obtusata
+    status: Native
+  - name: Platanthera orbiculata
+    status: Native
+  - name: Platanthera praeclara
+    status: Native
+  - name: Platanthera psycodes
+    status: Native
+  - name: Poa alsodes
+    status: Native
+  - name: Poa annua
+    status: Introduced
+  - name: Poa arida
+    status: Native
+  - name: Poa bulbosa ssp. vivipara
+    status: Introduced
+  - name: Poa chaixii
+    status: Introduced
+  - name: Poa compressa
+    status: Introduced
+  - name: Poa glauca ssp. glauca
+    status: Native
+  - name: Poa interior
+    status: Native
+  - name: Poa nemoralis
+    status: Introduced
+  - name: Poa paludigena
+    status: Native
+  - name: Poa palustris
+    status: Native
+  - name: Poa pratensis
+    status: Introduced
+  - name: Poa pratensis ssp. angustifolia
+    status: Introduced
+  - name: Poa pratensis ssp. pratensis
+    status: Introduced
+  - name: Poa saltuensis
+    status: Native
+  - name: Poa saltuensis ssp. languida
+    status: Native
+  - name: Poa saltuensis ssp. saltuensis
+    status: Native
+  - name: Poa sylvestris
+    status: Native
+  - name: Poa trivialis ssp. trivialis
+    status: Introduced
+  - name: Poa wolfii
+    status: Native
+  - name: Podophyllum peltatum
+    status: Native
+  - name: Pogonia ophioglossoides
+    status: Native
+  - name: Polanisia dodecandra
+    status: Native
+  - name: Polanisia dodecandra ssp. dodecandra
+    status: Native
+  - name: Polanisia dodecandra ssp. trachysperma
+    status: Native
+  - name: Polanisia jamesii
+    status: Native
+  # - name: Polemonium lacustre
+  - name: Polemonium occidentale ssp. lacustre
+    status: Native
+  - name: Polemonium reptans var. reptans
+    status: Native
+  - name: Polygala cruciata
+    status: Native
+  - name: Polygala polygama
+    status: Native
+  - name: Polygala sanguinea
+    status: Native
+  - name: Polygala senega
+    status: Native
+  - name: Polygala verticillata
+    status: Native
+  # - name: Polygaloides paucifolia
+  - name: Polygala paucifolia
+    status: Native
+  - name: Polygonatum biflorum
+    status: Native
+  - name: Polygonatum pubescens
+    status: Native
+  - name: Polygonella articulata
+    status: Native
+  - name: Polygonum achoreum
+    status: Native
+  - name: Polygonum aviculare
+    status: Introduced
+  - name: Polygonum aviculare ssp. aviculare
+    status: Introduced
+  - name: Polygonum aviculare ssp. buxiforme
+    status: Native
+  - name: Polygonum aviculare ssp. depressum
+    status: Introduced
+  - name: Polygonum aviculare ssp. neglectum
+    status: Introduced
+  - name: Polygonum douglasii
+    status: Native
+  - name: Polygonum erectum
+    status: Native
+  - name: Polygonum ramosissimum
+    status: Native
+  - name: Polygonum ramosissimum ssp. prolificum
+    status: Native
+  - name: Polygonum ramosissimum ssp. ramosissimum
+    status: Native
+  - name: Polygonum tenue
+    status: Native
+  - name: Polymnia canadensis
+    status: Native
+  - name: Polypodium virginianum
+    status: Native
+  - name: Polystichum acrostichoides
+    status: Native
+  - name: Polystichum braunii
+    status: Native
+  - name: Polytaenia nuttallii
+    status: Native
+  - name: Pontederia cordata
+    status: Native
+  - name: Populus alba
+    status: Introduced
+  - name: Populus balsamifera
+    status: Native
+  - name: Populus deltoides ssp. monilifera
+    status: Native
+  - name: Populus grandidentata
+    status: Native
+  - name: Populus tremuloides
+    status: Native
+  - name: Populus X jackii
+    status: Native
+  - name: Portulaca oleracea
+    status: Introduced
+  - name: Potamogeton alpinus
+    status: Native
+  - name: Potamogeton amplifolius
+    status: Native
+  - name: Potamogeton bicupulatus
+    status: Native
+  - name: Potamogeton confervoides
+    status: Native
+  - name: Potamogeton crispus
+    status: Introduced
+  - name: Potamogeton diversifolius
+    status: Native
+  - name: Potamogeton epihydrus
+    status: Native
+  - name: Potamogeton foliosus ssp. foliosus
+    status: Native
+  - name: Potamogeton friesii
+    status: Native
+  - name: Potamogeton gramineus
+    status: Native
+  - name: Potamogeton illinoensis
+    status: Native
+  - name: Potamogeton natans
+    status: Native
+  - name: Potamogeton nodosus
+    status: Native
+  - name: Potamogeton oakesianus
+    status: Native
+  - name: Potamogeton obtusifolius
+    status: Native
+  - name: Potamogeton praelongus
+    status: Native
+  - name: Potamogeton pulcher
+    status: Native
+  - name: Potamogeton pusillus
+    status: Native
+  - name: Potamogeton pusillus ssp. pusillus
+    status: Native
+  - name: Potamogeton pusillus ssp. tenuissimus
+    status: Native
+  - name: Potamogeton richardsonii
+    status: Native
+  - name: Potamogeton robbinsii
+    status: Native
+  - name: Potamogeton spirillus
+    status: Native
+  - name: Potamogeton strictifolius
+    status: Native
+  - name: Potamogeton vaseyi
+    status: Native
+  - name: Potamogeton X hagstroemii
+    status: Native
+  - name: Potamogeton X haynesii
+    status: Native
+  - name: Potamogeton zosteriformis
+    status: Native
+  - name: Potentilla anserina ssp. anserina
+    status: Native
+  - name: Potentilla argentea
+    status: Introduced
+  - name: Potentilla bipinnatifida
+    status: Native
+  - name: Potentilla gracilis var. flabelliformis
+    status: Native
+  - name: Potentilla hippiana
+    status: Native
+  - name: Potentilla lasiodonta
+    status: Native
+  - name: Potentilla norvegica
+    status: Native
+  - name: Potentilla pensylvanica
+    status: Native
+  - name: Potentilla recta
+    status: Introduced
+  - name: Potentilla rivalis
+    status: Native
+  - name: Potentilla simplex
+    status: Native
+  - name: Potentilla supina ssp. paradoxa
+    status: Native
+  - name: Prenanthes alba
+    status: Native
+  - name: Prenanthes aspera
+    status: Native
+  - name: Prenanthes crepidinea
+    status: Native
+  - name: Prenanthes racemosa
+    status: Native
+  - name: Primula mistassinica
+    status: Native
+  - name: Prosartes trachycarpa
+    status: Native
+  - name: Prunella vulgaris
+    status: Introduced
+  - name: Prunella vulgaris var. lanceolata
+    status: Introduced
+  - name: Prunella vulgaris var. vulgaris
+    status: Introduced
+  - name: Prunus americana
+    status: Native
+  - name: Prunus nigra
+    status: Native
+  - name: Prunus pensylvanica
+    status: Native
+  - name: Prunus pumila
+    status: Native
+  - name: Prunus pumila var. besseyi
+    status: Native
+  - name: Prunus pumila var. pumila
+    status: Native
+  - name: Prunus pumila var. susquehanae
+    status: Native
+  - name: Prunus serotina var. serotina
+    status: Native
+  - name: Prunus virginiana var. virginiana
+    status: Native
+  - name: Pseudognaphalium macounii
+    status: Native
+  - name: Pseudognaphalium obtusifolium
+    status: Native
+  - name: Ptelea trifoliata ssp. trifoliata
+    status: Introduced
+  - name: Pteridium aquilinum ssp. latiusculum
+    status: Native
+  - name: Puccinellia distans
+    status: Introduced
+  - name: Puccinellia nuttalliana
+    status: Native
+  - name: Pycnanthemum virginianum
+    status: Native
+  - name: Pyrola americana
+    status: Native
+  - name: Pyrola asarifolia ssp. asarifolia
+    status: Native
+  - name: Pyrola chlorantha
+    status: Native
+  - name: Pyrola elliptica
+    status: Native
+  - name: Pyrola minor
+    status: Native
+  - name: Quercus alba
+    status: Native
+  - name: Quercus bicolor
+    status: Native
+  # - name: Quercus bicolor x macrocarpa
+  - name: Quercus X schuettei
+    status: Native
+  - name: Quercus ellipsoidalis
+    status: Native
+  # - name: Quercus ellipsoidalis x rubra
+  #   status: Native
+  - name: Quercus macrocarpa
+    status: Native
+  - name: Quercus muhlenbergii
+    status: Native
+  - name: Quercus rubra
+    status: Native
+  - name: Quercus velutina
+    status: Native
+  - name: Quercus X bebbiana
+    status: Native
+  # - name: Quercus X hawkinsii
+  - name: Quercus X hawkinsiae
+    status: Native
+  - name: Quercus X hillii
+    status: Native
+  # - name: Quercus X paleolithicola
+  - name: Quercus X palaeolithicola
+    status: Introduced
+  - name: Ranunculus abortivus
+    status: Native
+  - name: Ranunculus acris
+    status: Introduced
+  - name: Ranunculus aquatilis var. diffusus
+    status: Native
+  - name: Ranunculus cymbalaria
+    status: Native
+  - name: Ranunculus fascicularis
+    status: Native
+  - name: Ranunculus ficaria
+    status: Introduced
+  - name: Ranunculus flabellaris
+    status: Native
+  - name: Ranunculus flammula
+    status: Native
+  - name: Ranunculus flammula var. ovalis
+    status: Native
+  - name: Ranunculus flammula var. reptans
+    status: Native
+  - name: Ranunculus gmelinii
+    status: Native
+  - name: Ranunculus hispidus
+    status: Native
+  - name: Ranunculus hispidus var. caricetorum
+    status: Native
+  - name: Ranunculus hispidus var. nitidus
+    status: Native
+  - name: Ranunculus lapponicus
+    status: Native
+  - name: Ranunculus macounii
+    status: Native
+  - name: Ranunculus pensylvanicus
+    status: Native
+  - name: Ranunculus recurvatus var. recurvatus
+    status: Native
+  - name: Ranunculus repens
+    status: Introduced
+  - name: Ranunculus rhomboideus
+    status: Native
+  - name: Ranunculus sceleratus
+    status: Native
+  - name: Ranunculus sceleratus var. multifidus
+    status: Native
+  - name: Ranunculus sceleratus var. sceleratus
+    status: Native
+  - name: Ranunculus testiculatus
+    status: Introduced
+  - name: Raphanus raphanistrum
+    status: Introduced
+  - name: Ratibida columnifera
+    status: Native
+  - name: Ratibida pinnata
+    status: Native
+  - name: Rhamnus alnifolia
+    status: Native
+  - name: Rhamnus cathartica
+    status: Introduced
+  - name: Rhodiola integrifolia ssp. leedyi
+    status: Native
+  - name: Rhododendron groenlandicum
+    status: Native
+  - name: Rhus aromatica var. aromatica
+    status: Unknown
+  - name: Rhus glabra
+    status: Native
+  - name: Rhus typhina
+    status: Native
+  # - name: Rhus X borealis
+  #   status: Native
+  - name: Rhynchospora alba
+    status: Native
+  - name: Rhynchospora capillacea
+    status: Native
+  - name: Rhynchospora capitellata
+    status: Native
+  - name: Rhynchospora fusca
+    status: Native
+  - name: Ribes americanum
+    status: Native
+  - name: Ribes aureum var. villosum
+    status: Native
+  - name: Ribes cynosbati
+    status: Native
+  - name: Ribes glandulosum
+    status: Native
+  - name: Ribes hirtellum
+    status: Native
+  - name: Ribes hudsonianum
+    status: Native
+  - name: Ribes lacustre
+    status: Native
+  - name: Ribes missouriense
+    status: Native
+  - name: Ribes nigrum
+    status: Introduced
+  - name: Ribes oxyacanthoides var. oxyacanthoides
+    status: Native
+  - name: Ribes rubrum
+    status: Introduced
+  - name: Ribes triste
+    status: Native
+  - name: Robinia hispida
+    status: Introduced
+  - name: Robinia pseudoacacia
+    status: Introduced
+  - name: Rorippa aquatica
+    status: Native
+  - name: Rorippa curvipes
+    status: Native
+  - name: Rorippa palustris
+    status: Native
+  - name: Rorippa palustris ssp. hispida
+    status: Native
+  - name: Rorippa palustris ssp. palustris
+    status: Native
+  - name: Rorippa sessiliflora
+    status: Native
+  - name: Rorippa sinuata
+    status: Native
+  - name: Rorippa sphaerocarpa
+    status: Native
+  - name: Rorippa sylvestris
+    status: Introduced
+  - name: Rosa acicularis ssp. sayi
+    status: Native
+  - name: Rosa arkansana
+    status: Native
+  - name: Rosa blanda
+    status: Native
+  - name: Rosa multiflora
+    status: Introduced
+  - name: Rosa rugosa
+    status: Introduced
+  - name: Rosa woodsii var. woodsii
+    status: Native
+  - name: Rosa X dulcissima
+    status: Native
+  - name: Rotala ramosior
+    status: Native
+  - name: Rubus ablatus
+    status: Native
+  - name: Rubus acridens
+    status: Native
+  - name: Rubus allegheniensis
+    status: Native
+  - name: Rubus alumnus
+    status: Native
+  - name: Rubus arcticus ssp. acaulis
+    status: Native
+  - name: Rubus caesius
+    status: Introduced
+  - name: Rubus canadensis
+    status: Native
+  - name: Rubus chamaemorus
+    status: Native
+  - name: Rubus dissensus
+    status: Native
+  - name: Rubus ferrofluvius
+    status: Native
+  - name: Rubus frondosus
+    status: Native
+  - name: Rubus fulleri
+    status: Native
+  - name: Rubus glandicaulis
+    status: Native
+  - name: Rubus groutianus
+    status: Native
+  - name: Rubus idaeus
+    status: Unknown
+  - name: Rubus idaeus var. idaeus
+    status: Introduced
+  - name: Rubus idaeus var. strigosus
+    status: Native
+  - name: Rubus ithacanus
+    status: Native
+  - name: Rubus junceus
+    status: Native
+  - name: Rubus missouricus
+    status: Native
+  - name: Rubus multifer
+    status: Native
+  - name: Rubus multiformis
+    status: Native
+  - name: Rubus occidentalis
+    status: Native
+  - name: Rubus parviflorus
+    status: Native
+  - name: Rubus parvifolius
+    status: Introduced
+  - name: Rubus plicatifolius
+    status: Native
+  - name: Rubus pubescens
+    status: Native
+  - name: Rubus quaesitus
+    status: Native
+  - name: Rubus recurvans
+    status: Native
+  - name: Rubus regionalis
+    status: Native
+  - name: Rubus roribaccus
+    status: Native
+  - name: Rubus rosa
+    status: Native
+  - name: Rubus satis
+    status: Native
+  - name: Rubus semisetosus
+    status: Native
+  - name: Rubus spectatus
+    status: Native
+  - name: Rubus steelei
+    status: Native
+  - name: Rubus stipulatus
+    status: Native
+  - name: Rubus superioris
+    status: Native
+  - name: Rubus uniformis
+    status: Native
+  - name: Rubus vermontanus
+    status: Native
+  - name: Rubus wheeleri
+    status: Native
+  - name: Rubus wisconsinensis
+    status: Native
+  - name: Rubus X neglectus
+    status: Native
+  - name: Rudbeckia hirta var. pulcherrima
+    status: Native
+  - name: Rudbeckia laciniata var. laciniata
+    status: Native
+  - name: Rudbeckia subtomentosa
+    status: Introduced
+  - name: Rudbeckia triloba var. triloba
+    status: Native
+  - name: Ruellia humilis
+    status: Native
+  - name: Rumex acetosa
+    status: Introduced
+  - name: Rumex acetosella
+    status: Introduced
+  - name: Rumex altissimus
+    status: Native
+  - name: Rumex britannica
+    status: Native
+  - name: Rumex crispus
+    status: Introduced
+  - name: Rumex fueginus
+    status: Native
+  - name: Rumex longifolius
+    status: Introduced
+  - name: Rumex obtusifolius
+    status: Introduced
+  - name: Rumex patientia
+    status: Introduced
+  - name: Rumex pseudonatronatus
+    status: Introduced
+  - name: Rumex stenophyllus
+    status: Introduced
+  - name: Rumex triangulivalvis
+    status: Native
+  - name: Rumex verticillatus
+    status: Native
+  - name: Ruppia cirrhosa
+    status: Native
+  - name: Sagina nodosa ssp. borealis
+    status: Native
+  - name: Sagina procumbens
+    status: Introduced
+  - name: Sagittaria brevirostra
+    status: Native
+  - name: Sagittaria calycina var. calycina
+    status: Native
+  - name: Sagittaria cristata
+    status: Native
+  - name: Sagittaria cuneata
+    status: Native
+  - name: Sagittaria latifolia
+    status: Native
+  - name: Sagittaria rigida
+    status: Native
+  - name: Salicornia rubra
+    status: Native
+  - name: Salix alba
+    status: Introduced
+  - name: Salix amygdaloides
+    status: Native
+  - name: Salix bebbiana
+    status: Native
+  - name: Salix candida
+    status: Native
+  - name: Salix discolor
+    status: Native
+  - name: Salix eriocephala
+    status: Native
+  - name: Salix famelica
+    status: Native
+  - name: Salix humilis
+    status: Native
+  - name: Salix humilis var. humilis
+    status: Native
+  - name: Salix humilis var. tristis
+    status: Native
+  - name: Salix interior
+    status: Native
+  - name: Salix lucida
+    status: Native
+  - name: Salix maccalliana
+    status: Native
+  - name: Salix nigra
+    status: Native
+  - name: Salix pedicellaris
+    status: Native
+  - name: Salix pellita
+    status: Native
+  - name: Salix pentandra
+    status: Introduced
+  - name: Salix petiolaris
+    status: Native
+  - name: Salix planifolia
+    status: Native
+  - name: Salix pseudomonticola
+    status: Native
+  - name: Salix pyrifolia
+    status: Native
+  - name: Salix sericea
+    status: Native
+  - name: Salix serissima
+    status: Native
+  # - name: Salix X fragilis
+  - name: Salix fragilis
+    status: Introduced
+  - name: Salsola collina
+    status: Introduced
+  - name: Salsola tragus
+    status: Introduced
+  - name: Salvia reflexa
+    status: Introduced
+  - name: Sambucus canadensis var. canadensis
+    status: Native
+  - name: Sambucus racemosa var. pubens
+    status: Native
+  - name: Sanguinaria canadensis
+    status: Native
+  - name: Sanicula canadensis
+    status: Native
+  - name: Sanicula canadensis var. canadensis
+    status: Native
+  - name: Sanicula canadensis var. grandis
+    status: Native
+  - name: Sanicula marilandica
+    status: Native
+  - name: Sanicula odorata
+    status: Native
+  - name: Sanicula trifoliata
+    status: Native
+  - name: Saponaria officinalis
+    status: Introduced
+  - name: Sarracenia purpurea ssp. purpurea
+    status: Native
+  - name: Satureja vulgaris
+    status: Native
+  - name: Saxifraga cernua
+    status: Native
+  - name: Saxifraga paniculata
+    status: Native
+  - name: Sceptridium dissectum
+    status: Native
+  - name: Sceptridium multifidum
+    status: Native
+  - name: Sceptridium oneidense
+    status: Native
+  # - name: Sceptridium rugulosum
+  - name: Botrychium rugulosum
+    status: Native
+  - name: Schedonnardus paniculatus
+    status: Native
+  - name: Schedonorus arundinaceus
+    status: Introduced
+  - name: Schedonorus pratensis
+    status: Introduced
+  - name: Scheuchzeria palustris
+    status: Native
+  - name: Schizachne purpurascens
+    status: Native
+  - name: Schizachyrium scoparium var. scoparium
+    status: Native
+  # - name: Schoenoplectiella purshiana
+  - name: Schoenoplectus purshianus
+    status: Native
+  # - name: Schoenoplectiella purshiana var. purshiana
+  - name: Schoenoplectus purshianus var. purshianus
+    status: Native
+  # - name: Schoenoplectiella purshiana var. williamsii
+  - name: Schoenoplectus purshianus var. williamsii
+    status: Native
+  # - name: Schoenoplectiella smithii
+  - name: Schoenoplectus smithii
+    status: Native
+  # - name: Schoenoplectiella smithii var. setosa
+  - name: Schoenoplectus smithii var. setosus
+    status: Native
+  # - name: Schoenoplectiella smithii var. smithii
+  - name: Schoenoplectus smithii var. smithii
+    status: Native
+  - name: Schoenoplectus acutus var. acutus
+    status: Native
+  # - name: Schoenoplectus acutus x tabernaemontani
+  #   status: Native
+  - name: Schoenoplectus heterochaetus
+    status: Native
+  - name: Schoenoplectus pungens
+    status: Native
+  - name: Schoenoplectus subterminalis
+    status: Native
+  - name: Schoenoplectus tabernaemontani
+    status: Native
+  - name: Schoenoplectus torreyi
+    status: Native
+  - name: Schoenoplectus X oblongus
+    status: Native
+  - name: Scilla siberica
+    status: Introduced
+  - name: Scirpus atrocinctus
+    status: Native
+  - name: Scirpus atrovirens
+    status: Native
+  - name: Scirpus cyperinus
+    status: Native
+  - name: Scirpus georgianus
+    status: Native
+  - name: Scirpus hattorianus
+    status: Native
+  - name: Scirpus microcarpus
+    status: Native
+  - name: Scirpus pallidus
+    status: Native
+  - name: Scirpus pedicellatus
+    status: Native
+  - name: Scirpus pendulus
+    status: Native
+  - name: Scleranthus annuus ssp. annuus
+    status: Introduced
+  - name: Scleranthus perennis
+    status: Introduced
+  - name: Scleria triglomerata
+    status: Native
+  - name: Scleria verticillata
+    status: Native
+  - name: Scolochloa festucacea
+    status: Native
+  - name: Scrophularia lanceolata
+    status: Native
+  - name: Scrophularia marilandica
+    status: Native
+  - name: Scutellaria galericulata
+    status: Native
+  - name: Scutellaria lateriflora
+    status: Native
+  - name: Scutellaria leonardii
+    status: Native
+  - name: Scutellaria ovata var. versicolor
+    status: Native
+  - name: Scutellaria parvula
+    status: Native
+  - name: Securigera varia
+    status: Introduced
+  - name: Sedum acre
+    status: Introduced
+  - name: Selaginella rupestris
+    status: Native
+  - name: Selaginella selaginoides
+    status: Native
+  - name: Senecio integerrimus var. integerrimus
+    status: Native
+  - name: Senecio viscosus
+    status: Introduced
+  - name: Senecio vulgaris
+    status: Introduced
+  - name: Setaria faberi
+    status: Introduced
+  - name: Setaria italica
+    status: Introduced
+  - name: Setaria pumila
+    status: Introduced
+  # - name: Setaria pumila ssp. pallidefusca
+  - name: Setaria pallide-fusca
+    status: Introduced
+  - name: Setaria pumila ssp. pumila
+    status: Introduced
+  - name: Setaria verticillata
+    status: Introduced
+  - name: Setaria viridis
+    status: Introduced
+  - name: Setaria viridis var. major
+    status: Introduced
+  - name: Setaria viridis var. viridis
+    status: Introduced
+  - name: Shepherdia argentea
+    status: Native
+  - name: Shepherdia canadensis
+    status: Native
+  - name: Shinnersoseris rostrata
+    status: Native
+  - name: Sibbaldiopsis tridentata
+    status: Native
+  - name: Sicyos angulatus
+    status: Native
+  - name: Silene antirrhina
+    status: Native
+  - name: Silene armeria
+    status: Introduced
+  - name: Silene csereii
+    status: Introduced
+  - name: Silene dichotoma ssp. dichotoma
+    status: Introduced
+  - name: Silene dioica
+    status: Introduced
+  - name: Silene drummondii ssp. drummondii
+    status: Native
+  - name: Silene flos-cuculi ssp. flos-cuculi
+    status: Introduced
+  - name: Silene hitchguirei
+    status: Native
+  - name: Silene latifolia
+    status: Introduced
+  - name: Silene nivea
+    status: Native
+  - name: Silene noctiflora
+    status: Introduced
+  - name: Silene stellata
+    status: Native
+  # - name: Silene vulgaris ssp. vulgaris
+  - name: Silene vulgaris
+    status: Introduced
+  - name: Silphium laciniatum
+    status: Native
+  - name: Silphium perfoliatum var. perfoliatum
+    status: Native
+  - name: Sinapis arvensis
+    status: Introduced
+  - name: Sisymbrium altissimum
+    status: Introduced
+  - name: Sisymbrium loeselii
+    status: Introduced
+  - name: Sisymbrium officinale
+    status: Introduced
+  - name: Sisyrinchium angustifolium
+    status: Native
+  - name: Sisyrinchium campestre
+    status: Native
+  - name: Sisyrinchium montanum var. montanum
+    status: Native
+  - name: Sisyrinchium mucronatum
+    status: Native
+  - name: Sium suave
+    status: Native
+  - name: Smilax ecirrhata
+    status: Native
+  - name: Smilax herbacea
+    status: Native
+  - name: Smilax illinoensis
+    status: Native
+  - name: Smilax lasioneura
+    status: Native
+  - name: Smilax tamnoides
+    status: Native
+  - name: Solanum carolinense var. carolinense
+    status: Introduced
+  - name: Solanum dulcamara
+    status: Introduced
+  # - name: Solanum emulans
+  - name: Solanum americanum
+    status: Native
+  # - name: Solanum nitidibaccatum
+  - name: Solanum physalifolium
+    status: Native
+  - name: Solanum rostratum
+    status: Native
+  - name: Solanum triflorum
+    status: Native
+  - name: Solidago altissima
+    status: Native
+  - name: Solidago altissima ssp. altissima
+    status: Native
+  - name: Solidago altissima ssp. gilvocanescens
+    status: Native
+  - name: Solidago canadensis
+    status: Native
+  - name: Solidago canadensis var. canadensis
+    status: Native
+  - name: Solidago canadensis var. hargeri
+    status: Native
+  - name: Solidago flexicaulis
+    status: Native
+  - name: Solidago gigantea
+    status: Native
+  - name: Solidago hispida
+    status: Native
+  - name: Solidago juncea
+    status: Native
+  - name: Solidago missouriensis
+    status: Native
+  - name: Solidago mollis
+    status: Native
+  - name: Solidago nemoralis
+    status: Native
+  - name: Solidago nemoralis ssp. decemflora
+    status: Native
+  - name: Solidago nemoralis ssp. nemoralis
+    status: Native
+  - name: Solidago ptarmicoides
+    status: Native
+  - name: Solidago riddellii
+    status: Native
+  - name: Solidago rigida
+    status: Native
+  - name: Solidago rigida ssp. humilis
+    status: Native
+  - name: Solidago rigida ssp. rigida
+    status: Native
+  - name: Solidago sciaphila
+    status: Native
+  - name: Solidago speciosa
+    status: Native
+  - name: Solidago speciosa var. rigidiuscula
+    status: Native
+  - name: Solidago speciosa var. speciosa
+    status: Native
+  - name: Solidago uliginosa
+    status: Native
+  - name: Solidago ulmifolia var. ulmifolia
+    status: Native
+  - name: Solidago X bernardii
+    status: Native
+  - name: Sonchus arvensis
+    status: Introduced
+  - name: Sonchus arvensis ssp. arvensis
+    status: Introduced
+  - name: Sonchus arvensis ssp. uliginosus
+    status: Introduced
+  - name: Sonchus asper
+    status: Introduced
+  - name: Sonchus oleraceus
+    status: Introduced
+  - name: Sorbaria sorbifolia
+    status: Introduced
+  - name: Sorbus americana
+    status: Native
+  - name: Sorbus aucuparia
+    status: Introduced
+  - name: Sorbus decora
+    status: Native
+  - name: Sorghastrum nutans
+    status: Native
+  - name: Sparganium americanum
+    status: Native
+  - name: Sparganium androcladum
+    status: Native
+  - name: Sparganium angustifolium
+    status: Native
+  - name: Sparganium emersum
+    status: Native
+  - name: Sparganium eurycarpum
+    status: Native
+  - name: Sparganium fluctuans
+    status: Native
+  - name: Sparganium glomeratum
+    status: Native
+  - name: Sparganium natans
+    status: Native
+  - name: Spartina gracilis
+    status: Native
+  - name: Spartina pectinata
+    status: Native
+  - name: Spergula arvensis
+    status: Introduced
+  - name: Spergularia rubra
+    status: Introduced
+  - name: Spermolepis inermis
+    status: Unknown
+  - name: Sphaeralcea coccinea var. coccinea
+    status: Native
+  - name: Sphenopholis intermedia
+    status: Native
+  - name: Sphenopholis obtusata
+    status: Native
+  - name: Spinulum annotinum
+    status: Native
+  # - name: Spinulum canadense
+  #   status: Native
+  - name: Spiraea alba var. alba
+    status: Native
+  - name: Spiraea tomentosa var. rosea
+    status: Native
+  - name: Spiranthes casei var. casei
+    status: Native
+  - name: Spiranthes cernua
+    status: Native
+  - name: Spiranthes lacera
+    status: Native
+  - name: Spiranthes lacera var. gracilis
+    status: Native
+  - name: Spiranthes lacera var. lacera
+    status: Native
+  - name: Spiranthes magnicamporum
+    status: Native
+  - name: Spiranthes ovalis var. erostellata
+    status: Native
+  - name: Spiranthes romanzoffiana
+    status: Native
+  - name: Spirodela polyrrhiza
+    status: Native
+  - name: Sporobolus compositus var. compositus
+    status: Native
+  - name: Sporobolus cryptandrus
+    status: Native
+  - name: Sporobolus heterolepis
+    status: Native
+  - name: Sporobolus neglectus
+    status: Native
+  - name: Sporobolus vaginiflorus var. vaginiflorus
+    status: Native
+  - name: Stachys hispida
+    status: Native
+  - name: Stachys palustris
+    status: Native
+  - name: Stachys palustris var. homotricha
+    status: Native
+  - name: Stachys palustris var. pilosa
+    status: Native
+  - name: Stachys tenuifolia
+    status: Native
+  - name: Staphylea trifolia
+    status: Native
+  - name: Stellaria alsine
+    status: Introduced
+  - name: Stellaria borealis ssp. borealis
+    status: Native
+  - name: Stellaria crassifolia
+    status: Native
+  - name: Stellaria graminea
+    status: Introduced
+  - name: Stellaria longifolia
+    status: Native
+  - name: Stellaria longipes ssp. longipes
+    status: Native
+  - name: Stellaria media
+    status: Introduced
+  - name: Streptopus amplexifolius
+    status: Native
+  - name: Streptopus lanceolatus
+    status: Native
+  - name: Strophostyles helvola
+    status: Native
+  - name: Strophostyles leiosperma
+    status: Native
+  - name: Stuckenia filiformis
+    status: Native
+  - name: Stuckenia filiformis ssp. alpina
+    status: Native
+  - name: Stuckenia filiformis ssp. occidentalis
+    status: Native
+  - name: Stuckenia pectinata
+    status: Native
+  - name: Stuckenia vaginata
+    status: Native
+  - name: Suaeda calceoliformis
+    status: Native
+  - name: Subularia aquatica ssp. americana
+    status: Native
+  - name: Sullivantia sullivantii
+    status: Native
+  - name: Symphoricarpos albus
+    status: Native
+  - name: Symphoricarpos occidentalis
+    status: Native
+  - name: Symphyotrichum boreale
+    status: Native
+  - name: Symphyotrichum ciliatum
+    status: Native
+  - name: Symphyotrichum ciliolatum
+    status: Native
+  - name: Symphyotrichum cordifolium
+    status: Native
+  - name: Symphyotrichum drummondii var. drummondii
+    status: Native
+  - name: Symphyotrichum ericoides
+    status: Native
+  - name: Symphyotrichum ericoides var. ericoides
+    status: Native
+  - name: Symphyotrichum ericoides var. pansum
+    status: Native
+  - name: Symphyotrichum falcatum var. commutatum
+    status: Native
+  - name: Symphyotrichum firmum
+    status: Native
+  - name: Symphyotrichum laeve
+    status: Native
+  - name: Symphyotrichum laeve var. geyeri
+    status: Native
+  - name: Symphyotrichum laeve var. laeve
+    status: Native
+  - name: Symphyotrichum lanceolatum
+    status: Native
+  - name: Symphyotrichum lanceolatum var. hesperium
+    status: Native
+  - name: Symphyotrichum lanceolatum var. hirsuticaule
+    status: Native
+  - name: Symphyotrichum lanceolatum var. interior
+    status: Native
+  - name: Symphyotrichum lanceolatum var. lanceolatum
+    status: Native
+  - name: Symphyotrichum lateriflorum
+    status: Native
+  - name: Symphyotrichum novae-angliae
+    status: Native
+  - name: Symphyotrichum oblongifolium
+    status: Native
+  - name: Symphyotrichum ontarionis var. ontarionis
+    status: Native
+  - name: Symphyotrichum oolentangiense
+    status: Native
+  - name: Symphyotrichum pilosum
+    status: Native
+  - name: Symphyotrichum pilosum var. pilosum
+    status: Native
+  - name: Symphyotrichum pilosum var. pringlei
+    status: Native
+  - name: Symphyotrichum praealtum
+    status: Native
+  - name: Symphyotrichum prenanthoides
+    status: Native
+  - name: Symphyotrichum puniceum var. puniceum
+    status: Native
+  - name: Symphyotrichum sericeum
+    status: Native
+  - name: Symphyotrichum shortii
+    status: Native
+  - name: Symphyotrichum urophyllum
+    status: Native
+  - name: Symphyotrichum X amethystinum
+    status: Native
+  - name: Symphyotrichum X longulum
+    status: Native
+  - name: Symphytum officinale
+    status: Introduced
+  - name: Symplocarpus foetidus
+    status: Native
+  - name: Synthyris bullii
+    status: Native
+  - name: Taenidia integerrima
+    status: Native
+  - name: Tanacetum parthenium
+    status: Introduced
+  - name: Tanacetum vulgare
+    status: Introduced
+  - name: Taraxacum erythrospermum
+    status: Introduced
+  - name: Taraxacum officinale
+    status: Introduced
+  - name: Taxus canadensis
+    status: Native
+  - name: Tephroseris palustris
+    status: Native
+  - name: Tephrosia virginiana
+    status: Native
+  - name: Teucrium canadense
+    status: Native
+  - name: Teucrium canadense var. occidentale
+    status: Native
+  - name: Teucrium canadense var. virginicum
+    status: Native
+  # - name: Thalictrum amphibolum
+  #   status: Native
+  - name: Thalictrum dasycarpum
+    status: Native
+  - name: Thalictrum dioicum
+    status: Native
+  - name: Thalictrum thalictroides
+    status: Native
+  - name: Thalictrum venulosum
+    status: Native
+  - name: Thaspium barbinode
+    status: Native
+  - name: Thaspium chapmanii
+    status: Native
+  - name: Thelypteris palustris var. pubescens
+    status: Native
+  - name: Thladiantha dubia
+    status: Introduced
+  - name: Thlaspi arvense
+    status: Introduced
+  - name: Thuja occidentalis
+    status: Native
+  - name: Tilia americana
+    status: Native
+  - name: Tofieldia pusilla
+    status: Native
+  - name: Torilis japonica
+    status: Introduced
+  - name: Torreyochloa pallida
+    status: Native
+  - name: Torreyochloa pallida var. fernaldii
+    status: Native
+  - name: Torreyochloa pallida var. pallida
+    status: Native
+  - name: Toxicodendron radicans
+    status: Native
+  - name: Toxicodendron radicans ssp. radicans
+    status: Native
+  - name: Toxicodendron radicans var. rydbergii
+    status: Native
+  - name: Toxicodendron vernix
+    status: Native
+  - name: Tradescantia bracteata
+    status: Native
+  - name: Tradescantia occidentalis var. occidentalis
+    status: Native
+  - name: Tradescantia ohiensis
+    status: Native
+  - name: Tragopogon dubius
+    status: Introduced
+  - name: Tragopogon pratensis
+    status: Introduced
+  - name: Triadenum fraseri
+    status: Native
+  - name: Triantha glutinosa
+    status: Native
+  - name: Tribulus terrestris
+    status: Introduced
+  - name: Trichophorum alpinum
+    status: Native
+  - name: Trichophorum cespitosum
+    status: Native
+  - name: Trichophorum clintonii
+    status: Native
+  - name: Tridens flavus var. flavus
+    status: Introduced
+  - name: Trientalis borealis
+    status: Native
+  - name: Trifolium arvense
+    status: Introduced
+  - name: Trifolium aureum
+    status: Introduced
+  - name: Trifolium campestre
+    status: Introduced
+  - name: Trifolium fragiferum
+    status: Introduced
+  - name: Trifolium hybridum
+    status: Introduced
+  - name: Trifolium incarnatum
+    status: Introduced
+  - name: Trifolium pratense
+    status: Introduced
+  - name: Trifolium repens
+    status: Introduced
+  - name: Triglochin maritima
+    status: Native
+  - name: Triglochin palustris
+    status: Native
+  - name: Trillium cernuum
+    status: Native
+  - name: Trillium flexipes
+    status: Native
+  - name: Trillium grandiflorum
+    status: Native
+  - name: Trillium nivale
+    status: Native
+  - name: Triodanis leptocarpa
+    status: Native
+  - name: Triodanis perfoliata
+    status: Native
+  - name: Triosteum aurantiacum
+    status: Native
+  - name: Triosteum perfoliatum
+    status: Native
+  - name: Triplasis purpurea var. purpurea
+    status: Native
+  - name: Tripleurospermum inodorum
+    status: Introduced
+  - name: Trisetum spicatum
+    status: Native
+  - name: Tsuga canadensis
+    status: Native
+  - name: Turritis glabra
+    status: Native
+  - name: Typha angustifolia
+    status: Introduced
+  - name: Typha latifolia
+    status: Native
+  - name: Typha X glauca
+    status: Introduced
+  - name: Ulmus americana
+    status: Native
+  - name: Ulmus pumila
+    status: Introduced
+  - name: Ulmus rubra
+    status: Native
+  - name: Ulmus thomasii
+    status: Native
+  - name: Urtica dioica ssp. gracilis
+    status: Native
+  - name: Utricularia cornuta
+    status: Native
+  - name: Utricularia geminiscapa
+    status: Native
+  - name: Utricularia gibba
+    status: Native
+  - name: Utricularia intermedia
+    status: Native
+  - name: Utricularia minor
+    status: Native
+  - name: Utricularia purpurea
+    status: Native
+  - name: Utricularia resupinata
+    status: Native
+  - name: Utricularia vulgaris
+    status: Native
+  - name: Uvularia grandiflora
+    status: Native
+  - name: Uvularia sessilifolia
+    status: Native
+  - name: Vaccaria hispanica
+    status: Introduced
+  - name: Vaccinium angustifolium
+    status: Native
+  - name: Vaccinium cespitosum
+    status: Native
+  - name: Vaccinium macrocarpon
+    status: Native
+  - name: Vaccinium myrtilloides
+    status: Native
+  - name: Vaccinium oxycoccos
+    status: Native
+  - name: Vaccinium uliginosum
+    status: Native
+  - name: Vaccinium vitis-idaea
+    status: Native
+  - name: Valeriana edulis var. ciliata
+    status: Native
+  - name: Valeriana officinalis
+    status: Introduced
+  - name: Vallisneria americana
+    status: Native
+  - name: Verbascum blattaria
+    status: Introduced
+  - name: Verbascum thapsus
+    status: Introduced
+  - name: Verbena bracteata
+    status: Native
+  - name: Verbena hastata
+    status: Native
+  - name: Verbena simplex
+    status: Native
+  - name: Verbena stricta
+    status: Native
+  - name: Verbena urticifolia
+    status: Native
+  - name: Verbena X deamii
+    status: Native
+  - name: Verbena X perriana
+    status: Native
+  - name: Vernonia baldwinii
+    status: Unknown
+  - name: Vernonia fasciculata
+    status: Native
+  - name: Veronica americana
+    status: Native
+  - name: Veronica arvensis
+    status: Introduced
+  - name: Veronica catenata
+    status: Native
+  - name: Veronica longifolia
+    status: Introduced
+  - name: Veronica officinalis
+    status: Introduced
+  - name: Veronica peregrina
+    status: Native
+  - name: Veronica persica
+    status: Introduced
+  - name: Veronica scutellata
+    status: Native
+  - name: Veronica serpyllifolia
+    status: Unknown
+  - name: Veronicastrum virginicum
+    status: Native
+  - name: Veronica verna
+    status: Introduced
+  - name: Viburnum edule
+    status: Native
+  - name: Viburnum lentago
+    status: Native
+  - name: Viburnum opulus
+    status: Unknown
+  - name: Viburnum opulus var. americanum
+    status: Native
+  - name: Viburnum opulus var. opulus
+    status: Introduced
+  - name: Viburnum rafinesquianum
+    status: Native
+  - name: Viburnum rafinesquianum var. affine
+    status: Native
+  - name: Viburnum rafinesquianum var. rafinesquianum
+    status: Native
+  - name: Vicia americana
+    status: Native
+  - name: Vicia americana var. americana
+    status: Native
+  - name: Vicia americana var. minor
+    status: Native
+  - name: Vicia cracca
+    status: Introduced
+  - name: Vicia sativa
+    status: Introduced
+  - name: Vicia sativa var. angustifolia
+    status: Introduced
+  - name: Vicia sativa var. sativa
+    status: Introduced
+  - name: Vicia villosa
+    status: Introduced
+  - name: Vinca minor
+    status: Introduced
+  - name: Viola adunca var. adunca
+    status: Native
+  - name: Viola affinis
+    status: Native
+  - name: Viola blanda
+    status: Native
+  - name: Viola canadensis var. rugulosa
+    status: Native
+  # - name: Viola communis
+  #   status: Native
+  - name: Viola cucullata
+    status: Native
+  - name: Viola epipsila ssp. repens
+    status: Native
+  - name: Viola labradorica
+    status: Native
+  - name: Viola lanceolata
+    status: Native
+  - name: Viola macloskeyi
+    status: Native
+  - name: Viola missouriensis
+    status: Native
+  - name: Viola nephrophylla
+    status: Native
+  - name: Viola novae-angliae
+    status: Native
+  - name: Viola nuttallii
+    status: Native
+  - name: Viola pedata var. pedata
+    status: Native
+  - name: Viola pedatifida
+    status: Native
+  - name: Viola pratincola
+    status: Native
+  - name: Viola primulifolia var. primulifolia
+    status: Native
+  - name: Viola pubescens
+    status: Native
+  - name: Viola pubescens var. pubescens
+    status: Native
+  - name: Viola pubescens var. scabriuscula
+    status: Native
+  - name: Viola renifolia
+    status: Native
+  - name: Viola sagittata var. sagittata
+    status: Native
+  - name: Viola selkirkii
+    status: Native
+  - name: Viola septentrionalis
+    status: Native
+  - name: Viola sororia
+    status: Native
+  # - name: Viola tricolor var. tricolor
+  - name: Viola tricolor
+    status: Introduced
+  - name: Vitis aestivalis
+    status: Native
+  - name: Vitis riparia
+    status: Native
+  - name: Vulpia octoflora
+    status: Native
+  - name: Vulpia octoflora var. glauca
+    status: Native
+  - name: Vulpia octoflora var. octoflora
+    status: Native
+  - name: Waldsteinia fragarioides
+    status: Native
+  - name: Wolffia borealis
+    status: Native
+  - name: Wolffia brasiliensis
+    status: Native
+  - name: Wolffia columbiana
+    status: Native
+  - name: Woodsia alpina
+    status: Native
+  - name: Woodsia glabella
+    status: Native
+  - name: Woodsia ilvensis
+    status: Native
+  - name: Woodsia obtusa ssp. obtusa
+    status: Native
+  - name: Woodsia oregana ssp. cathcartiana
+    status: Native
+  - name: Woodsia scopulina ssp. laurentiana
+    status: Native
+  - name: Woodsia X abbeae
+    status: Native
+  - name: Woodsia X gracilis
+    status: Native
+  - name: Woodsia X maxonii
+    status: Native
+  - name: Xanthisma spinulosum var. spinulosum
+    status: Native
+  - name: Xanthium strumarium
+    status: Native
+  - name: X Elyhordeum macounii
+    status: Native
+  - name: Xyris montana
+    status: Native
+  - name: Xyris torta
+    status: Native
+  - name: Zannichellia palustris
+    status: Native
+  - name: Zanthoxylum americanum
+    status: Native
+  - name: Zigadenus elegans
+    status: Native
+  - name: Zizania aquatica var. aquatica
+    status: Native
+  - name: Zizania palustris
+    status: Native
+  - name: Zizania palustris var. interior
+    status: Native
+  - name: Zizania palustris var. palustris
+    status: Native
+  # - name: Zizia aptera var. aptera
+  - name: Zizia aptera
+    status: Native
+  - name: Zizia aurea
+    status: Native
