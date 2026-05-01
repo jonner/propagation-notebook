@@ -118,6 +118,9 @@ pub struct Taxon {
     #[belongs_to(key=parent_id, references=id)]
     pub parent: BelongsTo<Option<Taxon>>,
 
+    #[unique]
+    pub sequence: u64,
+
     // #[index]
     pub rank: Rank,
 

@@ -103,7 +103,8 @@ async fn main() -> anyhow::Result<()> {
                 .name2(&theirs.unit_name2)
                 .name3(&theirs.unit_name3)
                 .complete_name(&theirs.complete_name)
-                .rank(&theirs.rank_id);
+                .rank(theirs.rank_id)
+                .sequence(theirs.phylo_sort_seq);
             creates.push(query);
         }
         let objs = toasty::batch(creates).exec(&mut ourdb).await?;

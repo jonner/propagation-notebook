@@ -24,3 +24,8 @@ snapshot_name = "0003_snapshot.toml"
 id = 8305146977783418290
 name = "0004_unembed_phenology.sql"
 snapshot_name = "0004_snapshot.toml"
+
+[[migrations]]
+id = 5477271090245595158
+name = "0005_add_taxon_sequence_col.sql"
+snapshot_name = "0005_snapshot.toml"
