@@ -45,7 +45,7 @@ pub struct Region {
     pub npcs: HasMany<NativePlantCommunity>,
 }
 
-#[derive(Debug, Clone, Copy, toasty::Embed)]
+#[derive(Debug, Clone, Copy, toasty::Embed, strum::Display)]
 pub enum NativeStatus {
     #[column(variant = 1)]
     Native,

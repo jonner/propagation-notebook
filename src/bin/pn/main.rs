@@ -1,6 +1,8 @@
+use std::collections::HashMap;
+
 use clap::Parser;
 use propagation_notebook::{
-    region::Region,
+    region::{Region, RegionalTaxonStatus},
     taxonomy::{Synonym, Taxon, VernacularName},
 };
 use toasty::Db;
@@ -149,6 +151,68 @@ async fn main() -> anyhow::Result<()> {
                         println!(" - {}: {} ({})", child.id, child.complete_name, child.rank);
                     }
                 }
+            }
+            cli::TaxonCommands::List { region_id } => {
+                match region_id {
+                    Some(region_id) => {
+                        let region = Region::get_by_id(&mut db, region_id).await?;
+                        let regional_statuses = RegionalTaxonStatus::filter(
+                            RegionalTaxonStatus::fields().region_id().eq(region_id),
+                        )
+                        // FIXME: We want to order by a taxon sequence, but
+                        // toasty doesn't yet support ordering by data in a relation
+                        .exec(&mut db)
+                        .await?;
+
+                        // FIXME: it's too slow to include all relations, so query the taxa separately
+                        let taxa = Taxon::filter(
+                            Taxon::fields().id().in_list(
+                                regional_statuses
+                                    .iter()
+                                    .map(|s| s.taxon_id)
+                                    .collect::<Vec<_>>(),
+                            ),
+                        )
+                        .order_by(Taxon::fields().sequence().asc())
+                        .exec(&mut db)
+                        .await?;
+
+                        // since we can't order the regional status list by taxon
+                        // sequence, we need to iterate through the sorted taxon list, and then look up the
+                        // regional status from a hash table
+                        let map = regional_statuses
+                            .into_iter()
+                            .map(|s| (s.taxon_id, s))
+                            .collect::<HashMap<_, _>>();
+
+                        println!("{}", region.name);
+                        println!("{}", "=".repeat(region.name.len()));
+                        println!("{} taxa", taxa.len());
+                        for taxon in taxa {
+                            let status = map.get(&taxon.id).unwrap();
+                            println!(
+                                " - {}: {} {}",
+                                taxon.id,
+                                taxon.complete_name,
+                                status
+                                    .native_status
+                                    .map(|s| format!(" ({s})"))
+                                    .unwrap_or_default()
+                            )
+                        }
+                    }
+                    None => {
+                        let taxa = Taxon::all()
+                            .order_by(Taxon::fields().sequence().asc())
+                            .exec(&mut db)
+                            .await?;
+
+                        println!("{} taxa", taxa.len());
+                        for taxon in taxa {
+                            println!(" - {}: {}", taxon.id, taxon.complete_name,)
+                        }
+                    }
+                };
             }
         },
         cli::MainCommand::Regions { command } => match command {

@@ -23,6 +23,10 @@ pub enum TaxonCommands {
     Search { search_string: String },
     #[command(about = "Show detailed information about a Taxon")]
     Info { id: u64 },
+    List {
+        #[arg(short, long, help = "Limit to taxa within the specified region")]
+        region_id: Option<u64>,
+    },
 }
 
 #[derive(Debug, clap::Subcommand)]
