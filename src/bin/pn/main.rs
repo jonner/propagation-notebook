@@ -116,7 +116,7 @@ async fn main() -> anyhow::Result<()> {
                     }
                 }
             }
-            cli::TaxonCommands::Info { id } => {
+            cli::TaxonCommands::Show { id } => {
                 let taxon = Taxon::filter_by_id(id)
                     .include(Taxon::fields().parent())
                     .include(Taxon::fields().children())

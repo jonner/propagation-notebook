@@ -25,7 +25,7 @@ pub enum TaxonCommands {
     #[command(about = "Search for a taxon")]
     Search { search_string: String },
     #[command(about = "Show detailed information about a Taxon")]
-    Info { id: u64 },
+    Show { id: u64 },
     #[command(about = "Print a list of taxa that match a given set of filters")]
     List {
         #[arg(short, long, help = "Limit to taxa within the specified region")]
