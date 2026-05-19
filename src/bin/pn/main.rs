@@ -238,8 +238,15 @@ async fn main() -> anyhow::Result<()> {
                     dbg!(&region);
                 }
             }
-            cli::RegionCommands::Add { region_name } => {
-                let new_region = Region::create().name(region_name).exec(&mut db).await?;
+            cli::RegionCommands::Add {
+                region_name,
+                bounds,
+            } => {
+                let new_region = Region::create()
+                    .name(region_name)
+                    .bounds(bounds)
+                    .exec(&mut db)
+                    .await?;
                 println!("Added new region {}: {}", new_region.id, new_region.name);
             }
             cli::RegionCommands::AddSpecies {

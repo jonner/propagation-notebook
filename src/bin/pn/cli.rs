@@ -38,7 +38,15 @@ pub enum RegionCommands {
     #[command(about = "Print a list of regions")]
     List,
     #[command(about = "Add a new region to the database")]
-    Add { region_name: String },
+    Add {
+        region_name: String,
+        #[arg(
+            short,
+            long,
+            help = "geojson string representing the bounds of the region"
+        )]
+        bounds: Option<String>,
+    },
     #[command(about = "Add a taxon to the region")]
     AddSpecies {
         #[arg(short, long, help = "ID of a region in the database")]
