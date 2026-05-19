@@ -238,10 +238,23 @@ async fn main() -> anyhow::Result<()> {
                     dbg!(&region);
                 }
             }
+            cli::RegionCommands::Modify { id, bounds, name } => {
+                let mut update_query = Region::update_by_id(id);
+                let bounds = bounds.resolve().await?;
+                if let Some(name) = name {
+                    update_query = update_query.name(name);
+                }
+                if let Some(bounds) = bounds {
+                    update_query = update_query.bounds(bounds);
+                }
+                update_query.exec(&mut db).await?;
+                println!("Region {id} updated");
+            }
             cli::RegionCommands::Add {
                 region_name,
                 bounds,
             } => {
+                let bounds = bounds.resolve().await?;
                 let new_region = Region::create()
                     .name(region_name)
                     .bounds(bounds)
