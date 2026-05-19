@@ -122,6 +122,7 @@ async fn main() -> anyhow::Result<()> {
                     .include(Taxon::fields().children())
                     .include(Taxon::fields().vernaculars())
                     .include(Taxon::fields().synonyms())
+                    .include(Taxon::fields().regional_statuses().region())
                     .one()
                     .exec(&mut db)
                     .await?;
@@ -149,6 +150,20 @@ async fn main() -> anyhow::Result<()> {
                     println!("Child taxa:");
                     for child in taxon.children.get() {
                         println!(" - {}: {} ({})", child.id, child.complete_name, child.rank);
+                    }
+                }
+                if !taxon.regional_statuses.get().is_empty() {
+                    println!("Regions:");
+                    for status in taxon.regional_statuses.get() {
+                        let region = status.region.get();
+                        println!(
+                            " - {}: {} ({})",
+                            region.id,
+                            region.name,
+                            status
+                                .native_status
+                                .unwrap_or(propagation_notebook::region::NativeStatus::Unknown)
+                        );
                     }
                 }
             }
