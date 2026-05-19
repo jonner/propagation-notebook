@@ -76,6 +76,8 @@ pub enum RegionCommands {
         #[clap(flatten)]
         bounds: BoundsArg,
     },
+    #[command(about = "Show detailed information about a region")]
+    Show { id: u64 },
     #[command(about = "Modify information about a region", group(clap::ArgGroup::new("modify_fields").args(["name", "bounds_string", "bounds_file"]).required(true).multiple(true)))]
     Modify {
         id: u64,

@@ -11,6 +11,15 @@ use crate::cli::Options;
 
 mod cli;
 
+fn truncate_with_summary(s: &str, max_chars: usize) -> String {
+    let extra_chars = s.chars().count().saturating_sub(max_chars);
+    if extra_chars == 0 {
+        return s.to_string();
+    }
+    s.chars().take(max_chars).collect::<String>()
+        + &format!("... [skipped {extra_chars} more characters]")
+}
+
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt::init();
@@ -233,10 +242,25 @@ async fn main() -> anyhow::Result<()> {
         cli::MainCommand::Regions { command } => match command {
             cli::RegionCommands::List => {
                 let regions = Region::all().exec(&mut db).await?;
-                println!("{} regions found", regions.len());
-                for region in regions {
-                    dbg!(&region);
+                if regions.is_empty() {
+                    println!("No Regions found");
+                } else {
+                    for region in regions {
+                        println!("{}: {}", region.id, region.name)
+                    }
                 }
+            }
+            cli::RegionCommands::Show { id } => {
+                let region = Region::get_by_id(&mut db, id).await?;
+                println!("ID: {}", region.id);
+                println!("Name: {}", region.name);
+                println!(
+                    "Bounds:\n{}",
+                    truncate_with_summary(&region.bounds.unwrap_or("None".to_string()), 200)
+                        .lines()
+                        .map(|l| "  ".to_string() + l + "\n")
+                        .collect::<String>()
+                );
             }
             cli::RegionCommands::Modify { id, bounds, name } => {
                 let mut update_query = Region::update_by_id(id);
