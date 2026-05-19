@@ -18,7 +18,7 @@ async fn main() -> anyhow::Result<()> {
         .connect("sqlite:./propagation-notebook.sqlite")
         .await?;
     match options.command {
-        cli::MainCommand::Taxon { command } => match command {
+        cli::MainCommand::Taxa { command } => match command {
             cli::TaxonCommands::Search { search_string } => {
                 tracing::debug!("Searching for exact complete name");
                 if let Ok(found) = Taxon::filter(Taxon::fields().complete_name().eq(&search_string))
@@ -151,7 +151,7 @@ async fn main() -> anyhow::Result<()> {
                 }
             }
         },
-        cli::MainCommand::Region { command } => match command {
+        cli::MainCommand::Regions { command } => match command {
             cli::RegionCommands::List => {
                 let regions = Region::all().exec(&mut db).await?;
                 println!("{} regions found", regions.len());

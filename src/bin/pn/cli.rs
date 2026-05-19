@@ -7,11 +7,11 @@ pub struct Options {
 #[derive(Debug, clap::Subcommand)]
 pub enum MainCommand {
     #[command(about = "Taxonomy-related commands")]
-    Taxon {
+    Taxa {
         #[command(subcommand)]
         command: TaxonCommands,
     },
-    Region {
+    Regions {
         #[command(subcommand)]
         command: RegionCommands,
     },
