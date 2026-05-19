@@ -242,6 +242,28 @@ async fn main() -> anyhow::Result<()> {
                 let new_region = Region::create().name(region_name).exec(&mut db).await?;
                 println!("Added new region {}: {}", new_region.id, new_region.name);
             }
+            cli::RegionCommands::AddSpecies {
+                region_id,
+                taxon_id,
+                native_status,
+                c_value,
+                conservation_status,
+                wetland_indicator,
+                harvest_start,
+                harvest_end,
+            } => {
+                RegionalTaxonStatus::create()
+                    .region_id(region_id)
+                    .taxon_id(taxon_id)
+                    .native_status(native_status)
+                    .c_value(c_value)
+                    .conservation_status(conservation_status)
+                    .wetland_indicator(wetland_indicator)
+                    .window_start(harvest_start)
+                    .window_end(harvest_end)
+                    .exec(&mut db)
+                    .await?;
+            }
         },
     }
     Ok(())

@@ -1,3 +1,5 @@
+use propagation_notebook::region::{ConservationStatus, NativeStatus, WetlandIndicator};
+
 #[derive(Debug, clap::Parser)]
 pub struct Options {
     #[command(subcommand)]
@@ -37,4 +39,45 @@ pub enum RegionCommands {
     List,
     #[command(about = "Add a new region to the database")]
     Add { region_name: String },
+    #[command(about = "Add a taxon to the region")]
+    AddSpecies {
+        #[arg(short, long, help = "ID of a region in the database")]
+        region_id: u64,
+        #[arg(short, long, help = "ID of a taxon in the database")]
+        taxon_id: u64,
+        #[arg(
+            short,
+            long,
+            help = "Native status of the given taxon within this region"
+        )]
+        native_status: Option<NativeStatus>,
+        #[arg(
+            long,
+            help = "Coefficient of conservatism (0-10) for the species in this region"
+        )]
+        c_value: Option<u64>,
+        #[arg(
+            short,
+            long,
+            help = "Conservation status for the species in the given region"
+        )]
+        conservation_status: Option<ConservationStatus>,
+        #[arg(
+            short,
+            long,
+            help = "Whether the species is a wetland indicator in the given region"
+        )]
+        wetland_indicator: Option<WetlandIndicator>,
+        // harvest phenology
+        #[arg(
+            long,
+            help = "Start of the harvest window for the species in the given region"
+        )]
+        harvest_start: Option<jiff::civil::Date>,
+        #[arg(
+            long,
+            help = "End of the harvest window for the species in the given region"
+        )]
+        harvest_end: Option<jiff::civil::Date>,
+    },
 }
