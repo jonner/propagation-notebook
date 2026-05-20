@@ -52,7 +52,7 @@ pub struct CleaningProcedure {
 }
 
 #[derive(Debug, Clone, Copy, toasty::Embed, strum::Display, clap::ValueEnum)]
-pub enum CleaningType {
+pub enum OperationType {
     #[column(variant = 1)]
     Rub, // remove fuzz?
     #[column(variant = 2)]
@@ -77,7 +77,7 @@ pub struct CleaningProcedureStep {
     pub procedure: BelongsTo<CleaningProcedure>,
 
     pub order: u64,
-    pub cleaning_type: CleaningType,
+    pub operation_type: OperationType,
     #[tabled(display("display::option", "-"))]
     pub equipment: Option<String>,
     pub notes: String, // Description of the step
@@ -87,7 +87,7 @@ impl CleaningProcedureStep {
     pub fn summary(&self) -> String {
         format!(
             "{} // {} // {}",
-            self.cleaning_type,
+            self.operation_type,
             self.notes,
             self.equipment.as_deref().unwrap_or("-"),
         )

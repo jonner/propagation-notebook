@@ -600,7 +600,7 @@ async fn main() -> anyhow::Result<()> {
                 let step = CleaningProcedureStep::create()
                     .procedure_id(procedure_id)
                     .order(order)
-                    .cleaning_type(step_type)
+                    .operation_type(step_type)
                     .equipment(equipment)
                     .notes(notes)
                     .exec(&mut db)
@@ -655,7 +655,7 @@ async fn main() -> anyhow::Result<()> {
                     query = query.order(order);
                 }
                 if let Some(step_type) = step_type {
-                    query = query.cleaning_type(step_type);
+                    query = query.operation_type(step_type);
                 }
                 if let Some(equipment) = equipment {
                     query = query.equipment(equipment);

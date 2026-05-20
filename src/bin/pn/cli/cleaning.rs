@@ -1,4 +1,4 @@
-use propagation_notebook::collecting::CleaningType;
+use propagation_notebook::collecting::OperationType;
 
 #[derive(Debug, clap::Subcommand)]
 pub enum CleaningCommands {
@@ -22,7 +22,7 @@ pub enum CleaningCommands {
         #[arg(short, long, help = "The order of this step within the procedure")]
         order: u64,
         #[arg(short = 't', long, help = "The type of this step")]
-        step_type: CleaningType,
+        step_type: OperationType,
         #[arg(short, long, help = "equipment used for this step")]
         equipment: Option<String>,
         #[arg(short, long, help = "A description of the step")]
@@ -33,8 +33,8 @@ pub enum CleaningCommands {
         id: u64,
         #[arg(short, long, help = "The order of this step within the procedure")]
         order: Option<u64>,
-        #[arg(short = 't', long, help = "The type of this step")]
-        step_type: Option<CleaningType>,
+        #[arg(short = 't', long = "type", help = "The type of this step")]
+        step_type: Option<OperationType>,
         #[arg(short, long, help = "equipment used for this step")]
         equipment: Option<String>,
         #[arg(short, long, help = "A description of the step")]
