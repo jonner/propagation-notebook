@@ -143,6 +143,12 @@ pub struct Taxon {
     pub protocols: HasMany<Protocol>,
 }
 
+impl Taxon {
+    pub fn reference(&self) -> String {
+        format!("{}: {}", self.id, self.complete_name)
+    }
+}
+
 #[derive(Debug, Clone, toasty::Model)]
 pub struct VernacularName {
     #[auto]

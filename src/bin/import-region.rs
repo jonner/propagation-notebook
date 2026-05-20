@@ -112,8 +112,9 @@ async fn main() -> anyhow::Result<()> {
         .await?;
 
     println!(
-        "Created region {}: '{}' with {} taxa",
-        region.id, region.name, n_taxa
+        "Created region '{}' with {} taxa",
+        region.reference(),
+        n_taxa
     );
 
     todo!()

@@ -49,7 +49,7 @@ async fn main() -> anyhow::Result<()> {
                     .exec(&mut db)
                     .await
                 {
-                    println!("found taxon {}: '{}'", found.id, found.complete_name);
+                    println!("found taxon {}", found.reference());
                 } else {
                     tracing::debug!("Searching for approximate complete name");
                     let wildcard = format!("%{search_string}%");
@@ -59,7 +59,7 @@ async fn main() -> anyhow::Result<()> {
                     if !taxa.is_empty() {
                         println!("Possible options for '{search_string}':");
                         for t in taxa {
-                            println!("- {}: {}", t.id, t.complete_name);
+                            println!("- {}", t.reference());
                         }
                     } else {
                         tracing::debug!("Searching for exact scientific synonym");
@@ -71,10 +71,9 @@ async fn main() -> anyhow::Result<()> {
                                 .await
                         {
                             println!(
-                                "Found '{}' which is a synonym for {}: '{}'",
+                                "Found '{}' which is a synonym for {}",
                                 found.complete_name,
-                                found.taxon.get().id,
-                                found.taxon.get().complete_name
+                                found.taxon.get().reference(),
                             );
                         } else {
                             tracing::debug!("Searching for approximate scientific synonyms");
@@ -87,10 +86,9 @@ async fn main() -> anyhow::Result<()> {
                                 println!("Possible options for '{search_string}':");
                                 for syn in synonyms {
                                     println!(
-                                        "'{}' is a synonym for {}: '{}'",
+                                        "'{}' is a synonym for {}",
                                         syn.complete_name,
-                                        syn.taxon.get().id,
-                                        syn.taxon.get().complete_name
+                                        syn.taxon.get().reference(),
                                     );
                                 }
                             } else {
@@ -105,9 +103,8 @@ async fn main() -> anyhow::Result<()> {
                                 .await
                                 {
                                     println!(
-                                        "Found {}: '{} ({})'",
-                                        vernacular.taxon.get().id,
-                                        vernacular.taxon.get().complete_name,
+                                        "Found {} ({})",
+                                        vernacular.taxon.get().reference(),
                                         vernacular.name
                                     );
                                 } else {
@@ -122,9 +119,8 @@ async fn main() -> anyhow::Result<()> {
                                         println!("Possible options for '{search_string}':");
                                         for vernacular in vernaculars {
                                             println!(
-                                                "{}: '{} ({})'",
-                                                vernacular.taxon.get().id,
-                                                vernacular.taxon.get().complete_name,
+                                                "{} ({})",
+                                                vernacular.taxon.get().reference(),
                                                 vernacular.name,
                                             );
                                         }
@@ -157,7 +153,7 @@ async fn main() -> anyhow::Result<()> {
                         .parent
                         .get()
                         .as_ref()
-                        .map(|p| format!("{}: {} ({})", p.id, p.complete_name, p.rank))
+                        .map(|p| format!("{} ({})", p.reference(), p.rank))
                         .unwrap_or_default(),
                 ]);
                 tbuilder.push_record([
@@ -186,7 +182,7 @@ async fn main() -> anyhow::Result<()> {
                         .children
                         .get()
                         .iter()
-                        .map(|t| format!("{}: {} ({})", t.id, t.complete_name, t.rank))
+                        .map(|t| format!("{} ({})", t.reference(), t.rank))
                         .collect::<Vec<_>>()
                         .join("\n"),
                 ]);
@@ -198,9 +194,8 @@ async fn main() -> anyhow::Result<()> {
                         .iter()
                         .map(|s| {
                             format!(
-                                "{}: {} ({})",
-                                s.region_id,
-                                s.region.get().name,
+                                "{} ({})",
+                                s.region.get().reference(),
                                 s.origin
                                     .unwrap_or(propagation_notebook::region::Origin::Unknown)
                             )
@@ -291,7 +286,7 @@ async fn main() -> anyhow::Result<()> {
                     .bounds(bounds)
                     .exec(&mut db)
                     .await?;
-                println!("Added new region {}: {}", new_region.id, new_region.name);
+                println!("Added new region {}", new_region.reference());
             }
         },
         MainCommand::RegionalTaxa { command } => match command {
@@ -352,13 +347,12 @@ async fn main() -> anyhow::Result<()> {
                 let ntaxa = taxa.len();
                 println!("Regional Taxa from region '{}'", region.name);
                 let mut tbuilder = tabled::builder::Builder::default();
-                tbuilder.push_record(["ID", "Taxon ID", "Name", "Origin"]);
+                tbuilder.push_record(["ID", "Taxon", "Origin"]);
                 for taxon in taxa {
                     let status = map.get(&taxon.id).unwrap();
                     tbuilder.push_record([
                         status.id.to_string(),
-                        taxon.id.to_string(),
-                        taxon.complete_name,
+                        taxon.reference(),
                         status.origin.map(|s| s.to_string()).unwrap_or_default(),
                     ]);
                 }
@@ -377,18 +371,8 @@ async fn main() -> anyhow::Result<()> {
                     .await?;
                 let mut tbuilder = tabled::builder::Builder::default();
                 tbuilder.push_record(["ID", &status.id.to_string()]);
-                tbuilder.push_record([
-                    "Taxon",
-                    &format!(
-                        "{}: {}",
-                        status.taxon.get().id,
-                        status.taxon.get().complete_name
-                    ),
-                ]);
-                tbuilder.push_record([
-                    "Region",
-                    &format!("{}: {}", status.region.get().id, status.region.get().name),
-                ]);
+                tbuilder.push_record(["Taxon", &status.taxon.get().reference()]);
+                tbuilder.push_record(["Region", &status.region.get().reference()]);
                 tbuilder.push_record([
                     "Origin",
                     &status
@@ -456,7 +440,7 @@ async fn main() -> anyhow::Result<()> {
                 for item in items {
                     tbuilder.push_record([
                         item.id.to_string(),
-                        item.taxon.get().complete_name.clone(),
+                        item.taxon.get().reference(),
                         item.ripening_indicators,
                         item.storage.unwrap_or_default(),
                     ])
@@ -479,7 +463,7 @@ async fn main() -> anyhow::Result<()> {
                 .await?;
                 let mut tbuilder = tabled::builder::Builder::default();
                 tbuilder.push_record(["ID", &data.id.to_string()]);
-                tbuilder.push_record(["Taxon", &data.taxon.get().complete_name]);
+                tbuilder.push_record(["Taxon", &data.taxon.get().reference()]);
                 tbuilder.push_record(["Ripening Indicators", &data.ripening_indicators]);
                 tbuilder.push_record(["Storage instructions", &data.storage.unwrap_or_default()]);
                 println!(

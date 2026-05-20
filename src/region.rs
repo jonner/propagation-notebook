@@ -45,6 +45,12 @@ pub struct Region {
     pub npcs: HasMany<NativePlantCommunity>,
 }
 
+impl Region {
+    pub fn reference(&self) -> String {
+        format!("{}: {}", self.id, self.name)
+    }
+}
+
 #[derive(Debug, Clone, Copy, toasty::Embed, strum::Display, clap::ValueEnum)]
 pub enum Origin {
     #[column(variant = 1)]
