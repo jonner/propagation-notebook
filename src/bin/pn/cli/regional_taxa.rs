@@ -1,5 +1,12 @@
 use propagation_notebook::region::{ConservationStatus, Origin, WetlandIndicator};
 
+#[derive(clap::Parser, Debug)]
+pub struct RegionalTaxonId {
+    #[arg(short, long, help = "ID of a region")]
+    pub region_id: u64,
+    #[arg(short, long, help = "ID of a taxon")]
+    pub taxon_id: u64,
+}
 #[derive(Debug, clap::Subcommand)]
 pub enum RegionalTaxaCommands {
     #[command(about = "Print a list of taxa for a region")]
@@ -8,13 +15,14 @@ pub enum RegionalTaxaCommands {
         region_id: u64,
     },
     #[command(about = "Show detailed information about the status of a taxon within a region")]
-    Show { id: u64 },
+    Show {
+        #[command(flatten)]
+        id: RegionalTaxonId,
+    },
     #[command(about = "Add a taxon to a region")]
     Add {
-        #[arg(short, long, help = "ID of a region")]
-        region_id: u64,
-        #[arg(short, long, help = "ID of a taxon")]
-        taxon_id: u64,
+        #[command(flatten)]
+        id: RegionalTaxonId,
         #[arg(short, long, help = "Origin of the taxon vis-a-vis this region")]
         origin: Option<Origin>,
         #[arg(
@@ -47,5 +55,8 @@ pub enum RegionalTaxaCommands {
         harvest_end: Option<jiff::civil::Date>,
     },
     #[command(about = "Remove a taxon from a region")]
-    Remove { id: u64 },
+    Remove {
+        #[command(flatten)]
+        id: RegionalTaxonId,
+    },
 }

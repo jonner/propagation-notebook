@@ -62,6 +62,7 @@ pub enum Origin {
 }
 
 #[derive(Debug, Clone, toasty::Model)]
+#[index(taxon_id, region_id)]
 pub struct RegionalTaxonStatus {
     #[auto]
     #[key]

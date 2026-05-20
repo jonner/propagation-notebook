@@ -340,8 +340,7 @@ async fn main() -> anyhow::Result<()> {
         },
         MainCommand::RegionalTaxa { command } => match command {
             RegionalTaxaCommands::Add {
-                region_id,
-                taxon_id,
+                id,
                 origin,
                 c_value,
                 conservation_status,
@@ -350,8 +349,8 @@ async fn main() -> anyhow::Result<()> {
                 harvest_end,
             } => {
                 let s = RegionalTaxonStatus::create()
-                    .region_id(region_id)
-                    .taxon_id(taxon_id)
+                    .region_id(id.region_id)
+                    .taxon_id(id.taxon_id)
                     .origin(origin)
                     .c_value(c_value)
                     .conservation_status(conservation_status)
@@ -396,11 +395,10 @@ async fn main() -> anyhow::Result<()> {
                 let ntaxa = taxa.len();
                 println!("Regional Taxa from region '{}'", region.name);
                 let mut tbuilder = tabled::builder::Builder::default();
-                tbuilder.push_record(["ID", "Taxon", "Origin"]);
+                tbuilder.push_record(["Taxon", "Origin"]);
                 for taxon in taxa {
                     let status = map.get(&taxon.id).unwrap();
                     tbuilder.push_record([
-                        status.id.to_string(),
                         taxon.reference(),
                         status
                             .origin
@@ -415,14 +413,16 @@ async fn main() -> anyhow::Result<()> {
                 println!("{} taxa found", ntaxa);
             }
             RegionalTaxaCommands::Show { id } => {
-                let status = RegionalTaxonStatus::filter_by_id(id)
-                    .include(RegionalTaxonStatus::fields().region())
-                    .include(RegionalTaxonStatus::fields().taxon())
-                    .one()
-                    .exec(&mut db)
-                    .await?;
+                let status = RegionalTaxonStatus::filter_by_taxon_id_and_region_id(
+                    id.taxon_id,
+                    id.region_id,
+                )
+                .include(RegionalTaxonStatus::fields().region())
+                .include(RegionalTaxonStatus::fields().taxon())
+                .one()
+                .exec(&mut db)
+                .await?;
                 let mut tbuilder = tabled::builder::Builder::default();
-                tbuilder.push_record(["ID", &status.id.to_string()]);
                 tbuilder.push_record(["Taxon", &status.taxon.get().reference()]);
                 tbuilder.push_record(["Region", &status.region.get().reference()]);
                 tbuilder.push_record([
@@ -477,8 +477,13 @@ async fn main() -> anyhow::Result<()> {
                 )
             }
             RegionalTaxaCommands::Remove { id } => {
-                RegionalTaxonStatus::delete_by_id(&mut db, id).await?;
-                println!("Deleted regional taxon {id}");
+                RegionalTaxonStatus::delete_by_taxon_id_and_region_id(
+                    &mut db,
+                    id.taxon_id,
+                    id.region_id,
+                )
+                .await?;
+                println!("Removed taxon {} from region {}", id.taxon_id, id.region_id);
             }
         },
         MainCommand::Collecting { command } => match command {
