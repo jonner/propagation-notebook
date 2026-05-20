@@ -635,14 +635,36 @@ async fn main() -> anyhow::Result<()> {
                 }
             }
             CleaningCommands::Steps { procedure_id } => {
-                let procedure = CleaningProcedure::filter_by_id(procedure_id)
-                    .include(CleaningProcedure::fields().steps())
-                    .one()
+                let steps = CleaningProcedureStep::filter_by_procedure_id(procedure_id)
+                    .order_by(CleaningProcedureStep::fields().order().asc())
                     .exec(&mut db)
                     .await?;
-                let mut table = tabled::Table::new(procedure.steps.get().iter());
+                let mut table = tabled::Table::new(steps.iter());
 
                 println!("{}", table.with(tabled::settings::Style::blank()));
+            }
+            CleaningCommands::ModifyStep {
+                id,
+                order,
+                step_type,
+                equipment,
+                notes,
+            } => {
+                let mut query = CleaningProcedureStep::update_by_id(id);
+                if let Some(order) = order {
+                    query = query.order(order);
+                }
+                if let Some(step_type) = step_type {
+                    query = query.cleaning_type(step_type);
+                }
+                if let Some(equipment) = equipment {
+                    query = query.equipment(equipment);
+                }
+                if let Some(notes) = notes {
+                    query = query.notes(notes);
+                }
+                query.exec(&mut db).await?;
+                println!("Updated step {}", id);
             }
         },
     };

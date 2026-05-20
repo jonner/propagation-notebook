@@ -28,6 +28,18 @@ pub enum CleaningCommands {
         #[arg(short, long, help = "A description of the step")]
         notes: String,
     },
+    #[command(about = "Edit the details of an existing cleaning step", group(clap::ArgGroup::new("step_fields").args(["order", "step_type", "equipment", "notes"]).required(true).multiple(false)))]
+    ModifyStep {
+        id: u64,
+        #[arg(short, long, help = "The order of this step within the procedure")]
+        order: Option<u64>,
+        #[arg(short = 't', long, help = "The type of this step")]
+        step_type: Option<CleaningType>,
+        #[arg(short, long, help = "equipment used for this step")]
+        equipment: Option<String>,
+        #[arg(short, long, help = "A description of the step")]
+        notes: Option<String>,
+    },
     #[command(about = "Associate a taxon with the seed cleaning procedure")]
     Assign {
         procedure_id: u64,
