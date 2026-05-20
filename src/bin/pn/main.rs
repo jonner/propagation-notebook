@@ -300,7 +300,7 @@ async fn main() -> anyhow::Result<()> {
                 harvest_start,
                 harvest_end,
             } => {
-                RegionalTaxonStatus::create()
+                let s = RegionalTaxonStatus::create()
                     .region_id(region_id)
                     .taxon_id(taxon_id)
                     .native_status(native_status)
@@ -311,6 +311,7 @@ async fn main() -> anyhow::Result<()> {
                     .window_end(harvest_end.map(|d| d.with().year(2000).build().unwrap()))
                     .exec(&mut db)
                     .await?;
+                println!("Added regional taxon {}", s.id);
             }
             cli::RegionalTaxaCommands::List { region_id } => {
                 let region = Region::get_by_id(&mut db, region_id).await?;
