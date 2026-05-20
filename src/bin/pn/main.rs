@@ -1,7 +1,9 @@
 use std::collections::HashMap;
 
+use anyhow::anyhow;
 use clap::Parser;
 use propagation_notebook::{
+    collection::CollectionData,
     region::{Region, RegionalTaxonStatus},
     taxonomy::{Synonym, Taxon, VernacularName},
 };
@@ -11,7 +13,7 @@ use tracing::level_filters::LevelFilter;
 use tracing_subscriber::{EnvFilter, layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::cli::{
-    MainCommand, Options, region::RegionCommands,
+    MainCommand, Options, collecting::CollectingCommands, region::RegionCommands,
     regional_taxa::RegionalTaxaCommands, taxa::TaxonCommands,
 };
 
@@ -442,6 +444,66 @@ async fn main() -> anyhow::Result<()> {
                 println!("Deleted regional taxon {id}");
             }
         },
-    }
+        MainCommand::Collecting { command } => match command {
+            CollectingCommands::List => {
+                let items = CollectionData::all()
+                    .include(CollectionData::fields().taxon())
+                    .exec(&mut db)
+                    .await?;
+                let nitems = items.len();
+                let mut tbuilder = tabled::builder::Builder::default();
+                tbuilder.push_record(["ID", "Taxon", "Ripening Indicators", "Storage"]);
+                for item in items {
+                    tbuilder.push_record([
+                        item.id.to_string(),
+                        item.taxon.get().complete_name.clone(),
+                        item.ripening_indicators,
+                        item.storage.unwrap_or_default(),
+                    ])
+                }
+                println!(
+                    "{}",
+                    tbuilder.build().with(tabled::settings::Style::blank())
+                );
+                println!("\n{nitems} found");
+            }
+            CollectingCommands::Show { id, taxon_id } => {
+                let data = match (id, taxon_id) {
+                    (Some(id), None) => CollectionData::filter_by_id(id),
+                    (None, Some(taxon_id)) => CollectionData::filter_by_taxon_id(taxon_id),
+                    _ => return Err(anyhow!("must specify either an id or a taxon id")),
+                }
+                .include(CollectionData::fields().taxon())
+                .one()
+                .exec(&mut db)
+                .await?;
+                let mut tbuilder = tabled::builder::Builder::default();
+                tbuilder.push_record(["ID", &data.id.to_string()]);
+                tbuilder.push_record(["Taxon", &data.taxon.get().complete_name]);
+                tbuilder.push_record(["Ripening Indicators", &data.ripening_indicators]);
+                tbuilder.push_record(["Storage instructions", &data.storage.unwrap_or_default()]);
+                println!(
+                    "{}",
+                    tbuilder
+                        .build()
+                        .with(tabled::settings::Style::blank())
+                        .with(Modify::new(Columns::first()).with(Alignment::right()))
+                )
+            }
+            CollectingCommands::Add {
+                taxon_id,
+                ripening_indicators,
+                storage,
+            } => {
+                let data = CollectionData::create()
+                    .taxon_id(taxon_id)
+                    .ripening_indicators(ripening_indicators)
+                    .storage(storage)
+                    .exec(&mut db)
+                    .await?;
+                println!("Added collection information {}", data.id);
+            }
+        },
+    };
     Ok(())
 }
