@@ -5,6 +5,7 @@ use propagation_notebook::{
     region::{Region, RegionalTaxonStatus},
     taxonomy::{Synonym, Taxon, VernacularName},
 };
+use tabled::settings::{Alignment, Modify, object::Columns};
 use toasty::Db;
 
 use crate::cli::Options;
@@ -16,8 +17,7 @@ fn truncate_with_summary(s: &str, max_chars: usize) -> String {
     if extra_chars == 0 {
         return s.to_string();
     }
-    s.chars().take(max_chars).collect::<String>()
-        + &format!("... [skipped {extra_chars} more characters]")
+    s.chars().take(max_chars).collect::<String>() + &format!("... [{extra_chars} more characters]")
 }
 
 #[tokio::main]
@@ -135,46 +135,74 @@ async fn main() -> anyhow::Result<()> {
                     .one()
                     .exec(&mut db)
                     .await?;
-                // dbg!(&taxon);
-                println!("{}", taxon.complete_name);
-                println!("{}", "=".repeat(taxon.complete_name.len()));
-                println!("ID: {}", taxon.id);
-                println!("Rank: {}", taxon.rank);
-                if let Some(parent) = taxon.parent.get() {
-                    println!("Parent: {} ({})", parent.complete_name, parent.rank)
-                }
-                if !taxon.synonyms.get().is_empty() {
-                    println!("Synonym(s):");
-                    for syn in taxon.synonyms.get() {
-                        println!(" - {}", syn.complete_name);
-                    }
-                }
-                if !taxon.vernaculars.get().is_empty() {
-                    println!("Common Name(s):");
-                    for vernacular in taxon.vernaculars.get() {
-                        println!(" - {}", vernacular.name);
-                    }
-                }
-                if !taxon.children.get().is_empty() {
-                    println!("Child taxa:");
-                    for child in taxon.children.get() {
-                        println!(" - {}: {} ({})", child.id, child.complete_name, child.rank);
-                    }
-                }
-                if !taxon.regional_statuses.get().is_empty() {
-                    println!("Regions:");
-                    for status in taxon.regional_statuses.get() {
-                        let region = status.region.get();
-                        println!(
-                            " - {}: {} ({})",
-                            region.id,
-                            region.name,
-                            status
-                                .native_status
-                                .unwrap_or(propagation_notebook::region::NativeStatus::Unknown)
-                        );
-                    }
-                }
+                let mut tbuilder = tabled::builder::Builder::default();
+                tbuilder.push_record(["ID", &taxon.id.to_string()]);
+                tbuilder.push_record(["Name", &taxon.complete_name]);
+                tbuilder.push_record(["Rank", &taxon.rank.to_string()]);
+                tbuilder.push_record([
+                    "Parent",
+                    &taxon
+                        .parent
+                        .get()
+                        .as_ref()
+                        .map(|p| format!("{}: {} ({})", p.id, p.complete_name, p.rank))
+                        .unwrap_or_default(),
+                ]);
+                tbuilder.push_record([
+                    "Synonyms",
+                    &taxon
+                        .synonyms
+                        .get()
+                        .iter()
+                        .map(|s| s.complete_name.clone())
+                        .collect::<Vec<_>>()
+                        .join("\n"),
+                ]);
+                tbuilder.push_record([
+                    "Common Name(s)",
+                    &taxon
+                        .vernaculars
+                        .get()
+                        .iter()
+                        .map(|v| v.name.clone())
+                        .collect::<Vec<_>>()
+                        .join("\n"),
+                ]);
+                tbuilder.push_record([
+                    "Child taxa",
+                    &taxon
+                        .children
+                        .get()
+                        .iter()
+                        .map(|t| format!("{}: {} ({})", t.id, t.complete_name, t.rank))
+                        .collect::<Vec<_>>()
+                        .join("\n"),
+                ]);
+                tbuilder.push_record([
+                    "Regions",
+                    &taxon
+                        .regional_statuses
+                        .get()
+                        .iter()
+                        .map(|s| {
+                            format!(
+                                "{}: {} ({})",
+                                s.region_id,
+                                s.region.get().name,
+                                s.native_status
+                                    .unwrap_or(propagation_notebook::region::NativeStatus::Unknown)
+                            )
+                        })
+                        .collect::<Vec<_>>()
+                        .join("\n"),
+                ]);
+                println!(
+                    "{}",
+                    tbuilder
+                        .build()
+                        .with(tabled::settings::Style::blank())
+                        .with(Modify::new(Columns::first()).with(Alignment::right()))
+                );
             }
             cli::TaxonCommands::List { region_id } => {
                 match region_id {
@@ -209,32 +237,44 @@ async fn main() -> anyhow::Result<()> {
                             .map(|s| (s.taxon_id, s))
                             .collect::<HashMap<_, _>>();
 
-                        println!("{}", region.name);
-                        println!("{}", "=".repeat(region.name.len()));
-                        println!("{} taxa", taxa.len());
+                        let ntaxa = taxa.len();
+                        println!("Regional Taxa: {}", region.name);
+                        let mut tbuilder = tabled::builder::Builder::default();
+                        tbuilder.push_record(["ID", "Name", "Status"]);
                         for taxon in taxa {
                             let status = map.get(&taxon.id).unwrap();
-                            println!(
-                                " - {}: {} {}",
-                                taxon.id,
+                            tbuilder.push_record([
+                                taxon.id.to_string(),
                                 taxon.complete_name,
                                 status
                                     .native_status
-                                    .map(|s| format!(" ({s})"))
-                                    .unwrap_or_default()
-                            )
+                                    .map(|s| s.to_string())
+                                    .unwrap_or_default(),
+                            ]);
                         }
+                        println!(
+                            "{}",
+                            tbuilder.build().with(tabled::settings::Style::blank())
+                        );
+                        println!("{} taxa found", ntaxa);
                     }
                     None => {
                         let taxa = Taxon::all()
                             .order_by(Taxon::fields().sequence().asc())
                             .exec(&mut db)
                             .await?;
+                        let ntaxa = taxa.len();
 
-                        println!("{} taxa", taxa.len());
+                        let mut tbuilder = tabled::builder::Builder::default();
+                        tbuilder.push_record(["ID", "Name"]);
                         for taxon in taxa {
-                            println!(" - {}: {}", taxon.id, taxon.complete_name,)
+                            tbuilder.push_record([taxon.id.to_string(), taxon.complete_name]);
                         }
+                        println!(
+                            "{}",
+                            tbuilder.build().with(tabled::settings::Style::blank())
+                        );
+                        println!("{} taxa found", ntaxa);
                     }
                 };
             }
@@ -245,22 +285,33 @@ async fn main() -> anyhow::Result<()> {
                 if regions.is_empty() {
                     println!("No Regions found");
                 } else {
+                    let mut tbuilder = tabled::builder::Builder::default();
+                    tbuilder.push_record(["ID", "Name"]);
                     for region in regions {
-                        println!("{}: {}", region.id, region.name)
+                        tbuilder.push_record([region.id.to_string(), region.name])
                     }
+                    println!(
+                        "{}",
+                        tbuilder.build().with(tabled::settings::Style::blank())
+                    );
                 }
             }
             cli::RegionCommands::Show { id } => {
                 let region = Region::get_by_id(&mut db, id).await?;
-                println!("ID: {}", region.id);
-                println!("Name: {}", region.name);
+                let mut tbuilder = tabled::builder::Builder::default();
+                tbuilder.push_record(["ID", &region.id.to_string()]);
+                tbuilder.push_record(["Name", &region.name]);
+                tbuilder.push_record([
+                    "Bounds",
+                    &truncate_with_summary(&region.bounds.unwrap_or("None".to_string()), 500),
+                ]);
                 println!(
-                    "Bounds:\n{}",
-                    truncate_with_summary(&region.bounds.unwrap_or("None".to_string()), 200)
-                        .lines()
-                        .map(|l| "  ".to_string() + l + "\n")
-                        .collect::<String>()
-                );
+                    "{}",
+                    tbuilder
+                        .build()
+                        .with(tabled::settings::Style::empty())
+                        .with(Modify::new(Columns::first()).with(Alignment::right()))
+                )
             }
             cli::RegionCommands::Modify { id, bounds, name } => {
                 let mut update_query = Region::update_by_id(id);
