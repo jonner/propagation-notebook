@@ -15,8 +15,8 @@ use tracing::level_filters::LevelFilter;
 use tracing_subscriber::{EnvFilter, layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::cli::{
-    MainCommand, Options, collecting::CollectingCommands, region::RegionCommands,
-    regional_taxa::RegionalTaxaCommands, taxa::TaxonCommands,
+    MainCommand, Options, cleaning::CleaningCommands, collecting::CollectingCommands,
+    region::RegionCommands, regional_taxa::RegionalTaxaCommands, taxa::TaxonCommands,
 };
 
 mod cli;
@@ -530,7 +530,7 @@ async fn main() -> anyhow::Result<()> {
             }
         },
         MainCommand::Cleaning { command } => match command {
-            cli::cleaning::CleaningCommands::List => {
+            CleaningCommands::List => {
                 let items = CleaningProcedure::all()
                     .include(CleaningProcedure::fields().steps())
                     .include(CleaningProcedure::fields().taxon_links().taxon())
@@ -553,7 +553,7 @@ async fn main() -> anyhow::Result<()> {
                 );
                 println!("\n{nitems} found");
             }
-            cli::cleaning::CleaningCommands::Show { id } => {
+            CleaningCommands::Show { id } => {
                 let procedure = CleaningProcedure::filter_by_id(id)
                     .include(CleaningProcedure::fields().steps())
                     .include(CleaningProcedure::fields().taxon_links().taxon())
@@ -582,7 +582,7 @@ async fn main() -> anyhow::Result<()> {
                     tbuilder.build().with(tabled::settings::Style::blank())
                 );
             }
-            cli::cleaning::CleaningCommands::Add { name, notes } => {
+            CleaningCommands::Add { name, notes } => {
                 let item = CleaningProcedure::create()
                     .name(name)
                     .notes(notes)
@@ -590,7 +590,7 @@ async fn main() -> anyhow::Result<()> {
                     .await?;
                 println!("Added new procedure {}", item.id);
             }
-            cli::cleaning::CleaningCommands::AddStep {
+            CleaningCommands::AddStep {
                 procedure_id,
                 order,
                 step_type,
@@ -607,7 +607,7 @@ async fn main() -> anyhow::Result<()> {
                     .await?;
                 println!("Added new step {}", step.id);
             }
-            cli::cleaning::CleaningCommands::Assign {
+            CleaningCommands::Assign {
                 procedure_id,
                 taxon_id,
                 notes,
