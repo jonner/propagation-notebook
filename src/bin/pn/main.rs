@@ -327,6 +327,16 @@ async fn main() -> anyhow::Result<()> {
                     .await?;
                 println!("Added new region {}", new_region.reference());
             }
+            RegionCommands::Remove { id } => {
+                if inquire::Confirm::new("Are you sure you wish to delete this region?")
+                    .with_default(false)
+                    .with_help_message("All associated data will be deleted")
+                    .prompt()?
+                {
+                    Region::delete_by_id(&mut db, id).await?;
+                    println!("Deleted region {id} from the database");
+                }
+            }
         },
         MainCommand::RegionalTaxa { command } => match command {
             RegionalTaxaCommands::Add {

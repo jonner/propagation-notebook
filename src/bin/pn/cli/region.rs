@@ -51,4 +51,6 @@ pub enum RegionCommands {
         #[arg(short, long, help = "Specify a new name for the region")]
         name: Option<String>,
     },
+    #[command(about = "Remove a region from the database")]
+    Remove { id: u64 },
 }
