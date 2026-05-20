@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use propagation_notebook::region::{ConservationStatus, NativeStatus, WetlandIndicator};
+use propagation_notebook::region::{ConservationStatus, Origin, WetlandIndicator};
 
 #[derive(Debug, clap::Parser)]
 pub struct Options {
@@ -94,16 +94,12 @@ pub enum RegionCommands {
 pub enum RegionalTaxaCommands {
     #[command(about = "Add a taxon to the region")]
     Add {
-        #[arg(short, long, help = "ID of a region in the database")]
+        #[arg(short, long, help = "ID of a region")]
         region_id: u64,
-        #[arg(short, long, help = "ID of a taxon in the database")]
+        #[arg(short, long, help = "ID of a taxon")]
         taxon_id: u64,
-        #[arg(
-            short,
-            long,
-            help = "Native status of the given taxon within this region"
-        )]
-        native_status: Option<NativeStatus>,
+        #[arg(short, long, help = "Origin of the taxon vis-a-vis this region")]
+        origin: Option<Origin>,
         #[arg(
             long,
             help = "Coefficient of conservatism (0-10) for the species in this region"

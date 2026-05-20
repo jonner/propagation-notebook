@@ -9,18 +9,18 @@ use propagation_notebook::{
 use tokio::io::AsyncReadExt;
 
 #[derive(Debug, Clone, Copy, PartialEq, serde::Serialize, serde::Deserialize)]
-enum NativeStatus {
+enum Origin {
     Native,
     Introduced,
     Unknown,
 }
 
-impl From<NativeStatus> for propagation_notebook::region::NativeStatus {
-    fn from(value: NativeStatus) -> Self {
+impl From<Origin> for propagation_notebook::region::Origin {
+    fn from(value: Origin) -> Self {
         match value {
-            NativeStatus::Native => propagation_notebook::region::NativeStatus::Native,
-            NativeStatus::Introduced => propagation_notebook::region::NativeStatus::Introduced,
-            NativeStatus::Unknown => propagation_notebook::region::NativeStatus::Unknown,
+            Origin::Native => propagation_notebook::region::Origin::Native,
+            Origin::Introduced => propagation_notebook::region::Origin::Introduced,
+            Origin::Unknown => propagation_notebook::region::Origin::Unknown,
         }
     }
 }
@@ -29,7 +29,7 @@ impl From<NativeStatus> for propagation_notebook::region::NativeStatus {
 struct TaxonInfo {
     name: String,
     c_value: Option<u64>,
-    status: NativeStatus,
+    origin: Origin,
     // conservation_status: Option<ConservationStatus>,
     // wetland_indicator: Option<WetlandIndicator>,
 }
@@ -79,11 +79,11 @@ async fn main() -> anyhow::Result<()> {
             .entry(t.id)
             .and_modify(|existing| {
                 // if any of the lumped taxa is native, consider the whole thing native
-                if taxon_info.status == NativeStatus::Native {
-                    existing.status = taxon_info.status;
-                } else if existing.status == NativeStatus::Unknown {
+                if taxon_info.origin == Origin::Native {
+                    existing.origin = taxon_info.origin;
+                } else if existing.origin == Origin::Unknown {
                     // any new status overrides unknown
-                    existing.status = taxon_info.status;
+                    existing.origin = taxon_info.origin;
                 }
             })
             .or_insert(taxon_info);
@@ -95,9 +95,11 @@ async fn main() -> anyhow::Result<()> {
         taxa_create.push(
             RegionalTaxonStatus::create()
                 .taxon_id(id)
-                .native_status(std::convert::Into::<
-                    propagation_notebook::region::NativeStatus,
-                >::into(taxon_info.status))
+                .origin(
+                    std::convert::Into::<propagation_notebook::region::Origin>::into(
+                        taxon_info.origin,
+                    ),
+                )
                 .c_value(taxon_info.c_value),
         );
     }

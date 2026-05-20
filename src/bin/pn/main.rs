@@ -196,8 +196,8 @@ async fn main() -> anyhow::Result<()> {
                                 "{}: {} ({})",
                                 s.region_id,
                                 s.region.get().name,
-                                s.native_status
-                                    .unwrap_or(propagation_notebook::region::NativeStatus::Unknown)
+                                s.origin
+                                    .unwrap_or(propagation_notebook::region::Origin::Unknown)
                             )
                         })
                         .collect::<Vec<_>>()
@@ -293,7 +293,7 @@ async fn main() -> anyhow::Result<()> {
             cli::RegionalTaxaCommands::Add {
                 region_id,
                 taxon_id,
-                native_status,
+                origin,
                 c_value,
                 conservation_status,
                 wetland_indicator,
@@ -303,7 +303,7 @@ async fn main() -> anyhow::Result<()> {
                 let s = RegionalTaxonStatus::create()
                     .region_id(region_id)
                     .taxon_id(taxon_id)
-                    .native_status(native_status)
+                    .origin(origin)
                     .c_value(c_value)
                     .conservation_status(conservation_status)
                     .wetland_indicator(wetland_indicator)
@@ -354,10 +354,7 @@ async fn main() -> anyhow::Result<()> {
                         status.id.to_string(),
                         taxon.id.to_string(),
                         taxon.complete_name,
-                        status
-                            .native_status
-                            .map(|s| s.to_string())
-                            .unwrap_or_default(),
+                        status.origin.map(|s| s.to_string()).unwrap_or_default(),
                     ]);
                 }
                 println!(
@@ -390,8 +387,8 @@ async fn main() -> anyhow::Result<()> {
                 tbuilder.push_record([
                     "Origin",
                     &status
-                        .native_status
-                        .unwrap_or(propagation_notebook::region::NativeStatus::Unknown)
+                        .origin
+                        .unwrap_or(propagation_notebook::region::Origin::Unknown)
                         .to_string(),
                 ]);
                 tbuilder.push_record([

@@ -46,7 +46,7 @@ pub struct Region {
 }
 
 #[derive(Debug, Clone, Copy, toasty::Embed, strum::Display, clap::ValueEnum)]
-pub enum NativeStatus {
+pub enum Origin {
     #[column(variant = 1)]
     Native,
     #[column(variant = 2)]
@@ -71,7 +71,7 @@ pub struct RegionalTaxonStatus {
     #[belongs_to(key=region_id, references=id)]
     pub region: BelongsTo<Region>,
 
-    pub native_status: Option<NativeStatus>,
+    pub origin: Option<Origin>,
     // generally 0-10?
     pub c_value: Option<u64>,
     pub conservation_status: Option<ConservationStatus>,
