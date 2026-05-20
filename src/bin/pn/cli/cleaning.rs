@@ -13,6 +13,8 @@ pub enum CleaningCommands {
         #[arg(long, help = "General notes about the procedure")]
         notes: Option<String>,
     },
+    #[command(about = "Show all steps for the specified seed cleaning procedure")]
+    Steps { procedure_id: u64 },
     #[command(about = "Add a new step to the seed cleaning procedure")]
     AddStep {
         #[arg(short, long, help = "A procedure ID")]

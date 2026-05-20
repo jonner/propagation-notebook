@@ -1,3 +1,4 @@
+use tabled::{Tabled, derive::display};
 use toasty::{BelongsTo, HasMany};
 
 use crate::taxonomy::Taxon;
@@ -62,7 +63,8 @@ pub enum CleaningType {
     Other,
 }
 
-#[derive(Debug, Clone, toasty::Model)]
+#[derive(Debug, Clone, toasty::Model, Tabled)]
+#[tabled(rename_all = "CamelCase")]
 pub struct CleaningProcedureStep {
     #[auto]
     #[key]
@@ -71,10 +73,12 @@ pub struct CleaningProcedureStep {
     #[index]
     pub procedure_id: u64,
     #[belongs_to(key=procedure_id, references=id)]
+    #[tabled(skip)]
     pub procedure: BelongsTo<CleaningProcedure>,
 
     pub order: u64,
     pub cleaning_type: CleaningType,
+    #[tabled(display("display::option", "-"))]
     pub equipment: Option<String>,
     pub notes: String, // Description of the step
 }

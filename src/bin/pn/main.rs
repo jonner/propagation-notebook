@@ -634,6 +634,16 @@ async fn main() -> anyhow::Result<()> {
                     );
                 }
             }
+            CleaningCommands::Steps { procedure_id } => {
+                let procedure = CleaningProcedure::filter_by_id(procedure_id)
+                    .include(CleaningProcedure::fields().steps())
+                    .one()
+                    .exec(&mut db)
+                    .await?;
+                let mut table = tabled::Table::new(procedure.steps.get().iter());
+
+                println!("{}", table.with(tabled::settings::Style::blank()));
+            }
         },
     };
     Ok(())
