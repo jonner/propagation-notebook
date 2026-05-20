@@ -27,6 +27,40 @@ pub struct BoundsArg {
     pub bounds_string: Option<String>,
 }
 
+#[derive(clap::Args, Debug)]
+pub struct RegionalTaxonProperties {
+    #[arg(short, long, help = "Origin of the taxon vis-a-vis this region")]
+    pub origin: Option<Origin>,
+    #[arg(
+        long,
+        help = "Coefficient of conservatism (0-10) for the species in this region"
+    )]
+    pub c_value: Option<u64>,
+    #[arg(
+        short,
+        long,
+        help = "Conservation status for the species in the given region"
+    )]
+    pub conservation_status: Option<ConservationStatus>,
+    #[arg(
+        short,
+        long,
+        help = "Whether the species is a wetland indicator in the given region"
+    )]
+    pub wetland_indicator: Option<WetlandIndicator>,
+    // harvest phenology
+    #[arg(
+        long,
+        help = "Start of the harvest window for the species in the given region"
+    )]
+    pub harvest_start: Option<jiff::civil::Date>,
+    #[arg(
+        long,
+        help = "End of the harvest window for the species in the given region"
+    )]
+    pub harvest_end: Option<jiff::civil::Date>,
+}
+
 impl BoundsArg {
     pub async fn resolve(self) -> anyhow::Result<Option<String>> {
         match (self.bounds_string, self.bounds_file) {
@@ -76,36 +110,15 @@ pub enum RegionCommands {
     AddTaxon {
         #[command(flatten)]
         id: RegionalTaxonId,
-        #[arg(short, long, help = "Origin of the taxon vis-a-vis this region")]
-        origin: Option<Origin>,
-        #[arg(
-            long,
-            help = "Coefficient of conservatism (0-10) for the species in this region"
-        )]
-        c_value: Option<u64>,
-        #[arg(
-            short,
-            long,
-            help = "Conservation status for the species in the given region"
-        )]
-        conservation_status: Option<ConservationStatus>,
-        #[arg(
-            short,
-            long,
-            help = "Whether the species is a wetland indicator in the given region"
-        )]
-        wetland_indicator: Option<WetlandIndicator>,
-        // harvest phenology
-        #[arg(
-            long,
-            help = "Start of the harvest window for the species in the given region"
-        )]
-        harvest_start: Option<jiff::civil::Date>,
-        #[arg(
-            long,
-            help = "End of the harvest window for the species in the given region"
-        )]
-        harvest_end: Option<jiff::civil::Date>,
+        #[command(flatten)]
+        props: RegionalTaxonProperties,
+    },
+    #[command(about = "Modify information about a taxon within a region", group(clap::ArgGroup::new("modify_taxon_fields").args(["origin", "c_value", "conservation_status", "wetland_indicator", "harvest_start", "harvest_end"]).required(true).multiple(false)))]
+    ModifyTaxon {
+        #[command(flatten)]
+        id: RegionalTaxonId,
+        #[command(flatten)]
+        props: RegionalTaxonProperties,
     },
     #[command(about = "Remove a taxon from a region")]
     RemoveTaxon {
