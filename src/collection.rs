@@ -73,5 +73,5 @@ pub struct CleaningProcedureStep {
     pub order: u64,
     pub cleaning_type: CleaningType,
     pub equipment: Option<String>,
-    pub notes: Option<String>, // e.g screen size
+    pub notes: String, // Description of the step
 }
