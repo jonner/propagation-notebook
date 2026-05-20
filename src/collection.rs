@@ -78,3 +78,14 @@ pub struct CleaningProcedureStep {
     pub equipment: Option<String>,
     pub notes: String, // Description of the step
 }
+
+impl CleaningProcedureStep {
+    pub fn summary(&self) -> String {
+        format!(
+            "{} // {} // {}",
+            self.cleaning_type,
+            self.notes,
+            self.equipment.as_deref().unwrap_or("-"),
+        )
+    }
+}

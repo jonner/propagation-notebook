@@ -154,6 +154,7 @@ async fn main() -> anyhow::Result<()> {
                     .include(Taxon::fields().synonyms())
                     .include(Taxon::fields().regional_statuses().region())
                     .include(Taxon::fields().collection_data())
+                    .include(Taxon::fields().cleaning_procedure().procedure().steps())
                     .one()
                     .exec(&mut db)
                     .await?;
@@ -213,6 +214,29 @@ async fn main() -> anyhow::Result<()> {
                         .and_then(|d| d.storage.as_deref())
                         .unwrap_or("-"),
                 ]);
+                if let Some(tcp) = taxon.cleaning_procedure.get() {
+                    tbuilder.push_record(["Seed Cleaning", &{
+                        let proc = tcp.procedure.get();
+                        let mut steps = Vec::from(proc.steps.get());
+                        steps.sort_by_key(|v| v.order);
+                        let mut inner_table = tabled::builder::Builder::default();
+                        inner_table.push_record(["ID", &proc.id.to_string()]);
+                        inner_table.push_record(["Name", &proc.name]);
+                        inner_table.push_record(["Notes", proc.notes.as_deref().unwrap_or("-")]);
+                        inner_table.push_record([
+                            "Steps",
+                            &join_or_default(&steps, "[none]", |step| {
+                                format!(" - {}", step.summary())
+                            }),
+                        ]);
+                        let s = format!(
+                            "Taxon-specific Notes:\n{}\n\nProcedure:\n{}",
+                            tcp.notes.as_deref().unwrap_or("[none]"),
+                            inner_table.build().with(tabled::settings::Style::blank())
+                        );
+                        s
+                    }])
+                }
                 println!(
                     "{}",
                     tbuilder
@@ -551,15 +575,7 @@ async fn main() -> anyhow::Result<()> {
                 steps.sort_by_key(|a| a.order);
                 tbuilder.push_record([
                     "Steps",
-                    &join_or_default(&steps, "-", |step| {
-                        format!(
-                            "{}: {} // {} // {}",
-                            step.order,
-                            step.cleaning_type,
-                            step.notes,
-                            step.equipment.as_deref().unwrap_or("-"),
-                        )
-                    }),
+                    &join_or_default(&steps, "-", |step| format!(" - {}", step.summary())),
                 ]);
                 println!(
                     "{}",
