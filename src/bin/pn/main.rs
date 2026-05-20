@@ -444,14 +444,14 @@ async fn main() -> anyhow::Result<()> {
                     &status
                         .conservation_status
                         .map(|v| v.to_string())
-                        .unwrap_or_else(|| "_".into()),
+                        .unwrap_or_else(|| "-".into()),
                 ]);
                 tbuilder.push_record([
                     "Wetland Indicator",
                     &status
                         .wetland_indicator
                         .map(|v| v.to_string())
-                        .unwrap_or_else(|| "_".into()),
+                        .unwrap_or_else(|| "-".into()),
                 ]);
                 let window_str = match (status.window_start, status.window_end) {
                     (None, None) => "-".into(),
