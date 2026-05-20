@@ -3,7 +3,7 @@ use toasty::{BelongsTo, HasMany};
 use crate::taxonomy::Taxon;
 
 #[derive(Debug, Clone, toasty::Model)]
-pub struct CollectionData {
+pub struct CollectingData {
     #[auto]
     #[key]
     pub id: u64,

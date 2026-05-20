@@ -3,8 +3,8 @@ use std::collections::HashMap;
 use anyhow::anyhow;
 use clap::Parser;
 use propagation_notebook::{
-    collection::{
-        CleaningProcedure, CleaningProcedureStep, CollectionData, TaxonCleaningProcedure,
+    collecting::{
+        CleaningProcedure, CleaningProcedureStep, CollectingData, TaxonCleaningProcedure,
     },
     region::{Region, RegionalTaxonStatus},
     taxonomy::{Synonym, Taxon, VernacularName},
@@ -153,7 +153,7 @@ async fn main() -> anyhow::Result<()> {
                     .include(Taxon::fields().vernaculars())
                     .include(Taxon::fields().synonyms())
                     .include(Taxon::fields().regional_statuses().region())
-                    .include(Taxon::fields().collection_data())
+                    .include(Taxon::fields().collecting_data())
                     .include(Taxon::fields().cleaning_procedure().procedure().steps())
                     .one()
                     .exec(&mut db)
@@ -199,7 +199,7 @@ async fn main() -> anyhow::Result<()> {
                 tbuilder.push_record([
                     "Ripening",
                     taxon
-                        .collection_data
+                        .collecting_data
                         .get()
                         .as_ref()
                         .map(|d| d.ripening_indicators.as_str())
@@ -208,7 +208,7 @@ async fn main() -> anyhow::Result<()> {
                 tbuilder.push_record([
                     "Storage",
                     taxon
-                        .collection_data
+                        .collecting_data
                         .get()
                         .as_ref()
                         .and_then(|d| d.storage.as_deref())
@@ -473,8 +473,8 @@ async fn main() -> anyhow::Result<()> {
         },
         MainCommand::Collecting { command } => match command {
             CollectingCommands::List => {
-                let items = CollectionData::all()
-                    .include(CollectionData::fields().taxon())
+                let items = CollectingData::all()
+                    .include(CollectingData::fields().taxon())
                     .exec(&mut db)
                     .await?;
                 let nitems = items.len();
@@ -491,11 +491,11 @@ async fn main() -> anyhow::Result<()> {
             }
             CollectingCommands::Show { id, taxon_id } => {
                 let data = match (id, taxon_id) {
-                    (Some(id), None) => CollectionData::filter_by_id(id),
-                    (None, Some(taxon_id)) => CollectionData::filter_by_taxon_id(taxon_id),
+                    (Some(id), None) => CollectingData::filter_by_id(id),
+                    (None, Some(taxon_id)) => CollectingData::filter_by_taxon_id(taxon_id),
                     _ => return Err(anyhow!("must specify either an id or a taxon id")),
                 }
-                .include(CollectionData::fields().taxon())
+                .include(CollectingData::fields().taxon())
                 .one()
                 .exec(&mut db)
                 .await?;
@@ -520,7 +520,7 @@ async fn main() -> anyhow::Result<()> {
                 ripening_indicators,
                 storage,
             } => {
-                let data = CollectionData::create()
+                let data = CollectingData::create()
                     .taxon_id(taxon_id)
                     .ripening_indicators(ripening_indicators)
                     .storage(storage)

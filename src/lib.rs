@@ -1,6 +1,6 @@
 use toasty::ModelSet;
 
-pub mod collection;
+pub mod collecting;
 pub mod protocol;
 pub mod region;
 pub mod taxonomy;
