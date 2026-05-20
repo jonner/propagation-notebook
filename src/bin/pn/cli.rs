@@ -31,10 +31,10 @@ pub enum MainCommand {
 pub enum TaxonCommands {
     #[command(about = "Print a list of all taxa")]
     List,
-    #[command(about = "Search for a taxon")]
-    Search { search_string: String },
     #[command(about = "Show detailed information about a Taxon")]
     Show { id: u64 },
+    #[command(about = "Search for a taxon")]
+    Search { search_string: String },
 }
 
 #[derive(clap::Args, Debug)]
@@ -72,14 +72,14 @@ impl BoundsArg {
 pub enum RegionCommands {
     #[command(about = "Print a list of regions")]
     List,
+    #[command(about = "Show detailed information about a region")]
+    Show { id: u64 },
     #[command(about = "Add a new region to the database")]
     Add {
         region_name: String,
         #[clap(flatten)]
         bounds: BoundsArg,
     },
-    #[command(about = "Show detailed information about a region")]
-    Show { id: u64 },
     #[command(about = "Modify information about a region", group(clap::ArgGroup::new("modify_fields").args(["name", "bounds_string", "bounds_file"]).required(true).multiple(true)))]
     Modify {
         id: u64,
@@ -92,7 +92,14 @@ pub enum RegionCommands {
 
 #[derive(Debug, clap::Subcommand)]
 pub enum RegionalTaxaCommands {
-    #[command(about = "Add a taxon to the region")]
+    #[command(about = "Print a list of taxa for a region")]
+    List {
+        #[arg(short, long, help = "ID of a region")]
+        region_id: u64,
+    },
+    #[command(about = "Show detailed information about the status of a taxon within a region")]
+    Show { id: u64 },
+    #[command(about = "Add a taxon to a region")]
     Add {
         #[arg(short, long, help = "ID of a region")]
         region_id: u64,
@@ -129,13 +136,6 @@ pub enum RegionalTaxaCommands {
         )]
         harvest_end: Option<jiff::civil::Date>,
     },
-    #[command(about = "Print a list of taxa for a given region")]
-    List {
-        #[arg(short, long, help = "ID of a region")]
-        region_id: u64,
-    },
-    #[command(about = "Show detailed information about the status of a regional taxon")]
-    Show { id: u64 },
-    #[command(about = "Remove a regional taxon from the database")]
+    #[command(about = "Remove a taxon from a region")]
     Remove { id: u64 },
 }
