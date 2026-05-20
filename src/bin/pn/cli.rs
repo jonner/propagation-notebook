@@ -18,11 +18,6 @@ pub enum MainCommand {
         #[command(subcommand)]
         command: region::RegionCommands,
     },
-    #[command(about = "commands related to regional taxa lists")]
-    RegionalTaxa {
-        #[command(subcommand)]
-        command: regional_taxa::RegionalTaxaCommands,
-    },
     #[command(about = "Seed collecting information")]
     Collecting {
         #[command(subcommand)]
@@ -38,5 +33,4 @@ pub enum MainCommand {
 pub mod cleaning;
 pub mod collecting;
 pub mod region;
-pub mod regional_taxa;
 pub mod taxa;

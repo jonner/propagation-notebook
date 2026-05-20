@@ -16,7 +16,7 @@ use tracing_subscriber::{EnvFilter, layer::SubscriberExt, util::SubscriberInitEx
 
 use crate::cli::{
     MainCommand, Options, cleaning::CleaningCommands, collecting::CollectingCommands,
-    region::RegionCommands, regional_taxa::RegionalTaxaCommands, taxa::TaxonCommands,
+    region::RegionCommands, taxa::TaxonCommands,
 };
 
 mod cli;
@@ -337,9 +337,7 @@ async fn main() -> anyhow::Result<()> {
                     println!("Deleted region {id} from the database");
                 }
             }
-        },
-        MainCommand::RegionalTaxa { command } => match command {
-            RegionalTaxaCommands::Add {
+            RegionCommands::AddTaxon {
                 id,
                 origin,
                 c_value,
@@ -361,7 +359,7 @@ async fn main() -> anyhow::Result<()> {
                     .await?;
                 println!("Added regional taxon {}", s.id);
             }
-            RegionalTaxaCommands::List { region_id } => {
+            RegionCommands::ListTaxa { region_id } => {
                 let region = Region::get_by_id(&mut db, region_id).await?;
                 let regional_statuses = RegionalTaxonStatus::filter(
                     RegionalTaxonStatus::fields().region_id().eq(region_id),
@@ -412,7 +410,7 @@ async fn main() -> anyhow::Result<()> {
                 );
                 println!("{} taxa found", ntaxa);
             }
-            RegionalTaxaCommands::Show { id } => {
+            RegionCommands::ShowTaxon { id } => {
                 let status = RegionalTaxonStatus::filter_by_taxon_id_and_region_id(
                     id.taxon_id,
                     id.region_id,
@@ -476,7 +474,7 @@ async fn main() -> anyhow::Result<()> {
                         .with(Modify::new(Columns::first()).with(Alignment::right()))
                 )
             }
-            RegionalTaxaCommands::Remove { id } => {
+            RegionCommands::RemoveTaxon { id } => {
                 RegionalTaxonStatus::delete_by_taxon_id_and_region_id(
                     &mut db,
                     id.taxon_id,
