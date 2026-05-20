@@ -437,6 +437,10 @@ async fn main() -> anyhow::Result<()> {
                         .with(Modify::new(Columns::first()).with(Alignment::right()))
                 )
             }
+            cli::RegionalTaxaCommands::Remove { id } => {
+                RegionalTaxonStatus::delete_by_id(&mut db, id).await?;
+                println!("Deleted regional taxon {id}");
+            }
         },
     }
     Ok(())

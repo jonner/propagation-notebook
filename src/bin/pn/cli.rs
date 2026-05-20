@@ -140,4 +140,6 @@ pub enum RegionalTaxaCommands {
     },
     #[command(about = "Show detailed information about the status of a regional taxon")]
     Show { id: u64 },
+    #[command(about = "Remove a regional taxon from the database")]
+    Remove { id: u64 },
 }
