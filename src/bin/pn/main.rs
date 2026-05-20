@@ -211,79 +211,23 @@ async fn main() -> anyhow::Result<()> {
                         .with(Modify::new(Columns::first()).with(Alignment::right()))
                 );
             }
-            cli::TaxonCommands::List { region_id } => {
-                match region_id {
-                    Some(region_id) => {
-                        let region = Region::get_by_id(&mut db, region_id).await?;
-                        let regional_statuses = RegionalTaxonStatus::filter(
-                            RegionalTaxonStatus::fields().region_id().eq(region_id),
-                        )
-                        // FIXME: We want to order by a taxon sequence, but
-                        // toasty doesn't yet support ordering by data in a relation
-                        .exec(&mut db)
-                        .await?;
+            cli::TaxonCommands::List => {
+                let taxa = Taxon::all()
+                    .order_by(Taxon::fields().sequence().asc())
+                    .exec(&mut db)
+                    .await?;
+                let ntaxa = taxa.len();
 
-                        // FIXME: it's too slow to include all relations, so query the taxa separately
-                        let taxa = Taxon::filter(
-                            Taxon::fields().id().in_list(
-                                regional_statuses
-                                    .iter()
-                                    .map(|s| s.taxon_id)
-                                    .collect::<Vec<_>>(),
-                            ),
-                        )
-                        .order_by(Taxon::fields().sequence().asc())
-                        .exec(&mut db)
-                        .await?;
-
-                        // since we can't order the regional status list by taxon
-                        // sequence, we need to iterate through the sorted taxon list, and then look up the
-                        // regional status from a hash table
-                        let map = regional_statuses
-                            .into_iter()
-                            .map(|s| (s.taxon_id, s))
-                            .collect::<HashMap<_, _>>();
-
-                        let ntaxa = taxa.len();
-                        println!("Regional Taxa: {}", region.name);
-                        let mut tbuilder = tabled::builder::Builder::default();
-                        tbuilder.push_record(["ID", "Name", "Status"]);
-                        for taxon in taxa {
-                            let status = map.get(&taxon.id).unwrap();
-                            tbuilder.push_record([
-                                taxon.id.to_string(),
-                                taxon.complete_name,
-                                status
-                                    .native_status
-                                    .map(|s| s.to_string())
-                                    .unwrap_or_default(),
-                            ]);
-                        }
-                        println!(
-                            "{}",
-                            tbuilder.build().with(tabled::settings::Style::blank())
-                        );
-                        println!("{} taxa found", ntaxa);
-                    }
-                    None => {
-                        let taxa = Taxon::all()
-                            .order_by(Taxon::fields().sequence().asc())
-                            .exec(&mut db)
-                            .await?;
-                        let ntaxa = taxa.len();
-
-                        let mut tbuilder = tabled::builder::Builder::default();
-                        tbuilder.push_record(["ID", "Name"]);
-                        for taxon in taxa {
-                            tbuilder.push_record([taxon.id.to_string(), taxon.complete_name]);
-                        }
-                        println!(
-                            "{}",
-                            tbuilder.build().with(tabled::settings::Style::blank())
-                        );
-                        println!("{} taxa found", ntaxa);
-                    }
-                };
+                let mut tbuilder = tabled::builder::Builder::default();
+                tbuilder.push_record(["ID", "Name"]);
+                for taxon in taxa {
+                    tbuilder.push_record([taxon.id.to_string(), taxon.complete_name]);
+                }
+                println!(
+                    "{}",
+                    tbuilder.build().with(tabled::settings::Style::blank())
+                );
+                println!("{} taxa found", ntaxa);
             }
         },
         cli::MainCommand::Regions { command } => match command {
@@ -344,7 +288,9 @@ async fn main() -> anyhow::Result<()> {
                     .await?;
                 println!("Added new region {}: {}", new_region.id, new_region.name);
             }
-            cli::RegionCommands::AddSpecies {
+        },
+        cli::MainCommand::RegionalTaxa { command } => match command {
+            cli::RegionalTaxaCommands::Add {
                 region_id,
                 taxon_id,
                 native_status,
@@ -361,10 +307,62 @@ async fn main() -> anyhow::Result<()> {
                     .c_value(c_value)
                     .conservation_status(conservation_status)
                     .wetland_indicator(wetland_indicator)
-                    .window_start(harvest_start)
-                    .window_end(harvest_end)
+                    .window_start(harvest_start.map(|d| d.with().year(2000).build().unwrap()))
+                    .window_end(harvest_end.map(|d| d.with().year(2000).build().unwrap()))
                     .exec(&mut db)
                     .await?;
+            }
+            cli::RegionalTaxaCommands::List { region_id } => {
+                let region = Region::get_by_id(&mut db, region_id).await?;
+                let regional_statuses = RegionalTaxonStatus::filter(
+                    RegionalTaxonStatus::fields().region_id().eq(region_id),
+                )
+                // FIXME: We want to order by a taxon sequence, but
+                // toasty doesn't yet support ordering by data in a relation
+                .exec(&mut db)
+                .await?;
+
+                // FIXME: it's too slow to include all relations, so query the taxa separately
+                let taxa = Taxon::filter(
+                    Taxon::fields().id().in_list(
+                        regional_statuses
+                            .iter()
+                            .map(|s| s.taxon_id)
+                            .collect::<Vec<_>>(),
+                    ),
+                )
+                .order_by(Taxon::fields().sequence().asc())
+                .exec(&mut db)
+                .await?;
+
+                // since we can't order the regional status list by taxon
+                // sequence, we need to iterate through the sorted taxon list, and then look up the
+                // regional status from a hash table
+                let map = regional_statuses
+                    .into_iter()
+                    .map(|s| (s.taxon_id, s))
+                    .collect::<HashMap<_, _>>();
+
+                let ntaxa = taxa.len();
+                println!("Regional Taxa: {}", region.name);
+                let mut tbuilder = tabled::builder::Builder::default();
+                tbuilder.push_record(["ID", "Name", "Status"]);
+                for taxon in taxa {
+                    let status = map.get(&taxon.id).unwrap();
+                    tbuilder.push_record([
+                        taxon.id.to_string(),
+                        taxon.complete_name,
+                        status
+                            .native_status
+                            .map(|s| s.to_string())
+                            .unwrap_or_default(),
+                    ]);
+                }
+                println!(
+                    "{}",
+                    tbuilder.build().with(tabled::settings::Style::blank())
+                );
+                println!("{} taxa found", ntaxa);
             }
         },
     }

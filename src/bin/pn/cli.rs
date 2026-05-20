@@ -20,15 +20,17 @@ pub enum MainCommand {
         #[command(subcommand)]
         command: RegionCommands,
     },
+    #[command(about = "commands related to regional taxa lists")]
+    RegionalTaxa {
+        #[command(subcommand)]
+        command: RegionalTaxaCommands,
+    },
 }
 
 #[derive(Debug, clap::Subcommand)]
 pub enum TaxonCommands {
-    #[command(about = "Print a list of taxa that match a given set of filters")]
-    List {
-        #[arg(short, long, help = "Limit to taxa within the specified region")]
-        region_id: Option<u64>,
-    },
+    #[command(about = "Print a list of all taxa")]
+    List,
     #[command(about = "Search for a taxon")]
     Search { search_string: String },
     #[command(about = "Show detailed information about a Taxon")]
@@ -86,8 +88,12 @@ pub enum RegionCommands {
         #[arg(short, long, help = "Specify a new name for the region")]
         name: Option<String>,
     },
+}
+
+#[derive(Debug, clap::Subcommand)]
+pub enum RegionalTaxaCommands {
     #[command(about = "Add a taxon to the region")]
-    AddSpecies {
+    Add {
         #[arg(short, long, help = "ID of a region in the database")]
         region_id: u64,
         #[arg(short, long, help = "ID of a taxon in the database")]
@@ -126,5 +132,10 @@ pub enum RegionCommands {
             help = "End of the harvest window for the species in the given region"
         )]
         harvest_end: Option<jiff::civil::Date>,
+    },
+    #[command(about = "Print a list of taxa for a given region")]
+    List {
+        #[arg(short, long, help = "ID of a region")]
+        region_id: u64,
     },
 }
