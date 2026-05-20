@@ -38,7 +38,7 @@ pub struct CleaningProcedure {
     #[auto]
     #[key]
     pub id: u64,
-
+    pub name: String,
     pub notes: Option<String>,
 
     #[has_many(pair=procedure)]
