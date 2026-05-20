@@ -27,6 +27,17 @@ fn truncate_with_summary(s: &str, max_chars: usize) -> String {
     s.chars().take(max_chars).collect::<String>() + &format!("... [{extra_chars} more characters]")
 }
 
+fn join_or_default<T, F>(items: &[T], default: &str, extract: F) -> String
+where
+    F: Fn(&T) -> String,
+{
+    if items.is_empty() {
+        default.to_string()
+    } else {
+        items.iter().map(extract).collect::<Vec<_>>().join("\n")
+    }
+}
+
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     let filter = EnvFilter::try_from_default_env()
@@ -140,6 +151,7 @@ async fn main() -> anyhow::Result<()> {
                     .include(Taxon::fields().vernaculars())
                     .include(Taxon::fields().synonyms())
                     .include(Taxon::fields().regional_statuses().region())
+                    .include(Taxon::fields().collection_data())
                     .one()
                     .exec(&mut db)
                     .await?;
@@ -154,54 +166,50 @@ async fn main() -> anyhow::Result<()> {
                         .get()
                         .as_ref()
                         .map(|p| format!("{} ({})", p.reference(), p.rank))
-                        .unwrap_or_default(),
+                        .unwrap_or_else(|| "-".into()),
                 ]);
                 tbuilder.push_record([
                     "Synonyms",
-                    &taxon
-                        .synonyms
-                        .get()
-                        .iter()
-                        .map(|s| s.complete_name.clone())
-                        .collect::<Vec<_>>()
-                        .join("\n"),
+                    &join_or_default(taxon.synonyms.get(), "-", |v| v.complete_name.clone()),
                 ]);
                 tbuilder.push_record([
                     "Common Name(s)",
-                    &taxon
-                        .vernaculars
-                        .get()
-                        .iter()
-                        .map(|v| v.name.clone())
-                        .collect::<Vec<_>>()
-                        .join("\n"),
+                    &join_or_default(taxon.vernaculars.get(), "-", |v| v.name.clone()),
                 ]);
                 tbuilder.push_record([
                     "Child taxa",
-                    &taxon
-                        .children
-                        .get()
-                        .iter()
-                        .map(|t| format!("{} ({})", t.reference(), t.rank))
-                        .collect::<Vec<_>>()
-                        .join("\n"),
+                    &join_or_default(taxon.children.get(), "-", |t| {
+                        format!("{} ({})", t.reference(), t.rank)
+                    }),
                 ]);
                 tbuilder.push_record([
                     "Regions",
-                    &taxon
-                        .regional_statuses
+                    &join_or_default(taxon.regional_statuses.get(), "-", |s| {
+                        format!(
+                            "{} ({})",
+                            s.region.get().reference(),
+                            s.origin
+                                .unwrap_or(propagation_notebook::region::Origin::Unknown)
+                        )
+                    }),
+                ]);
+                tbuilder.push_record([
+                    "Ripening",
+                    taxon
+                        .collection_data
                         .get()
-                        .iter()
-                        .map(|s| {
-                            format!(
-                                "{} ({})",
-                                s.region.get().reference(),
-                                s.origin
-                                    .unwrap_or(propagation_notebook::region::Origin::Unknown)
-                            )
-                        })
-                        .collect::<Vec<_>>()
-                        .join("\n"),
+                        .as_ref()
+                        .map(|d| d.ripening_indicators.as_str())
+                        .unwrap_or_else(|| "-"),
+                ]);
+                tbuilder.push_record([
+                    "Storage",
+                    taxon
+                        .collection_data
+                        .get()
+                        .as_ref()
+                        .and_then(|d| d.storage.as_deref())
+                        .unwrap_or("-"),
                 ]);
                 println!(
                     "{}",
@@ -248,13 +256,18 @@ async fn main() -> anyhow::Result<()> {
                 }
             }
             RegionCommands::Show { id } => {
-                let region = Region::get_by_id(&mut db, id).await?;
+                let region = Region::filter_by_id(id)
+                    .include(Region::fields().taxon_statuses())
+                    .one()
+                    .exec(&mut db)
+                    .await?;
                 let mut tbuilder = tabled::builder::Builder::default();
                 tbuilder.push_record(["ID", &region.id.to_string()]);
                 tbuilder.push_record(["Name", &region.name]);
+                tbuilder.push_record(["Taxa", &region.taxon_statuses.get().len().to_string()]);
                 tbuilder.push_record([
                     "Bounds",
-                    &truncate_with_summary(&region.bounds.unwrap_or("None".to_string()), 500),
+                    &truncate_with_summary(&region.bounds.unwrap_or_else(|| "-".to_string()), 500),
                 ]);
                 println!(
                     "{}",
@@ -353,7 +366,10 @@ async fn main() -> anyhow::Result<()> {
                     tbuilder.push_record([
                         status.id.to_string(),
                         taxon.reference(),
-                        status.origin.map(|s| s.to_string()).unwrap_or_default(),
+                        status
+                            .origin
+                            .map(|s| s.to_string())
+                            .unwrap_or_else(|| "-".into()),
                     ]);
                 }
                 println!(
@@ -382,25 +398,28 @@ async fn main() -> anyhow::Result<()> {
                 ]);
                 tbuilder.push_record([
                     "Coeff. of conservatism",
-                    &status.c_value.map(|v| v.to_string()).unwrap_or_default(),
+                    &status
+                        .c_value
+                        .map(|v| v.to_string())
+                        .unwrap_or_else(|| "-".into()),
                 ]);
                 tbuilder.push_record([
                     "Conservation Status",
                     &status
                         .conservation_status
                         .map(|v| v.to_string())
-                        .unwrap_or_default(),
+                        .unwrap_or_else(|| "_".into()),
                 ]);
                 tbuilder.push_record([
                     "Wetland Indicator",
                     &status
                         .wetland_indicator
                         .map(|v| v.to_string())
-                        .unwrap_or_default(),
+                        .unwrap_or_else(|| "_".into()),
                 ]);
                 let window_str = match (status.window_start, status.window_end) {
-                    (None, None) => "",
-                    _ => &format!(
+                    (None, None) => "-".into(),
+                    _ => format!(
                         "{} - {}",
                         status
                             .window_start
@@ -412,9 +431,7 @@ async fn main() -> anyhow::Result<()> {
                             .unwrap_or("?".to_string())
                     ),
                 };
-                tbuilder.push_record(["Harvest Window", window_str]);
-                // pub window_start: Option<jiff::civil::Date>,
-                // pub window_end: Option<jiff::civil::Date>,
+                tbuilder.push_record(["Harvest Window", &window_str]);
                 println!(
                     "{}",
                     tbuilder
@@ -436,14 +453,9 @@ async fn main() -> anyhow::Result<()> {
                     .await?;
                 let nitems = items.len();
                 let mut tbuilder = tabled::builder::Builder::default();
-                tbuilder.push_record(["ID", "Taxon", "Ripening Indicators", "Storage"]);
+                tbuilder.push_record(["ID", "Taxon"]);
                 for item in items {
-                    tbuilder.push_record([
-                        item.id.to_string(),
-                        item.taxon.get().reference(),
-                        item.ripening_indicators,
-                        item.storage.unwrap_or_default(),
-                    ])
+                    tbuilder.push_record([item.id.to_string(), item.taxon.get().reference()])
                 }
                 println!(
                     "{}",
@@ -465,7 +477,10 @@ async fn main() -> anyhow::Result<()> {
                 tbuilder.push_record(["ID", &data.id.to_string()]);
                 tbuilder.push_record(["Taxon", &data.taxon.get().reference()]);
                 tbuilder.push_record(["Ripening Indicators", &data.ripening_indicators]);
-                tbuilder.push_record(["Storage instructions", &data.storage.unwrap_or_default()]);
+                tbuilder.push_record([
+                    "Storage instructions",
+                    &data.storage.unwrap_or_else(|| "-".into()),
+                ]);
                 println!(
                     "{}",
                     tbuilder
