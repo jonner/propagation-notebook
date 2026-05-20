@@ -28,6 +28,7 @@ pub enum MainCommand {
         #[command(subcommand)]
         command: collecting::CollectingCommands,
     },
+    #[command(about = "Seed cleaning information")]
     Cleaning {
         #[command(subcommand)]
         command: CleaningCommands,
