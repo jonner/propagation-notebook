@@ -10,7 +10,10 @@ use toasty::Db;
 use tracing::level_filters::LevelFilter;
 use tracing_subscriber::{EnvFilter, layer::SubscriberExt, util::SubscriberInitExt};
 
-use crate::cli::Options;
+use crate::cli::{
+    MainCommand, Options, region::RegionCommands,
+    regional_taxa::RegionalTaxaCommands, taxa::TaxonCommands,
+};
 
 mod cli;
 
@@ -36,8 +39,8 @@ async fn main() -> anyhow::Result<()> {
         .connect("sqlite:./propagation-notebook.sqlite")
         .await?;
     match options.command {
-        cli::MainCommand::Taxa { command } => match command {
-            cli::TaxonCommands::Search { search_string } => {
+        MainCommand::Taxa { command } => match command {
+            TaxonCommands::Search { search_string } => {
                 tracing::debug!("Searching for exact complete name");
                 if let Ok(found) = Taxon::filter(Taxon::fields().complete_name().eq(&search_string))
                     .one()
@@ -132,7 +135,7 @@ async fn main() -> anyhow::Result<()> {
                     }
                 }
             }
-            cli::TaxonCommands::Show { id } => {
+            TaxonCommands::Show { id } => {
                 let taxon = Taxon::filter_by_id(id)
                     .include(Taxon::fields().parent())
                     .include(Taxon::fields().children())
@@ -211,7 +214,7 @@ async fn main() -> anyhow::Result<()> {
                         .with(Modify::new(Columns::first()).with(Alignment::right()))
                 );
             }
-            cli::TaxonCommands::List => {
+            TaxonCommands::List => {
                 let taxa = Taxon::all()
                     .order_by(Taxon::fields().sequence().asc())
                     .exec(&mut db)
@@ -230,8 +233,8 @@ async fn main() -> anyhow::Result<()> {
                 println!("{} taxa found", ntaxa);
             }
         },
-        cli::MainCommand::Regions { command } => match command {
-            cli::RegionCommands::List => {
+        MainCommand::Regions { command } => match command {
+            RegionCommands::List => {
                 let regions = Region::all().exec(&mut db).await?;
                 if regions.is_empty() {
                     println!("No Regions found");
@@ -247,7 +250,7 @@ async fn main() -> anyhow::Result<()> {
                     );
                 }
             }
-            cli::RegionCommands::Show { id } => {
+            RegionCommands::Show { id } => {
                 let region = Region::get_by_id(&mut db, id).await?;
                 let mut tbuilder = tabled::builder::Builder::default();
                 tbuilder.push_record(["ID", &region.id.to_string()]);
@@ -264,7 +267,7 @@ async fn main() -> anyhow::Result<()> {
                         .with(Modify::new(Columns::first()).with(Alignment::right()))
                 )
             }
-            cli::RegionCommands::Modify { id, bounds, name } => {
+            RegionCommands::Modify { id, bounds, name } => {
                 let mut update_query = Region::update_by_id(id);
                 let bounds = bounds.resolve().await?;
                 if let Some(name) = name {
@@ -276,7 +279,7 @@ async fn main() -> anyhow::Result<()> {
                 update_query.exec(&mut db).await?;
                 println!("Region {id} updated");
             }
-            cli::RegionCommands::Add {
+            RegionCommands::Add {
                 region_name,
                 bounds,
             } => {
@@ -289,8 +292,8 @@ async fn main() -> anyhow::Result<()> {
                 println!("Added new region {}: {}", new_region.id, new_region.name);
             }
         },
-        cli::MainCommand::RegionalTaxa { command } => match command {
-            cli::RegionalTaxaCommands::Add {
+        MainCommand::RegionalTaxa { command } => match command {
+            RegionalTaxaCommands::Add {
                 region_id,
                 taxon_id,
                 origin,
@@ -313,7 +316,7 @@ async fn main() -> anyhow::Result<()> {
                     .await?;
                 println!("Added regional taxon {}", s.id);
             }
-            cli::RegionalTaxaCommands::List { region_id } => {
+            RegionalTaxaCommands::List { region_id } => {
                 let region = Region::get_by_id(&mut db, region_id).await?;
                 let regional_statuses = RegionalTaxonStatus::filter(
                     RegionalTaxonStatus::fields().region_id().eq(region_id),
@@ -363,7 +366,7 @@ async fn main() -> anyhow::Result<()> {
                 );
                 println!("{} taxa found", ntaxa);
             }
-            cli::RegionalTaxaCommands::Show { id } => {
+            RegionalTaxaCommands::Show { id } => {
                 let status = RegionalTaxonStatus::filter_by_id(id)
                     .include(RegionalTaxonStatus::fields().region())
                     .include(RegionalTaxonStatus::fields().taxon())
@@ -434,7 +437,7 @@ async fn main() -> anyhow::Result<()> {
                         .with(Modify::new(Columns::first()).with(Alignment::right()))
                 )
             }
-            cli::RegionalTaxaCommands::Remove { id } => {
+            RegionalTaxaCommands::Remove { id } => {
                 RegionalTaxonStatus::delete_by_id(&mut db, id).await?;
                 println!("Deleted regional taxon {id}");
             }
