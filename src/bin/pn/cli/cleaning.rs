@@ -15,7 +15,7 @@ pub enum CleaningCommands {
     },
     #[command(about = "Show all steps for the specified seed cleaning procedure")]
     Steps { procedure_id: u64 },
-    #[command(about = "Add a new step to the seed cleaning procedure")]
+    #[command(about = "Add a new step to a seed cleaning procedure")]
     AddStep {
         #[arg(short, long, help = "A procedure ID")]
         procedure_id: u64,
