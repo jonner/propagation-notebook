@@ -17,21 +17,34 @@ pub struct CollectionData {
     pub storage: Option<String>,
 }
 
+// pivot table for associating a cleaning procedure with a taxon
+#[derive(Debug, Clone, toasty::Model)]
+pub struct TaxonCleaningProcedure {
+    #[key]
+    #[index]
+    pub taxon_id: u64,
+    #[belongs_to(key=taxon_id, references=id)]
+    pub taxon: BelongsTo<Taxon>,
+
+    #[key]
+    #[index]
+    pub procedure_id: u64,
+    #[belongs_to(key=procedure_id, references=id)]
+    pub procedure: BelongsTo<CleaningProcedure>,
+}
+
 #[derive(Debug, Clone, toasty::Model)]
 pub struct CleaningProcedure {
     #[auto]
     #[key]
     pub id: u64,
 
-    #[index]
-    pub taxon_id: u64,
-    #[belongs_to(key=taxon_id, references=id)]
-    pub taxon: BelongsTo<Taxon>,
-
     pub notes: Option<String>,
 
     #[has_many(pair=procedure)]
     pub steps: HasMany<CleaningProcedureStep>,
+    #[has_many(pair=procedure)]
+    pub taxon_links: HasMany<TaxonCleaningProcedure>,
 }
 
 #[derive(Debug, Clone, Copy, toasty::Embed)]
