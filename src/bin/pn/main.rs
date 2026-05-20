@@ -260,7 +260,7 @@ async fn main() -> anyhow::Result<()> {
                     "{}",
                     tbuilder
                         .build()
-                        .with(tabled::settings::Style::empty())
+                        .with(tabled::settings::Style::blank())
                         .with(Modify::new(Columns::first()).with(Alignment::right()))
                 )
             }
@@ -344,12 +344,13 @@ async fn main() -> anyhow::Result<()> {
                     .collect::<HashMap<_, _>>();
 
                 let ntaxa = taxa.len();
-                println!("Regional Taxa: {}", region.name);
+                println!("Regional Taxa from region '{}'", region.name);
                 let mut tbuilder = tabled::builder::Builder::default();
-                tbuilder.push_record(["ID", "Name", "Status"]);
+                tbuilder.push_record(["ID", "Taxon ID", "Name", "Origin"]);
                 for taxon in taxa {
                     let status = map.get(&taxon.id).unwrap();
                     tbuilder.push_record([
+                        status.id.to_string(),
                         taxon.id.to_string(),
                         taxon.complete_name,
                         status
@@ -363,6 +364,77 @@ async fn main() -> anyhow::Result<()> {
                     tbuilder.build().with(tabled::settings::Style::blank())
                 );
                 println!("{} taxa found", ntaxa);
+            }
+            cli::RegionalTaxaCommands::Show { id } => {
+                let status = RegionalTaxonStatus::filter_by_id(id)
+                    .include(RegionalTaxonStatus::fields().region())
+                    .include(RegionalTaxonStatus::fields().taxon())
+                    .one()
+                    .exec(&mut db)
+                    .await?;
+                let mut tbuilder = tabled::builder::Builder::default();
+                tbuilder.push_record(["ID", &status.id.to_string()]);
+                tbuilder.push_record([
+                    "Taxon",
+                    &format!(
+                        "{}: {}",
+                        status.taxon.get().id,
+                        status.taxon.get().complete_name
+                    ),
+                ]);
+                tbuilder.push_record([
+                    "Region",
+                    &format!("{}: {}", status.region.get().id, status.region.get().name),
+                ]);
+                tbuilder.push_record([
+                    "Origin",
+                    &status
+                        .native_status
+                        .unwrap_or(propagation_notebook::region::NativeStatus::Unknown)
+                        .to_string(),
+                ]);
+                tbuilder.push_record([
+                    "Coeff. of conservatism",
+                    &status.c_value.map(|v| v.to_string()).unwrap_or_default(),
+                ]);
+                tbuilder.push_record([
+                    "Conservation Status",
+                    &status
+                        .conservation_status
+                        .map(|v| v.to_string())
+                        .unwrap_or_default(),
+                ]);
+                tbuilder.push_record([
+                    "Wetland Indicator",
+                    &status
+                        .wetland_indicator
+                        .map(|v| v.to_string())
+                        .unwrap_or_default(),
+                ]);
+                let window_str = match (status.window_start, status.window_end) {
+                    (None, None) => "",
+                    _ => &format!(
+                        "{} - {}",
+                        status
+                            .window_start
+                            .map(|d| d.strftime("%b %d").to_string())
+                            .unwrap_or("?".to_string()),
+                        status
+                            .window_end
+                            .map(|d| d.strftime("%b %d").to_string())
+                            .unwrap_or("?".to_string())
+                    ),
+                };
+                tbuilder.push_record(["Harvest Window", window_str]);
+                // pub window_start: Option<jiff::civil::Date>,
+                // pub window_end: Option<jiff::civil::Date>,
+                println!(
+                    "{}",
+                    tbuilder
+                        .build()
+                        .with(tabled::settings::Style::blank())
+                        .with(Modify::new(Columns::first()).with(Alignment::right()))
+                )
             }
         },
     }

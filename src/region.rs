@@ -2,7 +2,7 @@ use toasty::{BelongsTo, HasMany};
 
 use crate::taxonomy::Taxon;
 
-#[derive(Debug, Clone, Copy, toasty::Embed, clap::ValueEnum)]
+#[derive(Debug, Clone, Copy, toasty::Embed, strum::Display, clap::ValueEnum)]
 pub enum WetlandIndicator {
     #[column(variant = 1)]
     ObligateWetland,
@@ -18,7 +18,7 @@ pub enum WetlandIndicator {
     Other,
 }
 
-#[derive(Debug, Clone, Copy, toasty::Embed, clap::ValueEnum)]
+#[derive(Debug, Clone, Copy, toasty::Embed, strum::Display, clap::ValueEnum)]
 pub enum ConservationStatus {
     #[column(variant = 1)]
     Endangered,

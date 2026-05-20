@@ -138,4 +138,6 @@ pub enum RegionalTaxaCommands {
         #[arg(short, long, help = "ID of a region")]
         region_id: u64,
     },
+    #[command(about = "Show detailed information about the status of a regional taxon")]
+    Show { id: u64 },
 }
