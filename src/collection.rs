@@ -47,7 +47,7 @@ pub struct CleaningProcedure {
     pub taxon_links: HasMany<TaxonCleaningProcedure>,
 }
 
-#[derive(Debug, Clone, Copy, toasty::Embed)]
+#[derive(Debug, Clone, Copy, toasty::Embed, strum::Display, clap::ValueEnum)]
 pub enum CleaningType {
     #[column(variant = 1)]
     Rub, // remove fuzz?

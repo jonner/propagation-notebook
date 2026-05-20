@@ -1,3 +1,5 @@
+use crate::cli::cleaning::CleaningCommands;
+
 #[derive(Debug, clap::Parser)]
 pub struct Options {
     #[command(subcommand)]
@@ -26,8 +28,13 @@ pub enum MainCommand {
         #[command(subcommand)]
         command: collecting::CollectingCommands,
     },
+    Cleaning {
+        #[command(subcommand)]
+        command: CleaningCommands,
+    },
 }
 
+pub mod cleaning;
 pub mod collecting;
 pub mod region;
 pub mod regional_taxa;

@@ -3,7 +3,9 @@ use std::collections::HashMap;
 use anyhow::anyhow;
 use clap::Parser;
 use propagation_notebook::{
-    collection::CollectionData,
+    collection::{
+        CleaningProcedure, CleaningProcedureStep, CollectionData, TaxonCleaningProcedure,
+    },
     region::{Region, RegionalTaxonStatus},
     taxonomy::{Synonym, Taxon, VernacularName},
 };
@@ -501,6 +503,118 @@ async fn main() -> anyhow::Result<()> {
                     .exec(&mut db)
                     .await?;
                 println!("Added collection information {}", data.id);
+            }
+        },
+        MainCommand::Cleaning { command } => match command {
+            cli::cleaning::CleaningCommands::List => {
+                let items = CleaningProcedure::all()
+                    .include(CleaningProcedure::fields().steps())
+                    .include(CleaningProcedure::fields().taxon_links().taxon())
+                    .exec(&mut db)
+                    .await?;
+                let nitems = items.len();
+                let mut tbuilder = tabled::builder::Builder::default();
+                tbuilder.push_record(["ID", "Name", "Steps", "Taxa"]);
+                for item in items {
+                    tbuilder.push_record([
+                        item.id.to_string(),
+                        item.name,
+                        item.steps.get().len().to_string(),
+                        item.taxon_links.get().len().to_string(),
+                    ])
+                }
+                println!(
+                    "{}",
+                    tbuilder.build().with(tabled::settings::Style::blank())
+                );
+                println!("\n{nitems} found");
+            }
+            cli::cleaning::CleaningCommands::Show { id } => {
+                let procedure = CleaningProcedure::filter_by_id(id)
+                    .include(CleaningProcedure::fields().steps())
+                    .include(CleaningProcedure::fields().taxon_links().taxon())
+                    .one()
+                    .exec(&mut db)
+                    .await?;
+                let mut tbuilder = tabled::builder::Builder::default();
+                tbuilder.push_record(["ID", &procedure.id.to_string()]);
+                tbuilder.push_record(["Name", &procedure.name]);
+                tbuilder.push_record(["Notes", &procedure.notes.unwrap_or_else(|| "-".into())]);
+                tbuilder.push_record([
+                    "Taxa",
+                    &join_or_default(procedure.taxon_links.get(), "-", |v| {
+                        v.taxon.get().reference()
+                    }),
+                ]);
+                // sort steps in order
+                let mut steps = Vec::from(procedure.steps.get());
+                steps.sort_by_key(|a| a.order);
+                tbuilder.push_record([
+                    "Steps",
+                    &join_or_default(&steps, "-", |step| {
+                        format!(
+                            "{}: {} // {} // {}",
+                            step.order,
+                            step.cleaning_type,
+                            step.notes,
+                            step.equipment.as_deref().unwrap_or("-"),
+                        )
+                    }),
+                ]);
+                println!(
+                    "{}",
+                    tbuilder.build().with(tabled::settings::Style::blank())
+                );
+            }
+            cli::cleaning::CleaningCommands::Add { name, notes } => {
+                let item = CleaningProcedure::create()
+                    .name(name)
+                    .notes(notes)
+                    .exec(&mut db)
+                    .await?;
+                println!("Added new procedure {}", item.id);
+            }
+            cli::cleaning::CleaningCommands::AddStep {
+                procedure_id,
+                order,
+                step_type,
+                equipment,
+                notes,
+            } => {
+                let step = CleaningProcedureStep::create()
+                    .procedure_id(procedure_id)
+                    .order(order)
+                    .cleaning_type(step_type)
+                    .equipment(equipment)
+                    .notes(notes)
+                    .exec(&mut db)
+                    .await?;
+                println!("Added new step {}", step.id);
+            }
+            cli::cleaning::CleaningCommands::Assign {
+                procedure_id,
+                taxon_id,
+                remove,
+            } => {
+                if remove {
+                    TaxonCleaningProcedure::delete_by_taxon_id_and_procedure_id(
+                        &mut db,
+                        taxon_id,
+                        procedure_id,
+                    )
+                    .await?;
+                    println!("Assignment removed");
+                } else {
+                    let item = TaxonCleaningProcedure::create()
+                        .taxon_id(taxon_id)
+                        .procedure_id(procedure_id)
+                        .exec(&mut db)
+                        .await?;
+                    println!(
+                        "Taxon {} now uses procedure {}",
+                        item.taxon_id, item.procedure_id
+                    );
+                }
             }
         },
     };
