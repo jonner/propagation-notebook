@@ -26,6 +26,9 @@ pub struct TaxonCleaningProcedure {
     #[belongs_to(key=taxon_id, references=id)]
     pub taxon: BelongsTo<Taxon>,
 
+    // notes for customizing the procedure for this taxon
+    pub notes: Option<String>,
+
     #[key]
     #[index]
     pub procedure_id: u64,

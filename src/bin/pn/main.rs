@@ -594,6 +594,7 @@ async fn main() -> anyhow::Result<()> {
             cli::cleaning::CleaningCommands::Assign {
                 procedure_id,
                 taxon_id,
+                notes,
                 remove,
             } => {
                 if remove {
@@ -608,6 +609,7 @@ async fn main() -> anyhow::Result<()> {
                     let item = TaxonCleaningProcedure::create()
                         .taxon_id(taxon_id)
                         .procedure_id(procedure_id)
+                        .notes(notes)
                         .exec(&mut db)
                         .await?;
                     println!(
