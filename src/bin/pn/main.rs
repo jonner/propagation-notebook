@@ -7,6 +7,8 @@ use propagation_notebook::{
 };
 use tabled::settings::{Alignment, Modify, object::Columns};
 use toasty::Db;
+use tracing::level_filters::LevelFilter;
+use tracing_subscriber::{EnvFilter, layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::cli::Options;
 
@@ -22,7 +24,12 @@ fn truncate_with_summary(s: &str, max_chars: usize) -> String {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    tracing_subscriber::fmt::init();
+    let filter = EnvFilter::try_from_default_env()
+        .unwrap_or_else(|_| EnvFilter::default().add_directive(LevelFilter::WARN.into()));
+    tracing_subscriber::registry()
+        .with(tracing_subscriber::fmt::layer())
+        .with(filter)
+        .init();
     let options = Options::parse();
     let mut db = Db::builder()
         .models(propagation_notebook::models())

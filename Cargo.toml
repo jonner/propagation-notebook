@@ -16,7 +16,7 @@ toasty = { version = "0.6.1", features = ["jiff", "sqlite", "serde"] }
 toasty-cli = "0.6.1"
 tokio = { version = "1.52.1", features = ["rt-multi-thread"] }
 tracing = "0.1.44"
-tracing-subscriber = "0.3.23"
+tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
 url = { version = "2.5.8", features = ["serde"] }
 
 [dev-dependencies]
