@@ -574,6 +574,21 @@ async fn main() -> anyhow::Result<()> {
                     println!("Removed collecting data {id}")
                 }
             }
+            CollectingCommands::Modify {
+                id,
+                ripening_indicators,
+                storage,
+            } => {
+                let mut query = CollectingData::update_by_id(id);
+                if let Some(ripening) = ripening_indicators {
+                    query = query.ripening_indicators(ripening);
+                }
+                if let Some(storage) = storage {
+                    query = query.storage(storage);
+                }
+                query.exec(&mut db).await?;
+                println!("Modified collection information {id}");
+            }
         },
         MainCommand::Cleaning { command } => match command {
             CleaningCommands::List => {
