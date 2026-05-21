@@ -497,13 +497,18 @@ async fn main() -> anyhow::Result<()> {
                 )
             }
             RegionCommands::RemoveTaxon { id } => {
-                RegionalTaxonStatus::delete_by_taxon_id_and_region_id(
-                    &mut db,
-                    id.taxon_id,
-                    id.region_id,
-                )
-                .await?;
-                println!("Removed taxon {} from region {}", id.taxon_id, id.region_id);
+                if inquire::Confirm::new("Are you sure you wish to remove this regional taxon?")
+                    .with_default(false)
+                    .prompt()?
+                {
+                    RegionalTaxonStatus::delete_by_taxon_id_and_region_id(
+                        &mut db,
+                        id.taxon_id,
+                        id.region_id,
+                    )
+                    .await?;
+                    println!("Removed taxon {} from region {}", id.taxon_id, id.region_id);
+                }
             }
         },
         MainCommand::Collecting { command } => match command {
@@ -649,13 +654,18 @@ async fn main() -> anyhow::Result<()> {
                 remove,
             } => {
                 if remove {
-                    TaxonCleaningProcedure::delete_by_taxon_id_and_procedure_id(
-                        &mut db,
-                        taxon_id,
-                        procedure_id,
-                    )
-                    .await?;
-                    println!("Assignment removed");
+                    if inquire::Confirm::new("Are you sure you wish to remove this procedure?")
+                        .with_default(false)
+                        .prompt()?
+                    {
+                        TaxonCleaningProcedure::delete_by_taxon_id_and_procedure_id(
+                            &mut db,
+                            taxon_id,
+                            procedure_id,
+                        )
+                        .await?;
+                        println!("Assignment removed");
+                    }
                 } else {
                     let item = TaxonCleaningProcedure::create()
                         .taxon_id(taxon_id)
