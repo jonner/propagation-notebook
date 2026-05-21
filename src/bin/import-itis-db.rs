@@ -48,6 +48,16 @@ pub struct TaxonomicUnit {
 }
 
 #[derive(Debug, toasty::Model)]
+#[table = "hierarchy"]
+pub struct Hierarchy {
+    #[key]
+    hierarchy_string: String,
+    #[index]
+    tsn: u64,
+    level: u64,
+}
+
+#[derive(Debug, toasty::Model)]
 pub struct SynonymLink {
     #[key]
     tsn: u64,
@@ -85,10 +95,32 @@ async fn main() -> anyhow::Result<()> {
 
     let mut tsn_to_id: HashMap<u64, u64> = HashMap::default();
 
+    // Build a sequence map from the hierarchy table. hierarchy_string is the
+    // primary key and encodes the ancestry path (e.g. "202422-846491-660046"),
+    // so lexicographic order guarantees parent-before-child. phylo_sort_seq
+    // has too many ties (89k taxa share seq=0) and causes rows to be skipped
+    // at page boundaries when paginating.
+    println!("Building hierarchy sequence...");
+    let mut tsn_to_seq: HashMap<u64, u64> = HashMap::default();
+    let mut page = Hierarchy::all()
+        .order_by(Hierarchy::fields().hierarchy_string().asc())
+        .paginate(500)
+        .exec(&mut itisdb)
+        .await?;
+    let mut seq: u64 = 0;
+    loop {
+        for h in page.iter() {
+            tsn_to_seq.insert(h.tsn, seq);
+            seq += 1;
+        }
+        match page.next(&mut itisdb).await? {
+            Some(next) => page = next,
+            None => break,
+        }
+    }
+
     let mut page = TaxonomicUnit::filter_by_name_usage("accepted")
-        // need to sort by taxonomic sequence to guarantee that the parent will
-        // be added to the database before the child that refers to it.
-        .order_by(TaxonomicUnit::fields().phylo_sort_seq().asc())
+        .order_by(TaxonomicUnit::fields().tsn().asc())
         .paginate(100)
         .exec(&mut itisdb)
         .await?;
@@ -97,6 +129,7 @@ async fn main() -> anyhow::Result<()> {
     loop {
         let mut creates = Vec::new();
         for theirs in page.iter() {
+            let sequence = tsn_to_seq.get(&theirs.tsn).copied().unwrap_or(u64::MAX);
             let query = propagation_notebook::taxonomy::Taxon::create()
                 .itis_id(theirs.tsn)
                 .name1(&theirs.unit_name1)
@@ -104,7 +137,7 @@ async fn main() -> anyhow::Result<()> {
                 .name3(&theirs.unit_name3)
                 .complete_name(&theirs.complete_name)
                 .rank(theirs.rank_id)
-                .sequence(theirs.phylo_sort_seq);
+                .sequence(sequence);
             creates.push(query);
         }
         let objs = toasty::batch(creates).exec(&mut ourdb).await?;
@@ -121,9 +154,7 @@ async fn main() -> anyhow::Result<()> {
 
     println!("Setting parent taxa...");
     let mut page = TaxonomicUnit::filter_by_name_usage("accepted")
-        // need to sort by taxonomic sequence to guarantee that the parent will
-        // be added to the database before the child that refers to it.
-        .order_by(TaxonomicUnit::fields().phylo_sort_seq().asc())
+        .order_by(TaxonomicUnit::fields().tsn().asc())
         .paginate(100)
         .exec(&mut itisdb)
         .await?;
