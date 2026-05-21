@@ -44,6 +44,8 @@ pub struct Region {
     // FIXME: geojson??
     pub bounds: Option<String>,
 
+    pub notes: Option<String>,
+
     #[has_many]
     pub taxon_statuses: HasMany<RegionalTaxonStatus>,
     #[has_many]

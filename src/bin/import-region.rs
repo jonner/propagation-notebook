@@ -39,6 +39,7 @@ struct RegionInfo {
     name: String,
     bounds: Option<String>,
     taxa: Vec<TaxonInfo>,
+    notes: Option<String>,
     // npcs: Vec<NativePlantCommunityInfo>,
 }
 
@@ -104,6 +105,8 @@ async fn main() -> anyhow::Result<()> {
     let n_taxa = taxa_create.len();
     let region = Region::create()
         .name(info.name)
+        .bounds(info.bounds)
+        .notes(info.notes)
         .taxon_statuses(taxa_create)
         .exec(&mut db)
         .await?;

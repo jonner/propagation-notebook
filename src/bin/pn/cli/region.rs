@@ -85,14 +85,18 @@ pub enum RegionCommands {
         region_name: String,
         #[clap(flatten)]
         bounds: BoundsArg,
+        #[arg(long, help = "Free-form notes about the region")]
+        notes: Option<String>,
     },
-    #[command(about = "Modify information about a region", group(clap::ArgGroup::new("modify_fields").args(["name", "bounds_string", "bounds_file"]).required(true).multiple(true)))]
+    #[command(about = "Modify information about a region", group(clap::ArgGroup::new("modify_fields").args(["name", "bounds_string", "bounds_file", "notes"]).required(true).multiple(true)))]
     Modify {
         id: u64,
         #[command(flatten)]
         bounds: BoundsArg,
         #[arg(short, long, help = "Specify a new name for the region")]
         name: Option<String>,
+        #[arg(long, help = "Set notes for a region")]
+        notes: Option<String>,
     },
     #[command(about = "Remove a region from the database")]
     Remove { id: u64 },

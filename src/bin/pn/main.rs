@@ -294,6 +294,7 @@ async fn main() -> anyhow::Result<()> {
                 let mut tbuilder = tabled::builder::Builder::default();
                 tbuilder.push_record(["ID", &region.id.to_string()]);
                 tbuilder.push_record(["Name", &region.name]);
+                tbuilder.push_record(["Notes", &region.notes.unwrap_or_else(|| "-".to_string())]);
                 tbuilder.push_record(["Taxa", &region.taxon_statuses.get().len().to_string()]);
                 tbuilder.push_record([
                     "Bounds",
@@ -307,7 +308,12 @@ async fn main() -> anyhow::Result<()> {
                         .with(Modify::new(Columns::first()).with(Alignment::right()))
                 )
             }
-            RegionCommands::Modify { id, bounds, name } => {
+            RegionCommands::Modify {
+                id,
+                bounds,
+                name,
+                notes,
+            } => {
                 let mut update_query = Region::update_by_id(id);
                 let bounds = bounds.resolve().await?;
                 if let Some(name) = name {
@@ -316,17 +322,22 @@ async fn main() -> anyhow::Result<()> {
                 if let Some(bounds) = bounds {
                     update_query = update_query.bounds(bounds);
                 }
+                if let Some(notes) = notes {
+                    update_query = update_query.notes(notes);
+                }
                 update_query.exec(&mut db).await?;
                 println!("Region {id} updated");
             }
             RegionCommands::Add {
                 region_name,
                 bounds,
+                notes,
             } => {
                 let bounds = bounds.resolve().await?;
                 let new_region = Region::create()
                     .name(region_name)
                     .bounds(bounds)
+                    .notes(notes)
                     .exec(&mut db)
                     .await?;
                 println!("Added new region {}", new_region.reference());
