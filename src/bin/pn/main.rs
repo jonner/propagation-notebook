@@ -542,11 +542,8 @@ async fn main() -> anyhow::Result<()> {
                 let mut tbuilder = tabled::builder::Builder::default();
                 tbuilder.push_record(["ID", &data.id.to_string()]);
                 tbuilder.push_record(["Taxon", &data.taxon.get().reference()]);
-                tbuilder.push_record(["Ripening Indicators", &data.ripening_indicators]);
-                tbuilder.push_record([
-                    "Storage instructions",
-                    &data.storage.unwrap_or_else(|| "-".into()),
-                ]);
+                tbuilder.push_record(["Ripening", &data.ripening_indicators]);
+                tbuilder.push_record(["Storage", &data.storage.unwrap_or_else(|| "-".into())]);
                 println!(
                     "{}",
                     tbuilder
