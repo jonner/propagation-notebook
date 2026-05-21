@@ -1,8 +1,11 @@
+use serde::{Deserialize, Serialize};
 use toasty::{BelongsTo, HasMany};
 
 use crate::taxonomy::Taxon;
 
-#[derive(Debug, Clone, Copy, toasty::Embed, strum::Display, clap::ValueEnum)]
+#[derive(
+    Debug, Clone, Copy, toasty::Embed, strum::Display, clap::ValueEnum, Serialize, Deserialize,
+)]
 pub enum WetlandIndicator {
     #[column(variant = 1)]
     ObligateWetland,
@@ -18,7 +21,9 @@ pub enum WetlandIndicator {
     Other,
 }
 
-#[derive(Debug, Clone, Copy, toasty::Embed, strum::Display, clap::ValueEnum)]
+#[derive(
+    Debug, Clone, Copy, toasty::Embed, strum::Display, clap::ValueEnum, Serialize, Deserialize,
+)]
 pub enum ConservationStatus {
     #[column(variant = 1)]
     Endangered,

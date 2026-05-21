@@ -3,7 +3,7 @@ use std::{collections::HashMap, path::PathBuf};
 use anyhow::Context;
 use clap::Parser;
 use propagation_notebook::{
-    region::{Region, RegionalTaxonStatus},
+    region::{ConservationStatus, Region, RegionalTaxonStatus, WetlandIndicator},
     taxonomy::Synonym,
 };
 use tokio::io::AsyncReadExt;
@@ -30,8 +30,8 @@ struct TaxonInfo {
     name: String,
     c_value: Option<u64>,
     origin: Origin,
-    // conservation_status: Option<ConservationStatus>,
-    // wetland_indicator: Option<WetlandIndicator>,
+    status: Option<ConservationStatus>,
+    wetland_indicator: Option<WetlandIndicator>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -100,6 +100,7 @@ async fn main() -> anyhow::Result<()> {
                         taxon_info.origin,
                     ),
                 )
+                .conservation_status(taxon_info.status)
                 .c_value(taxon_info.c_value),
         );
     }
@@ -117,7 +118,7 @@ async fn main() -> anyhow::Result<()> {
         n_taxa
     );
 
-    todo!()
+    Ok(())
 }
 
 async fn find_taxon_for_name(
