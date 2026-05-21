@@ -423,11 +423,12 @@ async fn main() -> anyhow::Result<()> {
                 let ntaxa = taxa.len();
                 println!("Regional Taxa from region '{}'", region.name);
                 let mut tbuilder = tabled::builder::Builder::default();
-                tbuilder.push_record(["Taxon", "Origin"]);
+                tbuilder.push_record(["ID", "Taxon", "Origin"]);
                 for taxon in taxa {
                     let status = map.get(&taxon.id).unwrap();
                     tbuilder.push_record([
-                        taxon.reference(),
+                        taxon.id.to_string(),
+                        taxon.complete_name,
                         status
                             .origin
                             .map(|s| s.to_string())
