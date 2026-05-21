@@ -29,7 +29,7 @@ impl From<Origin> for propagation_notebook::region::Origin {
 struct TaxonInfo {
     name: String,
     c_value: Option<u64>,
-    origin: Origin,
+    origin: Option<Origin>,
     status: Option<ConservationStatus>,
     wetland_indicator: Option<WetlandIndicator>,
 }
@@ -79,9 +79,9 @@ async fn main() -> anyhow::Result<()> {
             .entry(t.id)
             .and_modify(|existing| {
                 // if any of the lumped taxa is native, consider the whole thing native
-                if taxon_info.origin == Origin::Native {
+                if taxon_info.origin == Some(Origin::Native) {
                     existing.origin = taxon_info.origin;
-                } else if existing.origin == Origin::Unknown {
+                } else if existing.origin.is_none_or(|x| x == Origin::Unknown) {
                     // any new status overrides unknown
                     existing.origin = taxon_info.origin;
                 }
@@ -95,11 +95,7 @@ async fn main() -> anyhow::Result<()> {
         taxa_create.push(
             RegionalTaxonStatus::create()
                 .taxon_id(id)
-                .origin(
-                    std::convert::Into::<propagation_notebook::region::Origin>::into(
-                        taxon_info.origin,
-                    ),
-                )
+                .origin(taxon_info.origin.map(|x| x.into()))
                 .conservation_status(taxon_info.status)
                 .c_value(taxon_info.c_value),
         );
