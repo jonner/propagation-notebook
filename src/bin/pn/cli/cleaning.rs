@@ -50,21 +50,6 @@ pub enum CleaningCommands {
         #[arg(short, long, help = "A description of the step")]
         notes: Option<String>,
     },
-    #[command(about = "Associate a taxon with the seed cleaning procedure")]
-    Assign {
-        procedure_id: u64,
-        #[arg(short, long, help = "A taxon ID")]
-        taxon_id: u64,
-        #[arg(
-            short,
-            long,
-            help = "Custom notes for this taxon",
-            conflicts_with = "remove"
-        )]
-        notes: Option<String>,
-        #[arg(short, long, help = "Remove the assignment")]
-        remove: bool,
-    },
     #[command(about = "Remove a step from a cleaning procedure")]
     RemoveStep { id: u64 },
 }

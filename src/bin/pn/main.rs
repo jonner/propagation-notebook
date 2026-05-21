@@ -263,6 +263,35 @@ async fn main() -> anyhow::Result<()> {
                 );
                 println!("{} taxa found", ntaxa);
             }
+            TaxonCommands::SetCleaningProcedure {
+                taxon_id,
+                procedure_id,
+                notes,
+                remove,
+            } => {
+                if remove {
+                    if inquire::Confirm::new("Are you sure you wish to remove this procedure?")
+                        .with_default(false)
+                        .prompt()?
+                    {
+                        TaxonCleaningProcedure::delete_by_taxon_id_and_procedure_id(
+                            &mut db,
+                            taxon_id,
+                            procedure_id,
+                        )
+                        .await?;
+                        println!("Assignment removed");
+                    }
+                } else {
+                    TaxonCleaningProcedure::create()
+                        .taxon_id(taxon_id)
+                        .procedure_id(procedure_id)
+                        .notes(notes)
+                        .exec(&mut db)
+                        .await?;
+                    println!("Procedure {} assigned to taxon {}", taxon_id, procedure_id);
+                }
+            }
         },
         MainCommand::Regions { command } => match command {
             RegionCommands::List => {
@@ -667,38 +696,6 @@ async fn main() -> anyhow::Result<()> {
                     .exec(&mut db)
                     .await?;
                 println!("Added new step {}", step.id);
-            }
-            CleaningCommands::Assign {
-                procedure_id,
-                taxon_id,
-                notes,
-                remove,
-            } => {
-                if remove {
-                    if inquire::Confirm::new("Are you sure you wish to remove this procedure?")
-                        .with_default(false)
-                        .prompt()?
-                    {
-                        TaxonCleaningProcedure::delete_by_taxon_id_and_procedure_id(
-                            &mut db,
-                            taxon_id,
-                            procedure_id,
-                        )
-                        .await?;
-                        println!("Assignment removed");
-                    }
-                } else {
-                    let item = TaxonCleaningProcedure::create()
-                        .taxon_id(taxon_id)
-                        .procedure_id(procedure_id)
-                        .notes(notes)
-                        .exec(&mut db)
-                        .await?;
-                    println!(
-                        "Taxon {} now uses procedure {}",
-                        item.taxon_id, item.procedure_id
-                    );
-                }
             }
             CleaningCommands::Steps { procedure_id } => {
                 let steps = CleaningProcedureStep::filter_by_procedure_id(procedure_id)
