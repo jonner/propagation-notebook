@@ -40,6 +40,88 @@ where
     }
 }
 
+fn build_taxon_table(taxon: &Taxon) -> tabled::builder::Builder {
+    let mut tbuilder = tabled::builder::Builder::default();
+    tbuilder.push_record(["ID", &taxon.id.to_string()]);
+    tbuilder.push_record(["Name", &taxon.complete_name]);
+    tbuilder.push_record(["Rank", &taxon.rank.to_string()]);
+    tbuilder.push_record([
+        "Parent",
+        &taxon
+            .parent
+            .get()
+            .as_ref()
+            .map(|p| format!("{} ({})", p.reference(), p.rank))
+            .unwrap_or_else(|| "-".into()),
+    ]);
+    tbuilder.push_record([
+        "Synonyms",
+        &join_or_default(taxon.synonyms.get(), "-", |v| v.complete_name.clone()),
+    ]);
+    tbuilder.push_record([
+        "Common Name(s)",
+        &join_or_default(taxon.vernaculars.get(), "-", |v| v.name.clone()),
+    ]);
+    tbuilder.push_record([
+        "Child taxa",
+        &join_or_default(taxon.children.get(), "-", |t| {
+            format!("{} ({})", t.reference(), t.rank)
+        }),
+    ]);
+    tbuilder.push_record([
+        "Regions",
+        &join_or_default(taxon.regional_statuses.get(), "-", |s| {
+            format!(
+                "{} ({})",
+                s.region.get().reference(),
+                s.origin
+                    .unwrap_or(propagation_notebook::region::Origin::Unknown)
+            )
+        }),
+    ]);
+    tbuilder.push_record([
+        "Ripening",
+        taxon
+            .collecting_data
+            .get()
+            .as_ref()
+            .map(|d| d.ripening_indicators.as_str())
+            .unwrap_or_else(|| "-"),
+    ]);
+    tbuilder.push_record([
+        "Storage",
+        taxon
+            .collecting_data
+            .get()
+            .as_ref()
+            .and_then(|d| d.storage.as_deref())
+            .unwrap_or("-"),
+    ]);
+    if let Some(tcp) = taxon.cleaning_procedure.get() {
+        tbuilder.push_record(["Seed Cleaning", &{
+            let proc = tcp.procedure.get();
+            let mut steps = Vec::from(proc.steps.get());
+            steps.sort_by_key(|v| v.order);
+            let mut inner_table = tabled::builder::Builder::default();
+            inner_table.push_record(["ID", &proc.id.to_string()]);
+            inner_table.push_record(["Name", &proc.name]);
+            inner_table.push_record(["Notes", proc.notes.as_deref().unwrap_or("-")]);
+            inner_table.push_record([
+                "Steps",
+                &join_or_default(&steps, "[none]", |step| format!(" - {}", step.summary())),
+            ]);
+            let s = format!(
+                "Taxon-specific Notes:\n{}\n\nProcedure:\n{}",
+                tcp.notes.as_deref().unwrap_or("[none]"),
+                inner_table.build().with(tabled::settings::Style::blank())
+            );
+            s
+        }])
+    }
+
+    tbuilder
+}
+
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     let filter = EnvFilter::try_from_default_env()
@@ -158,85 +240,7 @@ async fn main() -> anyhow::Result<()> {
                     .one()
                     .exec(&mut db)
                     .await?;
-                let mut tbuilder = tabled::builder::Builder::default();
-                tbuilder.push_record(["ID", &taxon.id.to_string()]);
-                tbuilder.push_record(["Name", &taxon.complete_name]);
-                tbuilder.push_record(["Rank", &taxon.rank.to_string()]);
-                tbuilder.push_record([
-                    "Parent",
-                    &taxon
-                        .parent
-                        .get()
-                        .as_ref()
-                        .map(|p| format!("{} ({})", p.reference(), p.rank))
-                        .unwrap_or_else(|| "-".into()),
-                ]);
-                tbuilder.push_record([
-                    "Synonyms",
-                    &join_or_default(taxon.synonyms.get(), "-", |v| v.complete_name.clone()),
-                ]);
-                tbuilder.push_record([
-                    "Common Name(s)",
-                    &join_or_default(taxon.vernaculars.get(), "-", |v| v.name.clone()),
-                ]);
-                tbuilder.push_record([
-                    "Child taxa",
-                    &join_or_default(taxon.children.get(), "-", |t| {
-                        format!("{} ({})", t.reference(), t.rank)
-                    }),
-                ]);
-                tbuilder.push_record([
-                    "Regions",
-                    &join_or_default(taxon.regional_statuses.get(), "-", |s| {
-                        format!(
-                            "{} ({})",
-                            s.region.get().reference(),
-                            s.origin
-                                .unwrap_or(propagation_notebook::region::Origin::Unknown)
-                        )
-                    }),
-                ]);
-                tbuilder.push_record([
-                    "Ripening",
-                    taxon
-                        .collecting_data
-                        .get()
-                        .as_ref()
-                        .map(|d| d.ripening_indicators.as_str())
-                        .unwrap_or_else(|| "-"),
-                ]);
-                tbuilder.push_record([
-                    "Storage",
-                    taxon
-                        .collecting_data
-                        .get()
-                        .as_ref()
-                        .and_then(|d| d.storage.as_deref())
-                        .unwrap_or("-"),
-                ]);
-                if let Some(tcp) = taxon.cleaning_procedure.get() {
-                    tbuilder.push_record(["Seed Cleaning", &{
-                        let proc = tcp.procedure.get();
-                        let mut steps = Vec::from(proc.steps.get());
-                        steps.sort_by_key(|v| v.order);
-                        let mut inner_table = tabled::builder::Builder::default();
-                        inner_table.push_record(["ID", &proc.id.to_string()]);
-                        inner_table.push_record(["Name", &proc.name]);
-                        inner_table.push_record(["Notes", proc.notes.as_deref().unwrap_or("-")]);
-                        inner_table.push_record([
-                            "Steps",
-                            &join_or_default(&steps, "[none]", |step| {
-                                format!(" - {}", step.summary())
-                            }),
-                        ]);
-                        let s = format!(
-                            "Taxon-specific Notes:\n{}\n\nProcedure:\n{}",
-                            tcp.notes.as_deref().unwrap_or("[none]"),
-                            inner_table.build().with(tabled::settings::Style::blank())
-                        );
-                        s
-                    }])
-                }
+                let tbuilder = build_taxon_table(&taxon);
                 println!(
                     "{}",
                     tbuilder
@@ -443,11 +447,30 @@ async fn main() -> anyhow::Result<()> {
                 )
                 .include(RegionalTaxonStatus::fields().region())
                 .include(RegionalTaxonStatus::fields().taxon())
+                .include(RegionalTaxonStatus::fields().taxon().parent())
+                .include(RegionalTaxonStatus::fields().taxon().children())
+                .include(RegionalTaxonStatus::fields().taxon().vernaculars())
+                .include(RegionalTaxonStatus::fields().taxon().synonyms())
+                .include(
+                    RegionalTaxonStatus::fields()
+                        .taxon()
+                        .regional_statuses()
+                        .region(),
+                )
+                .include(RegionalTaxonStatus::fields().taxon().collecting_data())
+                .include(
+                    RegionalTaxonStatus::fields()
+                        .taxon()
+                        .cleaning_procedure()
+                        .procedure()
+                        .steps(),
+                )
                 .one()
                 .exec(&mut db)
                 .await?;
-                let mut tbuilder = tabled::builder::Builder::default();
-                tbuilder.push_record(["Taxon", &status.taxon.get().reference()]);
+                let mut tbuilder = build_taxon_table(status.taxon.get());
+                tbuilder.push_record([""]);
+                tbuilder.push_record(["Regional Information"]);
                 tbuilder.push_record(["Region", &status.region.get().reference()]);
                 tbuilder.push_record([
                     "Origin",
@@ -492,13 +515,14 @@ async fn main() -> anyhow::Result<()> {
                     ),
                 };
                 tbuilder.push_record(["Harvest Window", &window_str]);
+
                 println!(
                     "{}",
                     tbuilder
                         .build()
                         .with(tabled::settings::Style::blank())
                         .with(Modify::new(Columns::first()).with(Alignment::right()))
-                )
+                );
             }
             RegionCommands::RemoveTaxon { id } => {
                 RegionalTaxonStatus::delete_by_taxon_id_and_region_id(
