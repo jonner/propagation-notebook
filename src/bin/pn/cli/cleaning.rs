@@ -65,4 +65,6 @@ pub enum CleaningCommands {
         #[arg(short, long, help = "Remove the assignment")]
         remove: bool,
     },
+    #[command(about = "Remove a step from a cleaning procedure")]
+    RemoveStep { id: u64 },
 }

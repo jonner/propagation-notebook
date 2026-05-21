@@ -753,6 +753,15 @@ async fn main() -> anyhow::Result<()> {
                 query.exec(&mut db).await?;
                 println!("Modified cleaning procedure {id}");
             }
+            CleaningCommands::RemoveStep { id } => {
+                if inquire::Confirm::new("Are you sure you wish to remove this step?")
+                    .with_default(false)
+                    .prompt()?
+                {
+                    CleaningProcedureStep::delete_by_id(&mut db, id).await?;
+                    println!("Removed step {id}");
+                }
+            }
         },
     };
     Ok(())
