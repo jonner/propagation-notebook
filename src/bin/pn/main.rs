@@ -386,7 +386,6 @@ async fn main() -> anyhow::Result<()> {
                 println!("Modified taxon {} in region {}", id.taxon_id, id.region_id);
             }
             RegionCommands::ListTaxa { region_id } => {
-                let region = Region::get_by_id(&mut db, region_id).await?;
                 let regional_statuses = RegionalTaxonStatus::filter(
                     RegionalTaxonStatus::fields().region_id().eq(region_id),
                 )
@@ -416,8 +415,6 @@ async fn main() -> anyhow::Result<()> {
                     .map(|s| (s.taxon_id, s))
                     .collect::<HashMap<_, _>>();
 
-                let ntaxa = taxa.len();
-                println!("Regional Taxa from region '{}'", region.name);
                 let mut tbuilder = tabled::builder::Builder::default();
                 tbuilder.push_record(["Taxon", "Origin"]);
                 for taxon in taxa {
@@ -434,7 +431,6 @@ async fn main() -> anyhow::Result<()> {
                     "{}",
                     tbuilder.build().with(tabled::settings::Style::blank())
                 );
-                println!("{} taxa found", ntaxa);
             }
             RegionCommands::ShowTaxon { id } => {
                 let status = RegionalTaxonStatus::filter_by_taxon_id_and_region_id(
