@@ -13,6 +13,9 @@ pub enum CleaningCommands {
         #[arg(long, help = "General notes about the procedure")]
         notes: Option<String>,
     },
+    #[command(about = "Remove a seed cleaning procedure")]
+    Remove { id: u64 },
+    #[command(about = "Add a new seed cleaning procedure")]
     #[command(about = "Show all steps for the specified seed cleaning procedure")]
     Steps { procedure_id: u64 },
     #[command(about = "Add a new step to a seed cleaning procedure")]
