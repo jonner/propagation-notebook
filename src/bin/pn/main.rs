@@ -565,6 +565,15 @@ async fn main() -> anyhow::Result<()> {
                     .await?;
                 println!("Added collection information {}", data.id);
             }
+            CollectingCommands::Remove { id } => {
+                if inquire::Confirm::new("Are you sure you wish to remove this collecting data?")
+                    .with_default(false)
+                    .prompt()?
+                {
+                    CollectingData::delete_by_id(&mut db, id).await?;
+                    println!("Removed collecting data {id}")
+                }
+            }
         },
         MainCommand::Cleaning { command } => match command {
             CleaningCommands::List => {

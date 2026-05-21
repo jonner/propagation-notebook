@@ -22,4 +22,6 @@ pub enum CollectingCommands {
         #[arg(short, long, help = "Instructions for storing the seed")]
         storage: Option<String>,
     },
+    #[command(about = "Remove seed collecting information")]
+    Remove { id: u64 },
 }
