@@ -742,6 +742,17 @@ async fn main() -> anyhow::Result<()> {
                     println!("Removed cleaning procedure {id}");
                 }
             }
+            CleaningCommands::Modify { id, name, notes } => {
+                let mut query = CleaningProcedure::update_by_id(id);
+                if let Some(name) = name {
+                    query = query.name(name);
+                }
+                if let Some(notes) = notes {
+                    query = query.notes(notes);
+                }
+                query.exec(&mut db).await?;
+                println!("Modified cleaning procedure {id}");
+            }
         },
     };
     Ok(())
