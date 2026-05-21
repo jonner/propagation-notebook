@@ -5,7 +5,6 @@ pub enum CollectingCommands {
     #[command(about = "Show seed collecting information",
   group(clap::ArgGroup::new("id_fields").args(["id", "taxon_id"]).required(true).multiple(false)))]
     Show {
-        #[arg(short, long, help = "ID of seed collecting data")]
         id: Option<u64>,
         #[arg(short, long, help = "ID of a Taxon")]
         taxon_id: Option<u64>,
