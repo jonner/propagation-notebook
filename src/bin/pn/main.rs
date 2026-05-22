@@ -355,14 +355,21 @@ async fn main() -> anyhow::Result<()> {
         },
         MainCommand::Regions { command } => match command {
             RegionCommands::List => {
-                let regions = Region::all().exec(&mut db).await?;
+                let regions = Region::all()
+                    .include(Region::fields().taxon_statuses())
+                    .exec(&mut db)
+                    .await?;
                 if regions.is_empty() {
                     println!("No Regions found");
                 } else {
                     let mut tbuilder = tabled::builder::Builder::default();
-                    tbuilder.push_record(["ID", "Name"]);
+                    tbuilder.push_record(["ID", "Name", "Taxa"]);
                     for region in regions {
-                        tbuilder.push_record([region.id.to_string(), region.name])
+                        tbuilder.push_record([
+                            region.id.to_string(),
+                            region.name,
+                            region.taxon_statuses.get().len().to_string(),
+                        ])
                     }
                     println!(
                         "{}",
