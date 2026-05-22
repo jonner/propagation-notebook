@@ -323,6 +323,35 @@ async fn main() -> anyhow::Result<()> {
                 );
                 println!("{} taxa found", ntaxa);
             }
+            TaxonCommands::SetCleaningProcedure {
+                taxon_id,
+                procedure_id,
+                notes,
+                remove,
+            } => {
+                if remove {
+                    if inquire::Confirm::new("Are you sure you wish to remove this procedure?")
+                        .with_default(false)
+                        .prompt()?
+                    {
+                        TaxonCleaningProcedure::delete_by_taxon_id_and_procedure_id(
+                            &mut db,
+                            taxon_id,
+                            procedure_id,
+                        )
+                        .await?;
+                        println!("Assignment removed");
+                    }
+                } else {
+                    TaxonCleaningProcedure::create()
+                        .taxon_id(taxon_id)
+                        .procedure_id(procedure_id)
+                        .notes(notes)
+                        .exec(&mut db)
+                        .await?;
+                    println!("Procedure {} assigned to taxon {}", taxon_id, procedure_id);
+                }
+            }
         },
         MainCommand::Regions { command } => match command {
             RegionCommands::List => {
@@ -457,7 +486,6 @@ async fn main() -> anyhow::Result<()> {
                 println!("Modified taxon {} in region {}", id.taxon_id, id.region_id);
             }
             RegionCommands::ListTaxa { region_id } => {
-                let region = Region::get_by_id(&mut db, region_id).await?;
                 let regional_statuses = RegionalTaxonStatus::filter(
                     RegionalTaxonStatus::fields().region_id().eq(region_id),
                 )
@@ -487,8 +515,6 @@ async fn main() -> anyhow::Result<()> {
                     .map(|s| (s.taxon_id, s))
                     .collect::<HashMap<_, _>>();
 
-                let ntaxa = taxa.len();
-                println!("Regional Taxa from region '{}'", region.name);
                 let mut tbuilder = tabled::builder::Builder::default();
                 tbuilder.push_record(["ID", "Taxon", "Origin"]);
                 for taxon in taxa {
@@ -506,16 +532,20 @@ async fn main() -> anyhow::Result<()> {
                     "{}",
                     tbuilder.build().with(tabled::settings::Style::blank())
                 );
-                println!("{} taxa found", ntaxa);
             }
             RegionCommands::RemoveTaxon { id } => {
-                RegionalTaxonStatus::delete_by_taxon_id_and_region_id(
-                    &mut db,
-                    id.taxon_id,
-                    id.region_id,
-                )
-                .await?;
-                println!("Removed taxon {} from region {}", id.taxon_id, id.region_id);
+                if inquire::Confirm::new("Are you sure you wish to remove this regional taxon?")
+                    .with_default(false)
+                    .prompt()?
+                {
+                    RegionalTaxonStatus::delete_by_taxon_id_and_region_id(
+                        &mut db,
+                        id.taxon_id,
+                        id.region_id,
+                    )
+                    .await?;
+                    println!("Removed taxon {} from region {}", id.taxon_id, id.region_id);
+                }
             }
         },
         MainCommand::Collecting { command } => match command {
@@ -549,11 +579,8 @@ async fn main() -> anyhow::Result<()> {
                 let mut tbuilder = tabled::builder::Builder::default();
                 tbuilder.push_record(["ID", &data.id.to_string()]);
                 tbuilder.push_record(["Taxon", &data.taxon.get().reference()]);
-                tbuilder.push_record(["Ripening Indicators", &data.ripening_indicators]);
-                tbuilder.push_record([
-                    "Storage instructions",
-                    &data.storage.unwrap_or_else(|| "-".into()),
-                ]);
+                tbuilder.push_record(["Ripening", &data.ripening_indicators]);
+                tbuilder.push_record(["Storage", &data.storage.unwrap_or_else(|| "-".into())]);
                 println!(
                     "{}",
                     tbuilder
@@ -574,6 +601,30 @@ async fn main() -> anyhow::Result<()> {
                     .exec(&mut db)
                     .await?;
                 println!("Added collection information {}", data.id);
+            }
+            CollectingCommands::Remove { id } => {
+                if inquire::Confirm::new("Are you sure you wish to remove this collecting data?")
+                    .with_default(false)
+                    .prompt()?
+                {
+                    CollectingData::delete_by_id(&mut db, id).await?;
+                    println!("Removed collecting data {id}")
+                }
+            }
+            CollectingCommands::Modify {
+                id,
+                ripening_indicators,
+                storage,
+            } => {
+                let mut query = CollectingData::update_by_id(id);
+                if let Some(ripening) = ripening_indicators {
+                    query = query.ripening_indicators(ripening);
+                }
+                if let Some(storage) = storage {
+                    query = query.storage(storage);
+                }
+                query.exec(&mut db).await?;
+                println!("Modified collection information {id}");
             }
         },
         MainCommand::Cleaning { command } => match command {
@@ -654,33 +705,6 @@ async fn main() -> anyhow::Result<()> {
                     .await?;
                 println!("Added new step {}", step.id);
             }
-            CleaningCommands::Assign {
-                procedure_id,
-                taxon_id,
-                notes,
-                remove,
-            } => {
-                if remove {
-                    TaxonCleaningProcedure::delete_by_taxon_id_and_procedure_id(
-                        &mut db,
-                        taxon_id,
-                        procedure_id,
-                    )
-                    .await?;
-                    println!("Assignment removed");
-                } else {
-                    let item = TaxonCleaningProcedure::create()
-                        .taxon_id(taxon_id)
-                        .procedure_id(procedure_id)
-                        .notes(notes)
-                        .exec(&mut db)
-                        .await?;
-                    println!(
-                        "Taxon {} now uses procedure {}",
-                        item.taxon_id, item.procedure_id
-                    );
-                }
-            }
             CleaningCommands::Steps { procedure_id } => {
                 let steps = CleaningProcedureStep::filter_by_procedure_id(procedure_id)
                     .order_by(CleaningProcedureStep::fields().order().asc())
@@ -712,6 +736,36 @@ async fn main() -> anyhow::Result<()> {
                 }
                 query.exec(&mut db).await?;
                 println!("Updated step {}", id);
+            }
+            CleaningCommands::Remove { id } => {
+                if inquire::Confirm::new("Are you sure you wish to remove this cleaning procedure?")
+                    .with_default(false)
+                    .with_help_message("It will remove all related steps")
+                    .prompt()?
+                {
+                    CleaningProcedure::delete_by_id(&mut db, id).await?;
+                    println!("Removed cleaning procedure {id}");
+                }
+            }
+            CleaningCommands::Modify { id, name, notes } => {
+                let mut query = CleaningProcedure::update_by_id(id);
+                if let Some(name) = name {
+                    query = query.name(name);
+                }
+                if let Some(notes) = notes {
+                    query = query.notes(notes);
+                }
+                query.exec(&mut db).await?;
+                println!("Modified cleaning procedure {id}");
+            }
+            CleaningCommands::RemoveStep { id } => {
+                if inquire::Confirm::new("Are you sure you wish to remove this step?")
+                    .with_default(false)
+                    .prompt()?
+                {
+                    CleaningProcedureStep::delete_by_id(&mut db, id).await?;
+                    println!("Removed step {id}");
+                }
             }
         },
     };

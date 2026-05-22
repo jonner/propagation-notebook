@@ -13,6 +13,16 @@ pub enum CleaningCommands {
         #[arg(long, help = "General notes about the procedure")]
         notes: Option<String>,
     },
+    #[command(about = "Modify a seed cleaning procedure", group(clap::ArgGroup::new("cleaning_props").args(["name", "notes"]).required(true).multiple(false)))]
+    Modify {
+        id: u64,
+        #[arg(short, long, help = "A name for the procedure")]
+        name: Option<String>,
+        #[arg(long, help = "General notes about the procedure")]
+        notes: Option<String>,
+    },
+    #[command(about = "Remove a seed cleaning procedure")]
+    Remove { id: u64 },
     #[command(about = "Show all steps for the specified seed cleaning procedure")]
     Steps { procedure_id: u64 },
     #[command(about = "Add a new step to a seed cleaning procedure")]
@@ -40,19 +50,6 @@ pub enum CleaningCommands {
         #[arg(short, long, help = "A description of the step")]
         notes: Option<String>,
     },
-    #[command(about = "Associate a taxon with the seed cleaning procedure")]
-    Assign {
-        procedure_id: u64,
-        #[arg(short, long, help = "A taxon ID")]
-        taxon_id: u64,
-        #[arg(
-            short,
-            long,
-            help = "Custom notes for this taxon",
-            conflicts_with = "remove"
-        )]
-        notes: Option<String>,
-        #[arg(short, long, help = "Remove the assignment")]
-        remove: bool,
-    },
+    #[command(about = "Remove a step from a cleaning procedure")]
+    RemoveStep { id: u64 },
 }
