@@ -106,10 +106,6 @@ pub enum RegionCommands {
         region_id: u64,
     },
     #[command(about = "Show detailed information about the status of a taxon within a region")]
-    ShowTaxon {
-        #[command(flatten)]
-        id: RegionalTaxonId,
-    },
     #[command(about = "Add a taxon to a region")]
     AddTaxon {
         #[command(flatten)]
