@@ -1,10 +1,11 @@
 use std::collections::HashMap;
 
-use anyhow::Context;
 use indicatif::ProgressIterator;
 use itertools::Itertools;
 use propagation_notebook::taxonomy::Rank;
 use toasty::{BelongsTo, HasMany};
+
+use crate::cli::taxa::TaxonomicAuthority;
 
 const CHUNK_SIZE: usize = 500;
 #[derive(Debug, toasty::Model)]
@@ -77,30 +78,32 @@ pub struct Vernacular {
     vernacular_name: String,
 }
 
-#[tokio::main]
-async fn main() -> anyhow::Result<()> {
-    tracing_subscriber::fmt::init();
-    let itis_db_path = std::env::var("ITIS_DB_URI").with_context(|| " Please set the ITIS_DB_URI environment variable to the uri to connect to the ITIS database (download from https://www.itis.gov/downloads/index.html)")?;
-    let our_db_path = &std::env::var("DB_URI").with_context(|| "Please set the DB_URI environment variable to the uri to connect to the propagation notebook database")?;
-
-    let mut itisdb = toasty::Db::builder()
+pub async fn import_taxa(
+    db: &mut toasty::Db,
+    itis_uri: &str,
+    authority: TaxonomicAuthority,
+) -> anyhow::Result<()> {
+    let itisdb = toasty::Db::builder()
         .models(toasty::models!(crate::*))
-        .connect(&itis_db_path)
+        .connect(itis_uri)
         .await?;
 
-    let mut ourdb = toasty::Db::builder()
-        .models(propagation_notebook::models())
-        .connect(our_db_path)
-        .await?;
-    let mut ourtxn = ourdb.transaction().await?;
+    let mut txn = db.transaction().await?;
 
+    match authority {
+        TaxonomicAuthority::Itis => import_taxa_itis(itisdb, &mut txn).await?,
+    }
+
+    txn.commit().await?;
+
+    Ok(())
+}
+
+async fn import_taxa_itis(
+    mut itisdb: toasty::Db,
+    ourtxn: &mut toasty::Transaction<'_>,
+) -> Result<(), anyhow::Error> {
     let mut tsn_to_id: HashMap<u64, u64> = HashMap::default();
-
-    // Build a sequence map from the hierarchy table. hierarchy_string is the
-    // primary key and encodes the ancestry path (e.g. "202422-846491-660046"),
-    // so lexicographic order guarantees parent-before-child. phylo_sort_seq
-    // has too many ties (89k taxa share seq=0) and causes rows to be skipped
-    // at page boundaries when paginating.
     println!("Building hierarchy sequence...");
     let mut tsn_to_seq: HashMap<u64, _> = HashMap::default();
     let records = Hierarchy::all()
@@ -110,13 +113,11 @@ async fn main() -> anyhow::Result<()> {
     for (seq, record) in records.into_iter().enumerate().progress() {
         tsn_to_seq.insert(record.tsn, seq);
     }
-
     println!("Importing accepted taxa...");
     let taxa = TaxonomicUnit::filter_by_name_usage("accepted")
         .order_by(TaxonomicUnit::fields().tsn().asc())
         .exec(&mut itisdb)
         .await?;
-
     for chunk in &taxa
         .into_iter()
         .progress()
@@ -134,10 +135,9 @@ async fn main() -> anyhow::Result<()> {
         .chunks(CHUNK_SIZE)
     {
         let chunk: Vec<_> = chunk.into_iter().collect();
-        let objs = toasty::batch(chunk).exec(&mut ourtxn).await?;
+        let objs = toasty::batch(chunk).exec(ourtxn).await?;
         tsn_to_id.extend(objs.into_iter().map(|obj| (obj.itis_id, obj.id)));
     }
-
     println!("Setting parent taxa...");
     let taxa = TaxonomicUnit::filter_by_name_usage("accepted")
         .order_by(TaxonomicUnit::fields().tsn().asc())
@@ -162,9 +162,8 @@ async fn main() -> anyhow::Result<()> {
         .chunks(CHUNK_SIZE)
     {
         let chunk: Vec<_> = chunk.into_iter().collect();
-        toasty::batch(chunk).exec(&mut ourtxn).await?;
+        toasty::batch(chunk).exec(ourtxn).await?;
     }
-
     println!("Importing vernacular names...");
     let records = Vernacular::all()
         .order_by(Vernacular::fields().tsn().asc())
@@ -183,41 +182,38 @@ async fn main() -> anyhow::Result<()> {
         .chunks(CHUNK_SIZE)
     {
         toasty::batch(chunk.into_iter().collect::<Vec<_>>())
-            .exec(&mut ourtxn)
+            .exec(ourtxn)
             .await?;
     }
-
     println!("Importing synonyms...");
     let records = TaxonomicUnit::filter_by_name_usage("not accepted")
         .order_by(TaxonomicUnit::fields().tsn().asc())
         .exec(&mut itisdb)
         .await?;
-    for chunk in &records.into_iter().progress().chunks(CHUNK_SIZE) {
-        let mut creates = Vec::new();
+    Ok(
+        for chunk in &records.into_iter().progress().chunks(CHUNK_SIZE) {
+            let mut creates = Vec::new();
 
-        for theirs in chunk {
-            match SynonymLink::get_by_tsn(&mut itisdb, theirs.tsn).await {
-                Ok(link) => {
-                    let ourid = tsn_to_id
-                        .get(&link.tsn_accepted)
-                        .expect("Failed to find id of accepted taxon");
-                    let synonym = propagation_notebook::taxonomy::Synonym::create()
-                        .name1(&theirs.unit_name1)
-                        .name2(&theirs.unit_name2)
-                        .name3(&theirs.unit_name3)
-                        .complete_name(&theirs.complete_name)
-                        .taxon_id(ourid);
-                    creates.push(synonym);
-                }
-                Err(e) => tracing::warn!(?e),
-            };
-        }
-        if !creates.is_empty() {
-            toasty::batch(creates).exec(&mut ourtxn).await?;
-        }
-    }
-
-    ourtxn.commit().await?;
-
-    Ok(())
+            for theirs in chunk {
+                match SynonymLink::get_by_tsn(&mut itisdb, theirs.tsn).await {
+                    Ok(link) => {
+                        let ourid = tsn_to_id
+                            .get(&link.tsn_accepted)
+                            .expect("Failed to find id of accepted taxon");
+                        let synonym = propagation_notebook::taxonomy::Synonym::create()
+                            .name1(&theirs.unit_name1)
+                            .name2(&theirs.unit_name2)
+                            .name3(&theirs.unit_name3)
+                            .complete_name(&theirs.complete_name)
+                            .taxon_id(ourid);
+                        creates.push(synonym);
+                    }
+                    Err(e) => tracing::warn!(?e),
+                };
+            }
+            if !creates.is_empty() {
+                toasty::batch(creates).exec(ourtxn).await?;
+            }
+        },
+    )
 }

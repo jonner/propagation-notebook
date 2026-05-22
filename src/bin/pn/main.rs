@@ -25,6 +25,7 @@ use crate::{
 
 mod cli;
 mod import_region;
+mod import_taxa;
 
 fn truncate_with_summary(s: &str, max_chars: usize) -> String {
     let extra_chars = s.chars().count().saturating_sub(max_chars);
@@ -371,6 +372,21 @@ async fn main() -> anyhow::Result<()> {
                         .exec(&mut db)
                         .await?;
                     println!("Procedure {} assigned to taxon {}", taxon_id, procedure_id);
+                }
+            }
+            TaxonCommands::Import { db_uri, authority } => {
+                let ntaxa = Taxon::all().count().exec(&mut db).await?;
+                if inquire::Confirm::new(
+                    "Are you sure you wish to import all taxa from the external database?",
+                )
+                .with_default(false)
+                .with_help_message(&format!("The database currently contains {ntaxa} taxa"))
+                .prompt()?
+                {
+                    // FIXME: we should probably clear the database if the
+                    // user confirms rather than re-import a taxonomy into an
+                    // existing taxonomy
+                    import_taxa::import_taxa(&mut db, &db_uri, authority).await?
                 }
             }
         },

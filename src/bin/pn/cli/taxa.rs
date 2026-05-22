@@ -1,3 +1,8 @@
+#[derive(Debug, Clone, Copy, clap::ValueEnum)]
+pub enum TaxonomicAuthority {
+    Itis,
+}
+
 #[derive(Debug, clap::Subcommand)]
 pub enum TaxonCommands {
     #[command(about = "Print a list of all taxa")]
@@ -20,5 +25,18 @@ pub enum TaxonCommands {
         notes: Option<String>,
         #[arg(short, long, help = "Remove the assignment")]
         remove: bool,
+    },
+    #[command(about = "Import a new taxonomy for use with this tool")]
+    Import {
+        #[arg(help = "A URI to the external taxonomy database")]
+        db_uri: String,
+        #[arg(
+            short,
+            long,
+            help = "The creator of the database",
+            value_enum,
+            default_value_t = TaxonomicAuthority::Itis
+        )]
+        authority: TaxonomicAuthority,
     },
 }
