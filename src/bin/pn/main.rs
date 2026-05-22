@@ -815,6 +815,9 @@ async fn main() -> anyhow::Result<()> {
                 }
             }
         },
+        MainCommand::Propagation { command } => match command {
+            cli::propagation::PropagationCommands::List => todo!(),
+        },
     };
     Ok(())
 }

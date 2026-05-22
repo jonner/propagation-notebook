@@ -1,4 +1,4 @@
-use crate::cli::cleaning::CleaningCommands;
+use crate::cli::{cleaning::CleaningCommands, propagation::PropagationCommands};
 
 #[derive(Debug, clap::Parser)]
 pub struct Options {
@@ -28,9 +28,15 @@ pub enum MainCommand {
         #[command(subcommand)]
         command: CleaningCommands,
     },
+    #[command(about = "Seed propagation information")]
+    Propagation {
+        #[command(subcommand)]
+        command: PropagationCommands,
+    },
 }
 
 pub mod cleaning;
 pub mod collecting;
+pub mod propagation;
 pub mod region;
 pub mod taxa;
