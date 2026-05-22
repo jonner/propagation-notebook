@@ -6,7 +6,10 @@ pub enum TaxonomicAuthority {
 #[derive(Debug, clap::Subcommand)]
 pub enum TaxonCommands {
     #[command(about = "Print a list of all taxa")]
-    List,
+    List {
+        #[arg(short, long, help = "Show only taxa in the specified region")]
+        region_id: Option<u64>,
+    },
     #[command(about = "Show detailed information about a Taxon")]
     Show { id: u64 },
     #[command(about = "Search for a taxon")]

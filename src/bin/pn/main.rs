@@ -46,6 +46,55 @@ where
     }
 }
 
+async fn list_regional_taxa(db: &mut toasty::Db, region_id: u64) -> anyhow::Result<()> {
+    let regional_statuses =
+        RegionalTaxonStatus::filter(RegionalTaxonStatus::fields().region_id().eq(region_id))
+            // FIXME: We want to order by a taxon sequence, but
+            // toasty doesn't yet support ordering by data in a relation
+            .exec(db)
+            .await?;
+
+    // FIXME: it's too slow to include all relations, so query the taxa separately
+    let taxa = Taxon::filter(
+        Taxon::fields().id().in_list(
+            regional_statuses
+                .iter()
+                .map(|s| s.taxon_id)
+                .collect::<Vec<_>>(),
+        ),
+    )
+    .order_by(Taxon::fields().sequence().asc())
+    .exec(db)
+    .await?;
+
+    // since we can't order the regional status list by taxon
+    // sequence, we need to iterate through the sorted taxon list, and then look up the
+    // regional status from a hash table
+    let map = regional_statuses
+        .into_iter()
+        .map(|s| (s.taxon_id, s))
+        .collect::<HashMap<_, _>>();
+
+    let mut tbuilder = tabled::builder::Builder::default();
+    tbuilder.push_record(["ID", "Taxon", "Origin"]);
+    for taxon in taxa {
+        let status = map.get(&taxon.id).unwrap();
+        tbuilder.push_record([
+            taxon.id.to_string(),
+            taxon.complete_name,
+            status
+                .origin
+                .map(|s| s.to_string())
+                .unwrap_or_else(|| "-".into()),
+        ]);
+    }
+    println!(
+        "{}",
+        tbuilder.build().with(tabled::settings::Style::blank())
+    );
+    Ok(())
+}
+
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     let filter = EnvFilter::try_from_default_env()
@@ -327,24 +376,27 @@ async fn main() -> anyhow::Result<()> {
                     }
                 }
             }
-            TaxonCommands::List => {
-                let taxa = Taxon::all()
-                    .order_by(Taxon::fields().sequence().asc())
-                    .exec(&mut db)
-                    .await?;
-                let ntaxa = taxa.len();
+            TaxonCommands::List { region_id } => match region_id {
+                Some(id) => list_regional_taxa(&mut db, id).await?,
+                None => {
+                    let taxa = Taxon::all()
+                        .order_by(Taxon::fields().sequence().asc())
+                        .exec(&mut db)
+                        .await?;
+                    let ntaxa = taxa.len();
 
-                let mut tbuilder = tabled::builder::Builder::default();
-                tbuilder.push_record(["ID", "Name"]);
-                for taxon in taxa {
-                    tbuilder.push_record([taxon.id.to_string(), taxon.complete_name]);
+                    let mut tbuilder = tabled::builder::Builder::default();
+                    tbuilder.push_record(["ID", "Name"]);
+                    for taxon in taxa {
+                        tbuilder.push_record([taxon.id.to_string(), taxon.complete_name]);
+                    }
+                    println!(
+                        "{}",
+                        tbuilder.build().with(tabled::settings::Style::blank())
+                    );
+                    println!("{} taxa found", ntaxa);
                 }
-                println!(
-                    "{}",
-                    tbuilder.build().with(tabled::settings::Style::blank())
-                );
-                println!("{} taxa found", ntaxa);
-            }
+            },
             TaxonCommands::SetCleaningProcedure {
                 taxon_id,
                 procedure_id,
@@ -533,52 +585,7 @@ async fn main() -> anyhow::Result<()> {
                 println!("Modified taxon {} in region {}", id.taxon_id, id.region_id);
             }
             RegionCommands::ListTaxa { region_id } => {
-                let regional_statuses = RegionalTaxonStatus::filter(
-                    RegionalTaxonStatus::fields().region_id().eq(region_id),
-                )
-                // FIXME: We want to order by a taxon sequence, but
-                // toasty doesn't yet support ordering by data in a relation
-                .exec(&mut db)
-                .await?;
-
-                // FIXME: it's too slow to include all relations, so query the taxa separately
-                let taxa = Taxon::filter(
-                    Taxon::fields().id().in_list(
-                        regional_statuses
-                            .iter()
-                            .map(|s| s.taxon_id)
-                            .collect::<Vec<_>>(),
-                    ),
-                )
-                .order_by(Taxon::fields().sequence().asc())
-                .exec(&mut db)
-                .await?;
-
-                // since we can't order the regional status list by taxon
-                // sequence, we need to iterate through the sorted taxon list, and then look up the
-                // regional status from a hash table
-                let map = regional_statuses
-                    .into_iter()
-                    .map(|s| (s.taxon_id, s))
-                    .collect::<HashMap<_, _>>();
-
-                let mut tbuilder = tabled::builder::Builder::default();
-                tbuilder.push_record(["ID", "Taxon", "Origin"]);
-                for taxon in taxa {
-                    let status = map.get(&taxon.id).unwrap();
-                    tbuilder.push_record([
-                        taxon.id.to_string(),
-                        taxon.complete_name,
-                        status
-                            .origin
-                            .map(|s| s.to_string())
-                            .unwrap_or_else(|| "-".into()),
-                    ]);
-                }
-                println!(
-                    "{}",
-                    tbuilder.build().with(tabled::settings::Style::blank())
-                );
+                list_regional_taxa(&mut db, region_id).await?
             }
             RegionCommands::RemoveTaxon { id } => {
                 if inquire::Confirm::new("Are you sure you wish to remove this regional taxon?")
