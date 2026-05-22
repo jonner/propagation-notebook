@@ -2,7 +2,7 @@ use toasty::{BelongsTo, HasMany, HasOne};
 
 use crate::{
     collecting::{CollectingData, TaxonCleaningProcedure},
-    protocol::Protocol,
+    propagation::Protocol,
     region::RegionalTaxonStatus,
 };
 
