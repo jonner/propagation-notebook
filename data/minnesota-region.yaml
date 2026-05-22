@@ -2442,7 +2442,7 @@ taxa:
   - name: Humulus lupulus var. pubescens
     origin: Native
   # - name: Huperzia appressa
-  - name: Lycopodiella appressa
+  - name: Huperzia selago
     origin: Native
     status: SpecialConcern
   - name: Huperzia lucidula
