@@ -2,6 +2,7 @@ use std::{collections::HashMap, path::PathBuf};
 
 use anyhow::Context;
 use clap::Parser;
+use indicatif::ProgressIterator;
 use propagation_notebook::{
     region::{ConservationStatus, Region, RegionalTaxonStatus, WetlandIndicator},
     taxonomy::Synonym,
@@ -59,6 +60,7 @@ async fn main() -> anyhow::Result<()> {
         .models(propagation_notebook::models())
         .connect(&db_path)
         .await?;
+    let mut txn = db.transaction().await?;
 
     let mut f = tokio::fs::OpenOptions::new()
         .read(true)
@@ -74,8 +76,9 @@ async fn main() -> anyhow::Result<()> {
     // taxonomy, so we need to eliminate duplicates at the end. We do this by storing
     // the result in a hashmap by result taxon id
     let mut lookups: HashMap<u64, TaxonInfo> = HashMap::default();
-    for taxon_info in info.taxa {
-        let t = find_taxon_for_name(&mut db, &taxon_info.name).await?;
+    println!("Validating taxa...");
+    for taxon_info in info.taxa.into_iter().progress() {
+        let t = find_taxon_for_name(&mut txn, &taxon_info.name).await?;
         lookups
             .entry(t.id)
             .and_modify(|existing| {
@@ -92,7 +95,7 @@ async fn main() -> anyhow::Result<()> {
 
     // now insert all unique taxa into the region table
     let mut taxa_create = Vec::new();
-    for (id, taxon_info) in lookups.iter() {
+    for (id, taxon_info) in lookups.into_iter() {
         taxa_create.push(
             RegionalTaxonStatus::create()
                 .taxon_id(id)
@@ -108,8 +111,10 @@ async fn main() -> anyhow::Result<()> {
         .bounds(info.bounds)
         .notes(info.notes)
         .taxon_statuses(taxa_create)
-        .exec(&mut db)
+        .exec(&mut txn)
         .await?;
+
+    txn.commit().await?;
 
     println!(
         "Created region '{}' with {} taxa",

@@ -1,12 +1,12 @@
-use std::{
-    collections::HashMap,
-    io::{Write, stdout},
-};
+use std::collections::HashMap;
 
 use anyhow::Context;
+use indicatif::ProgressIterator;
+use itertools::Itertools;
 use propagation_notebook::taxonomy::Rank;
 use toasty::{BelongsTo, HasMany};
 
+const CHUNK_SIZE: usize = 500;
 #[derive(Debug, toasty::Model)]
 pub struct TaxonomicUnit {
     #[key]
@@ -92,6 +92,7 @@ async fn main() -> anyhow::Result<()> {
         .models(propagation_notebook::models())
         .connect(our_db_path)
         .await?;
+    let mut ourtxn = ourdb.transaction().await?;
 
     let mut tsn_to_id: HashMap<u64, u64> = HashMap::default();
 
@@ -101,66 +102,51 @@ async fn main() -> anyhow::Result<()> {
     // has too many ties (89k taxa share seq=0) and causes rows to be skipped
     // at page boundaries when paginating.
     println!("Building hierarchy sequence...");
-    let mut tsn_to_seq: HashMap<u64, u64> = HashMap::default();
-    let mut page = Hierarchy::all()
+    let mut tsn_to_seq: HashMap<u64, _> = HashMap::default();
+    let records = Hierarchy::all()
         .order_by(Hierarchy::fields().hierarchy_string().asc())
-        .paginate(500)
         .exec(&mut itisdb)
         .await?;
-    let mut seq: u64 = 0;
-    loop {
-        for h in page.iter() {
-            tsn_to_seq.insert(h.tsn, seq);
-            seq += 1;
-        }
-        match page.next(&mut itisdb).await? {
-            Some(next) => page = next,
-            None => break,
-        }
+    for (seq, record) in records.into_iter().enumerate().progress() {
+        tsn_to_seq.insert(record.tsn, seq);
     }
 
-    let mut page = TaxonomicUnit::filter_by_name_usage("accepted")
+    println!("Importing accepted taxa...");
+    let taxa = TaxonomicUnit::filter_by_name_usage("accepted")
         .order_by(TaxonomicUnit::fields().tsn().asc())
-        .paginate(100)
         .exec(&mut itisdb)
         .await?;
 
-    println!("Importing accepted taxa...");
-    loop {
-        let mut creates = Vec::new();
-        for theirs in page.iter() {
-            let sequence = tsn_to_seq.get(&theirs.tsn).copied().unwrap_or(u64::MAX);
-            let query = propagation_notebook::taxonomy::Taxon::create()
+    for chunk in &taxa
+        .into_iter()
+        .progress()
+        .map(|theirs| {
+            let sequence = tsn_to_seq.get(&theirs.tsn).copied().unwrap();
+            propagation_notebook::taxonomy::Taxon::create()
                 .itis_id(theirs.tsn)
                 .name1(&theirs.unit_name1)
                 .name2(&theirs.unit_name2)
                 .name3(&theirs.unit_name3)
                 .complete_name(&theirs.complete_name)
                 .rank(theirs.rank_id)
-                .sequence(sequence);
-            creates.push(query);
-        }
-        let objs = toasty::batch(creates).exec(&mut ourdb).await?;
+                .sequence(sequence as u64)
+        })
+        .chunks(CHUNK_SIZE)
+    {
+        let chunk: Vec<_> = chunk.into_iter().collect();
+        let objs = toasty::batch(chunk).exec(&mut ourtxn).await?;
         tsn_to_id.extend(objs.into_iter().map(|obj| (obj.itis_id, obj.id)));
-        print!(".");
-        stdout().flush().unwrap();
-
-        match page.next(&mut itisdb).await? {
-            Some(next) => page = next,
-            None => break,
-        }
     }
-    println!();
 
     println!("Setting parent taxa...");
-    let mut page = TaxonomicUnit::filter_by_name_usage("accepted")
+    let taxa = TaxonomicUnit::filter_by_name_usage("accepted")
         .order_by(TaxonomicUnit::fields().tsn().asc())
-        .paginate(100)
         .exec(&mut itisdb)
         .await?;
-    loop {
-        let mut updates = Vec::new();
-        for theirs in page.iter() {
+    for chunk in &taxa
+        .into_iter()
+        .progress()
+        .map(|theirs| {
             let errmsg = format!(
                 "Failed to find parent of {} (id={}, parent={:?})",
                 theirs.complete_name, theirs.tsn, theirs.parent_tsn
@@ -169,60 +155,47 @@ async fn main() -> anyhow::Result<()> {
                 .parent_tsn
                 .filter(|id| id != &0)
                 .map(|id| *tsn_to_id.get(&id).expect(&errmsg));
-            updates.push(
-                propagation_notebook::taxonomy::Taxon::filter_by_itis_id(theirs.tsn)
-                    .update()
-                    .parent_id(our_parent_id),
-            );
-        }
-        toasty::batch(updates).exec(&mut ourdb).await?;
-        print!(".");
-        stdout().flush().unwrap();
-
-        match page.next(&mut itisdb).await? {
-            Some(next) => page = next,
-            None => break,
-        }
+            propagation_notebook::taxonomy::Taxon::filter_by_itis_id(theirs.tsn)
+                .update()
+                .parent_id(our_parent_id)
+        })
+        .chunks(CHUNK_SIZE)
+    {
+        let chunk: Vec<_> = chunk.into_iter().collect();
+        toasty::batch(chunk).exec(&mut ourtxn).await?;
     }
-    println!();
 
     println!("Importing vernacular names...");
-    let mut page = Vernacular::all()
+    let records = Vernacular::all()
         .order_by(Vernacular::fields().tsn().asc())
-        .paginate(100)
         .exec(&mut itisdb)
         .await?;
-    loop {
-        let mut creates = Vec::new();
-        for v in page.iter() {
-            if let Some(ourid) = tsn_to_id.get(&v.tsn) {
-                creates.push(
-                    propagation_notebook::taxonomy::VernacularName::create()
-                        .name(&v.vernacular_name)
-                        .taxon_id(ourid),
-                )
-            }
-        }
-        toasty::batch(creates).exec(&mut ourdb).await?;
-        print!(".");
-        stdout().flush().unwrap();
-
-        match page.next(&mut itisdb).await? {
-            Some(next) => page = next,
-            None => break,
-        }
+    for chunk in &records
+        .into_iter()
+        .progress()
+        .filter_map(|record| {
+            tsn_to_id.get(&record.tsn).map(|ourid| {
+                propagation_notebook::taxonomy::VernacularName::create()
+                    .name(&record.vernacular_name)
+                    .taxon_id(ourid)
+            })
+        })
+        .chunks(CHUNK_SIZE)
+    {
+        toasty::batch(chunk.into_iter().collect::<Vec<_>>())
+            .exec(&mut ourtxn)
+            .await?;
     }
-    println!();
 
     println!("Importing synonyms...");
-    let mut page = TaxonomicUnit::filter_by_name_usage("not accepted")
+    let records = TaxonomicUnit::filter_by_name_usage("not accepted")
         .order_by(TaxonomicUnit::fields().tsn().asc())
-        .paginate(100)
         .exec(&mut itisdb)
         .await?;
-    loop {
+    for chunk in &records.into_iter().progress().chunks(CHUNK_SIZE) {
         let mut creates = Vec::new();
-        for theirs in page.iter() {
+
+        for theirs in chunk {
             match SynonymLink::get_by_tsn(&mut itisdb, theirs.tsn).await {
                 Ok(link) => {
                     let ourid = tsn_to_id
@@ -239,16 +212,12 @@ async fn main() -> anyhow::Result<()> {
                 Err(e) => tracing::warn!(?e),
             };
         }
-
-        toasty::batch(creates).exec(&mut ourdb).await?;
-        print!(".");
-        stdout().flush().unwrap();
-        match page.next(&mut itisdb).await? {
-            Some(next) => page = next,
-            None => break,
+        if !creates.is_empty() {
+            toasty::batch(creates).exec(&mut ourtxn).await?;
         }
     }
-    println!();
+
+    ourtxn.commit().await?;
 
     Ok(())
 }
