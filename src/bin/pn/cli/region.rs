@@ -88,6 +88,11 @@ pub enum RegionCommands {
         #[arg(long, help = "Free-form notes about the region")]
         notes: Option<String>,
     },
+    #[command(about = "Import a new region to the database")]
+    Import {
+        #[arg(help = "A path to a yaml file describing a region")]
+        path: PathBuf,
+    },
     #[command(about = "Modify information about a region", group(clap::ArgGroup::new("modify_fields").args(["name", "bounds_string", "bounds_file", "notes"]).required(true).multiple(true)))]
     Modify {
         id: u64,

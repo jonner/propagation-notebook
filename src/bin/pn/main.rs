@@ -14,12 +14,16 @@ use toasty::Db;
 use tracing::level_filters::LevelFilter;
 use tracing_subscriber::{EnvFilter, layer::SubscriberExt, util::SubscriberInitExt};
 
-use crate::cli::{
-    MainCommand, Options, cleaning::CleaningCommands, collecting::CollectingCommands,
-    region::RegionCommands, taxa::TaxonCommands,
+use crate::{
+    cli::{
+        MainCommand, Options, cleaning::CleaningCommands, collecting::CollectingCommands,
+        region::RegionCommands, taxa::TaxonCommands,
+    },
+    import_region::import_region,
 };
 
 mod cli;
+mod import_region;
 
 fn truncate_with_summary(s: &str, max_chars: usize) -> String {
     let extra_chars = s.chars().count().saturating_sub(max_chars);
@@ -433,6 +437,9 @@ async fn main() -> anyhow::Result<()> {
                     .exec(&mut db)
                     .await?;
                 println!("Added new region {}", new_region.reference());
+            }
+            RegionCommands::Import { path } => {
+                import_region(&mut db, path).await?;
             }
             RegionCommands::Remove { id } => {
                 if inquire::Confirm::new("Are you sure you wish to delete this region?")

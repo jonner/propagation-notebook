@@ -1,7 +1,8 @@
-use std::{collections::HashMap, path::PathBuf};
+use std::{
+    collections::HashMap,
+    path::{Path, PathBuf},
+};
 
-use anyhow::Context;
-use clap::Parser;
 use indicatif::ProgressIterator;
 use propagation_notebook::{
     region::{ConservationStatus, Region, RegionalTaxonStatus, WetlandIndicator},
@@ -49,23 +50,13 @@ struct Args {
     region_file: PathBuf,
 }
 
-#[tokio::main]
-async fn main() -> anyhow::Result<()> {
-    tracing_subscriber::fmt::init();
-    let args = Args::parse();
-    let db_path =
-        std::env::var("DB_URI").with_context(|| "Please set DB_URI environment variable")?;
-
-    let mut db = toasty::Db::builder()
-        .models(propagation_notebook::models())
-        .connect(&db_path)
-        .await?;
+pub async fn import_region<P>(db: &mut toasty::Db, path: P) -> anyhow::Result<()>
+where
+    P: AsRef<Path>,
+{
     let mut txn = db.transaction().await?;
 
-    let mut f = tokio::fs::OpenOptions::new()
-        .read(true)
-        .open(args.region_file)
-        .await?;
+    let mut f = tokio::fs::OpenOptions::new().read(true).open(path).await?;
     let mut info_string = String::new();
     f.read_to_string(&mut info_string).await?;
 
