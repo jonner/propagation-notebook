@@ -53,9 +53,16 @@ async fn main() -> anyhow::Result<()> {
         .with(filter)
         .init();
     let options = Options::parse();
+    let db_uri = match std::env::var("PN_DB_URI") {
+        Err(std::env::VarError::NotPresent) => {
+            Ok("sqlite:./propagation-notebook.sqlite".to_string())
+        }
+        Err(e) => Err(e),
+        s => s,
+    }?;
     let mut db = Db::builder()
         .models(propagation_notebook::models())
-        .connect("sqlite:./propagation-notebook.sqlite")
+        .connect(&db_uri)
         .await?;
     match options.command {
         MainCommand::Taxa { command } => match command {
