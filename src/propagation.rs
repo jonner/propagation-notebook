@@ -174,6 +174,7 @@ pub struct CultureEnvironment {
 
 // a combination of seed prep and sowing
 #[derive(Debug, Clone, toasty::Model)]
+#[table = "propagation_protocols"]
 pub struct Protocol {
     #[auto]
     #[key]
