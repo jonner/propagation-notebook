@@ -13,7 +13,7 @@ pub enum LightRequirement {
 }
 
 #[derive(Debug, Clone, toasty::Model, Tabled)]
-#[tabled(display(Option, "display::option", "-"))]
+#[tabled(display(Option, "display::option", "-"), rename_all = "CamelCase")]
 pub struct ProtocolStep {
     #[auto]
     #[key]
