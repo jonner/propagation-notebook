@@ -27,6 +27,50 @@ mod cli;
 mod import_region;
 mod import_taxa;
 
+mod style {
+    use tabled::{
+        grid::{
+            config::ColoredConfig,
+            dimension::CompleteDimension,
+            records::{ExactRecords, Records},
+        },
+        settings::{Alignment, Modify, Style, TableOption, object::Columns},
+    };
+
+    pub struct BasicTable;
+
+    impl<R> TableOption<R, ColoredConfig, CompleteDimension> for BasicTable
+    where
+        R: Records,
+    {
+        fn change(
+            self,
+            records: &mut R,
+            cfg: &mut ColoredConfig,
+            dimension: &mut CompleteDimension,
+        ) {
+            Style::empty().change(records, cfg, dimension);
+        }
+    }
+    pub struct DetailTable;
+    impl<R> TableOption<R, ColoredConfig, CompleteDimension> for DetailTable
+    where
+        R: ExactRecords + Records,
+    {
+        fn change(
+            self,
+            records: &mut R,
+            cfg: &mut ColoredConfig,
+            dimension: &mut CompleteDimension,
+        ) {
+            BasicTable.change(records, cfg, dimension);
+            Modify::new(Columns::first())
+                .with(Alignment::right())
+                .change(records, cfg, dimension);
+        }
+    }
+}
+
 fn truncate_with_summary(s: &str, max_chars: usize) -> String {
     let extra_chars = s.chars().count().saturating_sub(max_chars);
     if extra_chars == 0 {
@@ -88,10 +132,7 @@ async fn list_regional_taxa(db: &mut toasty::Db, region_id: u64) -> anyhow::Resu
                 .unwrap_or_else(|| "-".into()),
         ]);
     }
-    println!(
-        "{}",
-        tbuilder.build().with(tabled::settings::Style::blank())
-    );
+    println!("{}", tbuilder.build().with(style::BasicTable));
     Ok(())
 }
 
@@ -305,18 +346,12 @@ async fn main() -> anyhow::Result<()> {
                             let s = format!(
                                 "Taxon-specific Notes:\n{}\n\nProcedure:\n{}",
                                 tcp.notes.as_deref().unwrap_or("[none]"),
-                                inner_table.build().with(tabled::settings::Style::blank())
+                                inner_table.build().with(style::BasicTable)
                             );
                             s
                         }])
                     }
-                    println!(
-                        "{}",
-                        tbuilder
-                            .build()
-                            .with(tabled::settings::Style::blank())
-                            .with(Modify::new(Columns::first()).with(Alignment::right()))
-                    );
+                    println!("{}", tbuilder.build().with(style::DetailTable));
                     println!();
                     println!("Regional Information:");
                     for status in taxon.regional_statuses.get() {
@@ -365,13 +400,7 @@ async fn main() -> anyhow::Result<()> {
                             ),
                         };
                         tbuilder.push_record(["Harvest Window", &window_str]);
-                        println!(
-                            "{}",
-                            tbuilder
-                                .build()
-                                .with(tabled::settings::Style::blank())
-                                .with(Modify::new(Columns::first()).with(Alignment::right()))
-                        );
+                        println!("{}", tbuilder.build().with(style::DetailTable));
                         println!();
                     }
                 }
@@ -390,10 +419,7 @@ async fn main() -> anyhow::Result<()> {
                     for taxon in taxa {
                         tbuilder.push_record([taxon.id.to_string(), taxon.complete_name]);
                     }
-                    println!(
-                        "{}",
-                        tbuilder.build().with(tabled::settings::Style::blank())
-                    );
+                    println!("{}", tbuilder.build().with(style::BasicTable));
                     println!("{} taxa found", ntaxa);
                 }
             },
@@ -460,10 +486,7 @@ async fn main() -> anyhow::Result<()> {
                             region.taxon_statuses.get().len().to_string(),
                         ])
                     }
-                    println!(
-                        "{}",
-                        tbuilder.build().with(tabled::settings::Style::blank())
-                    );
+                    println!("{}", tbuilder.build().with(style::BasicTable));
                 }
             }
             RegionCommands::Show { id } => {
@@ -481,13 +504,7 @@ async fn main() -> anyhow::Result<()> {
                     "Bounds",
                     &truncate_with_summary(&region.bounds.unwrap_or_else(|| "-".to_string()), 500),
                 ]);
-                println!(
-                    "{}",
-                    tbuilder
-                        .build()
-                        .with(tabled::settings::Style::blank())
-                        .with(Modify::new(Columns::first()).with(Alignment::right()))
-                )
+                println!("{}", tbuilder.build().with(style::DetailTable))
             }
             RegionCommands::Modify {
                 id,
@@ -614,10 +631,7 @@ async fn main() -> anyhow::Result<()> {
                 for item in items {
                     tbuilder.push_record([item.id.to_string(), item.taxon.get().reference()])
                 }
-                println!(
-                    "{}",
-                    tbuilder.build().with(tabled::settings::Style::blank())
-                );
+                println!("{}", tbuilder.build().with(style::BasicTable));
                 println!("\n{nitems} found");
             }
             CollectingCommands::Show { id, taxon_id } => {
@@ -635,13 +649,7 @@ async fn main() -> anyhow::Result<()> {
                 tbuilder.push_record(["Taxon", &data.taxon.get().reference()]);
                 tbuilder.push_record(["Ripening", &data.ripening_indicators]);
                 tbuilder.push_record(["Storage", &data.storage.unwrap_or_else(|| "-".into())]);
-                println!(
-                    "{}",
-                    tbuilder
-                        .build()
-                        .with(tabled::settings::Style::blank())
-                        .with(Modify::new(Columns::first()).with(Alignment::right()))
-                )
+                println!("{}", tbuilder.build().with(style::DetailTable))
             }
             CollectingCommands::Add {
                 taxon_id,
@@ -699,10 +707,7 @@ async fn main() -> anyhow::Result<()> {
                         item.taxon_links.get().len().to_string(),
                     ])
                 }
-                println!(
-                    "{}",
-                    tbuilder.build().with(tabled::settings::Style::blank())
-                );
+                println!("{}", tbuilder.build().with(style::BasicTable));
                 println!("\n{nitems} found");
             }
             CleaningCommands::Show { id } => {
@@ -729,10 +734,7 @@ async fn main() -> anyhow::Result<()> {
                     "Steps",
                     &join_or_default(&steps, "-", |step| format!(" - {}", step.summary())),
                 ]);
-                println!(
-                    "{}",
-                    tbuilder.build().with(tabled::settings::Style::blank())
-                );
+                println!("{}", tbuilder.build().with(style::BasicTable));
             }
             CleaningCommands::Add { name, notes } => {
                 let item = CleaningProcedure::create()
@@ -766,7 +768,7 @@ async fn main() -> anyhow::Result<()> {
                     .await?;
                 let mut table = tabled::Table::new(steps.iter());
 
-                println!("{}", table.with(tabled::settings::Style::blank()));
+                println!("{}", table.with(style::BasicTable));
             }
             CleaningCommands::ModifyStep {
                 id,
