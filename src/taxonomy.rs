@@ -2,7 +2,7 @@ use toasty::{BelongsTo, HasMany, HasOne};
 
 use crate::{
     collecting::{CollectingData, TaxonCleaningProcedure},
-    propagation::Protocol,
+    propagation::TaxonProtocol,
     region::RegionalTaxonStatus,
 };
 
@@ -140,7 +140,7 @@ pub struct Taxon {
     #[has_one]
     pub cleaning_procedure: HasOne<Option<TaxonCleaningProcedure>>,
     #[has_many]
-    pub protocols: HasMany<Protocol>,
+    pub protocols: HasMany<TaxonProtocol>,
 }
 
 impl Taxon {

@@ -1,6 +1,112 @@
+use crate::taxonomy::Taxon;
 use toasty::{BelongsTo, HasMany};
 
-use crate::taxonomy::Taxon;
+#[derive(Debug, Clone, Copy, toasty::Embed)]
+pub enum LightRequirement {
+    #[column(variant = 1)]
+    LightRequired,
+    #[column(variant = 2)]
+    DarkRequired,
+    #[column(variant = 3)]
+    NoPreference,
+}
+
+#[derive(Debug, Clone, toasty::Model)]
+pub struct ProtocolStep {
+    #[auto]
+    #[key]
+    pub id: u64,
+
+    #[index]
+    pub protocol_id: u64,
+    #[belongs_to(key=protocol_id, references=id)]
+    pub protocol: BelongsTo<Protocol>,
+
+    pub step_order: u32,
+    pub step_type: ProtocolStepType,
+    pub title: String,
+    pub instructions: Option<String>,
+    pub duration_days: Option<u32>,
+    pub temperature_min_c: Option<f32>,
+    pub temperature_max_c: Option<f32>,
+    pub light_requirement: Option<LightRequirement>,
+    pub moisture_requirement: Option<String>,
+    pub materials: Option<String>,
+    pub is_optional: bool,
+    pub notes: Option<String>,
+}
+
+#[derive(Debug, Clone, Copy, toasty::Embed)]
+pub enum ProtocolStepType {
+    #[column(variant = 1)]
+    Stratification,
+    #[column(variant = 2)]
+    Scarification,
+    #[column(variant = 3)]
+    Soaking,
+    #[column(variant = 4)]
+    Sowing,
+    #[column(variant = 5)]
+    Germination,
+    #[column(variant = 6)]
+    Transplanting,
+    #[column(variant = 7)]
+    CuttingPreparation,
+    #[column(variant = 8)]
+    Rooting,
+    #[column(variant = 99)]
+    Other,
+}
+
+#[derive(Debug, Clone, Copy, toasty::Embed)]
+pub enum ProtocolType {
+    Pretreatment,
+    Germination,
+    Establishment,
+    Propagation,
+}
+
+#[derive(Debug, Clone, toasty::Model)]
+pub struct Protocol {
+    #[key]
+    #[auto]
+    pub id: u64,
+    pub name: String,
+    pub notes: Option<String>,
+
+    #[has_many]
+    pub citations: HasMany<ProtocolCitation>,
+}
+
+#[derive(Debug, Clone, toasty::Model)]
+pub struct TaxonProtocol {
+    #[key]
+    id: u64,
+    #[index]
+    pub taxon_id: u64,
+    #[belongs_to(key=taxon_id, references=id)]
+    taxon: BelongsTo<Taxon>,
+
+    #[index]
+    pub pretreatment_protocol_id: Option<u64>,
+    #[belongs_to(key=pretreatment_protocol_id, references=id)]
+    pub pretreatment: BelongsTo<Protocol>,
+    #[index]
+    pub germination_protocol_id: Option<u64>,
+    #[belongs_to(key=germination_protocol_id, references=id)]
+    pub germination: BelongsTo<Protocol>,
+    #[index]
+    pub establishment_protocol_id: Option<u64>,
+    #[belongs_to(key=establishment_protocol_id, references=id)]
+    pub establishment: BelongsTo<Protocol>,
+
+    pub confidence: Option<u8>,
+    pub success_rate: Option<f32>,
+    pub notes: Option<String>,
+
+    #[has_many]
+    pub citations: HasMany<TaxonProtocolCitation>,
+}
 
 #[derive(Debug, Clone, Copy, toasty::Embed)]
 pub enum CitationType {
@@ -33,174 +139,32 @@ pub struct Citation {
     pub reliability: Option<u8>,
 }
 
-#[derive(Debug, Clone, Copy, toasty::Embed)]
-pub enum PropagationType {
-    #[column(variant = 1)]
-    Sexual,
-    #[column(variant = 2)]
-    Asexual,
-}
-
-#[derive(Debug, Clone, Copy, toasty::Embed)]
-pub enum DifficultyLevel {
-    #[column(variant = 1)]
-    Easy,
-    #[column(variant = 2)]
-    Moderate,
-    #[column(variant = 3)]
-    Challenging,
-    #[column(variant = 4)]
-    Expert,
-}
-
 #[derive(Debug, Clone, toasty::Model)]
-pub struct Procedure {
-    #[auto]
+pub struct ProtocolCitation {
     #[key]
-    pub id: u64,
-
-    pub propagation_type: PropagationType,
-    pub difficulty: DifficultyLevel,
-    // link to an external table of notes?
-    pub notes: Option<String>,
-
-    #[has_many]
-    pub sexual_steps: HasMany<SexualMethodStep>,
-    #[has_many]
-    pub asexual_steps: HasMany<AsexualMethodStep>,
-    #[has_many]
-    pub protocols: HasMany<Protocol>,
-}
-
-#[derive(Debug, Clone, Copy, toasty::Embed)]
-pub enum TreatmentType {
-    #[column(variant = 1)]
-    ColdMoistStratification,
-    #[column(variant = 2)]
-    WarmStratification,
-    #[column(variant = 3)]
-    MechanicalScarification,
-    #[column(variant = 4)]
-    ChemicalScarification,
-    #[column(variant = 5)]
-    SmokeWater,
-    #[column(variant = 6)]
-    PreSoak,
-}
-
-#[derive(Debug, Clone, Copy, toasty::Embed)]
-pub enum LightRequirement {
-    #[column(variant = 1)]
-    LightRequired,
-    #[column(variant = 2)]
-    DarkRequired,
-    #[column(variant = 3)]
-    NoPreference,
-}
-
-#[derive(Debug, Clone, toasty::Model)]
-pub struct SexualMethodStep {
-    #[auto]
-    #[key]
-    pub id: u64,
-
     #[index]
-    pub procedure_id: u64,
-    #[belongs_to(key=procedure_id, references=id)]
-    pub procedure: BelongsTo<Procedure>,
-
-    pub step_order: u64,
-    pub treatment_type: TreatmentType,
-    pub duration_days: u64,
-    pub temp_day: u64,
-    pub temp_night: u64,
-    pub light_requirements: LightRequirement,
-}
-
-#[derive(Debug, Clone, Copy, toasty::Embed)]
-pub enum AsexualMethodType {
-    #[column(variant = 1)]
-    RhizomeDivision,
-    #[column(variant = 2)]
-    StemCutting,
-    #[column(variant = 3)]
-    RootCutting,
-    #[column(variant = 4)]
-    TissueCulture,
-    #[column(variant = 5)]
-    Layering,
-    #[column(variant = 99)]
-    Other,
-}
-
-#[derive(Debug, Clone, toasty::Model)]
-pub struct AsexualMethodStep {
-    #[auto]
-    #[key]
-    pub id: u64,
-
-    #[index]
-    pub procedure_id: u64,
-    #[belongs_to(key=procedure_id, references=id)]
-    pub procedure: BelongsTo<Procedure>,
-
-    pub method_type: AsexualMethodType,
-    pub hormone_treatment: Option<String>,
-    pub substrate_media: Option<String>,
-    pub moise_humidity_requirement: Option<String>,
-    pub optimal_timing: Option<String>,
-}
-
-#[derive(Debug, Clone, toasty::Model)]
-pub struct CultureEnvironment {
-    #[auto]
-    #[key]
-    pub id: u64,
-
-    // mm
-    pub sowing_depth: u64,
-    pub depth_description: Option<String>, // (Enum/Text: e.g., "Surface Sown," "1x Seed Diameter," "1/4 inch")
-    pub media_type: Option<String>,        // enum?
-    pub compaction_level: Option<String>,  // (Enum: Lightly pressed, Firmly packed, Loose)
-    pub moisture_regime: Option<String>, // (Enum: Saturated/Wet, Consistently Moist, Dry-out between waterings)
-    pub container_type: Option<String>, // (Enum: Plug tray, Deep conetainer, Open flat, Soil block)
-    pub is_experimental: bool,
-    // link to an external table of notes?
-    pub notes: Option<String>,
-
-    #[has_many(pair=environment)]
-    pub procedures: HasMany<Protocol>,
-}
-
-// a combination of seed prep and sowing
-#[derive(Debug, Clone, toasty::Model)]
-#[table = "propagation_protocols"]
-pub struct Protocol {
-    #[auto]
-    #[key]
-    pub id: u64,
-
-    pub name: String,
-
-    #[index]
-    pub taxon_id: u64,
-    #[belongs_to(key=taxon_id, references=id)]
-    pub taxon: BelongsTo<Taxon>,
-
-    #[index]
-    pub protocol_id: u64,
+    protocol_id: u64,
     #[belongs_to(key=protocol_id, references=id)]
-    pub procedure: BelongsTo<Procedure>,
+    protocol: BelongsTo<Protocol>,
 
-    #[index]
-    pub environment_id: u64,
-    #[belongs_to(key=environment_id, references=id)]
-    pub environment: BelongsTo<CultureEnvironment>,
-
-    #[index]
-    pub citation_id: u64,
+    #[key]
+    citation_id: u64,
     #[belongs_to(key=citation_id, references=id)]
-    pub citation: BelongsTo<Citation>,
+    citation: BelongsTo<Citation>,
+}
 
-    pub notes: Option<String>,
+#[derive(Debug, Clone, toasty::Model)]
+pub struct TaxonProtocolCitation {
+    #[key]
+    id: u64,
+
+    #[index]
+    taxon_protocol_id: u64,
+    #[belongs_to(key=taxon_protocol_id, references=id)]
+    taxon_protocol: BelongsTo<TaxonProtocol>,
+
+    #[key]
+    citation_id: u64,
+    #[belongs_to(key=citation_id, references=id)]
+    citation: BelongsTo<Citation>,
 }
