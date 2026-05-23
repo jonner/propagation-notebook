@@ -7,18 +7,23 @@ use propagation_notebook::{
     collecting::{
         CleaningProcedure, CleaningProcedureStep, CollectingData, TaxonCleaningProcedure,
     },
+    propagation::{Protocol, ProtocolStep},
     region::{Region, RegionalTaxonStatus},
     taxonomy::{Synonym, Taxon, VernacularName},
 };
-use tabled::builder::Builder as TableBuilder;
+use tabled::{Table, builder::Builder as TableBuilder};
 use toasty::Db;
 use tracing::level_filters::LevelFilter;
 use tracing_subscriber::{EnvFilter, layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::{
     cli::{
-        MainCommand, Options, cleaning::CleaningCommands, collecting::CollectingCommands,
-        region::RegionCommands, taxa::TaxonCommands,
+        MainCommand, Options,
+        cleaning::CleaningCommands,
+        collecting::CollectingCommands,
+        propagation::{PropagationCommands, PropagationStepsCommands},
+        region::RegionCommands,
+        taxa::TaxonCommands,
     },
     import_region::import_region,
 };
@@ -825,7 +830,176 @@ async fn main() -> anyhow::Result<()> {
             }
         },
         MainCommand::Propagation { command } => match command {
-            cli::propagation::PropagationCommands::List => todo!(),
+            PropagationCommands::List { r#type } => {
+                let mut query = Protocol::all();
+                if let Some(t) = r#type {
+                    query = query.filter(Protocol::fields().r#type().eq(t));
+                }
+                let protocols = query.exec(&mut db).await?;
+                let mut tbuilder = TableBuilder::default();
+                tbuilder.push_record(["ID", "Name", "Type"]);
+                for protocol in protocols {
+                    tbuilder.push_record([
+                        protocol.id.to_string(),
+                        protocol.name,
+                        protocol.r#type.to_string(),
+                    ])
+                }
+                println!("{}", tbuilder.build().with(style::BasicTable));
+            }
+            PropagationCommands::Show { id } => {
+                let p = Protocol::filter_by_id(id)
+                    .include(Protocol::fields().steps())
+                    .one()
+                    .exec(&mut db)
+                    .await?;
+                let mut tbuilder = TableBuilder::default();
+                tbuilder.push_record(["ID", &p.id.to_string()]);
+                tbuilder.push_record(["Name", &p.name]);
+                tbuilder.push_record(["Type", &p.r#type.to_string()]);
+                tbuilder.push_record(["Notes", p.notes.as_deref().unwrap_or("-")]);
+                tbuilder.push_record(["# of Steps", &p.steps.get().len().to_string()]);
+                println!("{}", tbuilder.build().with(style::DetailTable));
+            }
+            PropagationCommands::Add {
+                name,
+                r#type,
+                notes,
+            } => {
+                let item = Protocol::create()
+                    .name(name)
+                    .r#type(r#type)
+                    .notes(notes)
+                    .exec(&mut db)
+                    .await?;
+                println!("Added protocol {}", item.id);
+            }
+            PropagationCommands::Modify {
+                id,
+                name,
+                r#type,
+                notes,
+            } => {
+                let mut query = Protocol::update_by_id(id);
+                if let Some(name) = name {
+                    query = query.name(name);
+                }
+                if let Some(t) = r#type {
+                    query = query.r#type(t);
+                }
+
+                if let Some(notes) = notes {
+                    query = query.notes(notes);
+                }
+                query.exec(&mut db).await?;
+                println!("Updated protocol {id}");
+            }
+            PropagationCommands::Steps { command } => match command {
+                PropagationStepsCommands::Add {
+                    protocol_id,
+                    title,
+                    r#type,
+                    order,
+                    instructions,
+                    duration,
+                    min_temp,
+                    max_temp,
+                    light,
+                    moisture,
+                    materials,
+                    is_optional,
+                    notes,
+                } => {
+                    let item = ProtocolStep::create()
+                        .protocol_id(protocol_id)
+                        .title(title)
+                        .step_type(r#type)
+                        .order(order)
+                        .instructions(instructions)
+                        .duration(duration)
+                        .min_temp(min_temp)
+                        .max_temp(max_temp)
+                        .light(light)
+                        .moisture(moisture)
+                        .materials(materials)
+                        .is_optional(is_optional)
+                        .notes(notes)
+                        .exec(&mut db)
+                        .await?;
+                    println!("Added protocol step {}", item.id);
+                }
+                PropagationStepsCommands::Modify {
+                    id,
+                    title,
+                    r#type,
+                    order,
+                    instructions,
+                    duration,
+                    min_temp,
+                    max_temp,
+                    light,
+                    moisture,
+                    materials,
+                    is_optional,
+                    notes,
+                } => {
+                    let mut query = ProtocolStep::update_by_id(id);
+                    if let Some(title) = title {
+                        query = query.title(title);
+                    }
+                    if let Some(t) = r#type {
+                        query = query.step_type(t);
+                    }
+                    if let Some(order) = order {
+                        query = query.order(order);
+                    }
+                    if let Some(instructions) = instructions {
+                        query = query.instructions(instructions);
+                    }
+                    if let Some(duration) = duration {
+                        query = query.duration(duration);
+                    }
+                    if let Some(min_temp) = min_temp {
+                        query = query.min_temp(min_temp);
+                    }
+                    if let Some(max_temp) = max_temp {
+                        query = query.max_temp(max_temp);
+                    }
+                    if let Some(light) = light {
+                        query = query.light(light);
+                    }
+                    if let Some(moisture) = moisture {
+                        query = query.moisture(moisture);
+                    }
+                    if let Some(materials) = materials {
+                        query = query.materials(materials);
+                    }
+                    if let Some(is_optional) = is_optional {
+                        query = query.is_optional(is_optional);
+                    }
+                    if let Some(notes) = notes {
+                        query = query.notes(notes);
+                    }
+                    query.exec(&mut db).await?;
+                    println!("Modified protocol step {id}");
+                }
+                PropagationStepsCommands::List { protocol_id } => {
+                    let steps = ProtocolStep::filter_by_protocol_id(protocol_id)
+                        .order_by(ProtocolStep::fields().order().asc())
+                        .exec(&mut db)
+                        .await?;
+                    let mut table = Table::new(steps);
+                    println!("{}", table.with(style::BasicTable));
+                }
+                PropagationStepsCommands::Remove { id } => {
+                    if inquire::Confirm::new("Are you sure you wish to remove this step?")
+                        .with_default(false)
+                        .prompt()?
+                    {
+                        ProtocolStep::delete_by_id(&mut db, id).await?;
+                    }
+                }
+            },
         },
     };
     Ok(())

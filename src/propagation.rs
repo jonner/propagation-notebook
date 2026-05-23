@@ -1,7 +1,8 @@
 use crate::taxonomy::Taxon;
+use tabled::{Tabled, derive::display};
 use toasty::{BelongsTo, HasMany};
 
-#[derive(Debug, Clone, Copy, toasty::Embed)]
+#[derive(Debug, Clone, Copy, toasty::Embed, clap::ValueEnum, strum::Display)]
 pub enum LightRequirement {
     #[column(variant = 1)]
     LightRequired,
@@ -11,7 +12,8 @@ pub enum LightRequirement {
     NoPreference,
 }
 
-#[derive(Debug, Clone, toasty::Model)]
+#[derive(Debug, Clone, toasty::Model, Tabled)]
+#[tabled(display(Option, "display::option", "-"))]
 pub struct ProtocolStep {
     #[auto]
     #[key]
@@ -20,6 +22,7 @@ pub struct ProtocolStep {
     #[index]
     pub protocol_id: u64,
     #[belongs_to(key=protocol_id, references=id)]
+    #[tabled(skip)]
     pub protocol: BelongsTo<Protocol>,
 
     pub order: u64,
@@ -36,7 +39,7 @@ pub struct ProtocolStep {
     pub notes: Option<String>,
 }
 
-#[derive(Debug, Clone, Copy, toasty::Embed)]
+#[derive(Debug, Clone, Copy, toasty::Embed, clap::ValueEnum, strum::Display)]
 pub enum ProtocolStepType {
     #[column(variant = 1)]
     Stratification,
@@ -50,20 +53,20 @@ pub enum ProtocolStepType {
     Germination,
     #[column(variant = 6)]
     Transplanting,
-    #[column(variant = 7)]
-    CuttingPreparation,
-    #[column(variant = 8)]
-    Rooting,
+    // #[column(variant = 7)]
+    // CuttingPreparation,
+    // #[column(variant = 8)]
+    // Rooting,
     #[column(variant = 99)]
     Other,
 }
 
-#[derive(Debug, Clone, Copy, toasty::Embed)]
+#[derive(Debug, Clone, Copy, toasty::Embed, clap::ValueEnum, strum::Display)]
 pub enum ProtocolType {
     Pretreatment,
     Germination,
     Establishment,
-    Propagation,
+    // Propagation,
 }
 
 #[derive(Debug, Clone, toasty::Model)]
@@ -75,6 +78,8 @@ pub struct Protocol {
     pub notes: Option<String>,
     pub r#type: ProtocolType,
 
+    #[has_many]
+    pub steps: HasMany<ProtocolStep>,
     #[has_many]
     pub citations: HasMany<ProtocolCitation>,
 }
@@ -109,7 +114,7 @@ pub struct TaxonProtocol {
     pub citations: HasMany<TaxonProtocolCitation>,
 }
 
-#[derive(Debug, Clone, Copy, toasty::Embed)]
+#[derive(Debug, Clone, Copy, toasty::Embed, clap::ValueEnum)]
 pub enum CitationType {
     #[column(variant = 1)]
     PeerReviewedPaper,
