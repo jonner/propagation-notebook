@@ -94,3 +94,8 @@ snapshot_name = "0017_snapshot.toml"
 id = 186247680539960564
 name = "0018_migration.sql"
 snapshot_name = "0018_snapshot.toml"
+
+[[migrations]]
+id = 9090833379576354236
+name = "0019_migration.sql"
+snapshot_name = "0019_snapshot.toml"

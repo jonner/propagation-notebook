@@ -22,15 +22,15 @@ pub struct ProtocolStep {
     #[belongs_to(key=protocol_id, references=id)]
     pub protocol: BelongsTo<Protocol>,
 
-    pub step_order: u32,
+    pub order: u64,
     pub step_type: ProtocolStepType,
     pub title: String,
     pub instructions: Option<String>,
-    pub duration_days: Option<u32>,
-    pub temperature_min_c: Option<f32>,
-    pub temperature_max_c: Option<f32>,
-    pub light_requirement: Option<LightRequirement>,
-    pub moisture_requirement: Option<String>,
+    pub duration: Option<u64>,
+    pub min_temp: Option<f32>,
+    pub max_temp: Option<f32>,
+    pub light: Option<LightRequirement>,
+    pub moisture: Option<String>,
     pub materials: Option<String>,
     pub is_optional: bool,
     pub notes: Option<String>,
@@ -73,6 +73,7 @@ pub struct Protocol {
     pub id: u64,
     pub name: String,
     pub notes: Option<String>,
+    pub r#type: ProtocolType,
 
     #[has_many]
     pub citations: HasMany<ProtocolCitation>,
