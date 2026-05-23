@@ -899,6 +899,18 @@ async fn main() -> anyhow::Result<()> {
                 query.exec(&mut db).await?;
                 println!("Updated protocol {id}");
             }
+            PropagationCommands::Remove { id } => {
+                if inquire::Confirm::new(
+                    "Are you sure you wish to remove this Propagation protocol?",
+                )
+                .with_default(false)
+                .with_help_message("It will remove all related steps")
+                .prompt()?
+                {
+                    Protocol::delete_by_id(&mut db, id).await?;
+                    println!("Removed propagation protocol {id}");
+                }
+            }
             PropagationCommands::Steps { command } => match command {
                 PropagationStepsCommands::Add {
                     protocol_id,

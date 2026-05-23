@@ -34,6 +34,8 @@ pub enum PropagationCommands {
         #[arg(long, help = "Notes specific to this protocol")]
         notes: Option<String>,
     },
+    #[command(about = "Remove a seed propagation protocol")]
+    Remove { id: u64 },
     #[command(about = "Managing propagation protocol steps")]
     Steps {
         #[command(subcommand)]
