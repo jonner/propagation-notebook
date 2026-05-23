@@ -105,27 +105,36 @@ pub enum RegionCommands {
     },
     #[command(about = "Remove a region from the database")]
     Remove { id: u64 },
+    #[command(about = "Manage taxa for a region")]
+    Taxa {
+        #[command(subcommand)]
+        command: RegionTaxaCommands,
+    },
+}
+
+#[derive(Debug, clap::Subcommand)]
+pub enum RegionTaxaCommands {
     #[command(about = "Print a list of taxa for a region")]
-    ListTaxa {
+    List {
         #[arg(short, long, help = "ID of a region")]
         region_id: u64,
     },
     #[command(about = "Add a taxon to a region")]
-    AddTaxon {
+    Add {
         #[command(flatten)]
         id: RegionalTaxonId,
         #[command(flatten)]
         props: RegionalTaxonProperties,
     },
     #[command(about = "Modify information about a taxon within a region", group(clap::ArgGroup::new("modify_taxon_fields").args(["origin", "c_value", "conservation_status", "wetland_indicator", "harvest_start", "harvest_end"]).required(true).multiple(false)))]
-    ModifyTaxon {
+    Modify {
         #[command(flatten)]
         id: RegionalTaxonId,
         #[command(flatten)]
         props: RegionalTaxonProperties,
     },
     #[command(about = "Remove a taxon from a region")]
-    RemoveTaxon {
+    Remove {
         #[command(flatten)]
         id: RegionalTaxonId,
     },

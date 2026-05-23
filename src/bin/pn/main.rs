@@ -22,7 +22,7 @@ use crate::{
         cleaning::CleaningCommands,
         collecting::CollectingCommands,
         propagation::{PropagationCommands, PropagationStepsCommands},
-        region::RegionCommands,
+        region::{RegionCommands, RegionTaxaCommands},
         taxa::TaxonCommands,
     },
     import_region::import_region,
@@ -558,71 +558,74 @@ async fn main() -> anyhow::Result<()> {
                     println!("Deleted region {id} from the database");
                 }
             }
-            RegionCommands::AddTaxon { id, props } => {
-                let s = RegionalTaxonStatus::create()
-                    .region_id(id.region_id)
-                    .taxon_id(id.taxon_id)
-                    .origin(props.origin)
-                    .c_value(props.c_value)
-                    .conservation_status(props.conservation_status)
-                    .wetland_indicator(props.wetland_indicator)
-                    .window_start(
-                        props
-                            .harvest_start
-                            .map(|d| d.with().year(2000).build().unwrap()),
-                    )
-                    .window_end(
-                        props
-                            .harvest_end
-                            .map(|d| d.with().year(2000).build().unwrap()),
-                    )
-                    .exec(&mut db)
-                    .await?;
-                println!("Added regional taxon {}", s.id);
-            }
-            RegionCommands::ModifyTaxon { id, props } => {
-                let mut query = RegionalTaxonStatus::update_by_taxon_id_and_region_id(
-                    id.taxon_id,
-                    id.region_id,
-                );
-                if let Some(origin) = props.origin {
-                    query = query.origin(origin);
+            RegionCommands::Taxa { command } => match command {
+                RegionTaxaCommands::Add { id, props } => {
+                    let s = RegionalTaxonStatus::create()
+                        .region_id(id.region_id)
+                        .taxon_id(id.taxon_id)
+                        .origin(props.origin)
+                        .c_value(props.c_value)
+                        .conservation_status(props.conservation_status)
+                        .wetland_indicator(props.wetland_indicator)
+                        .window_start(
+                            props
+                                .harvest_start
+                                .map(|d| d.with().year(2000).build().unwrap()),
+                        )
+                        .window_end(
+                            props
+                                .harvest_end
+                                .map(|d| d.with().year(2000).build().unwrap()),
+                        )
+                        .exec(&mut db)
+                        .await?;
+                    println!("Added regional taxon {}", s.id);
                 }
-                if let Some(c_value) = props.c_value {
-                    query = query.c_value(c_value);
-                }
-                if let Some(conservation_status) = props.conservation_status {
-                    query = query.conservation_status(conservation_status);
-                }
-                if let Some(wetland_indicator) = props.wetland_indicator {
-                    query = query.wetland_indicator(wetland_indicator);
-                }
-                if let Some(harvest_start) = props.harvest_start {
-                    query = query.window_start(harvest_start.with().year(2000).build().unwrap());
-                }
-                if let Some(harvest_end) = props.harvest_end {
-                    query = query.window_end(harvest_end.with().year(2000).build().unwrap());
-                }
-                query.exec(&mut db).await?;
-                println!("Modified taxon {} in region {}", id.taxon_id, id.region_id);
-            }
-            RegionCommands::ListTaxa { region_id } => {
-                list_regional_taxa(&mut db, region_id).await?
-            }
-            RegionCommands::RemoveTaxon { id } => {
-                if inquire::Confirm::new("Are you sure you wish to remove this regional taxon?")
-                    .with_default(false)
-                    .prompt()?
-                {
-                    RegionalTaxonStatus::delete_by_taxon_id_and_region_id(
-                        &mut db,
+                RegionTaxaCommands::Modify { id, props } => {
+                    let mut query = RegionalTaxonStatus::update_by_taxon_id_and_region_id(
                         id.taxon_id,
                         id.region_id,
-                    )
-                    .await?;
-                    println!("Removed taxon {} from region {}", id.taxon_id, id.region_id);
+                    );
+                    if let Some(origin) = props.origin {
+                        query = query.origin(origin);
+                    }
+                    if let Some(c_value) = props.c_value {
+                        query = query.c_value(c_value);
+                    }
+                    if let Some(conservation_status) = props.conservation_status {
+                        query = query.conservation_status(conservation_status);
+                    }
+                    if let Some(wetland_indicator) = props.wetland_indicator {
+                        query = query.wetland_indicator(wetland_indicator);
+                    }
+                    if let Some(harvest_start) = props.harvest_start {
+                        query =
+                            query.window_start(harvest_start.with().year(2000).build().unwrap());
+                    }
+                    if let Some(harvest_end) = props.harvest_end {
+                        query = query.window_end(harvest_end.with().year(2000).build().unwrap());
+                    }
+                    query.exec(&mut db).await?;
+                    println!("Modified taxon {} in region {}", id.taxon_id, id.region_id);
                 }
-            }
+                RegionTaxaCommands::List { region_id } => {
+                    list_regional_taxa(&mut db, region_id).await?
+                }
+                RegionTaxaCommands::Remove { id } => {
+                    if inquire::Confirm::new("Are you sure you wish to remove this regional taxon?")
+                        .with_default(false)
+                        .prompt()?
+                    {
+                        RegionalTaxonStatus::delete_by_taxon_id_and_region_id(
+                            &mut db,
+                            id.taxon_id,
+                            id.region_id,
+                        )
+                        .await?;
+                        println!("Removed taxon {} from region {}", id.taxon_id, id.region_id);
+                    }
+                }
+            },
         },
         MainCommand::Collecting { command } => match command {
             CollectingCommands::List => {
