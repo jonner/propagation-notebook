@@ -190,30 +190,30 @@ async fn import_taxa_itis(
         .order_by(TaxonomicUnit::fields().tsn().asc())
         .exec(&mut itisdb)
         .await?;
-    Ok(
-        for chunk in &records.into_iter().progress().chunks(CHUNK_SIZE) {
-            let mut creates = Vec::new();
 
-            for theirs in chunk {
-                match SynonymLink::get_by_tsn(&mut itisdb, theirs.tsn).await {
-                    Ok(link) => {
-                        let ourid = tsn_to_id
-                            .get(&link.tsn_accepted)
-                            .expect("Failed to find id of accepted taxon");
-                        let synonym = propagation_notebook::taxonomy::Synonym::create()
-                            .name1(&theirs.unit_name1)
-                            .name2(&theirs.unit_name2)
-                            .name3(&theirs.unit_name3)
-                            .complete_name(&theirs.complete_name)
-                            .taxon_id(ourid);
-                        creates.push(synonym);
-                    }
-                    Err(e) => tracing::warn!(?e),
-                };
-            }
-            if !creates.is_empty() {
-                toasty::batch(creates).exec(ourtxn).await?;
-            }
-        },
-    )
+    for chunk in &records.into_iter().progress().chunks(CHUNK_SIZE) {
+        let mut creates = Vec::new();
+
+        for theirs in chunk {
+            match SynonymLink::get_by_tsn(&mut itisdb, theirs.tsn).await {
+                Ok(link) => {
+                    let ourid = tsn_to_id
+                        .get(&link.tsn_accepted)
+                        .expect("Failed to find id of accepted taxon");
+                    let synonym = propagation_notebook::taxonomy::Synonym::create()
+                        .name1(&theirs.unit_name1)
+                        .name2(&theirs.unit_name2)
+                        .name3(&theirs.unit_name3)
+                        .complete_name(&theirs.complete_name)
+                        .taxon_id(ourid);
+                    creates.push(synonym);
+                }
+                Err(e) => tracing::warn!(?e),
+            };
+        }
+        if !creates.is_empty() {
+            toasty::batch(creates).exec(ourtxn).await?;
+        }
+    }
+    Ok(())
 }
