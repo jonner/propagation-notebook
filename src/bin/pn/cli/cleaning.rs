@@ -23,10 +23,18 @@ pub enum CleaningCommands {
     },
     #[command(about = "Remove a seed cleaning procedure")]
     Remove { id: u64 },
+    #[command(about = "Manage steps for a seed cleaning procedure")]
+    Steps {
+        #[command(subcommand)]
+        command: CleaningStepsCommands,
+    },
+}
+#[derive(Debug, clap::Subcommand)]
+pub enum CleaningStepsCommands {
     #[command(about = "Show all steps for the specified seed cleaning procedure")]
-    Steps { procedure_id: u64 },
+    List { procedure_id: u64 },
     #[command(about = "Add a new step to a seed cleaning procedure")]
-    AddStep {
+    Add {
         #[arg(short, long, help = "A procedure ID")]
         procedure_id: u64,
         #[arg(short, long, help = "The order of this step within the procedure")]
@@ -39,7 +47,7 @@ pub enum CleaningCommands {
         notes: String,
     },
     #[command(about = "Edit the details of an existing cleaning step", group(clap::ArgGroup::new("step_fields").args(["order", "step_type", "equipment", "notes"]).required(true).multiple(false)))]
-    ModifyStep {
+    Modify {
         id: u64,
         #[arg(short, long, help = "The order of this step within the procedure")]
         order: Option<u64>,
@@ -51,5 +59,5 @@ pub enum CleaningCommands {
         notes: Option<String>,
     },
     #[command(about = "Remove a step from a cleaning procedure")]
-    RemoveStep { id: u64 },
+    Remove { id: u64 },
 }

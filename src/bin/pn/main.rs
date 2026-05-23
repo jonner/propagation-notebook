@@ -19,7 +19,7 @@ use tracing_subscriber::{EnvFilter, layer::SubscriberExt, util::SubscriberInitEx
 use crate::{
     cli::{
         MainCommand, Options,
-        cleaning::CleaningCommands,
+        cleaning::{CleaningCommands, CleaningStepsCommands},
         collecting::CollectingCommands,
         propagation::{PropagationCommands, PropagationStepsCommands},
         region::{RegionCommands, RegionTaxaCommands},
@@ -752,55 +752,6 @@ async fn main() -> anyhow::Result<()> {
                     .await?;
                 println!("Added new procedure {}", item.id);
             }
-            CleaningCommands::AddStep {
-                procedure_id,
-                order,
-                step_type,
-                equipment,
-                notes,
-            } => {
-                let step = CleaningProcedureStep::create()
-                    .procedure_id(procedure_id)
-                    .order(order)
-                    .operation_type(step_type)
-                    .equipment(equipment)
-                    .notes(notes)
-                    .exec(&mut db)
-                    .await?;
-                println!("Added new step {}", step.id);
-            }
-            CleaningCommands::Steps { procedure_id } => {
-                let steps = CleaningProcedureStep::filter_by_procedure_id(procedure_id)
-                    .order_by(CleaningProcedureStep::fields().order().asc())
-                    .exec(&mut db)
-                    .await?;
-                let mut table = tabled::Table::new(steps.iter());
-
-                println!("{}", table.with(style::BasicTable));
-            }
-            CleaningCommands::ModifyStep {
-                id,
-                order,
-                step_type,
-                equipment,
-                notes,
-            } => {
-                let mut query = CleaningProcedureStep::update_by_id(id);
-                if let Some(order) = order {
-                    query = query.order(order);
-                }
-                if let Some(step_type) = step_type {
-                    query = query.operation_type(step_type);
-                }
-                if let Some(equipment) = equipment {
-                    query = query.equipment(equipment);
-                }
-                if let Some(notes) = notes {
-                    query = query.notes(notes);
-                }
-                query.exec(&mut db).await?;
-                println!("Updated step {}", id);
-            }
             CleaningCommands::Remove { id } => {
                 if inquire::Confirm::new("Are you sure you wish to remove this cleaning procedure?")
                     .with_default(false)
@@ -822,15 +773,66 @@ async fn main() -> anyhow::Result<()> {
                 query.exec(&mut db).await?;
                 println!("Modified cleaning procedure {id}");
             }
-            CleaningCommands::RemoveStep { id } => {
-                if inquire::Confirm::new("Are you sure you wish to remove this step?")
-                    .with_default(false)
-                    .prompt()?
-                {
-                    CleaningProcedureStep::delete_by_id(&mut db, id).await?;
-                    println!("Removed step {id}");
+            CleaningCommands::Steps { command } => match command {
+                CleaningStepsCommands::Add {
+                    procedure_id,
+                    order,
+                    step_type,
+                    equipment,
+                    notes,
+                } => {
+                    let step = CleaningProcedureStep::create()
+                        .procedure_id(procedure_id)
+                        .order(order)
+                        .operation_type(step_type)
+                        .equipment(equipment)
+                        .notes(notes)
+                        .exec(&mut db)
+                        .await?;
+                    println!("Added new step {}", step.id);
                 }
-            }
+                CleaningStepsCommands::List { procedure_id } => {
+                    let steps = CleaningProcedureStep::filter_by_procedure_id(procedure_id)
+                        .order_by(CleaningProcedureStep::fields().order().asc())
+                        .exec(&mut db)
+                        .await?;
+                    let mut table = tabled::Table::new(steps.iter());
+
+                    println!("{}", table.with(style::BasicTable));
+                }
+                CleaningStepsCommands::Modify {
+                    id,
+                    order,
+                    step_type,
+                    equipment,
+                    notes,
+                } => {
+                    let mut query = CleaningProcedureStep::update_by_id(id);
+                    if let Some(order) = order {
+                        query = query.order(order);
+                    }
+                    if let Some(step_type) = step_type {
+                        query = query.operation_type(step_type);
+                    }
+                    if let Some(equipment) = equipment {
+                        query = query.equipment(equipment);
+                    }
+                    if let Some(notes) = notes {
+                        query = query.notes(notes);
+                    }
+                    query.exec(&mut db).await?;
+                    println!("Updated step {}", id);
+                }
+                CleaningStepsCommands::Remove { id } => {
+                    if inquire::Confirm::new("Are you sure you wish to remove this step?")
+                        .with_default(false)
+                        .prompt()?
+                    {
+                        CleaningProcedureStep::delete_by_id(&mut db, id).await?;
+                        println!("Removed step {id}");
+                    }
+                }
+            },
         },
         MainCommand::Propagation { command } => match command {
             PropagationCommands::List { r#type } => {
