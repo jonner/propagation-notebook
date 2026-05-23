@@ -179,6 +179,8 @@ pub struct Protocol {
     #[key]
     pub id: u64,
 
+    pub name: String,
+
     #[index]
     pub taxon_id: u64,
     #[belongs_to(key=taxon_id, references=id)]
