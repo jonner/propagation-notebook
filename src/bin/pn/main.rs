@@ -10,7 +10,7 @@ use propagation_notebook::{
     region::{Region, RegionalTaxonStatus},
     taxonomy::{Synonym, Taxon, VernacularName},
 };
-use tabled::settings::{Alignment, Modify, object::Columns};
+use tabled::builder::Builder as TableBuilder;
 use toasty::Db;
 use tracing::level_filters::LevelFilter;
 use tracing_subscriber::{EnvFilter, layer::SubscriberExt, util::SubscriberInitExt};
@@ -75,7 +75,7 @@ async fn list_regional_taxa(db: &mut toasty::Db, region_id: u64) -> anyhow::Resu
         .map(|s| (s.taxon_id, s))
         .collect::<HashMap<_, _>>();
 
-    let mut tbuilder = tabled::builder::Builder::default();
+    let mut tbuilder = TableBuilder::default();
     tbuilder.push_record(["ID", "Taxon", "Origin"]);
     for taxon in taxa {
         let status = map.get(&taxon.id).unwrap();
@@ -230,7 +230,7 @@ async fn main() -> anyhow::Result<()> {
                     .exec(&mut db)
                     .await?;
                 {
-                    let mut tbuilder = tabled::builder::Builder::default();
+                    let mut tbuilder = TableBuilder::default();
                     tbuilder.push_record(["ID", &taxon.id.to_string()]);
                     tbuilder.push_record(["Name", &taxon.complete_name]);
                     tbuilder.push_record(["Rank", &taxon.rank.to_string()]);
@@ -291,7 +291,7 @@ async fn main() -> anyhow::Result<()> {
                             let proc = tcp.procedure.get();
                             let mut steps = Vec::from(proc.steps.get());
                             steps.sort_by_key(|v| v.order);
-                            let mut inner_table = tabled::builder::Builder::default();
+                            let mut inner_table = TableBuilder::default();
                             inner_table.push_record(["ID", &proc.id.to_string()]);
                             inner_table.push_record(["Name", &proc.name]);
                             inner_table
@@ -320,7 +320,7 @@ async fn main() -> anyhow::Result<()> {
                     println!();
                     println!("Regional Information:");
                     for status in taxon.regional_statuses.get() {
-                        let mut tbuilder = tabled::builder::Builder::default();
+                        let mut tbuilder = TableBuilder::default();
                         tbuilder.push_record(["Region", &status.region.get().reference()]);
                         tbuilder.push_record([
                             "Origin",
@@ -385,7 +385,7 @@ async fn main() -> anyhow::Result<()> {
                         .await?;
                     let ntaxa = taxa.len();
 
-                    let mut tbuilder = tabled::builder::Builder::default();
+                    let mut tbuilder = TableBuilder::default();
                     tbuilder.push_record(["ID", "Name"]);
                     for taxon in taxa {
                         tbuilder.push_record([taxon.id.to_string(), taxon.complete_name]);
@@ -451,7 +451,7 @@ async fn main() -> anyhow::Result<()> {
                 if regions.is_empty() {
                     println!("No Regions found");
                 } else {
-                    let mut tbuilder = tabled::builder::Builder::default();
+                    let mut tbuilder = TableBuilder::default();
                     tbuilder.push_record(["ID", "Name", "Taxa"]);
                     for region in regions {
                         tbuilder.push_record([
@@ -472,7 +472,7 @@ async fn main() -> anyhow::Result<()> {
                     .one()
                     .exec(&mut db)
                     .await?;
-                let mut tbuilder = tabled::builder::Builder::default();
+                let mut tbuilder = TableBuilder::default();
                 tbuilder.push_record(["ID", &region.id.to_string()]);
                 tbuilder.push_record(["Name", &region.name]);
                 tbuilder.push_record(["Notes", &region.notes.unwrap_or_else(|| "-".to_string())]);
@@ -609,7 +609,7 @@ async fn main() -> anyhow::Result<()> {
                     .exec(&mut db)
                     .await?;
                 let nitems = items.len();
-                let mut tbuilder = tabled::builder::Builder::default();
+                let mut tbuilder = TableBuilder::default();
                 tbuilder.push_record(["ID", "Taxon"]);
                 for item in items {
                     tbuilder.push_record([item.id.to_string(), item.taxon.get().reference()])
@@ -630,7 +630,7 @@ async fn main() -> anyhow::Result<()> {
                 .one()
                 .exec(&mut db)
                 .await?;
-                let mut tbuilder = tabled::builder::Builder::default();
+                let mut tbuilder = TableBuilder::default();
                 tbuilder.push_record(["ID", &data.id.to_string()]);
                 tbuilder.push_record(["Taxon", &data.taxon.get().reference()]);
                 tbuilder.push_record(["Ripening", &data.ripening_indicators]);
@@ -689,7 +689,7 @@ async fn main() -> anyhow::Result<()> {
                     .exec(&mut db)
                     .await?;
                 let nitems = items.len();
-                let mut tbuilder = tabled::builder::Builder::default();
+                let mut tbuilder = TableBuilder::default();
                 tbuilder.push_record(["ID", "Name", "Steps", "Taxa"]);
                 for item in items {
                     tbuilder.push_record([
@@ -712,7 +712,7 @@ async fn main() -> anyhow::Result<()> {
                     .one()
                     .exec(&mut db)
                     .await?;
-                let mut tbuilder = tabled::builder::Builder::default();
+                let mut tbuilder = TableBuilder::default();
                 tbuilder.push_record(["ID", &procedure.id.to_string()]);
                 tbuilder.push_record(["Name", &procedure.name]);
                 tbuilder.push_record(["Notes", &procedure.notes.unwrap_or_else(|| "-".into())]);
