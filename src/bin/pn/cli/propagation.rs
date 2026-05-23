@@ -47,7 +47,7 @@ pub enum PropagationCommands {
 pub enum PropagationStepsCommands {
     #[command(about = "List steps for a seed propagation protocol")]
     List {
-        #[arg(short, long, help = "A protocol ID")]
+        #[arg(help = "A protocol ID")]
         protocol_id: u64,
     },
     #[command(about = "Add a step to a seed propagation protocol")]
