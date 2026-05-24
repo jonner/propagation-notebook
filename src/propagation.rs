@@ -63,10 +63,16 @@ pub enum ProtocolStepType {
 
 #[derive(Debug, Clone, Copy, toasty::Embed, clap::ValueEnum, strum::Display)]
 pub enum ProtocolType {
+    #[column(variant = 1)]
     Pretreatment,
+    #[column(variant = 2)]
     Germination,
+    #[column(variant = 3)]
     Establishment,
+    // #[column(variant = 4)]
     // Propagation,
+    #[column(variant = 99)]
+    Other,
 }
 
 #[derive(Debug, Clone, toasty::Model)]
