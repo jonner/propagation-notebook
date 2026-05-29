@@ -1,4 +1,4 @@
-use toasty::{BelongsTo, HasMany, HasOne};
+use toasty::Deferred;
 
 use crate::{
     collecting::{CollectingData, TaxonCleaningProcedure},
@@ -116,7 +116,7 @@ pub struct Taxon {
     #[index]
     pub parent_id: Option<u64>,
     #[belongs_to(key=parent_id, references=id)]
-    pub parent: BelongsTo<Option<Taxon>>,
+    pub parent: Deferred<Option<Taxon>>,
 
     #[unique]
     pub sequence: u64,
@@ -128,19 +128,19 @@ pub struct Taxon {
     pub life_cycle: Option<LifeCycle>,
 
     #[has_many(pair=parent)]
-    pub children: HasMany<Taxon>,
+    pub children: Deferred<Vec<Taxon>>,
     #[has_many]
-    pub vernaculars: HasMany<VernacularName>,
+    pub vernaculars: Deferred<Vec<VernacularName>>,
     #[has_many]
-    pub synonyms: HasMany<Synonym>,
+    pub synonyms: Deferred<Vec<Synonym>>,
     #[has_many]
-    pub regional_statuses: HasMany<RegionalTaxonStatus>,
+    pub regional_statuses: Deferred<Vec<RegionalTaxonStatus>>,
     #[has_one]
-    pub collecting_data: HasOne<Option<CollectingData>>,
+    pub collecting_data: Deferred<Option<CollectingData>>,
     #[has_one]
-    pub cleaning_procedure: HasOne<Option<TaxonCleaningProcedure>>,
+    pub cleaning_procedure: Deferred<Option<TaxonCleaningProcedure>>,
     #[has_many]
-    pub protocols: HasMany<TaxonProtocol>,
+    pub protocols: Deferred<Vec<TaxonProtocol>>,
 }
 
 impl Taxon {
@@ -158,7 +158,7 @@ pub struct VernacularName {
     #[index]
     pub taxon_id: u64,
     #[belongs_to(key=taxon_id, references=id)]
-    pub taxon: BelongsTo<Taxon>,
+    pub taxon: Deferred<Taxon>,
 
     pub name: String,
 }
@@ -172,7 +172,7 @@ pub struct Synonym {
     #[index]
     pub taxon_id: u64,
     #[belongs_to(key=taxon_id, references=id)]
-    pub taxon: BelongsTo<Taxon>,
+    pub taxon: Deferred<Taxon>,
 
     #[index]
     pub name1: String,

@@ -1,6 +1,6 @@
 use crate::taxonomy::Taxon;
 use tabled::{Tabled, derive::display};
-use toasty::{BelongsTo, HasMany};
+use toasty::Deferred;
 
 #[derive(Debug, Clone, Copy, toasty::Embed, clap::ValueEnum, strum::Display)]
 pub enum LightRequirement {
@@ -23,7 +23,7 @@ pub struct ProtocolStep {
     pub protocol_id: u64,
     #[belongs_to(key=protocol_id, references=id)]
     #[tabled(skip)]
-    pub protocol: BelongsTo<Protocol>,
+    pub protocol: Deferred<Protocol>,
 
     pub order: u64,
     pub step_type: ProtocolStepType,
@@ -85,9 +85,9 @@ pub struct Protocol {
     pub r#type: ProtocolType,
 
     #[has_many]
-    pub steps: HasMany<ProtocolStep>,
+    pub steps: Deferred<Vec<ProtocolStep>>,
     #[has_many]
-    pub citations: HasMany<ProtocolCitation>,
+    pub citations: Deferred<Vec<ProtocolCitation>>,
 }
 
 #[derive(Debug, Clone, toasty::Model)]
@@ -97,27 +97,27 @@ pub struct TaxonProtocol {
     #[index]
     pub taxon_id: u64,
     #[belongs_to(key=taxon_id, references=id)]
-    taxon: BelongsTo<Taxon>,
+    taxon: Deferred<Taxon>,
 
     #[index]
     pub pretreatment_protocol_id: Option<u64>,
     #[belongs_to(key=pretreatment_protocol_id, references=id)]
-    pub pretreatment: BelongsTo<Protocol>,
+    pub pretreatment: Deferred<Protocol>,
     #[index]
     pub germination_protocol_id: Option<u64>,
     #[belongs_to(key=germination_protocol_id, references=id)]
-    pub germination: BelongsTo<Protocol>,
+    pub germination: Deferred<Protocol>,
     #[index]
     pub establishment_protocol_id: Option<u64>,
     #[belongs_to(key=establishment_protocol_id, references=id)]
-    pub establishment: BelongsTo<Protocol>,
+    pub establishment: Deferred<Protocol>,
 
     pub confidence: Option<u8>,
     pub success_rate: Option<f32>,
     pub notes: Option<String>,
 
     #[has_many]
-    pub citations: HasMany<TaxonProtocolCitation>,
+    pub citations: Deferred<Vec<TaxonProtocolCitation>>,
 }
 
 #[derive(Debug, Clone, Copy, toasty::Embed, clap::ValueEnum)]
@@ -157,12 +157,12 @@ pub struct ProtocolCitation {
     #[index]
     protocol_id: u64,
     #[belongs_to(key=protocol_id, references=id)]
-    protocol: BelongsTo<Protocol>,
+    protocol: Deferred<Protocol>,
 
     #[key]
     citation_id: u64,
     #[belongs_to(key=citation_id, references=id)]
-    citation: BelongsTo<Citation>,
+    citation: Deferred<Citation>,
 }
 
 #[derive(Debug, Clone, toasty::Model)]
@@ -173,10 +173,10 @@ pub struct TaxonProtocolCitation {
     #[index]
     taxon_protocol_id: u64,
     #[belongs_to(key=taxon_protocol_id, references=id)]
-    taxon_protocol: BelongsTo<TaxonProtocol>,
+    taxon_protocol: Deferred<TaxonProtocol>,
 
     #[key]
     citation_id: u64,
     #[belongs_to(key=citation_id, references=id)]
-    citation: BelongsTo<Citation>,
+    citation: Deferred<Citation>,
 }

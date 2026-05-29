@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use indicatif::ProgressIterator;
 use itertools::Itertools;
 use propagation_notebook::taxonomy::Rank;
-use toasty::{BelongsTo, HasMany};
+use toasty::Deferred;
 
 use crate::cli::taxa::TaxonomicAuthority;
 
@@ -32,7 +32,7 @@ pub struct TaxonomicUnit {
     #[index]
     parent_tsn: Option<u64>,
     #[belongs_to(key=parent_tsn, references=tsn)]
-    parent: BelongsTo<TaxonomicUnit>,
+    parent: Deferred<TaxonomicUnit>,
     // taxon_author_id: int(11) DEFAULT NULL,
     // hybrid_author_id: int(11) DEFAULT NULL,
     kingdom_id: u64,
@@ -43,9 +43,9 @@ pub struct TaxonomicUnit {
     complete_name: String,
 
     #[has_many(pair=parent)]
-    children: HasMany<TaxonomicUnit>,
+    children: Deferred<Vec<TaxonomicUnit>>,
     #[has_many(pair=taxon)]
-    vernaculars: HasMany<Vernacular>,
+    vernaculars: Deferred<Vec<Vernacular>>,
 }
 
 #[derive(Debug, toasty::Model)]
@@ -73,7 +73,7 @@ pub struct Vernacular {
     #[index]
     tsn: u64,
     #[belongs_to(key=tsn, references= tsn)]
-    taxon: BelongsTo<TaxonomicUnit>,
+    taxon: Deferred<TaxonomicUnit>,
     language: String,
     vernacular_name: String,
 }

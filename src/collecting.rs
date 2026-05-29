@@ -1,5 +1,5 @@
 use tabled::{Tabled, derive::display};
-use toasty::{BelongsTo, HasMany};
+use toasty::Deferred;
 
 use crate::taxonomy::Taxon;
 
@@ -12,7 +12,7 @@ pub struct CollectingData {
     #[index]
     pub taxon_id: u64,
     #[belongs_to(key=taxon_id, references=id)]
-    pub taxon: BelongsTo<Taxon>,
+    pub taxon: Deferred<Taxon>,
 
     pub ripening_indicators: String,
     pub storage: Option<String>,
@@ -25,7 +25,7 @@ pub struct TaxonCleaningProcedure {
     #[index]
     pub taxon_id: u64,
     #[belongs_to(key=taxon_id, references=id)]
-    pub taxon: BelongsTo<Taxon>,
+    pub taxon: Deferred<Taxon>,
 
     // notes for customizing the procedure for this taxon
     pub notes: Option<String>,
@@ -34,7 +34,7 @@ pub struct TaxonCleaningProcedure {
     #[index]
     pub procedure_id: u64,
     #[belongs_to(key=procedure_id, references=id)]
-    pub procedure: BelongsTo<CleaningProcedure>,
+    pub procedure: Deferred<CleaningProcedure>,
 }
 
 #[derive(Debug, Clone, toasty::Model)]
@@ -46,9 +46,9 @@ pub struct CleaningProcedure {
     pub notes: Option<String>,
 
     #[has_many(pair=procedure)]
-    pub steps: HasMany<CleaningProcedureStep>,
+    pub steps: Deferred<Vec<CleaningProcedureStep>>,
     #[has_many(pair=procedure)]
-    pub taxon_links: HasMany<TaxonCleaningProcedure>,
+    pub taxon_links: Deferred<Vec<TaxonCleaningProcedure>>,
 }
 
 #[derive(Debug, Clone, Copy, toasty::Embed, strum::Display, clap::ValueEnum)]
@@ -74,7 +74,7 @@ pub struct CleaningProcedureStep {
     pub procedure_id: u64,
     #[belongs_to(key=procedure_id, references=id)]
     #[tabled(skip)]
-    pub procedure: BelongsTo<CleaningProcedure>,
+    pub procedure: Deferred<CleaningProcedure>,
 
     pub order: u64,
     pub operation_type: OperationType,

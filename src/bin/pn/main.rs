@@ -335,8 +335,8 @@ async fn main() -> anyhow::Result<()> {
                     if let Some(tcp) = taxon.cleaning_procedure.get() {
                         tbuilder.push_record(["Seed Cleaning", &{
                             let proc = tcp.procedure.get();
-                            let mut steps = Vec::from(proc.steps.get());
-                            steps.sort_by_key(|v| v.order);
+                            let mut sorted_steps = proc.steps.get().iter().collect::<Vec<_>>();
+                            sorted_steps.sort_by_key(|v| v.order);
                             let mut inner_table = TableBuilder::default();
                             inner_table.push_record(["ID", &proc.id.to_string()]);
                             inner_table.push_record(["Name", &proc.name]);
@@ -344,7 +344,7 @@ async fn main() -> anyhow::Result<()> {
                                 .push_record(["Notes", proc.notes.as_deref().unwrap_or("-")]);
                             inner_table.push_record([
                                 "Steps",
-                                &join_or_default(&steps, "[none]", |step| {
+                                &join_or_default(&sorted_steps, "[none]", |step| {
                                     format!(" - {}", step.summary())
                                 }),
                             ]);
@@ -736,11 +736,11 @@ async fn main() -> anyhow::Result<()> {
                     }),
                 ]);
                 // sort steps in order
-                let mut steps = Vec::from(procedure.steps.get());
-                steps.sort_by_key(|a| a.order);
+                let mut sorted_steps = procedure.steps.get().iter().collect::<Vec<_>>();
+                sorted_steps.sort_by_key(|a| a.order);
                 tbuilder.push_record([
                     "Steps",
-                    &join_or_default(&steps, "-", |step| format!(" - {}", step.summary())),
+                    &join_or_default(&sorted_steps, "-", |step| format!(" - {}", step.summary())),
                 ]);
                 println!("{}", tbuilder.build().with(style::BasicTable));
             }

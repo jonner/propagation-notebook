@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use toasty::{BelongsTo, HasMany};
+use toasty::Deferred;
 
 use crate::taxonomy::Taxon;
 
@@ -47,9 +47,9 @@ pub struct Region {
     pub notes: Option<String>,
 
     #[has_many]
-    pub taxon_statuses: HasMany<RegionalTaxonStatus>,
+    pub taxon_statuses: Deferred<Vec<RegionalTaxonStatus>>,
     #[has_many]
-    pub npcs: HasMany<NativePlantCommunity>,
+    pub npcs: Deferred<Vec<NativePlantCommunity>>,
 }
 
 impl Region {
@@ -78,12 +78,12 @@ pub struct RegionalTaxonStatus {
     #[index]
     pub taxon_id: u64,
     #[belongs_to(key=taxon_id, references=id)]
-    pub taxon: BelongsTo<Taxon>,
+    pub taxon: Deferred<Taxon>,
 
     #[index]
     pub region_id: u64,
     #[belongs_to(key=region_id, references=id)]
-    pub region: BelongsTo<Region>,
+    pub region: Deferred<Region>,
 
     pub origin: Option<Origin>,
     // generally 0-10?
@@ -97,7 +97,7 @@ pub struct RegionalTaxonStatus {
     #[index]
     pub native_plant_community_id: Option<u64>,
     #[belongs_to(key=native_plant_community_id, references=id)]
-    pub native_plant_community: BelongsTo<NativePlantCommunity>,
+    pub native_plant_community: Deferred<NativePlantCommunity>,
 }
 
 #[derive(Debug, Clone, toasty::Model)]
@@ -109,11 +109,11 @@ pub struct NativePlantCommunity {
     #[index]
     pub region_id: u64,
     #[belongs_to(key=region_id, references=id)]
-    pub region: BelongsTo<Region>,
+    pub region: Deferred<Region>,
 
     #[index]
     pub name: String,
 
     #[has_many]
-    regional_taxon_statuses: HasMany<RegionalTaxonStatus>,
+    regional_taxon_statuses: Deferred<Vec<RegionalTaxonStatus>>,
 }
