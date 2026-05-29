@@ -67,6 +67,14 @@ pub struct SynonymLink {
 }
 
 #[derive(Debug, toasty::Model)]
+pub struct Kingdom {
+    #[key]
+    kingdom_id: u64,
+    #[index]
+    kingdom_name: String,
+}
+
+#[derive(Debug, toasty::Model)]
 pub struct Vernacular {
     #[key]
     vern_id: u64,
@@ -103,6 +111,8 @@ async fn import_taxa_itis(
     mut itisdb: toasty::Db,
     ourtxn: &mut toasty::Transaction<'_>,
 ) -> Result<(), anyhow::Error> {
+    // find plant kingdom
+    let plant_kingdom = Kingdom::get_by_kingdom_name(&mut itisdb, "Plantae").await?;
     let mut tsn_to_id: HashMap<u64, u64> = HashMap::default();
     println!("Building hierarchy sequence...");
     let mut tsn_to_seq: HashMap<u64, _> = HashMap::default();
@@ -114,12 +124,19 @@ async fn import_taxa_itis(
         tsn_to_seq.insert(record.tsn, seq);
     }
     println!("Importing accepted taxa...");
-    let taxa = TaxonomicUnit::filter_by_name_usage("accepted")
+    let taxa = TaxonomicUnit::all()
+        .filter(
+            TaxonomicUnit::fields().name_usage().eq("accepted").and(
+                TaxonomicUnit::fields()
+                    .kingdom_id()
+                    .eq(plant_kingdom.kingdom_id),
+            ),
+        )
         .order_by(TaxonomicUnit::fields().tsn().asc())
         .exec(&mut itisdb)
         .await?;
     for chunk in &taxa
-        .into_iter()
+        .iter()
         .progress()
         .map(|theirs| {
             let sequence = tsn_to_seq.get(&theirs.tsn).copied().unwrap();
@@ -139,10 +156,6 @@ async fn import_taxa_itis(
         tsn_to_id.extend(objs.into_iter().map(|obj| (obj.itis_id, obj.id)));
     }
     println!("Setting parent taxa...");
-    let taxa = TaxonomicUnit::filter_by_name_usage("accepted")
-        .order_by(TaxonomicUnit::fields().tsn().asc())
-        .exec(&mut itisdb)
-        .await?;
     for chunk in &taxa
         .into_iter()
         .progress()
@@ -186,10 +199,16 @@ async fn import_taxa_itis(
             .await?;
     }
     println!("Importing synonyms...");
-    let records = TaxonomicUnit::filter_by_name_usage("not accepted")
-        .order_by(TaxonomicUnit::fields().tsn().asc())
-        .exec(&mut itisdb)
-        .await?;
+    let records = TaxonomicUnit::filter(
+        TaxonomicUnit::fields().name_usage().eq("not accepted").and(
+            TaxonomicUnit::fields()
+                .kingdom_id()
+                .eq(plant_kingdom.kingdom_id),
+        ),
+    )
+    .order_by(TaxonomicUnit::fields().tsn().asc())
+    .exec(&mut itisdb)
+    .await?;
 
     for chunk in &records.into_iter().progress().chunks(CHUNK_SIZE) {
         let mut creates = Vec::new();
