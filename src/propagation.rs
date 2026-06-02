@@ -1,67 +1,10 @@
 use crate::taxonomy::Taxon;
-use tabled::{Tabled, derive::display};
+use serde::Deserialize;
 use toasty::Deferred;
 
-#[derive(Debug, Clone, Copy, toasty::Embed, clap::ValueEnum, strum::Display)]
-pub enum LightRequirement {
-    #[column(variant = 1)]
-    LightRequired,
-    #[column(variant = 2)]
-    DarkRequired,
-    #[column(variant = 3)]
-    NoPreference,
-}
-
-#[derive(Debug, Clone, toasty::Model, Tabled)]
-#[tabled(display(Option, "display::option", "-"), rename_all = "CamelCase")]
-pub struct ProtocolStep {
-    #[auto]
-    #[key]
-    pub id: u64,
-
-    #[index]
-    pub protocol_id: u64,
-    #[belongs_to(key=protocol_id, references=id)]
-    #[tabled(skip)]
-    pub protocol: Deferred<Protocol>,
-
-    pub order: u64,
-    pub step_type: ProtocolStepType,
-    pub title: String,
-    pub instructions: Option<String>,
-    pub duration: Option<u64>,
-    pub min_temp: Option<f32>,
-    pub max_temp: Option<f32>,
-    pub light: Option<LightRequirement>,
-    pub moisture: Option<String>,
-    pub materials: Option<String>,
-    pub is_optional: bool,
-    pub notes: Option<String>,
-}
-
-#[derive(Debug, Clone, Copy, toasty::Embed, clap::ValueEnum, strum::Display)]
-pub enum ProtocolStepType {
-    #[column(variant = 1)]
-    Stratification,
-    #[column(variant = 2)]
-    Scarification,
-    #[column(variant = 3)]
-    Soaking,
-    #[column(variant = 4)]
-    Sowing,
-    #[column(variant = 5)]
-    Germination,
-    #[column(variant = 6)]
-    Transplanting,
-    // #[column(variant = 7)]
-    // CuttingPreparation,
-    // #[column(variant = 8)]
-    // Rooting,
-    #[column(variant = 99)]
-    Other,
-}
-
-#[derive(Debug, Clone, Copy, toasty::Embed, clap::ValueEnum, strum::Display)]
+#[derive(Debug, Clone, Copy, toasty::Embed, clap::ValueEnum, strum::Display, Deserialize)]
+#[clap(rename_all = "kebab-case")]
+#[serde(rename_all = "kebab-case")]
 pub enum ProtocolType {
     #[column(variant = 1)]
     Pretreatment,
@@ -75,52 +18,57 @@ pub enum ProtocolType {
     Other,
 }
 
-#[derive(Debug, Clone, toasty::Model)]
+// TODO: offer customizable parameters (e.g. 'days' for cold moist stratification)?
+#[derive(Debug, Clone, toasty::Model, Deserialize)]
+#[serde(rename_all = "kebab-case", deny_unknown_fields)]
 pub struct Protocol {
     #[key]
     #[auto]
     pub id: u64,
+
+    #[index]
     pub name: String,
+
+    pub instructions: String,
     pub notes: Option<String>,
     pub r#type: ProtocolType,
 
-    #[has_many]
-    pub steps: Deferred<Vec<ProtocolStep>>,
+    #[serde(skip)]
     #[has_many]
     pub citations: Deferred<Vec<ProtocolCitation>>,
+
+    #[serde(skip)]
+    #[has_many]
+    pub taxon_protocols: Deferred<Vec<TaxonProtocol>>,
 }
 
+// TODO: if protocols become parametrized, we'd need to add the parameters to
+// this model...
 #[derive(Debug, Clone, toasty::Model)]
 pub struct TaxonProtocol {
     #[key]
     id: u64,
+
     #[index]
     pub taxon_id: u64,
     #[belongs_to(key=taxon_id, references=id)]
     taxon: Deferred<Taxon>,
 
     #[index]
-    pub pretreatment_protocol_id: Option<u64>,
-    #[belongs_to(key=pretreatment_protocol_id, references=id)]
-    pub pretreatment: Deferred<Protocol>,
-    #[index]
-    pub germination_protocol_id: Option<u64>,
-    #[belongs_to(key=germination_protocol_id, references=id)]
-    pub germination: Deferred<Protocol>,
-    #[index]
-    pub establishment_protocol_id: Option<u64>,
-    #[belongs_to(key=establishment_protocol_id, references=id)]
-    pub establishment: Deferred<Protocol>,
+    pub protocol_id: Option<u64>,
+    #[belongs_to(key=protocol_id, references=id)]
+    pub protocol: Deferred<Protocol>,
 
     pub confidence: Option<u8>,
-    pub success_rate: Option<f32>,
     pub notes: Option<String>,
 
     #[has_many]
     pub citations: Deferred<Vec<TaxonProtocolCitation>>,
 }
 
-#[derive(Debug, Clone, Copy, toasty::Embed, clap::ValueEnum)]
+#[derive(Debug, Clone, Copy, toasty::Embed, clap::ValueEnum, Deserialize)]
+#[clap(rename_all = "kebab-case")]
+#[serde(rename_all = "kebab-case")]
 pub enum CitationType {
     #[column(variant = 1)]
     PeerReviewedPaper,

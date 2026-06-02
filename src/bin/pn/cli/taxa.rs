@@ -1,4 +1,5 @@
 #[derive(Debug, Clone, Copy, clap::ValueEnum)]
+#[clap(rename_all = "kebab-case")]
 pub enum TaxonomicAuthority {
     Itis,
 }

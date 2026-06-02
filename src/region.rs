@@ -6,6 +6,8 @@ use crate::taxonomy::Taxon;
 #[derive(
     Debug, Clone, Copy, toasty::Embed, strum::Display, clap::ValueEnum, Serialize, Deserialize,
 )]
+#[clap(rename_all = "kebab-case")]
+#[serde(rename_all = "kebab-case")]
 pub enum WetlandIndicator {
     #[column(variant = 1)]
     ObligateWetland,
@@ -24,6 +26,8 @@ pub enum WetlandIndicator {
 #[derive(
     Debug, Clone, Copy, toasty::Embed, strum::Display, clap::ValueEnum, Serialize, Deserialize,
 )]
+#[clap(rename_all = "kebab-case")]
+#[serde(rename_all = "kebab-case")]
 pub enum ConservationStatus {
     #[column(variant = 1)]
     Endangered,
@@ -58,7 +62,11 @@ impl Region {
     }
 }
 
-#[derive(Debug, Clone, Copy, toasty::Embed, strum::Display, clap::ValueEnum)]
+#[derive(
+    Debug, Clone, Copy, toasty::Embed, strum::Display, clap::ValueEnum, Serialize, Deserialize,
+)]
+#[clap(rename_all = "kebab-case")]
+#[serde(rename_all = "kebab-case")]
 pub enum Origin {
     #[column(variant = 1)]
     Native,

@@ -52,6 +52,7 @@ pub struct CleaningProcedure {
 }
 
 #[derive(Debug, Clone, Copy, toasty::Embed, strum::Display, clap::ValueEnum)]
+#[clap(rename_all = "kebab-case")]
 pub enum OperationType {
     #[column(variant = 1)]
     Rub, // remove fuzz?
@@ -64,7 +65,7 @@ pub enum OperationType {
 }
 
 #[derive(Debug, Clone, toasty::Model, Tabled)]
-#[tabled(rename_all = "CamelCase")]
+#[tabled(rename_all = "PascalCase")]
 pub struct CleaningProcedureStep {
     #[auto]
     #[key]
