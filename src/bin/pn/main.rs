@@ -126,7 +126,14 @@ async fn list_regional_taxa(db: &mut toasty::Db, region_id: u64) -> anyhow::Resu
         .collect::<HashMap<_, _>>();
 
     let mut tbuilder = TableBuilder::default();
-    tbuilder.push_record(["ID", "Taxon", "Origin"]);
+    tbuilder.push_record([
+        "ID",
+        "Taxon",
+        "Origin",
+        "Status",
+        "C-value",
+        "Wetland Indicator",
+    ]);
     for taxon in taxa {
         let status = map.get(&taxon.id).unwrap();
         tbuilder.push_record([
@@ -134,6 +141,18 @@ async fn list_regional_taxa(db: &mut toasty::Db, region_id: u64) -> anyhow::Resu
             taxon.complete_name,
             status
                 .origin
+                .map(|s| s.to_string())
+                .unwrap_or_else(|| "-".into()),
+            status
+                .conservation_status
+                .map(|s| s.to_string())
+                .unwrap_or_else(|| "-".into()),
+            status
+                .c_value
+                .map(|s| s.to_string())
+                .unwrap_or_else(|| "-".into()),
+            status
+                .wetland_indicator
                 .map(|s| s.to_string())
                 .unwrap_or_else(|| "-".into()),
         ]);
