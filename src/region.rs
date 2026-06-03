@@ -7,17 +7,21 @@ use crate::taxonomy::Taxon;
     Debug, Clone, Copy, toasty::Embed, strum::Display, clap::ValueEnum, Serialize, Deserialize,
 )]
 #[clap(rename_all = "kebab-case")]
-#[serde(rename_all = "kebab-case")]
 pub enum WetlandIndicator {
     #[column(variant = 1)]
+    #[serde(rename = "OBL")]
     ObligateWetland,
     #[column(variant = 2)]
+    #[serde(rename = "FACW")]
     FacultativeWetland,
     #[column(variant = 3)]
+    #[serde(rename = "FAC")]
     Facultative,
     #[column(variant = 4)]
+    #[serde(rename = "FACU")]
     FacultativeUpland,
     #[column(variant = 5)]
+    #[serde(rename = "UPL")]
     Upland,
     #[column(variant = 99)]
     Other,
