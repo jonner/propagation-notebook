@@ -93,6 +93,7 @@ where
                 .taxon_id(id)
                 .origin(taxon_info.origin.map(|x| x.into()))
                 .conservation_status(taxon_info.status)
+                .wetland_indicator(taxon_info.wetland_indicator)
                 .c_value(taxon_info.c_value),
         );
     }
