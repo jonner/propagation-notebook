@@ -1,5143 +1,5143 @@
 name: Minnesota
 taxa:
   - name: Abies balsamea
-    origin: Native
+    origin: native
   - name: Abutilon theophrasti
-    origin: Introduced
+    origin: introduced
   - name: Acalypha rhomboidea
-    origin: Native
+    origin: native
   - name: Acer ginnala
-    origin: Introduced
+    origin: introduced
   - name: Acer negundo
-    origin: Native
+    origin: native
   - name: Acer negundo var. negundo
-    origin: Native
+    origin: native
   - name: Acer negundo var. texanum
-    origin: Native
+    origin: native
   - name: Acer nigrum
-    origin: Native
+    origin: native
   - name: Acer platanoides
-    origin: Introduced
+    origin: introduced
   - name: Acer rubrum var. rubrum
-    origin: Native
+    origin: native
   - name: Acer saccharinum
-    origin: Native
+    origin: native
   - name: Acer saccharum
-    origin: Native
+    origin: native
   - name: Acer spicatum
-    origin: Native
+    origin: native
   - name: Achillea alpina
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Achillea millefolium
-    origin: Native
+    origin: native
   - name: Achillea ptarmica
-    origin: Introduced
+    origin: introduced
   - name: Achnatherum hymenoides
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Acmispon americanus var. americanus
-    origin: Native
+    origin: native
   - name: Acorus americanus
-    origin: Native
+    origin: native
   - name: Actaea pachypoda
-    origin: Native
+    origin: native
   - name: Actaea rubra
-    origin: Native
+    origin: native
   - name: Adiantum pedatum
-    origin: Native
+    origin: native
   - name: Adlumia fungosa
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Adoxa moschatellina
-    origin: Native
+    origin: native
   - name: Aegopodium podagraria
-    origin: Introduced
+    origin: introduced
   - name: Aesculus glabra var. glabra
-    origin: Introduced
+    origin: introduced
   - name: Aethusa cynapium
-    origin: Introduced
+    origin: introduced
   - name: Agalinis aspera
-    origin: Native
+    origin: native
   - name: Agalinis auriculata
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Agalinis gattingeri
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Agalinis purpurea
-    origin: Native
+    origin: native
   - name: Agalinis purpurea var. parviflora
-    origin: Native
+    origin: native
   - name: Agalinis purpurea var. purpurea
-    origin: Native
+    origin: native
   - name: Agalinis tenuifolia
-    origin: Native
+    origin: native
   - name: Agastache foeniculum
-    origin: Native
+    origin: native
   - name: Agastache nepetoides
-    origin: Native
+    origin: native
   - name: Agastache scrophulariifolia
-    origin: Native
+    origin: native
   - name: Ageratina altissima var. altissima
-    origin: Native
+    origin: native
   - name: Agoseris glauca var. glauca
-    origin: Native
+    origin: native
   - name: Agrimonia gryposepala
-    origin: Native
+    origin: native
   - name: Agrimonia pubescens
-    origin: Native
+    origin: native
   - name: Agrimonia striata
-    origin: Native
+    origin: native
   - name: Agropyron cristatum
-    origin: Introduced
+    origin: introduced
   - name: Agrostemma githago var. githago
-    origin: Introduced
+    origin: introduced
   - name: Agrostis gigantea
-    origin: Introduced
+    origin: introduced
   - name: Agrostis hyemalis
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Agrostis perennans
-    origin: Native
+    origin: native
   - name: Agrostis scabra
-    origin: Native
+    origin: native
   - name: Agrostis stolonifera
-    origin: Introduced
+    origin: introduced
   - name: Ailanthus altissima
-    origin: Introduced
+    origin: introduced
   - name: Alisma gramineum
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Alisma subcordatum
-    origin: Native
+    origin: native
   - name: Alisma triviale
-    origin: Native
+    origin: native
   - name: Alliaria petiolata
-    origin: Introduced
+    origin: introduced
   - name: Allium canadense var. canadense
-    origin: Native
+    origin: native
   - name: Allium cernuum
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Allium schoenoprasum
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Allium stellatum
-    origin: Native
+    origin: native
   - name: Allium textile
-    origin: Native
+    origin: native
   - name: Allium tricoccum
-    origin: Native
+    origin: native
   - name: Allium tricoccum var. burdickii
-    origin: Native
+    origin: native
   - name: Allium tricoccum var. tricoccum
-    origin: Native
+    origin: native
   - name: Allium tuberosum
-    origin: Introduced
+    origin: introduced
   - name: Alnus incana ssp. rugosa
-    origin: Native
+    origin: native
   - name: Alnus viridis ssp. crispa
-    origin: Native
+    origin: native
   - name: Alopecurus aequalis var. aequalis
-    origin: Native
+    origin: native
   - name: Alopecurus arundinaceus
-    origin: Introduced
+    origin: introduced
   - name: Alopecurus carolinianus
-    origin: Native
+    origin: native
   - name: Alopecurus pratensis
-    origin: Introduced
+    origin: introduced
   - name: Althaea officinalis
-    origin: Introduced
+    origin: introduced
   - name: Alyssum alyssoides
-    origin: Introduced
+    origin: introduced
   - name: Alyssum desertorum
-    origin: Introduced
+    origin: introduced
   - name: Amaranthus albus
-    origin: Native
+    origin: native
   - name: Amaranthus blitoides
-    origin: Introduced
+    origin: introduced
   - name: Amaranthus hybridus
-    origin: Introduced
+    origin: introduced
   - name: Amaranthus palmeri
-    origin: Introduced
+    origin: introduced
   - name: Amaranthus powellii
-    origin: Introduced
+    origin: introduced
   - name: Amaranthus retroflexus
-    origin: Introduced
+    origin: introduced
   - name: Amaranthus tuberculatus
-    origin: Native
+    origin: native
   - name: Ambrosia acanthicarpa
-    origin: Introduced
+    origin: introduced
   - name: Ambrosia artemisiifolia
-    origin: Native
+    origin: native
   - name: Ambrosia psilostachya
-    origin: Native
+    origin: native
   - name: Ambrosia trifida
-    origin: Native
+    origin: native
   - name: Amelanchier alnifolia
-    origin: Native
+    origin: native
   - name: Amelanchier arborea
-    origin: Native
+    origin: native
   - name: Amelanchier bartramiana
-    origin: Native
+    origin: native
   - name: Amelanchier humilis
-    origin: Native
+    origin: native
   - name: Amelanchier interior
-    origin: Native
+    origin: native
   - name: Amelanchier intermedia
-    origin: Native
+    origin: native
   - name: Amelanchier laevis
-    origin: Native
+    origin: native
   - name: Amelanchier sanguinea
-    origin: Native
+    origin: native
   - name: Amelanchier spicata
-    origin: Native
+    origin: native
   - name: Amerorchis rotundifolia
-    origin: Native
+    origin: native
   - name: Ammannia robusta
-    origin: Native
+    origin: native
   - name: Ammophila breviligulata
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Amorpha canescens
-    origin: Native
+    origin: native
   - name: Amorpha fruticosa
-    origin: Native
+    origin: native
   - name: Amorpha nana
-    origin: Native
+    origin: native
   - name: Amphicarpaea bracteata
-    origin: Native
+    origin: native
   - name: Anagallis arvensis
-    origin: Introduced
+    origin: introduced
   - name: Anagallis minima
-    origin: Native
+    origin: native
   - name: Anaphalis margaritacea
-    origin: Native
+    origin: native
   - name: Anchusa arvensis
-    origin: Introduced
+    origin: introduced
   - name: Andromeda polifolia var. latifolia
-    origin: Native
+    origin: native
   - name: Andropogon gerardii
-    origin: Native
+    origin: native
   - name: Androsace occidentalis
-    origin: Native
+    origin: native
   - name: Androsace septentrionalis
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Anemone acutiloba
-    origin: Native
+    origin: native
   - name: Anemone americana
-    origin: Native
+    origin: native
   - name: Anemone canadensis
-    origin: Native
+    origin: native
   - name: Anemone caroliniana
-    origin: Native
+    origin: native
   - name: Anemone cylindrica
-    origin: Native
+    origin: native
   - name: Anemone multifida var. multifida
-    origin: Unknown
+    origin: unknown
   - name: Anemone patens var. multifida
-    origin: Native
+    origin: native
   - name: Anemone quinquefolia var. quinquefolia
-    origin: Native
+    origin: native
   - name: Anemone virginiana
-    origin: Native
+    origin: native
   - name: Anemone virginiana var. alba
-    origin: Native
+    origin: native
   - name: Anemone virginiana var. cylindroidea
-    origin: Native
+    origin: native
   - name: Anemone virginiana var. virginiana
-    origin: Native
+    origin: native
   - name: Anethum graveolens
-    origin: Introduced
+    origin: introduced
   - name: Angelica atropurpurea
-    origin: Native
+    origin: native
   - name: Antennaria howellii
-    origin: Native
+    origin: native
   - name: Antennaria howellii ssp. canadensis
-    origin: Native
+    origin: native
   - name: Antennaria howellii ssp. neodioica
-    origin: Native
+    origin: native
   - name: Antennaria howellii ssp. petaloidea
-    origin: Native
+    origin: native
   - name: Antennaria microphylla
-    origin: Native
+    origin: native
   - name: Antennaria neglecta
-    origin: Native
+    origin: native
   - name: Antennaria parlinii
-    origin: Native
+    origin: native
   - name: Antennaria parlinii ssp. fallax
-    origin: Native
+    origin: native
   - name: Antennaria parlinii ssp. parlinii
-    origin: Native
+    origin: native
   - name: Antennaria parvifolia
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Antennaria plantaginifolia
-    origin: Native
+    origin: native
   - name: Anthemis cotula
-    origin: Introduced
+    origin: introduced
   - name: Anthoxanthum hirtum
-    origin: Native
+    origin: native
   - name: Anthoxanthum odoratum
-    origin: Introduced
+    origin: introduced
   - name: Anthriscus sylvestris
-    origin: Introduced
+    origin: introduced
   - name: Apios americana
-    origin: Native
+    origin: native
   - name: Aplectrum hyemale
-    origin: Native
+    origin: native
   - name: Apocynum androsaemifolium
-    origin: Native
+    origin: native
   - name: Apocynum cannabinum
-    origin: Native
+    origin: native
   - name: Aquilegia canadensis
-    origin: Native
+    origin: native
   - name: Arabidopsis lyrata ssp. lyrata
-    origin: Native
+    origin: native
   - name: Arabidopsis thaliana
-    origin: Introduced
+    origin: introduced
   - name: Arabis pycnocarpa var. pycnocarpa
-    origin: Native
+    origin: native
   - name: Aralia elata
-    origin: Introduced
+    origin: introduced
   - name: Aralia hispida
-    origin: Native
+    origin: native
   - name: Aralia nudicaulis
-    origin: Native
+    origin: native
   - name: Aralia racemosa
-    origin: Native
+    origin: native
   - name: Arceuthobium pusillum
-    origin: Native
+    origin: native
   - name: Arctium lappa
-    origin: Introduced
+    origin: introduced
   - name: Arctium minus
-    origin: Introduced
+    origin: introduced
   - name: Arctium tomentosum
-    origin: Introduced
+    origin: introduced
   - name: Arctostaphylos uva-ursi
-    origin: Native
+    origin: native
   - name: Arenaria serpyllifolia var. serpyllifolia
-    origin: Introduced
+    origin: introduced
   - name: Arethusa bulbosa
-    origin: Native
+    origin: native
   - name: Arisaema dracontium
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Arisaema triphyllum
-    origin: Native
+    origin: native
   - name: Aristida basiramea
-    origin: Native
+    origin: native
   - name: Aristida dichotoma var. curtissii
-    origin: Native
+    origin: native
   - name: Aristida longespica var. geniculata
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Aristida oligantha
-    origin: Native
+    origin: native
   - name: Aristida purpurea var. longiseta
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Aristida tuberculosa
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Armoracia rusticana
-    origin: Introduced
+    origin: introduced
   - name: Arnica lonchophylla
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Arnoglossum plantagineum
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Arnoglossum reniforme
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Aronia melanocarpa
-    origin: Native
+    origin: native
   - name: Artemisia abrotanum
-    origin: Introduced
+    origin: introduced
   - name: Artemisia absinthium
-    origin: Introduced
+    origin: introduced
   - name: Artemisia biennis
-    origin: Introduced
+    origin: introduced
   - name: Artemisia campestris ssp. caudata
-    origin: Native
+    origin: native
   - name: Artemisia dracunculus
-    origin: Native
+    origin: native
   - name: Artemisia frigida
-    origin: Native
+    origin: native
   - name: Artemisia ludoviciana ssp. ludoviciana
-    origin: Native
+    origin: native
   - name: Artemisia serrata
-    origin: Native
+    origin: native
   - name: Artemisia vulgaris
-    origin: Introduced
+    origin: introduced
   - name: Asarum canadense
-    origin: Native
+    origin: native
   - name: Asclepias amplexicaulis
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Asclepias exaltata
-    origin: Native
+    origin: native
   - name: Asclepias hirtella
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Asclepias incarnata ssp. incarnata
-    origin: Native
+    origin: native
   - name: Asclepias lanuginosa
-    origin: Native
+    origin: native
   - name: Asclepias ovalifolia
-    origin: Native
+    origin: native
   - name: Asclepias speciosa
-    origin: Native
+    origin: native
   - name: Asclepias stenophylla
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Asclepias sullivantii
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Asclepias syriaca
-    origin: Native
+    origin: native
   - name: Asclepias tuberosa ssp. interior
-    origin: Native
+    origin: native
   - name: Asclepias verticillata
-    origin: Native
+    origin: native
   - name: Asclepias viridiflora
-    origin: Native
+    origin: native
   - name: Asparagus officinalis
-    origin: Introduced
+    origin: introduced
   - name: Asplenium platyneuron
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Asplenium rhizophyllum
-    origin: Native
+    origin: native
   - name: Asplenium trichomanes ssp. trichomanes
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Astragalus agrestis
-    origin: Native
+    origin: native
   - name: Astragalus alpinus var. alpinus
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Astragalus canadensis var. canadensis
-    origin: Native
+    origin: native
   - name: Astragalus cicer
-    origin: Introduced
+    origin: introduced
   - name: Astragalus crassicarpus var. crassicarpus
-    origin: Native
+    origin: native
   - name: Astragalus flexuosus var. flexuosus
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Astragalus laxmannii var. robustior
-    origin: Native
+    origin: native
   - name: Astragalus lotiflorus
-    origin: Native
+    origin: native
   - name: Astragalus missouriensis var. missouriensis
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Astragalus multiflorus
-    origin: Native
+    origin: native
   - name: Astragalus neglectus
-    origin: Native
+    origin: native
   - name: Astragalus racemosus var. racemosus
-    origin: Native
+    origin: native
   - name: Athyrium filix-femina var. angustum
-    origin: Native
+    origin: native
   - name: Atriplex patula
-    origin: Introduced
+    origin: introduced
   - name: Atriplex prostrata
-    origin: Native
+    origin: native
   - name: Aureolaria grandiflora
-    origin: Native
+    origin: native
   - name: Aureolaria pedicularia
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Avena fatua
-    origin: Introduced
+    origin: introduced
   - name: Avena sativa
-    origin: Introduced
+    origin: introduced
   - name: Avenula hookeri
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Axyris amaranthoides
-    origin: Introduced
+    origin: introduced
   - name: Azolla microphylla
-    origin: Native
+    origin: native
   - name: Bacopa rotundifolia
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Baptisia lactea var. lactea
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Baptisia leucophaea
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Barbarea orthoceras
-    origin: Native
+    origin: native
   - name: Barbarea vulgaris
-    origin: Introduced
+    origin: introduced
   - name: Bartonia virginica
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Beckmannia syzigachne
-    origin: Native
+    origin: native
   - name: Berberis thunbergii
-    origin: Introduced
+    origin: introduced
   - name: Berberis vulgaris
-    origin: Introduced
+    origin: introduced
   - name: Berteroa incana
-    origin: Introduced
+    origin: introduced
   - name: Berula incisa
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Betula alleghaniensis
-    origin: Native
+    origin: native
   - name: Betula cordifolia
-    origin: Native
+    origin: native
   - name: Betula nigra
-    origin: Native
+    origin: native
   - name: Betula papyrifera
-    origin: Native
+    origin: native
   - name: Betula pumila
-    origin: Native
+    origin: native
   - name: Betula X purpusii
-    origin: Native
+    origin: native
   # - name: Betula X rosendahlii
-  #   origin: Native
+  #   origin: native
   - name: Betula X sandbergii
-    origin: Native
+    origin: native
   - name: Bidens beckii
-    origin: Native
+    origin: native
   - name: Bidens cernua
-    origin: Native
+    origin: native
   - name: Bidens connata
-    origin: Native
+    origin: native
   - name: Bidens discoidea
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Bidens frondosa
-    origin: Native
+    origin: native
   - name: Bidens trichosperma
-    origin: Native
+    origin: native
   - name: Bidens tripartita
-    origin: Native
+    origin: native
   - name: Bidens vulgata
-    origin: Native
+    origin: native
   - name: Bistorta vivipara
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Blephilia hirsuta
-    origin: Native
+    origin: native
   - name: Boechera canadensis
-    origin: Native
+    origin: native
   - name: Boechera collinsii
-    origin: Native
+    origin: native
   - name: Boechera dentata
-    origin: Native
+    origin: native
   - name: Boechera grahamii
-    origin: Native
+    origin: native
   - name: Boechera laevigata
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Boechera missouriensis
-    origin: Native
+    origin: native
   - name: Boechera retrofracta
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Boechera stricta
-    origin: Native
+    origin: native
   - name: Boehmeria cylindrica
-    origin: Native
+    origin: native
   - name: Bolboschoenus fluviatilis
-    origin: Native
+    origin: native
   - name: Bolboschoenus maritimus ssp. paludosus
-    origin: Native
+    origin: native
   - name: Boltonia asteroides
-    origin: Native
+    origin: native
   - name: Boltonia asteroides var. latisquama
-    origin: Native
+    origin: native
   - name: Boltonia asteroides var. recognita
-    origin: Native
+    origin: native
   - name: Botrychium angustisegmentum
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Botrychium ascendens
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Botrychium campestre
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   # - name: Botrychium campestre var. campestre
-  #   origin: Native
+  #   origin: native
   - name: Botrychium lineare # Botrychium campestre var. lineare
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Botrychium crenulatum
-    origin: Native
+    origin: native
   - name: Botrychium gallicomontanum
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Botrychium matricariifolium
-    origin: Native
+    origin: native
   # - name: Botrychium michiganense
-  #   origin: Native
+  #   origin: native
   - name: Botrychium minganense
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Botrychium mormo
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Botrychium neolunaria
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Botrychium pallidum
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Botrychium simplex var. simplex
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Botrychium spathulatum
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Botrychium tenebrosum
-    origin: Native
+    origin: native
   - name: Botrypus virginianus
-    origin: Native
+    origin: native
   - name: Bouteloua curtipendula var. curtipendula
-    origin: Native
+    origin: native
   - name: Bouteloua gracilis
-    origin: Native
+    origin: native
   - name: Bouteloua hirsuta var. hirsuta
-    origin: Native
+    origin: native
   - name: Brachyelytrum aristosum
-    origin: Native
+    origin: native
   - name: Brachyelytrum erectum
-    origin: Native
+    origin: native
   - name: Brasenia schreberi
-    origin: Native
+    origin: native
   - name: Brassica juncea
-    origin: Introduced
+    origin: introduced
   - name: Brassica nigra
-    origin: Introduced
+    origin: introduced
   - name: Brassica rapa
-    origin: Introduced
+    origin: introduced
   - name: Brickellia eupatorioides var. corymbulosa
-    origin: Native
+    origin: native
   - name: Bromus ciliatus
-    origin: Native
+    origin: native
   - name: Bromus inermis
-    origin: Introduced
+    origin: introduced
   - name: Bromus japonicus
-    origin: Introduced
+    origin: introduced
   - name: Bromus kalmii
-    origin: Native
+    origin: native
   - name: Bromus latiglumis
-    origin: Native
+    origin: native
   - name: Bromus pubescens
-    origin: Native
+    origin: native
   - name: Bromus secalinus
-    origin: Introduced
+    origin: introduced
   - name: Bromus tectorum
-    origin: Introduced
+    origin: introduced
   - name: Buchloe dactyloides
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Bulbostylis capillaris
-    origin: Native
+    origin: native
   - name: Butomus umbellatus
-    origin: Introduced
+    origin: introduced
   - name: Calamagrostis canadensis
-    origin: Native
+    origin: native
   - name: Calamagrostis canadensis var. canadensis
-    origin: Native
+    origin: native
   - name: Calamagrostis canadensis var. langsdorfii
-    origin: Native
+    origin: native
   - name: Calamagrostis canadensis var. macouniana
-    origin: Native
+    origin: native
   - name: Calamagrostis montanensis
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Calamagrostis purpurascens
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Calamagrostis stricta
-    origin: Native
+    origin: native
   - name: Calamagrostis stricta ssp. inexpansa
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Calamagrostis stricta ssp. stricta
-    origin: Native
+    origin: native
   - name: Calamovilfa longifolia var. longifolia
-    origin: Native
+    origin: native
   - name: Calla palustris
-    origin: Native
+    origin: native
   - name: Callirhoe triangulata
-    origin: Native
+    origin: native
   - name: Callitriche hermaphroditica
-    origin: Native
+    origin: native
   - name: Callitriche heterophylla
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Callitriche palustris
-    origin: Native
+    origin: native
   - name: Calopogon oklahomensis
-    origin: Native
+    origin: native
   - name: Calopogon tuberosus var. tuberosus
-    origin: Native
+    origin: native
   - name: Caltha natans
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Caltha palustris
-    origin: Native
+    origin: native
   - name: Calylophus serrulatus
-    origin: Native
+    origin: native
   - name: Calypso bulbosa var. americana
-    origin: Native
+    origin: native
   - name: Calystegia macounii
-    origin: Native
+    origin: native
   - name: Calystegia sepium
-    origin: Native
+    origin: native
   - name: Calystegia sepium ssp. angulata
-    origin: Native
+    origin: native
   - name: Calystegia sepium ssp. appalachiana
-    origin: Native
+    origin: native
   - name: Calystegia spithamaea
-    origin: Native
+    origin: native
   - name: Calystegia spithamaea ssp. spithamaea
-    origin: Native
+    origin: native
   - name: Calystegia spithamaea ssp. stans
-    origin: Native
+    origin: native
   - name: Camelina alyssum
-    origin: Introduced
+    origin: introduced
   - name: Camelina microcarpa
-    origin: Introduced
+    origin: introduced
   - name: Camelina sativa
-    origin: Introduced
+    origin: introduced
   - name: Campanula americana
-    origin: Native
+    origin: native
   - name: Campanula aparinoides
-    origin: Native
+    origin: native
   - name: Campanula aparinoides var. aparinoides
-    origin: Native
+    origin: native
   - name: Campanula aparinoides var. grandiflora
-    origin: Native
+    origin: native
   - name: Campanula cervicaria
-    origin: Introduced
+    origin: introduced
   - name: Campanula rapunculoides
-    origin: Introduced
+    origin: introduced
   - name: Campanula rotundifolia
-    origin: Native
+    origin: native
   - name: Canadanthus modestus
-    origin: Native
+    origin: native
   - name: Cannabis sativa
-    origin: Introduced
+    origin: introduced
   - name: Capsella bursa-pastoris
-    origin: Introduced
+    origin: introduced
   - name: Caragana arborescens
-    origin: Introduced
+    origin: introduced
   - name: Cardamine bulbosa
-    origin: Native
+    origin: native
   - name: Cardamine concatenata
-    origin: Native
+    origin: native
   # - name: Cardamine dentata
   - name: Cardamine pratensis
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Cardamine diphylla
-    origin: Unknown
+    origin: unknown
   - name: Cardamine douglassii
-    origin: Native
+    origin: native
   - name: Cardamine impatiens
-    origin: Introduced
+    origin: introduced
   - name: Cardamine parviflora
-    origin: Native
+    origin: native
   - name: Cardamine pensylvanica
-    origin: Native
+    origin: native
   - name: Cardamine pratensis
-    origin: Introduced
+    origin: introduced
   - name: Carduus acanthoides ssp. acanthoides
-    origin: Introduced
+    origin: introduced
   - name: Carduus nutans
-    origin: Introduced
+    origin: introduced
   - name: Carex adusta
-    origin: Native
+    origin: native
   - name: Carex albursina
-    origin: Native
+    origin: native
   - name: Carex alopecoidea
-    origin: Native
+    origin: native
   - name: Carex annectens
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Carex aquatilis
-    origin: Native
+    origin: native
   - name: Carex aquatilis var. aquatilis
-    origin: Native
+    origin: native
   - name: Carex aquatilis var. substricta
-    origin: Native
+    origin: native
   - name: Carex arcta
-    origin: Native
+    origin: native
   - name: Carex arctata
-    origin: Native
+    origin: native
   - name: Carex assiniboinensis
-    origin: Native
+    origin: native
   - name: Carex atherodes
-    origin: Native
+    origin: native
   - name: Carex aurea
-    origin: Native
+    origin: native
   - name: Carex backii
-    origin: Native
+    origin: native
   - name: Carex bebbii
-    origin: Native
+    origin: native
   - name: Carex bicknellii
-    origin: Native
+    origin: native
   - name: Carex blanda
-    origin: Native
+    origin: native
   - name: Carex brevior
-    origin: Native
+    origin: native
   - name: Carex bromoides ssp. bromoides
-    origin: Native
+    origin: native
   - name: Carex brunnescens
-    origin: Native
+    origin: native
   - name: Carex brunnescens ssp. brunnescens
-    origin: Native
+    origin: native
   - name: Carex brunnescens ssp. sphaerostachya
-    origin: Native
+    origin: native
   - name: Carex buxbaumii
-    origin: Native
+    origin: native
   - name: Carex canescens
-    origin: Native
+    origin: native
   - name: Carex canescens ssp. canescens
-    origin: Native
+    origin: native
   - name: Carex canescens ssp. disjuncta
-    origin: Native
+    origin: native
   - name: Carex capillaris
-    origin: Native
+    origin: native
   - name: Carex careyana
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Carex castanea
-    origin: Native
+    origin: native
   - name: Carex cephaloidea
-    origin: Native
+    origin: native
   - name: Carex cephalophora
-    origin: Native
+    origin: native
   - name: Carex chordorrhiza
-    origin: Native
+    origin: native
   - name: Carex communis var. communis
-    origin: Native
+    origin: native
   - name: Carex comosa
-    origin: Native
+    origin: native
   - name: Carex conjuncta
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Carex conoidea
-    origin: Native
+    origin: native
   - name: Carex crawei
-    origin: Native
+    origin: native
   - name: Carex crawfordii
-    origin: Native
+    origin: native
   - name: Carex crinita var. crinita
-    origin: Native
+    origin: native
   - name: Carex cristatella
-    origin: Native
+    origin: native
   - name: Carex crus-corvi
-    origin: Native
+    origin: native
   - name: Carex cryptolepis
-    origin: Native
+    origin: native
   - name: Carex davisii
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Carex debilis var. rudgei
-    origin: Native
+    origin: native
   - name: Carex deflexa var. deflexa
-    origin: Native
+    origin: native
   - name: Carex deweyana var. deweyana
-    origin: Native
+    origin: native
   - name: Carex diandra
-    origin: Native
+    origin: native
   - name: Carex disperma
-    origin: Native
+    origin: native
   - name: Carex duriuscula
-    origin: Native
+    origin: native
   - name: Carex eburnea
-    origin: Native
+    origin: native
   - name: Carex echinata ssp. echinata
-    origin: Native
+    origin: native
   # - name: Carex echinodes
   - name: Carex tenera var. echinodes
-    origin: Native
+    origin: native
   - name: Carex emoryi
-    origin: Native
+    origin: native
   - name: Carex exilis
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Carex filifolia var. filifolia
-    origin: Native
+    origin: native
   - name: Carex flava
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Carex foenea
-    origin: Native
+    origin: native
   - name: Carex formosa
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Carex garberi
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Carex gracillima
-    origin: Native
+    origin: native
   - name: Carex granularis
-    origin: Native
+    origin: native
   - name: Carex gravida
-    origin: Native
+    origin: native
   - name: Carex grayi
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Carex grisea
-    origin: Native
+    origin: native
   - name: Carex gynandra
-    origin: Native
+    origin: native
   - name: Carex gynocrates
-    origin: Native
+    origin: native
   - name: Carex hallii
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Carex haydenii
-    origin: Native
+    origin: native
   - name: Carex hirtifolia
-    origin: Native
+    origin: native
   - name: Carex hitchcockiana
-    origin: Native
+    origin: native
   - name: Carex hookerana
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Carex houghtoniana
-    origin: Native
+    origin: native
   - name: Carex hystericina
-    origin: Native
+    origin: native
   - name: Carex inops ssp. heliophila
-    origin: Native
+    origin: native
   - name: Carex interior
-    origin: Native
+    origin: native
   - name: Carex intumescens
-    origin: Native
+    origin: native
   - name: Carex jamesii
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Carex lacustris
-    origin: Native
+    origin: native
   - name: Carex laeviconica
-    origin: Native
+    origin: native
   - name: Carex laevivaginata
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Carex lasiocarpa
-    origin: Native
+    origin: native
   - name: Carex laxiculmis var. copulata
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Carex lenticularis var. lenticularis
-    origin: Native
+    origin: native
   - name: Carex leptalea
-    origin: Native
+    origin: native
   - name: Carex leptonervia
-    origin: Native
+    origin: native
   - name: Carex limosa
-    origin: Native
+    origin: native
   - name: Carex livida
-    origin: Native
+    origin: native
   - name: Carex lucorum var. lucorum
-    origin: Native
+    origin: native
   - name: Carex lupulina
-    origin: Native
+    origin: native
   - name: Carex lurida
-    origin: Native
+    origin: native
   - name: Carex magellanica ssp. irrigua
-    origin: Native
+    origin: native
   - name: Carex meadii
-    origin: Native
+    origin: native
   - name: Carex media
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Carex merritt-fernaldii
-    origin: Native
+    origin: native
   - name: Carex michauxiana
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Carex molesta
-    origin: Native
+    origin: native
   - name: Carex muehlenbergii var. muehlenbergii
-    origin: Native
+    origin: native
   - name: Carex muskingumensis
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Carex normalis
-    origin: Native
+    origin: native
   - name: Carex novae-angliae
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Carex obtusata
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Carex oligocarpa
-    origin: Native
+    origin: native
   - name: Carex oligosperma
-    origin: Native
+    origin: native
   - name: Carex ormostachya
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Carex pallescens
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Carex pauciflora
-    origin: Native
+    origin: native
   - name: Carex peckii
-    origin: Native
+    origin: native
   - name: Carex pedunculata
-    origin: Native
+    origin: native
   - name: Carex pellita
-    origin: Native
+    origin: native
   - name: Carex pensylvanica
-    origin: Native
+    origin: native
   - name: Carex plantaginea
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Carex praegracilis
-    origin: Native
+    origin: native
   - name: Carex prairea
-    origin: Native
+    origin: native
   - name: Carex praticola
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Carex projecta
-    origin: Native
+    origin: native
   - name: Carex pseudocyperus
-    origin: Native
+    origin: native
   - name: Carex radiata
-    origin: Native
+    origin: native
   - name: Carex retrorsa
-    origin: Native
+    origin: native
   - name: Carex richardsonii
-    origin: Native
+    origin: native
   - name: Carex rosea
-    origin: Native
+    origin: native
   - name: Carex rossii
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Carex rostrata
-    origin: Native
+    origin: native
   - name: Carex sartwellii
-    origin: Native
+    origin: native
   - name: Carex saximontana
-    origin: Native
+    origin: native
   - name: Carex scabrata
-    origin: Native
+    origin: native
   - name: Carex scirpoidea ssp. scirpoidea
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Carex scoparia
-    origin: Native
+    origin: native
   - name: Carex siccata
-    origin: Native
+    origin: native
   - name: Carex sparganioides
-    origin: Native
+    origin: native
   - name: Carex sprengelii
-    origin: Native
+    origin: native
   - name: Carex sterilis
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Carex stipata var. stipata
-    origin: Native
+    origin: native
   - name: Carex stricta
-    origin: Native
+    origin: native
   - name: Carex suberecta
-    origin: Native
+    origin: native
   - name: Carex supina ssp. spaniocarpa
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Carex sychnocephala
-    origin: Native
+    origin: native
   - name: Carex tenera
-    origin: Native
+    origin: native
   - name: Carex tenuiflora
-    origin: Native
+    origin: native
   - name: Carex tetanica
-    origin: Native
+    origin: native
   - name: Carex tonsa
-    origin: Native
+    origin: native
   - name: Carex tonsa var. rugosperma
-    origin: Native
+    origin: native
   - name: Carex tonsa var. tonsa
-    origin: Native
+    origin: native
   - name: Carex torreyi
-    origin: Native
+    origin: native
   - name: Carex tribuloides var. tribuloides
-    origin: Native
+    origin: native
   - name: Carex trichocarpa
-    origin: Native
+    origin: native
   - name: Carex trisperma
-    origin: Native
+    origin: native
   - name: Carex tuckermanii
-    origin: Native
+    origin: native
   - name: Carex typhina
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Carex umbellata
-    origin: Native
+    origin: native
   - name: Carex utriculata
-    origin: Native
+    origin: native
   - name: Carex vaginata
-    origin: Native
+    origin: native
   - name: Carex vesicaria
-    origin: Native
+    origin: native
   - name: Carex viridula ssp. viridula
-    origin: Native
+    origin: native
   - name: Carex vulpinoidea
-    origin: Native
+    origin: native
   - name: Carex woodii
-    origin: Native
+    origin: native
   - name: Carex xerantica
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Carex X knieskernii
-    origin: Native
+    origin: native
   - name: Carpinus caroliniana ssp. virginiana
-    origin: Native
+    origin: native
   - name: Carum carvi
-    origin: Introduced
+    origin: introduced
   - name: Carya cordiformis
-    origin: Native
+    origin: native
   - name: Carya ovata var. ovata
-    origin: Native
+    origin: native
   - name: Castilleja coccinea
-    origin: Native
+    origin: native
   - name: Castilleja septentrionalis
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Castilleja sessiliflora
-    origin: Native
+    origin: native
   - name: Catalpa speciosa
-    origin: Introduced
+    origin: introduced
   - name: Caulophyllum thalictroides
-    origin: Native
+    origin: native
   - name: Ceanothus americanus
-    origin: Native
+    origin: native
   - name: Ceanothus herbaceus
-    origin: Native
+    origin: native
   - name: Celastrus orbiculatus
-    origin: Introduced
+    origin: introduced
   - name: Celastrus scandens
-    origin: Native
+    origin: native
   - name: Celtis occidentalis
-    origin: Native
+    origin: native
   - name: Cenchrus longispinus
-    origin: Native
+    origin: native
   - name: Cenchrus spinifex
-    origin: Native
+    origin: native
   - name: Centaurea cyanus
-    origin: Introduced
+    origin: introduced
   - name: Centaurea jacea
-    origin: Introduced
+    origin: introduced
   - name: Centaurea montana
-    origin: Introduced
+    origin: introduced
   - name: Centaurea nigrescens
-    origin: Introduced
+    origin: introduced
   - name: Centaurea stoebe ssp. micranthos
-    origin: Introduced
+    origin: introduced
   - name: Centaurea X moncktonii
-    origin: Introduced
+    origin: introduced
   - name: Centaurium pulchellum
-    origin: Introduced
+    origin: introduced
   - name: Cephalanthus occidentalis
-    origin: Native
+    origin: native
   - name: Cerastium arvense
-    origin: Native
+    origin: native
   - name: Cerastium arvense ssp. arvense
-    origin: Introduced
+    origin: introduced
   - name: Cerastium arvense ssp. strictum
-    origin: Native
+    origin: native
   - name: Cerastium brachypodum
-    origin: Native
+    origin: native
   - name: Cerastium fontanum ssp. vulgare
-    origin: Introduced
+    origin: introduced
   - name: Cerastium nutans var. nutans
-    origin: Native
+    origin: native
   - name: Ceratophyllum demersum
-    origin: Native
+    origin: native
   - name: Ceratophyllum echinatum
-    origin: Native
+    origin: native
   - name: Chaenorhinum minus
-    origin: Introduced
+    origin: introduced
   - name: Chamaecrista fasciculata
-    origin: Native
+    origin: native
   - name: Chamaedaphne calyculata
-    origin: Native
+    origin: native
   # - name: Chamaenerion angustifolium
   - name: Chamerion angustifolium
-    origin: Native
+    origin: native
   # - name: Chamaenerion angustifolium ssp. angustifolium
   - name: Chamerion angustifolium ssp. angustifolium
-    origin: Native
+    origin: native
   # - name: Chamaenerion angustifolium ssp. circumvagum
   - name: Chamerion angustifolium ssp. circumvagum
-    origin: Native
+    origin: native
   - name: Chamaerhodos erecta
-    origin: Native
+    origin: native
   - name: Chelidonium majus
-    origin: Introduced
+    origin: introduced
   - name: Chelone glabra
-    origin: Native
+    origin: native
   - name: Chenopodium album
-    origin: Introduced
+    origin: introduced
   - name: Chenopodium berlandieri
-    origin: Native
+    origin: native
   - name: Chenopodium berlandieri var. bushianum
-    origin: Native
+    origin: native
   - name: Chenopodium berlandieri var. zschackei
-    origin: Native
+    origin: native
   - name: Chenopodium capitatum var. capitatum
-    origin: Native
+    origin: native
   - name: Chenopodium desiccatum
-    origin: Native
+    origin: native
   - name: Chenopodium glaucum
-    origin: Native
+    origin: native
   - name: Chenopodium glaucum var. glaucum
-    origin: Native
+    origin: native
   - name: Chenopodium glaucum var. salinum
-    origin: Native
+    origin: native
   - name: Chenopodium leptophyllum
-    origin: Introduced
+    origin: introduced
   - name: Chenopodium pratericola
-    origin: Native
+    origin: native
   - name: Chenopodium rubrum
-    origin: Native
+    origin: native
   - name: Chenopodium rubrum var. humile
-    origin: Native
+    origin: native
   - name: Chenopodium rubrum var. rubrum
-    origin: Native
+    origin: native
   - name: Chenopodium simplex
-    origin: Native
+    origin: native
   - name: Chenopodium standleyanum
-    origin: Native
+    origin: native
   # - name: Chimaphila umbellata ssp. umbellata
   - name: Chimaphila umbellata
-    origin: Native
+    origin: native
   - name: Chrysosplenium americanum
-    origin: Native
+    origin: native
   - name: Chrysosplenium iowense
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Cichorium intybus
-    origin: Introduced
+    origin: introduced
   - name: Cicuta bulbifera
-    origin: Native
+    origin: native
   - name: Cicuta maculata
-    origin: Native
+    origin: native
   - name: Cicuta maculata var. angustifolia
-    origin: Native
+    origin: native
   - name: Cicuta maculata var. bolanderi
-    origin: Native
+    origin: native
   - name: Cicuta maculata var. maculata
-    origin: Native
+    origin: native
   - name: Cinna arundinacea
-    origin: Native
+    origin: native
   - name: Cinna latifolia
-    origin: Native
+    origin: native
   - name: Circaea alpina ssp. alpina
-    origin: Native
+    origin: native
   - name: Circaea canadensis ssp. canadensis
-    origin: Native
+    origin: native
   # - name: Circaea X sterilis
   - name: Circaea X intermedia
-    origin: Native
+    origin: native
   - name: Cirsium altissimum
-    origin: Native
+    origin: native
   - name: Cirsium arvense
-    origin: Introduced
+    origin: introduced
   - name: Cirsium discolor
-    origin: Native
+    origin: native
   - name: Cirsium flodmanii
-    origin: Native
+    origin: native
   - name: Cirsium muticum
-    origin: Native
+    origin: native
   - name: Cirsium palustre
-    origin: Introduced
+    origin: introduced
   - name: Cirsium pumilum var. hillii
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Cirsium vulgare
-    origin: Introduced
+    origin: introduced
   - name: Cladium mariscoides
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Claytonia caroliniana
-    origin: Native
+    origin: native
   - name: Claytonia virginica
-    origin: Native
+    origin: native
   - name: Claytosmunda claytoniana
-    origin: Native
+    origin: native
   - name: Clematis occidentalis var. occidentalis
-    origin: Native
+    origin: native
   - name: Clematis virginiana
-    origin: Native
+    origin: native
   - name: Clintonia borealis
-    origin: Native
+    origin: native
   - name: Coeloglossum viride var. virescens
-    origin: Native
+    origin: native
   - name: Collomia linearis
-    origin: Native
+    origin: native
   - name: Comandra umbellata ssp. umbellata
-    origin: Native
+    origin: native
   - name: Comarum palustre
-    origin: Native
+    origin: native
   - name: Commelina communis
-    origin: Introduced
+    origin: introduced
   - name: Commelina erecta
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Comptonia peregrina
-    origin: Native
+    origin: native
   - name: Conium maculatum
-    origin: Introduced
+    origin: introduced
   - name: Conringia orientalis
-    origin: Introduced
+    origin: introduced
   - name: Convallaria majalis var. majalis
-    origin: Introduced
+    origin: introduced
   - name: Convolvulus arvensis
-    origin: Introduced
+    origin: introduced
   - name: Conyza canadensis
-    origin: Native
+    origin: native
   - name: Conyza ramosissima
-    origin: Native
+    origin: native
   - name: Coptis trifolia
-    origin: Native
+    origin: native
   - name: Corallorhiza maculata
-    origin: Native
+    origin: native
   - name: Corallorhiza maculata var. maculata
-    origin: Native
+    origin: native
   - name: Corallorhiza maculata var. occidentalis
-    origin: Native
+    origin: native
   - name: Corallorhiza odontorhiza var. odontorhiza
-    origin: Native
+    origin: native
   - name: Corallorhiza striata var. striata
-    origin: Native
+    origin: native
   - name: Corallorhiza trifida
-    origin: Native
+    origin: native
   - name: Coreopsis lanceolata
-    origin: Introduced
+    origin: introduced
   - name: Coreopsis palmata
-    origin: Native
+    origin: native
   - name: Coreopsis tinctoria
-    origin: Introduced
+    origin: introduced
   - name: Corispermum americanum var. americanum
-    origin: Native
+    origin: native
   - name: Corispermum pallasii
-    origin: Native
+    origin: native
   - name: Corispermum villosum
-    origin: Native
+    origin: native
   - name: Cornus alternifolia
-    origin: Native
+    origin: native
   - name: Cornus canadensis
-    origin: Native
+    origin: native
   - name: Cornus drummondii
-    origin: Native
+    origin: native
   - name: Cornus obliqua
-    origin: Native
+    origin: native
   - name: Cornus racemosa
-    origin: Native
+    origin: native
   - name: Cornus rugosa
-    origin: Native
+    origin: native
   - name: Cornus sericea
-    origin: Native
+    origin: native
   # - name: Corydalis aurea var. aurea
   - name: Corydalis aurea ssp. aurea
-    origin: Native
+    origin: native
   # - name: Corydalis micrantha var. micrantha
   - name: Corydalis micrantha ssp. micrantha
-    origin: Native
+    origin: native
   # - name: Corydalis nobilis
-  #   origin: Introduced
+  #   origin: introduced
   - name: Corydalis sempervirens
-    origin: Native
+    origin: native
   - name: Corylus americana
-    origin: Native
+    origin: native
   - name: Corylus cornuta ssp. cornuta
-    origin: Native
+    origin: native
   - name: Coryphantha vivipara
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Cota tinctoria
-    origin: Introduced
+    origin: introduced
   - name: Crassula aquatica
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Crataegus calpodendron
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Crataegus chrysocarpa
-    origin: Native
+    origin: native
   - name: Crataegus chrysocarpa var. blanchardii
-    origin: Native
+    origin: native
   - name: Crataegus chrysocarpa var. chrysocarpa
-    origin: Native
+    origin: native
   - name: Crataegus chrysocarpa var. faxonii
-    origin: Native
+    origin: native
   - name: Crataegus coccinea
-    origin: Native
+    origin: native
   - name: Crataegus douglasii
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Crataegus fluviatilis
-    origin: Native
+    origin: native
   - name: Crataegus laurentiana
-    origin: Native
+    origin: native
   - name: Crataegus macracantha
-    origin: Native
+    origin: native
   - name: Crataegus macrosperma
-    origin: Native
+    origin: native
   - name: Crataegus mollis
-    origin: Native
+    origin: native
   - name: Crataegus punctata
-    origin: Native
+    origin: native
   - name: Crataegus scabrida
-    origin: Native
+    origin: native
   - name: Crataegus schuettei
-    origin: Native
+    origin: native
   - name: Crataegus sheridana
-    origin: Native
+    origin: native
   - name: Crataegus submollis
-    origin: Native
+    origin: native
   - name: Crataegus succulenta var. succulenta
-    origin: Native
+    origin: native
   - name: Crepis runcinata ssp. runcinata
-    origin: Native
+    origin: native
   - name: Crepis tectorum
-    origin: Introduced
+    origin: introduced
   - name: Crocanthemum bicknellii
-    origin: Native
+    origin: native
   - name: Crocanthemum canadense
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   # - name: Crotalaria sagittalis var. sagittalis
   - name: Crotalaria sagittalis
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Croton glandulosus var. septentrionalis
-    origin: Introduced
+    origin: introduced
   - name: Cryptogramma acrostichoides
-    origin: Native
+    origin: native
   - name: Cryptogramma stelleri
-    origin: Native
+    origin: native
   - name: Cryptotaenia canadensis
-    origin: Native
+    origin: native
   - name: Cuscuta campestris
-    origin: Native
+    origin: native
   - name: Cuscuta cephalanthi
-    origin: Native
+    origin: native
   - name: Cuscuta coryli
-    origin: Native
+    origin: native
   - name: Cuscuta glomerata
-    origin: Native
+    origin: native
   - name: Cuscuta gronovii
-    origin: Native
+    origin: native
   - name: Cuscuta gronovii var. gronovii
-    origin: Native
+    origin: native
   - name: Cuscuta gronovii var. latiflora
-    origin: Native
+    origin: native
   - name: Cuscuta indecora var. indecora
-    origin: Native
+    origin: native
   - name: Cuscuta obtusiflora var. glandulosa
-    origin: Native
+    origin: native
   - name: Cuscuta pentagona
-    origin: Native
+    origin: native
   - name: Cuscuta polygonorum
-    origin: Native
+    origin: native
   - name: Cuscuta umbrosa
-    origin: Native
+    origin: native
   - name: Cyclachaena xanthiifolia
-    origin: Native
+    origin: native
   - name: Cycloloma atriplicifolium
-    origin: Native
+    origin: native
   # - name: Cymopterus glomeratus var. glomeratus
   - name: Cymopterus glomeratus
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Cynoglossum officinale
-    origin: Introduced
+    origin: introduced
   - name: Cynoglossum virginianum var. boreale
-    origin: Native
+    origin: native
   - name: Cyperus acuminatus
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Cyperus bipartitus
-    origin: Native
+    origin: native
   - name: Cyperus diandrus
-    origin: Native
+    origin: native
   - name: Cyperus engelmannii
-    origin: Native
+    origin: native
   - name: Cyperus erythrorhizos
-    origin: Native
+    origin: native
   - name: Cyperus esculentus var. leptostachyus
-    origin: Introduced
+    origin: introduced
   - name: Cyperus fuscus
-    origin: Introduced
+    origin: introduced
   - name: Cyperus houghtonii
-    origin: Native
+    origin: native
   - name: Cyperus lupulinus
-    origin: Native
+    origin: native
   - name: Cyperus lupulinus ssp. lupulinus
-    origin: Native
+    origin: native
   - name: Cyperus lupulinus ssp. macilentus
-    origin: Native
+    origin: native
   - name: Cyperus odoratus
-    origin: Native
+    origin: native
   - name: Cyperus schweinitzii
-    origin: Native
+    origin: native
   - name: Cyperus squarrosus
-    origin: Native
+    origin: native
   - name: Cyperus strigosus
-    origin: Native
+    origin: native
   # - name: Cyperus subsquarrosus
   - name: Lipocarpha micrantha
-    origin: Native
+    origin: native
   - name: Cyperus X mesochorus
-    origin: Native
+    origin: native
   - name: Cypripedium acaule
-    origin: Native
+    origin: native
   - name: Cypripedium arietinum
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Cypripedium candidum
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Cypripedium parviflorum
-    origin: Native
+    origin: native
   - name: Cypripedium parviflorum var. makasin
-    origin: Native
+    origin: native
   - name: Cypripedium parviflorum var. pubescens
-    origin: Native
+    origin: native
   - name: Cypripedium reginae
-    origin: Native
+    origin: native
   - name: Cypripedium X andrewsii
-    origin: Native
+    origin: native
   - name: Cystopteris bulbifera
-    origin: Native
+    origin: native
   - name: Cystopteris fragilis
-    origin: Native
+    origin: native
   - name: Cystopteris laurentiana
-    origin: Native
+    origin: native
   - name: Cystopteris protrusa
-    origin: Native
+    origin: native
   - name: Cystopteris tennesseensis
-    origin: Native
+    origin: native
   - name: Cystopteris tenuis
-    origin: Native
+    origin: native
   - name: Dactylis glomerata
-    origin: Introduced
+    origin: introduced
   - name: Dalea candida
-    origin: Native
+    origin: native
   - name: Dalea candida var. candida
-    origin: Native
+    origin: native
   - name: Dalea candida var. oligophylla
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Dalea leporina
-    origin: Native
+    origin: native
   - name: Dalea purpurea var. purpurea
-    origin: Native
+    origin: native
   - name: Dalea villosa var. villosa
-    origin: Native
+    origin: native
   - name: Danthonia spicata
-    origin: Native
+    origin: native
   - name: Dasiphora fruticosa
-    origin: Native
+    origin: native
   - name: Datura stramonium
-    origin: Introduced
+    origin: introduced
   - name: Datura wrightii
-    origin: Introduced
+    origin: introduced
   - name: Daucus carota
-    origin: Introduced
+    origin: introduced
   - name: Decodon verticillatus
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Delphinium carolinianum ssp. virescens
-    origin: Native
+    origin: native
   # - name: Dendrolycopodium dendroideum
   - name: Lycopodium dendroideum
-    origin: Native
+    origin: native
   # - name: Dendrolycopodium hickeyi
   - name: Lycopodium hickeyi
-    origin: Native
+    origin: native
   - name: Dendrolycopodium obscurum
-    origin: Native
+    origin: native
   - name: Deparia acrostichoides
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Deschampsia cespitosa ssp. cespitosa
-    origin: Native
+    origin: native
   - name: Deschampsia flexuosa
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Descurainia incana
-    origin: Native
+    origin: native
   - name: Descurainia pinnata ssp. brachycarpa
-    origin: Native
+    origin: native
   - name: Descurainia sophia
-    origin: Introduced
+    origin: introduced
   - name: Desmanthus illinoensis
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Desmodium canadense
-    origin: Native
+    origin: native
   - name: Desmodium cuspidatum
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Desmodium illinoense
-    origin: Native
+    origin: native
   - name: Desmodium nudiflorum
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Dianthus armeria ssp. armeria
-    origin: Introduced
+    origin: introduced
   - name: Dianthus barbatus ssp. barbatus
-    origin: Introduced
+    origin: introduced
   - name: Dianthus deltoides ssp. deltoides
-    origin: Introduced
+    origin: introduced
   - name: Diarrhena obovata
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Dicentra canadensis
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Dicentra cucullaria
-    origin: Native
+    origin: native
   - name: Dichanthelium acuminatum
-    origin: Native
+    origin: native
   - name: Dichanthelium acuminatum ssp. fasciculatum
-    origin: Native
+    origin: native
   - name: Dichanthelium acuminatum ssp. implicatum
-    origin: Native
+    origin: native
   - name: Dichanthelium acuminatum ssp. lindheimeri
-    origin: Native
+    origin: native
   - name: Dichanthelium boreale
-    origin: Native
+    origin: native
   - name: Dichanthelium depauperatum
-    origin: Native
+    origin: native
   - name: Dichanthelium latifolium
-    origin: Native
+    origin: native
   - name: Dichanthelium leibergii
-    origin: Native
+    origin: native
   - name: Dichanthelium linearifolium
-    origin: Native
+    origin: native
   - name: Dichanthelium oligosanthes
-    origin: Native
+    origin: native
   # - name: Dichanthelium oligosanthes ssp. oligosanthes
   - name: Dichanthelium oligosanthes var. oligosanthes
-    origin: Native
+    origin: native
   # - name: Dichanthelium oligosanthes ssp. scribnerianum
   - name: Dichanthelium oligosanthes var. scribnerianum
-    origin: Native
+    origin: native
   - name: Dichanthelium ovale
-    origin: Native
+    origin: native
   # - name: Dichanthelium ovale ssp. praecocius
-  #   origin: Native
+  #   origin: native
   # - name: Dichanthelium ovale ssp. pseudopubescens
-  #   origin: Native
+  #   origin: native
   # - name: Dichanthelium ovale ssp. villosissimum
-  #   origin: Native
+  #   origin: native
   - name: Dichanthelium perlongum
-    origin: Native
+    origin: native
   - name: Dichanthelium wilcoxianum
-    origin: Native
+    origin: native
   - name: Dichanthelium xanthophysum
-    origin: Native
+    origin: native
   - name: Didiplis diandra
-    origin: Native
+    origin: native
   - name: Diervilla lonicera
-    origin: Native
+    origin: native
   - name: Digitalis grandiflora
-    origin: Introduced
+    origin: introduced
   - name: Digitalis lanata
-    origin: Introduced
+    origin: introduced
   - name: Digitaria cognata
-    origin: Native
+    origin: native
   - name: Digitaria ischaemum
-    origin: Introduced
+    origin: introduced
   - name: Digitaria sanguinalis
-    origin: Introduced
+    origin: introduced
   - name: Dioscorea villosa
-    origin: Native
+    origin: native
   - name: Diphasiastrum complanatum
-    origin: Native
+    origin: native
   - name: Diphasiastrum digitatum
-    origin: Native
+    origin: native
   - name: Diphasiastrum tristachyum
-    origin: Native
+    origin: native
   - name: Diphasiastrum X habereri
-    origin: Native
+    origin: native
   - name: Diphasiastrum X verecundum
-    origin: Native
+    origin: native
   - name: Diphasiastrum X zeilleri
-    origin: Native
+    origin: native
   - name: Dipsacus fullonum
-    origin: Introduced
+    origin: introduced
   - name: Dipsacus laciniatus
-    origin: Introduced
+    origin: introduced
   - name: Dirca palustris
-    origin: Native
+    origin: native
   - name: Distichlis spicata
-    origin: Native
+    origin: native
   - name: Dodecatheon amethystinum
-    origin: Native
+    origin: native
   - name: Dodecatheon meadia
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Doellingeria umbellata
-    origin: Native
+    origin: native
   - name: Doellingeria umbellata var. pubens
-    origin: Native
+    origin: native
   - name: Doellingeria umbellata var. umbellata
-    origin: Native
+    origin: native
   - name: Draba arabisans
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Draba cana
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Draba nemorosa
-    origin: Native
+    origin: native
   - name: Draba norvegica
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Draba reptans
-    origin: Native
+    origin: native
   - name: Draba verna
-    origin: Introduced
+    origin: introduced
   - name: Dracocephalum parviflorum
-    origin: Native
+    origin: native
   - name: Drosera anglica
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Drosera intermedia
-    origin: Native
+    origin: native
   - name: Drosera linearis
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Drosera rotundifolia
-    origin: Native
+    origin: native
   - name: Drosera X obovata
-    origin: Native
+    origin: native
   - name: Drymocallis arguta
-    origin: Native
+    origin: native
   - name: Dryopteris carthusiana
-    origin: Native
+    origin: native
   - name: Dryopteris cristata
-    origin: Native
+    origin: native
   - name: Dryopteris expansa
-    origin: Native
+    origin: native
   - name: Dryopteris filix-mas
-    origin: Native
+    origin: native
   - name: Dryopteris fragrans
-    origin: Native
+    origin: native
   # - name: Dryopteris goldieana
   - name: Dryopteris goldiana
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Dryopteris intermedia
-    origin: Native
+    origin: native
   - name: Dryopteris marginalis
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Dryopteris X boottii
-    origin: Native
+    origin: native
   - name: Dryopteris X triploidea
-    origin: Native
+    origin: native
   - name: Dryopteris X uliginosa
-    origin: Native
+    origin: native
   - name: Duchesnea indica var. indica
-    origin: Introduced
+    origin: introduced
   - name: Dulichium arundinaceum var. arundinaceum
-    origin: Native
+    origin: native
   - name: Dysphania botrys
-    origin: Introduced
+    origin: introduced
   - name: Dyssodia papposa
-    origin: Native
+    origin: native
   - name: Echinacea angustifolia
-    origin: Native
+    origin: native
   - name: Echinochloa crus-galli
-    origin: Introduced
+    origin: introduced
   - name: Echinochloa muricata
-    origin: Native
+    origin: native
   - name: Echinochloa muricata var. microstachya
-    origin: Native
+    origin: native
   - name: Echinochloa muricata var. muricata
-    origin: Native
+    origin: native
   - name: Echinochloa walteri
-    origin: Native
+    origin: native
   - name: Echinocystis lobata
-    origin: Native
+    origin: native
   - name: Echinodorus berteroi
-    origin: Native
+    origin: native
   - name: Echinops sphaerocephalus
-    origin: Introduced
+    origin: introduced
   - name: Echium vulgare
-    origin: Introduced
+    origin: introduced
   - name: Eclipta prostrata
-    origin: Native
+    origin: native
   - name: Elaeagnus angustifolia
-    origin: Introduced
+    origin: introduced
   - name: Elaeagnus commutata
-    origin: Native
+    origin: native
   - name: Elaeagnus umbellata
-    origin: Introduced
+    origin: introduced
   - name: Elatine americana
-    origin: Native
+    origin: native
   - name: Elatine brachysperma
-    origin: Native
+    origin: native
   - name: Elatine minima
-    origin: Native
+    origin: native
   - name: Elatine triandra
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Eleocharis acicularis
-    origin: Native
+    origin: native
   - name: Eleocharis coloradoensis
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Eleocharis compressa
-    origin: Native
+    origin: native
   - name: Eleocharis compressa var. acutisquamata
-    origin: Native
+    origin: native
   - name: Eleocharis compressa var. compressa
-    origin: Native
+    origin: native
   - name: Eleocharis elliptica
-    origin: Native
+    origin: native
   - name: Eleocharis engelmannii
-    origin: Native
+    origin: native
   - name: Eleocharis erythropoda
-    origin: Native
+    origin: native
   - name: Eleocharis flavescens var. olivacea
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Eleocharis intermedia
-    origin: Native
+    origin: native
   - name: Eleocharis macrostachya
-    origin: Native
+    origin: native
   # - name: Eleocharis mamillata var. mamillata
   - name: Eleocharis mamillata ssp. mamillata
-    origin: Native
+    origin: native
   - name: Eleocharis nitida
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Eleocharis obtusa
-    origin: Native
+    origin: native
   - name: Eleocharis ovata
-    origin: Native
+    origin: native
   - name: Eleocharis palustris
-    origin: Native
+    origin: native
   - name: Eleocharis quinqueflora
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Eleocharis robbinsii
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Eleocharis rostellata
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Eleocharis wolfii
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Eleusine indica
-    origin: Introduced
+    origin: introduced
   - name: Eleutherococcus sieboldianus
-    origin: Introduced
+    origin: introduced
   - name: Ellisia nyctelea
-    origin: Native
+    origin: native
   - name: Elodea bifoliata
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Elodea canadensis
-    origin: Native
+    origin: native
   - name: Elodea nuttallii
-    origin: Native
+    origin: native
   - name: Elymus canadensis var. canadensis
-    origin: Native
+    origin: native
   - name: Elymus curvatus
-    origin: Native
+    origin: native
   - name: Elymus diversiglumis
-    origin: Native
+    origin: native
   - name: Elymus hystrix
-    origin: Native
+    origin: native
   - name: Elymus repens
-    origin: Introduced
+    origin: introduced
   - name: Elymus riparius
-    origin: Native
+    origin: native
   - name: Elymus trachycaulus
-    origin: Native
+    origin: native
   - name: Elymus trachycaulus ssp. subsecundus
-    origin: Native
+    origin: native
   - name: Elymus trachycaulus ssp. trachycaulus
-    origin: Native
+    origin: native
   - name: Elymus villosus
-    origin: Native
+    origin: native
   - name: Elymus virginicus
-    origin: Native
+    origin: native
   - name: Elymus virginicus var. jejunus
-    origin: Native
+    origin: native
   - name: Elymus virginicus var. virginicus
-    origin: Native
+    origin: native
   - name: Elymus wiegandii
-    origin: Native
+    origin: native
   - name: Empetrum atropurpureum
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Empetrum nigrum
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Enemion biternatum
-    origin: Native
+    origin: native
   - name: Epigaea repens
-    origin: Native
+    origin: native
   - name: Epilobium ciliatum
-    origin: Native
+    origin: native
   - name: Epilobium ciliatum ssp. ciliatum
-    origin: Native
+    origin: native
   - name: Epilobium ciliatum ssp. glandulosum
-    origin: Native
+    origin: native
   - name: Epilobium coloratum
-    origin: Native
+    origin: native
   - name: Epilobium densum
-    origin: Native
+    origin: native
   - name: Epilobium leptophyllum
-    origin: Native
+    origin: native
   - name: Epilobium palustre
-    origin: Native
+    origin: native
   # - name: Epilobium xwisconsinense
   - name: Epilobium X wisconsinense
-    origin: Native
+    origin: native
   - name: Epipactis helleborine
-    origin: Introduced
+    origin: introduced
   - name: Equisetum arvense
-    origin: Native
+    origin: native
   - name: Equisetum fluviatile
-    origin: Native
+    origin: native
   - name: Equisetum laevigatum
-    origin: Native
+    origin: native
   - name: Equisetum palustre
-    origin: Native
+    origin: native
   - name: Equisetum praealtum
-    origin: Native
+    origin: native
   - name: Equisetum pratense
-    origin: Native
+    origin: native
   - name: Equisetum scirpoides
-    origin: Native
+    origin: native
   - name: Equisetum sylvaticum
-    origin: Native
+    origin: native
   - name: Equisetum variegatum ssp. variegatum
-    origin: Native
+    origin: native
   - name: Equisetum X ferrissii
-    origin: Native
+    origin: native
   # - name: Equisetum X jesupii
-  #   origin: Native
+  #   origin: native
   - name: Equisetum X litorale
-    origin: Native
+    origin: native
   # - name: Equisetum X mildeanum
-  #   origin: Native
+  #   origin: native
   - name: Equisetum X nelsonii
-    origin: Native
+    origin: native
   - name: Eragrostis cilianensis
-    origin: Introduced
+    origin: introduced
   - name: Eragrostis frankii
-    origin: Native
+    origin: native
   - name: Eragrostis hypnoides
-    origin: Native
+    origin: native
   - name: Eragrostis minor
-    origin: Introduced
+    origin: introduced
   - name: Eragrostis pectinacea var. pectinacea
-    origin: Native
+    origin: native
   - name: Eragrostis pilosa
-    origin: Introduced
+    origin: introduced
   - name: Eragrostis pilosa var. perplexa
-    origin: Introduced
+    origin: introduced
   - name: Eragrostis pilosa var. pilosa
-    origin: Introduced
+    origin: introduced
   - name: Eragrostis spectabilis
-    origin: Native
+    origin: native
   - name: Eragrostis trichodes
-    origin: Native
+    origin: native
   - name: Erechtites hieraciifolius var. hieraciifolius
-    origin: Native
+    origin: native
   - name: Erigeron acris var. kamtschaticus
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Erigeron annuus
-    origin: Native
+    origin: native
   - name: Erigeron glabellus var. pubescens
-    origin: Native
+    origin: native
   - name: Erigeron lonchophyllus
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Erigeron philadelphicus var. philadelphicus
-    origin: Native
+    origin: native
   - name: Erigeron pulchellus
-    origin: Native
+    origin: native
   - name: Erigeron pulchellus var. pulchellus
-    origin: Native
+    origin: native
   - name: Erigeron pulchellus var. tolsteadii
-    origin: Native
+    origin: native
   - name: Erigeron strigosus
-    origin: Native
+    origin: native
   - name: Erigeron strigosus var. septentrionalis
-    origin: Native
+    origin: native
   - name: Erigeron strigosus var. strigosus
-    origin: Native
+    origin: native
   - name: Eriocaulon aquaticum
-    origin: Native
+    origin: native
   - name: Eriochloa villosa
-    origin: Introduced
+    origin: introduced
   - name: Eriophorum angustifolium ssp. angustifolium
-    origin: Native
+    origin: native
   - name: Eriophorum gracile
-    origin: Native
+    origin: native
   - name: Eriophorum russeolum ssp. leiocarpum
-    origin: Native
+    origin: native
   - name: Eriophorum tenellum
-    origin: Native
+    origin: native
   - name: Eriophorum vaginatum
-    origin: Native
+    origin: native
   - name: Eriophorum virginicum
-    origin: Native
+    origin: native
   - name: Eriophorum viridicarinatum
-    origin: Native
+    origin: native
   - name: Erodium cicutarium
-    origin: Introduced
+    origin: introduced
   - name: Erucastrum gallicum
-    origin: Introduced
+    origin: introduced
   - name: Eryngium yuccifolium var. yuccifolium
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Erysimum asperum
-    origin: Native
+    origin: native
   - name: Erysimum cheiranthoides
-    origin: Introduced
+    origin: introduced
   - name: Erysimum inconspicuum
-    origin: Native
+    origin: native
   # - name: Erythranthe geyeri
   - name: Mimulus glabratus var. fremontii
-    origin: Native
+    origin: native
   - name: Erythronium albidum
-    origin: Native
+    origin: native
   # - name: Erythronium albidum x propullans
-  #   origin: Native
+  #   origin: native
   - name: Erythronium americanum ssp. americanum
-    origin: Native
+    origin: native
   - name: Erythronium propullans
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Euonymus alatus
-    origin: Introduced
+    origin: introduced
   - name: Euonymus atropurpureus
-    origin: Native
+    origin: native
   - name: Eupatorium altissimum
-    origin: Native
+    origin: native
   - name: Eupatorium perfoliatum
-    origin: Native
+    origin: native
   - name: Eupatorium sessilifolium
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Euphorbia corollata
-    origin: Native
+    origin: native
   - name: Euphorbia cyathophora
-    origin: Native
+    origin: native
   - name: Euphorbia cyparissias
-    origin: Introduced
+    origin: introduced
   - name: Euphorbia davidii
-    origin: Introduced
+    origin: introduced
   - name: Euphorbia dentata
-    origin: Native
+    origin: native
   - name: Euphorbia geyeri var. geyeri
-    origin: Native
+    origin: native
   - name: Euphorbia glyptosperma
-    origin: Native
+    origin: native
   - name: Euphorbia hexagona
-    origin: Native
+    origin: native
   - name: Euphorbia maculata
-    origin: Native
+    origin: native
   - name: Euphorbia marginata
-    origin: Native
+    origin: native
   # - name: Chamaesyce missurica
   - name: Euphorbia missurica
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Euphorbia nutans
-    origin: Native
+    origin: native
   # - name: Euphorbia serpillifolia ssp. serpillifolia
   - name: Euphorbia serpyllifolia var. serpyllifolia
-    origin: Native
+    origin: native
   - name: Euphorbia spathulata
-    origin: Native
+    origin: native
   - name: Euphorbia virgata
-    origin: Introduced
+    origin: introduced
   - name: Euphrasia hudsoniana
-    origin: Native
+    origin: native
   - name: Euphrasia hudsoniana var. ramosior
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Euphrasia nemorosa
-    origin: Introduced
+    origin: introduced
   # - name: Euphrasia stricta var. stricta
-  #   origin: Introduced
+  #   origin: introduced
   - name: Eurybia macrophylla
-    origin: Native
+    origin: native
   - name: Euthamia graminifolia
-    origin: Native
+    origin: native
   - name: Euthamia gymnospermoides
-    origin: Native
+    origin: native
   - name: Eutrochium maculatum
-    origin: Native
+    origin: native
   - name: Eutrochium maculatum var. bruneri
-    origin: Native
+    origin: native
   - name: Eutrochium maculatum var. foliosum
-    origin: Native
+    origin: native
   - name: Eutrochium maculatum var. maculatum
-    origin: Native
+    origin: native
   - name: Eutrochium purpureum var. holzingeri
-    origin: Native
+    origin: native
   - name: Fagopyrum esculentum
-    origin: Introduced
+    origin: introduced
   - name: Fallopia cilinodis
-    origin: Native
+    origin: native
   - name: Fallopia convolvulus
-    origin: Introduced
+    origin: introduced
   - name: Fallopia japonica var. japonica
-    origin: Introduced
+    origin: introduced
   - name: Fallopia scandens
-    origin: Native
+    origin: native
   - name: Fallopia X bohemica
-    origin: Introduced
+    origin: introduced
   - name: Festuca rubra
-    origin: Introduced
+    origin: introduced
   - name: Festuca rubra ssp. fallax
-    origin: Introduced
+    origin: introduced
   - name: Festuca rubra ssp. rubra
-    origin: Introduced
+    origin: introduced
   - name: Festuca saximontana var. saximontana
-    origin: Native
+    origin: native
   - name: Festuca subverticillata
-    origin: Native
+    origin: native
   - name: Festuca trachyphylla
-    origin: Introduced
+    origin: introduced
   - name: Filipendula ulmaria
-    origin: Introduced
+    origin: introduced
   - name: Fimbristylis autumnalis
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Fimbristylis puberula var. interior
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Floerkea proserpinacoides
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Fragaria vesca ssp. americana
-    origin: Native
+    origin: native
   - name: Fragaria virginiana
-    origin: Native
+    origin: native
   - name: Fragaria virginiana ssp. glauca
-    origin: Native
+    origin: native
   - name: Fragaria virginiana ssp. virginiana
-    origin: Native
+    origin: native
   - name: Frangula alnus
-    origin: Introduced
+    origin: introduced
   - name: Fraxinus americana
-    origin: Native
+    origin: native
   - name: Fraxinus nigra
-    origin: Native
+    origin: native
   - name: Fraxinus pennsylvanica
-    origin: Native
+    origin: native
   - name: Froelichia floridana
-    origin: Native
+    origin: native
   - name: Gaillardia aristata
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Gaillardia pulchella
-    origin: Introduced
+    origin: introduced
   - name: Galearis spectabilis
-    origin: Native
+    origin: native
   - name: Galeopsis tetrahit
-    origin: Introduced
+    origin: introduced
   - name: Galeopsis tetrahit var. bifida
-    origin: Introduced
+    origin: introduced
   - name: Galeopsis tetrahit var. tetrahit
-    origin: Introduced
+    origin: introduced
   - name: Galinsoga parviflora var. parviflora
-    origin: Introduced
+    origin: introduced
   - name: Galinsoga quadriradiata
-    origin: Introduced
+    origin: introduced
   - name: Galium aparine
-    origin: Native
+    origin: native
   - name: Galium asprellum
-    origin: Native
+    origin: native
   - name: Galium boreale
-    origin: Native
+    origin: native
   - name: Galium circaezans var. hypomalacum
-    origin: Native
+    origin: native
   - name: Galium concinnum
-    origin: Native
+    origin: native
   - name: Galium labradoricum
-    origin: Native
+    origin: native
   - name: Galium mollugo
-    origin: Introduced
+    origin: introduced
   # - name: Galium obtusum var. obtusum
   - name: Galium obtusum ssp. obtusum
-    origin: Native
+    origin: native
   - name: Galium palustre
-    origin: Native
+    origin: native
   - name: Galium tinctorium var. tinctorium
-    origin: Native
+    origin: native
   # - name: Galium trifidum var. trifidum
   - name: Galium trifidum ssp. trifidum
-    origin: Native
+    origin: native
   # - name: Galium triflorum var. triflorum
   - name: Galium triflorum
-    origin: Native
+    origin: native
   - name: Galium verum
-    origin: Introduced
+    origin: introduced
   - name: Gaultheria hispidula
-    origin: Native
+    origin: native
   - name: Gaultheria procumbens
-    origin: Native
+    origin: native
   - name: Gaylussacia baccata
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   # - name: Gentiana affinis var. affinis
   - name: Gentiana affinis
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Gentiana andrewsii
-    origin: Native
+    origin: native
   - name: Gentiana andrewsii var. andrewsii
-    origin: Native
+    origin: native
   - name: Gentiana andrewsii var. dakotica
-    origin: Native
+    origin: native
   - name: Gentiana flavida
-    origin: Native
+    origin: native
   - name: Gentiana puberulenta
-    origin: Native
+    origin: native
   - name: Gentiana rubricaulis
-    origin: Native
+    origin: native
   - name: Gentiana X billingtonii
-    origin: Native
+    origin: native
   - name: Gentianella amarella ssp. acuta
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Gentianella quinquefolia ssp. occidentalis
-    origin: Native
+    origin: native
   - name: Gentianopsis crinita
-    origin: Native
+    origin: native
   - name: Gentianopsis virgata
-    origin: Native
+    origin: native
   - name: Gentianopsis virgata ssp. macounii
-    origin: Native
+    origin: native
   - name: Gentianopsis virgata ssp. virgata
-    origin: Native
+    origin: native
   - name: Geocaulon lividum
-    origin: Native
+    origin: native
   - name: Geranium bicknellii
-    origin: Native
+    origin: native
   - name: Geranium carolinianum
-    origin: Native
+    origin: native
   - name: Geranium maculatum
-    origin: Native
+    origin: native
   - name: Geranium sibiricum
-    origin: Introduced
+    origin: introduced
   - name: Geum aleppicum
-    origin: Native
+    origin: native
   - name: Geum canadense
-    origin: Native
+    origin: native
   - name: Geum laciniatum
-    origin: Native
+    origin: native
   - name: Geum macrophyllum var. perincisum
-    origin: Native
+    origin: native
   - name: Geum rivale
-    origin: Native
+    origin: native
   - name: Geum triflorum var. triflorum
-    origin: Native
+    origin: native
   - name: Geum vernum
-    origin: Native
+    origin: native
   - name: Glechoma hederacea
-    origin: Introduced
+    origin: introduced
   - name: Gleditsia triacanthos
-    origin: Native
+    origin: native
   - name: Glyceria borealis
-    origin: Native
+    origin: native
   - name: Glyceria canadensis var. canadensis
-    origin: Native
+    origin: native
   - name: Glyceria grandis var. grandis
-    origin: Native
+    origin: native
   - name: Glyceria maxima
-    origin: Introduced
+    origin: introduced
   - name: Glyceria striata
-    origin: Native
+    origin: native
   - name: Glycyrrhiza lepidota
-    origin: Native
+    origin: native
   - name: Gnaphalium uliginosum
-    origin: Introduced
+    origin: introduced
   - name: Goodyera pubescens
-    origin: Native
+    origin: native
   - name: Goodyera repens
-    origin: Native
+    origin: native
   - name: Goodyera tesselata
-    origin: Native
+    origin: native
   - name: Gratiola neglecta
-    origin: Native
+    origin: native
   - name: Grindelia hirsutula
-    origin: Native
+    origin: native
   - name: Grindelia squarrosa
-    origin: Native
+    origin: native
   # - name: Gymnocarpium continentale
-  #   origin: Native
+  #   origin: native
   - name: Gymnocarpium dryopteris
-    origin: Native
+    origin: native
   - name: Gymnocarpium robertianum
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Gymnocarpium X brittonianum
-    origin: Native
+    origin: native
   - name: Gymnocarpium X intermedium
-    origin: Native
+    origin: native
   - name: Gymnocladus dioicus
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Gypsophila muralis
-    origin: Introduced
+    origin: introduced
   - name: Gypsophila paniculata
-    origin: Introduced
+    origin: introduced
   - name: Hackelia deflexa var. americana
-    origin: Native
+    origin: native
   - name: Hackelia virginiana
-    origin: Native
+    origin: native
   - name: Halenia deflexa
-    origin: Native
+    origin: native
   - name: Hamamelis virginiana
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Hasteola suaveolens
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Hedeoma hispida
-    origin: Native
+    origin: native
   - name: Hedeoma pulegioides
-    origin: Native
+    origin: native
   - name: Hedyotis longifolia
-    origin: Native
+    origin: native
   - name: Helenium autumnale
-    origin: Native
+    origin: native
   - name: Helianthus annuus
-    origin: Native
+    origin: native
   - name: Helianthus giganteus
-    origin: Native
+    origin: native
   - name: Helianthus grosseserratus
-    origin: Native
+    origin: native
   - name: Helianthus hirsutus
-    origin: Native
+    origin: native
   - name: Helianthus maximiliani
-    origin: Native
+    origin: native
   - name: Helianthus nuttallii ssp. rydbergii
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Helianthus occidentalis ssp. occidentalis
-    origin: Native
+    origin: native
   - name: Helianthus pauciflorus
-    origin: Native
+    origin: native
   - name: Helianthus pauciflorus ssp. pauciflorus
-    origin: Native
+    origin: native
   - name: Helianthus pauciflorus ssp. subrhomboideus
-    origin: Native
+    origin: native
   - name: Helianthus petiolaris ssp. petiolaris
-    origin: Native
+    origin: native
   - name: Helianthus strumosus
-    origin: Native
+    origin: native
   - name: Helianthus tuberosus
-    origin: Native
+    origin: native
   - name: Helianthus X laetiflorus
-    origin: Native
+    origin: native
   - name: Heliopsis helianthoides var. scabra
-    origin: Native
+    origin: native
   - name: Hemerocallis fulva
-    origin: Introduced
+    origin: introduced
   - name: Heracleum maximum
-    origin: Native
+    origin: native
   - name: Hesperis matronalis
-    origin: Introduced
+    origin: introduced
   - name: Hesperostipa comata ssp. comata
-    origin: Native
+    origin: native
   - name: Hesperostipa curtiseta
-    origin: Native
+    origin: native
   - name: Hesperostipa spartea
-    origin: Native
+    origin: native
   - name: Heteranthera dubia
-    origin: Native
+    origin: native
   - name: Heteranthera limosa
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Heterotheca stenophylla var. angustifolia
-    origin: Native
+    origin: native
   - name: Heterotheca villosa
-    origin: Native
+    origin: native
   - name: Heterotheca villosa var. ballardii
-    origin: Native
+    origin: native
   - name: Heterotheca villosa var. foliosa
-    origin: Native
+    origin: native
   - name: Heterotheca villosa var. minor
-    origin: Native
+    origin: native
   - name: Heterotheca villosa var. villosa
-    origin: Native
+    origin: native
   - name: Heuchera richardsonii
-    origin: Native
+    origin: native
   - name: Hibiscus laevis
-    origin: Native
+    origin: native
   - name: Hibiscus trionum
-    origin: Introduced
+    origin: introduced
   - name: Hieracium aurantiacum
-    origin: Introduced
+    origin: introduced
   - name: Hieracium caespitosum
-    origin: Introduced
+    origin: introduced
   - name: Hieracium longipilum
-    origin: Native
+    origin: native
   - name: Hieracium pilosella
-    origin: Introduced
+    origin: introduced
   - name: Hieracium piloselloides
-    origin: Introduced
+    origin: introduced
   - name: Hieracium scabrum
-    origin: Native
+    origin: native
   - name: Hieracium umbellatum
-    origin: Native
+    origin: native
   - name: Hieracium vulgatum
-    origin: Introduced
+    origin: introduced
   - name: Hieracium X floribundum
-    origin: Native
+    origin: native
   - name: Hippuris vulgaris
-    origin: Native
+    origin: native
   # - name: Homalosorus pycnocarpos
   - name: Diplazium pycnocarpon
-    origin: Native
-    staus: Threatened
+    origin: native
+    staus: threatened
   - name: Hordeum jubatum ssp. jubatum
-    origin: Native
+    origin: native
   - name: Hordeum pusillum
-    origin: Native
+    origin: native
   # - name: Hordeum vulgare ssp. vulgare
   - name: Hordeum vulgare
-    origin: Introduced
+    origin: introduced
   - name: Hudsonia tomentosa
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Humulus japonicus
-    origin: Introduced
+    origin: introduced
   - name: Humulus lupulus
-    origin: Native
+    origin: native
   - name: Humulus lupulus var. lupuloides
-    origin: Native
+    origin: native
   - name: Humulus lupulus var. pubescens
-    origin: Native
+    origin: native
   # - name: Huperzia appressa
   - name: Huperzia selago
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Huperzia lucidula
-    origin: Native
+    origin: native
   - name: Huperzia porophila
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Huperzia selago
-    origin: Native
+    origin: native
   - name: Huperzia X bartleyi
-    origin: Native
+    origin: native
   - name: Huperzia X buttersii
-    origin: Native
+    origin: native
   - name: Huperzia X josephbeitelii
-    origin: Native
+    origin: native
   # - name: Huperzia X protoporophila
-  #   origin: Native
+  #   origin: native
   - name: Hybanthus concolor
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Hydrastis canadensis
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Hydrocotyle americana
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Hydrocotyle ranunculoides
-    origin: Unknown
+    origin: unknown
   - name: Hydrophyllum appendiculatum
-    origin: Native
+    origin: native
   - name: Hydrophyllum virginianum var. virginianum
-    origin: Native
+    origin: native
   # - name: Hylodesmum glutinosum
   - name: Desmodium glutinosum
-    origin: Native
+    origin: native
   # - name: Hylodesmum nudiflorum
   - name: Desmodium nudiflorum
-    origin: Native
+    origin: native
   - name: Hylotelephium telephium
-    origin: Introduced
+    origin: introduced
   - name: Hypericum ascyron ssp. pyramidatum
-    origin: Native
+    origin: native
   - name: Hypericum boreale
-    origin: Native
+    origin: native
   - name: Hypericum ellipticum
-    origin: Native
+    origin: native
   - name: Hypericum kalmianum
-    origin: Unknown
+    origin: unknown
   - name: Hypericum majus
-    origin: Native
+    origin: native
   # - name: Hypericum perforatum ssp. perforatum
   - name: Hypericum perforatum
-    origin: Introduced
+    origin: introduced
   - name: Hypericum punctatum
-    origin: Native
+    origin: native
   - name: Hypoxis hirsuta
-    origin: Native
+    origin: native
   # - name: Ilex verticillata var. verticillata
   - name: Ilex verticillata
-    origin: Native
+    origin: native
   - name: Impatiens balfourii
-    origin: Introduced
+    origin: introduced
   - name: Impatiens capensis
-    origin: Native
+    origin: native
   - name: Impatiens pallida
-    origin: Native
+    origin: native
   - name: Inula helenium
-    origin: Introduced
+    origin: introduced
   - name: Iodanthus pinnatifidus
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Ipomoea hederacea
-    origin: Unknown
+    origin: unknown
   - name: Iris pseudacorus
-    origin: Introduced
+    origin: introduced
   - name: Iris versicolor
-    origin: Native
+    origin: native
   - name: Iris virginica
-    origin: Native
+    origin: native
   - name: Isanthus brachiatus
-    origin: Native
+    origin: native
   - name: Isoetes echinospora
-    origin: Native
+    origin: native
   - name: Isoetes lacustris
-    origin: Native
+    origin: native
   - name: Isoetes melanopoda ssp. melanopoda
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Jeffersonia diphylla
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Juglans cinerea
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Juglans nigra
-    origin: Native
+    origin: native
   - name: Juglans X bixbyi
-    origin: Introduced
+    origin: introduced
   - name: Juncus alpinoarticulatus
-    origin: Native
+    origin: native
   - name: Juncus anthelatus
-    origin: Native
+    origin: native
   - name: Juncus articulatus
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Juncus balticus ssp. littoralis
-    origin: Native
+    origin: native
   - name: Juncus brachycarpus
-    origin: Unknown
+    origin: unknown
   - name: Juncus brevicaudatus
-    origin: Native
+    origin: native
   - name: Juncus bufonius
-    origin: Native
+    origin: native
   - name: Juncus canadensis
-    origin: Native
+    origin: native
   - name: Juncus compressus
-    origin: Introduced
+    origin: introduced
   - name: Juncus dudleyi
-    origin: Native
+    origin: native
   - name: Juncus effusus ssp. solutus
-    origin: Native
+    origin: native
   - name: Juncus filiformis
-    origin: Native
+    origin: native
   - name: Juncus gerardii
-    origin: Native
+    origin: native
   - name: Juncus greenei
-    origin: Native
+    origin: native
   - name: Juncus interior
-    origin: Native
+    origin: native
   - name: Juncus longistylis
-    origin: Native
+    origin: native
   - name: Juncus marginatus
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Juncus nodosus
-    origin: Native
+    origin: native
   - name: Juncus pelocarpus
-    origin: Native
+    origin: native
   - name: Juncus pylaei
-    origin: Native
+    origin: native
   - name: Juncus stygius var. americanus
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Juncus subtilis
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Juncus tenuis
-    origin: Native
+    origin: native
   - name: Juncus torreyi
-    origin: Native
+    origin: native
   - name: Juncus vaseyi
-    origin: Native
+    origin: native
   - name: Juncus X gracilescens
-    origin: Native
+    origin: native
   - name: Juniperus communis var. depressa
-    origin: Native
+    origin: native
   - name: Juniperus horizontalis
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Juniperus virginiana var. virginiana
-    origin: Native
+    origin: native
   - name: Kalmia polifolia
-    origin: Native
+    origin: native
   - name: Knautia arvensis
-    origin: Introduced
+    origin: introduced
   - name: Kochia scoparia ssp. scoparia
-    origin: Introduced
+    origin: introduced
   - name: Koeleria macrantha
-    origin: Native
+    origin: native
   - name: Krigia biflora
-    origin: Native
+    origin: native
   - name: Lactuca biennis
-    origin: Native
+    origin: native
   - name: Lactuca canadensis
-    origin: Native
+    origin: native
   - name: Lactuca floridana
-    origin: Native
+    origin: native
   - name: Lactuca ludoviciana
-    origin: Native
+    origin: native
   - name: Lactuca serriola
-    origin: Introduced
+    origin: introduced
   - name: Lamium amplexicaule
-    origin: Introduced
+    origin: introduced
   - name: Lamium galeobdolon
-    origin: Introduced
+    origin: introduced
   - name: Laportea canadensis
-    origin: Native
+    origin: native
   - name: Lappula redowskii
-    origin: Introduced
+    origin: introduced
   - name: Lappula squarrosa
-    origin: Introduced
+    origin: introduced
   - name: Lapsana communis
-    origin: Introduced
+    origin: introduced
   - name: Larix laricina
-    origin: Native
+    origin: native
   - name: Lathyrus japonicus var. maritimus
-    origin: Native
+    origin: native
   - name: Lathyrus latifolius
-    origin: Introduced
+    origin: introduced
   - name: Lathyrus ochroleucus
-    origin: Native
+    origin: native
   - name: Lathyrus palustris
-    origin: Native
+    origin: native
   - name: Lathyrus sylvestris
-    origin: Introduced
+    origin: introduced
   - name: Lathyrus tuberosus
-    origin: Introduced
+    origin: introduced
   - name: Lathyrus venosus var. intonsus
-    origin: Native
+    origin: native
   - name: Lechea intermedia var. intermedia
-    origin: Native
+    origin: native
   - name: Lechea stricta
-    origin: Native
+    origin: native
   - name: Lechea tenuifolia
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Leersia lenticularis
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Leersia oryzoides
-    origin: Native
+    origin: native
   - name: Leersia virginica
-    origin: Native
+    origin: native
   - name: Lemna minor
-    origin: Native
+    origin: native
   - name: Lemna obscura
-    origin: Native
+    origin: native
   - name: Lemna perpusilla
-    origin: Native
+    origin: native
   - name: Lemna trisulca
-    origin: Native
+    origin: native
   - name: Lemna turionifera
-    origin: Native
+    origin: native
   - name: Leontodon autumnalis
-    origin: Introduced
+    origin: introduced
   - name: Leonurus cardiaca
-    origin: Introduced
+    origin: introduced
   - name: Leonurus marrubiastrum
-    origin: Introduced
+    origin: introduced
   - name: Leonurus sibiricus
-    origin: Introduced
+    origin: introduced
   - name: Lepidium campestre
-    origin: Introduced
+    origin: introduced
   - name: Lepidium densiflorum
-    origin: Native
+    origin: native
   - name: Lepidium draba
-    origin: Introduced
+    origin: introduced
   - name: Lepidium virginicum ssp. virginicum
-    origin: Native
+    origin: native
   - name: Leptochloa fusca ssp. fascicularis
-    origin: Native
+    origin: native
   - name: Lespedeza capitata
-    origin: Native
+    origin: native
   - name: Lespedeza cuneata
-    origin: Introduced
+    origin: introduced
   - name: Lespedeza leptostachya
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Leucanthemella serotina
-    origin: Introduced
+    origin: introduced
   - name: Leucanthemum vulgare
-    origin: Introduced
+    origin: introduced
   - name: Leucophysalis grandiflora
-    origin: Native
+    origin: native
   - name: Leucospora multifida
-    origin: Native
+    origin: native
   - name: Levisticum officinale
-    origin: Introduced
+    origin: introduced
   - name: Liatris aspera
-    origin: Native
+    origin: native
   - name: Liatris cylindracea
-    origin: Native
+    origin: native
   - name: Liatris ligulistylis
-    origin: Native
+    origin: native
   - name: Liatris punctata var. punctata
-    origin: Native
+    origin: native
   - name: Liatris pycnostachya var. pycnostachya
-    origin: Native
+    origin: native
   - name: Lilium lancifolium
-    origin: Introduced
+    origin: introduced
   - name: Lilium michiganense
-    origin: Native
+    origin: native
   - name: Lilium philadelphicum
-    origin: Native
+    origin: native
   - name: Limosella aquatica
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Linaria dalmatica ssp. dalmatica
-    origin: Introduced
+    origin: introduced
   - name: Linaria vulgaris
-    origin: Introduced
+    origin: introduced
   - name: Lindernia dubia
-    origin: Native
+    origin: native
   - name: Linnaea borealis var. longiflora
-    origin: Native
+    origin: native
   - name: Linum lewisii var. lewisii
-    origin: Native
+    origin: native
   - name: Linum perenne
-    origin: Introduced
+    origin: introduced
   - name: Linum rigidum
-    origin: Native
+    origin: native
   - name: Linum rigidum var. rigidum
-    origin: Native
+    origin: native
   - name: Linum rigidum var. simulans
-    origin: Native
+    origin: native
   - name: Linum sulcatum
-    origin: Native
+    origin: native
   - name: Linum usitatissimum
-    origin: Introduced
+    origin: introduced
   - name: Liparis liliifolia
-    origin: Native
+    origin: native
   - name: Liparis loeselii
-    origin: Native
+    origin: native
   - name: Listera auriculata
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Listera convallarioides
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Listera cordata var. cordata
-    origin: Native
+    origin: native
   - name: Lithospermum canescens
-    origin: Native
+    origin: native
   - name: Lithospermum caroliniense var. croceum
-    origin: Native
+    origin: native
   - name: Lithospermum incisum
-    origin: Native
+    origin: native
   - name: Lithospermum latifolium
-    origin: Native
+    origin: native
   - name: Littorella americana
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   # - name: Lobelia cardinalis var. cardinalis
   - name: Lobelia cardinalis
-    origin: Native
+    origin: native
   - name: Lobelia dortmanna
-    origin: Native
+    origin: native
   - name: Lobelia inflata
-    origin: Native
+    origin: native
   - name: Lobelia kalmii
-    origin: Native
+    origin: native
   - name: Lobelia siphilitica
-    origin: Native
+    origin: native
   - name: Lobelia siphilitica var. ludoviciana
-    origin: Native
+    origin: native
   - name: Lobelia siphilitica var. siphilitica
-    origin: Native
+    origin: native
   - name: Lobelia spicata
-    origin: Native
+    origin: native
   - name: Lobelia spicata var. hirtella
-    origin: Native
+    origin: native
   - name: Lobelia spicata var. spicata
-    origin: Native
+    origin: native
   - name: Lobularia maritima
-    origin: Introduced
+    origin: introduced
   - name: Logfia arvensis
-    origin: Introduced
+    origin: introduced
   - name: Lolium multiflorum
-    origin: Introduced
+    origin: introduced
   - name: Lolium perenne
-    origin: Introduced
+    origin: introduced
   - name: Lomatium orientale
-    origin: Native
+    origin: native
   - name: Lonicera caerulea var. villosa
-    origin: Native
+    origin: native
   - name: Lonicera canadensis
-    origin: Native
+    origin: native
   - name: Lonicera dioica
-    origin: Native
+    origin: native
   - name: Lonicera dioica var. dioica
-    origin: Native
+    origin: native
   - name: Lonicera dioica var. glaucescens
-    origin: Native
+    origin: native
   - name: Lonicera hirsuta
-    origin: Native
+    origin: native
   - name: Lonicera morrowii
-    origin: Introduced
+    origin: introduced
   - name: Lonicera oblongifolia
-    origin: Native
+    origin: native
   - name: Lonicera reticulata
-    origin: Native
+    origin: native
   - name: Lonicera tatarica
-    origin: Introduced
+    origin: introduced
   - name: Lonicera X bella
-    origin: Introduced
+    origin: introduced
   - name: Lotus corniculatus
-    origin: Introduced
+    origin: introduced
   - name: Ludwigia palustris
-    origin: Native
+    origin: native
   - name: Ludwigia polycarpa
-    origin: Native
+    origin: native
   - name: Lupinus perennis
-    origin: Native
+    origin: native
   - name: Lupinus polyphyllus
-    origin: Introduced
+    origin: introduced
   - name: Luzula acuminata var. acuminata
-    origin: Native
+    origin: native
   - name: Luzula luzuloides ssp. luzuloides
-    origin: Introduced
+    origin: introduced
   - name: Luzula multiflora ssp. multiflora
-    origin: Native
+    origin: native
   - name: Luzula parviflora ssp. melanocarpa
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Lycium barbarum
-    origin: Introduced
+    origin: introduced
   - name: Lycopodiella inundata
-    origin: Native
+    origin: native
   - name: Lycopodium clavatum
-    origin: Native
+    origin: native
   - name: Lycopodium lagopus
-    origin: Native
+    origin: native
   - name: Lycopus americanus
-    origin: Native
+    origin: native
   - name: Lycopus asper
-    origin: Native
+    origin: native
   - name: Lycopus uniflorus
-    origin: Native
+    origin: native
   - name: Lycopus virginicus
-    origin: Native
+    origin: native
   - name: Lycopus X sherardii
-    origin: Native
+    origin: native
   - name: Lygodesmia juncea
-    origin: Native
+    origin: native
   - name: Lysimachia ciliata
-    origin: Native
+    origin: native
   - name: Lysimachia hybrida
-    origin: Native
+    origin: native
   - name: Lysimachia lanceolata
-    origin: Native
+    origin: native
   - name: Lysimachia maritima
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Lysimachia nummularia
-    origin: Introduced
+    origin: introduced
   - name: Lysimachia quadriflora
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Lysimachia quadrifolia
-    origin: Native
+    origin: native
   - name: Lysimachia terrestris
-    origin: Native
+    origin: native
   - name: Lysimachia thyrsiflora
-    origin: Native
+    origin: native
   - name: Lysimachia vulgaris
-    origin: Introduced
+    origin: introduced
   - name: Lysimachia X commixta
-    origin: Native
+    origin: native
   - name: Lythrum alatum var. alatum
-    origin: Native
+    origin: native
   - name: Lythrum salicaria
-    origin: Introduced
+    origin: introduced
   - name: Madia glomerata
-    origin: Introduced
+    origin: introduced
   - name: Maianthemum canadense
-    origin: Native
+    origin: native
   - name: Maianthemum racemosum ssp. racemosum
-    origin: Native
+    origin: native
   - name: Maianthemum stellatum
-    origin: Native
+    origin: native
   - name: Maianthemum trifolium
-    origin: Native
+    origin: native
   - name: Malaxis monophyllos var. brachypoda
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Malaxis paludosa
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Malaxis unifolia
-    origin: Native
+    origin: native
   - name: Malus ioensis
-    origin: Native
+    origin: native
   - name: Malva neglecta
-    origin: Introduced
+    origin: introduced
   - name: Malva pusilla
-    origin: Introduced
+    origin: introduced
   - name: Marsilea vestita
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Matricaria chamomilla
-    origin: Introduced
+    origin: introduced
   - name: Matricaria discoidea
-    origin: Introduced
+    origin: introduced
   - name: Matteuccia struthiopteris var. pensylvanica
-    origin: Native
+    origin: native
   - name: Medicago lupulina
-    origin: Introduced
+    origin: introduced
   - name: Medicago sativa
-    origin: Introduced
+    origin: introduced
   - name: Medicago sativa ssp. falcata
-    origin: Introduced
+    origin: introduced
   - name: Medicago sativa ssp. sativa
-    origin: Introduced
+    origin: introduced
   - name: Melampyrum lineare
-    origin: Native
+    origin: native
   - name: Melampyrum lineare var. americanum
-    origin: Native
+    origin: native
   - name: Melampyrum lineare var. lineare
-    origin: Native
+    origin: native
   - name: Melica nitens
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Melilotus albus
-    origin: Introduced
+    origin: introduced
   - name: Melilotus officinalis
-    origin: Introduced
+    origin: introduced
   - name: Menispermum canadense
-    origin: Native
+    origin: native
   - name: Mentha arvensis var. canadensis
-    origin: Native
+    origin: native
   - name: Mentha spicata
-    origin: Introduced
+    origin: introduced
   - name: Mentha X gentilis
-    origin: Introduced
+    origin: introduced
   - name: Menyanthes trifoliata
-    origin: Native
+    origin: native
   - name: Mertensia paniculata
-    origin: Native
+    origin: native
   - name: Mertensia virginica
-    origin: Native
+    origin: native
   - name: Micranthes pensylvanica
-    origin: Native
+    origin: native
   - name: Micranthes virginiensis
-    origin: Native
+    origin: native
   - name: Milium effusum var. cisatlanticum
-    origin: Native
+    origin: native
   - name: Mimulus ringens var. ringens
-    origin: Native
+    origin: native
   - name: Minuartia dawsonensis
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Mirabilis albida
-    origin: Native
+    origin: native
   - name: Mirabilis linearis var. linearis
-    origin: Native
+    origin: native
   - name: Mirabilis nyctaginea
-    origin: Native
+    origin: native
   - name: Miscanthus sacchariflorus
-    origin: Introduced
+    origin: introduced
   - name: Mitchella repens
-    origin: Native
+    origin: native
   - name: Mitella diphylla
-    origin: Native
+    origin: native
   - name: Mitella nuda
-    origin: Native
+    origin: native
   - name: Moehringia lateriflora
-    origin: Native
+    origin: native
   - name: Moehringia macrophylla
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Mollugo verticillata
-    origin: Native
+    origin: native
   - name: Monarda fistulosa
-    origin: Native
+    origin: native
   - name: Monarda fistulosa var. fistulosa
-    origin: Native
+    origin: native
   # - name: Monarda fistulosa var. menthaefolia
   - name: Monarda fistulosa var. menthifolia
-    origin: Native
+    origin: native
   - name: Monarda punctata var. villicaulis
-    origin: Native
+    origin: native
   - name: Moneses uniflora
-    origin: Native
+    origin: native
   - name: Monolepis nuttalliana
-    origin: Native
+    origin: native
   - name: Monotropa hypopitys
-    origin: Native
+    origin: native
   - name: Monotropa uniflora
-    origin: Native
+    origin: native
   - name: Montia chamissoi
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Morus alba
-    origin: Introduced
+    origin: introduced
   - name: Morus rubra
-    origin: Native
+    origin: native
   - name: Muhlenbergia asperifolia
-    origin: Native
+    origin: native
   - name: Muhlenbergia cuspidata
-    origin: Native
+    origin: native
   - name: Muhlenbergia frondosa
-    origin: Native
+    origin: native
   - name: Muhlenbergia glomerata
-    origin: Native
+    origin: native
   - name: Muhlenbergia mexicana
-    origin: Native
+    origin: native
   - name: Muhlenbergia mexicana var. filiformis
-    origin: Native
+    origin: native
   - name: Muhlenbergia mexicana var. mexicana
-    origin: Native
+    origin: native
   - name: Muhlenbergia racemosa
-    origin: Native
+    origin: native
   - name: Muhlenbergia richardsonis
-    origin: Native
+    origin: native
   - name: Muhlenbergia schreberi
-    origin: Native
+    origin: native
   - name: Muhlenbergia sylvatica
-    origin: Native
+    origin: native
   - name: Muhlenbergia uniflora
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Mulgedium pulchellum
-    origin: Native
+    origin: native
   - name: Myosotis arvensis
-    origin: Introduced
+    origin: introduced
   - name: Myosotis laxa
-    origin: Native
+    origin: native
   - name: Myosotis scorpioides
-    origin: Introduced
+    origin: introduced
   - name: Myosotis sylvatica
-    origin: Introduced
+    origin: introduced
   - name: Myosotis verna
-    origin: Native
+    origin: native
   - name: Myosoton aquaticum
-    origin: Introduced
+    origin: introduced
   - name: Myosurus minimus
-    origin: Native
+    origin: native
   - name: Myrica gale
-    origin: Native
+    origin: native
   - name: Myriophyllum alterniflorum
-    origin: Native
+    origin: native
   - name: Myriophyllum farwellii
-    origin: Native
+    origin: native
   - name: Myriophyllum heterophyllum
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Myriophyllum pinnatum
-    origin: Unknown
+    origin: unknown
   - name: Myriophyllum sibiricum
-    origin: Native
+    origin: native
   - name: Myriophyllum spicatum
-    origin: Introduced
+    origin: introduced
   - name: Myriophyllum tenellum
-    origin: Native
+    origin: native
   - name: Myriophyllum verticillatum
-    origin: Native
+    origin: native
   # - name: Myriopteris gracilis
   - name: Cheilanthes feei
-    origin: Native
+    origin: native
   - name: Najas flexilis
-    origin: Native
+    origin: native
   - name: Najas gracillima
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Najas guadalupensis
-    origin: Native
+    origin: native
   - name: Najas guadalupensis ssp. guadalupensis
-    origin: Native
+    origin: native
   - name: Najas guadalupensis ssp. olivacea
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Najas marina
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Najas minor
-    origin: Introduced
+    origin: introduced
   - name: Napaea dioica
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Nassella viridula
-    origin: Native
+    origin: native
   - name: Nasturtium microphyllum
-    origin: Introduced
+    origin: introduced
   - name: Nasturtium officinale
-    origin: Introduced
+    origin: introduced
   - name: Nelumbo lutea
-    origin: Native
+    origin: native
   - name: Nemopanthus mucronatus
-    origin: Native
+    origin: native
   - name: Nepeta cataria
-    origin: Introduced
+    origin: introduced
   - name: Neslia paniculata
-    origin: Introduced
+    origin: introduced
   - name: Nothocalais cuspidata
-    origin: Native
+    origin: native
   - name: Nuphar microphylla
-    origin: Native
+    origin: native
   - name: Nuphar rubrodisca
-    origin: Native
+    origin: native
   - name: Nuphar variegata
-    origin: Native
+    origin: native
   - name: Nuttallanthus canadensis
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Nymphaea leibergii
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Nymphaea odorata
-    origin: Native
+    origin: native
   - name: Nymphaea odorata ssp. odorata
-    origin: Native
+    origin: native
   - name: Nymphaea odorata ssp. tuberosa
-    origin: Native
+    origin: native
   - name: Odontites vulgaris
-    origin: Introduced
+    origin: introduced
   - name: Oenanthe javanica
-    origin: Introduced
+    origin: introduced
   - name: Oenothera biennis
-    origin: Native
+    origin: native
   - name: Oenothera clelandii
-    origin: Native
+    origin: native
   - name: Oenothera curtiflora
-    origin: Introduced
+    origin: introduced
   - name: Oenothera gaura
-    origin: Native
+    origin: native
   - name: Oenothera laciniata
-    origin: Native
+    origin: native
   - name: Oenothera nuttallii
-    origin: Native
+    origin: native
   - name: Oenothera oakesiana
-    origin: Native
+    origin: native
   - name: Oenothera parviflora
-    origin: Native
+    origin: native
   - name: Oenothera perennis
-    origin: Native
+    origin: native
   - name: Oenothera rhombipetala
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Oenothera suffrutescens
-    origin: Native
+    origin: native
   - name: Oenothera villosa
-    origin: Native
+    origin: native
   - name: Oenothera villosa ssp. strigosa
-    origin: Native
+    origin: native
   - name: Oenothera villosa ssp. villosa
-    origin: Native
+    origin: native
   - name: Onoclea sensibilis
-    origin: Native
+    origin: native
   - name: Onosmodium molle
-    origin: Native
+    origin: native
   - name: Onosmodium molle var. hispidissimum
-    origin: Native
+    origin: native
   - name: Onosmodium molle var. occidentale
-    origin: Native
+    origin: native
   - name: Ophioglossum pusillum
-    origin: Native
+    origin: native
   - name: Opuntia fragilis
-    origin: Native
+    origin: native
   - name: Opuntia humifusa
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Ornithogalum umbellatum
-    origin: Introduced
+    origin: introduced
   - name: Orobanche fasciculata
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Orobanche ludoviciana
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   # - name: Orobanche uniflora ssp. uniflora
   - name: Orobanche uniflora var. uniflora
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Orthilia secunda
-    origin: Native
+    origin: native
   - name: Orthocarpus luteus
-    origin: Native
+    origin: native
   - name: Oryzopsis asperifolia
-    origin: Native
+    origin: native
   - name: Osmorhiza berteroi
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Osmorhiza claytonii
-    origin: Native
+    origin: native
   - name: Osmorhiza depauperata
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Osmorhiza longistylis
-    origin: Native
+    origin: native
   - name: Osmunda regalis var. spectabilis
-    origin: Native
+    origin: native
   - name: Osmundastrum cinnamomeum
-    origin: Native
+    origin: native
   - name: Ostrya virginiana
-    origin: Native
+    origin: native
   - name: Oxalis dillenii
-    origin: Native
+    origin: native
   - name: Oxalis montana
-    origin: Native
+    origin: native
   - name: Oxalis stricta
-    origin: Native
+    origin: native
   - name: Oxalis violacea
-    origin: Native
+    origin: native
   - name: Oxypolis rigidior
-    origin: Native
+    origin: native
   - name: Oxytropis borealis var. viscida
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Oxytropis campestris var. dispar
-    origin: Native
+    origin: native
   - name: Oxytropis lambertii var. lambertii
-    origin: Native
+    origin: native
   - name: Packera aurea
-    origin: Native
+    origin: native
   - name: Packera cana
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Packera indecora
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Packera paupercula
-    origin: Native
+    origin: native
   - name: Packera plattensis
-    origin: Native
+    origin: native
   - name: Packera pseudaurea var. semicordata
-    origin: Native
+    origin: native
   - name: Panax quinquefolius
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Panax trifolius
-    origin: Native
+    origin: native
   - name: Panicum capillare ssp. capillare
-    origin: Native
+    origin: native
   - name: Panicum dichotomiflorum ssp. dichotomiflorum
-    origin: Native
+    origin: native
   - name: Panicum miliaceum ssp. ruderale
-    origin: Introduced
+    origin: introduced
   # - name: Panicum philadelphicum ssp. philadelphicum
   - name: Panicum philadelphicum var. philadelphicum
-    origin: Native
+    origin: native
   - name: Panicum virgatum
-    origin: Native
+    origin: native
   - name: Parietaria pensylvanica
-    origin: Native
+    origin: native
   - name: Parnassia glauca
-    origin: Native
+    origin: native
   - name: Parnassia palustris
-    origin: Native
+    origin: native
   - name: Paronychia canadensis
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Paronychia fastigiata var. fastigiata
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Parthenium integrifolium
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Parthenocissus quinquefolia
-    origin: Native
+    origin: native
   - name: Parthenocissus vitacea
-    origin: Native
+    origin: native
   - name: Pascopyrum smithii
-    origin: Native
+    origin: native
   - name: Paspalum setaceum
-    origin: Native
+    origin: native
   - name: Paspalum setaceum var. muhlenbergii
-    origin: Native
+    origin: native
   - name: Paspalum setaceum var. stramineum
-    origin: Native
+    origin: native
   - name: Pastinaca sativa
-    origin: Introduced
+    origin: introduced
   - name: Pedicularis canadensis
-    origin: Native
+    origin: native
   - name: Pedicularis lanceolata
-    origin: Native
+    origin: native
   - name: Pediomelum argophyllum
-    origin: Native
+    origin: native
   - name: Pediomelum esculentum
-    origin: Native
+    origin: native
   # - name: Pediomelum tenuiflorum
   - name: Psoralidium tenuiflorum
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Pellaea atropurpurea
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Pellaea glabella ssp. glabella
-    origin: Native
+    origin: native
   - name: Peltandra virginica
-    origin: Introduced
+    origin: introduced
   - name: Penstemon albidus
-    origin: Native
+    origin: native
   - name: Penstemon digitalis
-    origin: Native
+    origin: native
   - name: Penstemon gracilis
-    origin: Native
+    origin: native
   - name: Penstemon grandiflorus
-    origin: Native
+    origin: native
   - name: Penstemon pallidus
-    origin: Native
+    origin: native
   - name: Penthorum sedoides
-    origin: Native
+    origin: native
   - name: Peritoma serrulata
-    origin: Introduced
+    origin: introduced
   - name: Persicaria amphibia
-    origin: Native
+    origin: native
   - name: Persicaria amphibia var. emersa
-    origin: Native
+    origin: native
   - name: Persicaria amphibia var. stipulacea
-    origin: Native
+    origin: native
   - name: Persicaria arifolia
-    origin: Native
+    origin: native
   - name: Persicaria careyi
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Persicaria hydropiper
-    origin: Introduced
+    origin: introduced
   - name: Persicaria hydropiperoides
-    origin: Native
+    origin: native
   - name: Persicaria lapathifolia
-    origin: Native
+    origin: native
   - name: Persicaria longiseta
-    origin: Introduced
+    origin: introduced
   - name: Persicaria maculosa
-    origin: Introduced
+    origin: introduced
   - name: Persicaria minor
-    origin: Introduced
+    origin: introduced
   - name: Persicaria orientalis
-    origin: Introduced
+    origin: introduced
   - name: Persicaria pensylvanica
-    origin: Native
+    origin: native
   - name: Persicaria punctata
-    origin: Native
+    origin: native
   - name: Persicaria sagittata
-    origin: Native
+    origin: native
   - name: Persicaria virginiana
-    origin: Native
+    origin: native
   - name: Petasites frigidus
-    origin: Native
+    origin: native
   - name: Petasites frigidus var. palmatus
-    origin: Native
+    origin: native
   - name: Petasites frigidus var. sagittatus
-    origin: Native
+    origin: native
   - name: Petasites frigidus var. vitifolius
-    origin: Native
+    origin: native
   - name: Petrorhagia saxifraga var. saxifraga
-    origin: Introduced
+    origin: introduced
   - name: Phacelia franklinii
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Phalaris arundinacea
-    origin: Introduced
+    origin: introduced
   - name: Phalaris canariensis
-    origin: Introduced
+    origin: introduced
   - name: Phedimus aizoon
-    origin: Introduced
+    origin: introduced
   - name: Phedimus spurius
-    origin: Introduced
+    origin: introduced
   - name: Phegopteris connectilis
-    origin: Native
+    origin: native
   - name: Phegopteris hexagonoptera
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Phellodendron amurense
-    origin: Introduced
+    origin: introduced
   - name: Phemeranthus parviflorus
-    origin: Native
+    origin: native
   - name: Phemeranthus rugospermus
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Phleum pratense ssp. pratense
-    origin: Introduced
+    origin: introduced
   - name: Phlox divaricata var. laphamii
-    origin: Native
+    origin: native
   - name: Phlox maculata
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Phlox paniculata
-    origin: Introduced
+    origin: introduced
   - name: Phlox pilosa var. fulgida
-    origin: Native
+    origin: native
   # - name: Phlox subulata var. subulata
   - name: Phlox subulata ssp. subulata
-    origin: Introduced
+    origin: introduced
   - name: Phragmites australis
-    origin: Native
+    origin: native
   - name: Phragmites australis ssp. americanus
-    origin: Native
+    origin: native
   - name: Phragmites australis ssp. australis
-    origin: Introduced
+    origin: introduced
   - name: Phryma leptostachya var. leptostachya
-    origin: Native
+    origin: native
   - name: Phyla lanceolata
-    origin: Native
+    origin: native
   - name: Physalis heterophylla
-    origin: Native
+    origin: native
   - name: Physalis longifolia
-    origin: Native
+    origin: native
   - name: Physalis longifolia var. longifolia
-    origin: Native
+    origin: native
   - name: Physalis longifolia var. subglabrata
-    origin: Native
+    origin: native
   - name: Physalis virginiana
-    origin: Native
+    origin: native
   - name: Physaria ludoviciana
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Physocarpus intermedius
-    origin: Native
+    origin: native
   - name: Physocarpus opulifolius
-    origin: Native
+    origin: native
   # - name: Physostegia virginiana var. virginiana
   - name: Physostegia virginiana ssp. virginiana
-    origin: Native
+    origin: native
   - name: Picea glauca
-    origin: Native
+    origin: native
   - name: Picea mariana
-    origin: Native
+    origin: native
   - name: Pilea fontana
-    origin: Native
+    origin: native
   - name: Pilea pumila
-    origin: Native
+    origin: native
   - name: Pimpinella saxifraga ssp. saxifraga
-    origin: Introduced
+    origin: introduced
   - name: Pinguicula vulgaris
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Pinus banksiana
-    origin: Native
+    origin: native
   - name: Pinus resinosa
-    origin: Native
+    origin: native
   - name: Pinus strobus
-    origin: Native
+    origin: native
   - name: Pinus sylvestris
-    origin: Introduced
+    origin: introduced
   - name: Piptatherum canadense
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Piptatherum pungens
-    origin: Native
+    origin: native
   - name: Piptatherum racemosum
-    origin: Native
+    origin: native
   - name: Plagiobothrys scouleri var. penicillatus
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Plantago aristata
-    origin: Native
+    origin: native
   - name: Plantago elongata
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Plantago eriopoda
-    origin: Native
+    origin: native
   - name: Plantago indica
-    origin: Introduced
+    origin: introduced
   - name: Plantago lanceolata
-    origin: Introduced
+    origin: introduced
   - name: Plantago major
-    origin: Introduced
+    origin: introduced
   - name: Plantago major ssp. intermedia
-    origin: Introduced
+    origin: introduced
   # - name: Plantago major ssp. major
-  #   origin: Introduced
+  #   origin: introduced
   - name: Plantago patagonica
-    origin: Native
+    origin: native
   - name: Plantago rugelii
-    origin: Native
+    origin: native
   - name: Plantago virginica
-    origin: Native
+    origin: native
   - name: Platanthera aquilonis
-    origin: Native
+    origin: native
   - name: Platanthera clavellata
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Platanthera dilatata var. dilatata
-    origin: Native
+    origin: native
   - name: Platanthera flava var. herbiola
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Platanthera hookeri
-    origin: Native
+    origin: native
   - name: Platanthera huronensis
-    origin: Native
+    origin: native
   - name: Platanthera lacera
-    origin: Native
+    origin: native
   - name: Platanthera obtusata
-    origin: Native
+    origin: native
   - name: Platanthera orbiculata
-    origin: Native
+    origin: native
   - name: Platanthera praeclara
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Platanthera psycodes
-    origin: Native
+    origin: native
   - name: Poa alsodes
-    origin: Native
+    origin: native
   - name: Poa annua
-    origin: Introduced
+    origin: introduced
   - name: Poa arida
-    origin: Native
+    origin: native
   - name: Poa bulbosa ssp. vivipara
-    origin: Introduced
+    origin: introduced
   - name: Poa chaixii
-    origin: Introduced
+    origin: introduced
   - name: Poa compressa
-    origin: Introduced
+    origin: introduced
   - name: Poa glauca ssp. glauca
-    origin: Native
+    origin: native
   - name: Poa interior
-    origin: Native
+    origin: native
   - name: Poa nemoralis
-    origin: Introduced
+    origin: introduced
   - name: Poa paludigena
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Poa palustris
-    origin: Native
+    origin: native
   - name: Poa pratensis
-    origin: Introduced
+    origin: introduced
   - name: Poa pratensis ssp. angustifolia
-    origin: Introduced
+    origin: introduced
   - name: Poa pratensis ssp. pratensis
-    origin: Introduced
+    origin: introduced
   - name: Poa saltuensis
-    origin: Native
+    origin: native
   - name: Poa saltuensis ssp. languida
-    origin: Native
+    origin: native
   - name: Poa saltuensis ssp. saltuensis
-    origin: Native
+    origin: native
   - name: Poa sylvestris
-    origin: Native
+    origin: native
   - name: Poa trivialis ssp. trivialis
-    origin: Introduced
+    origin: introduced
   - name: Poa wolfii
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Podophyllum peltatum
-    origin: Native
+    origin: native
   - name: Pogonia ophioglossoides
-    origin: Native
+    origin: native
   - name: Polanisia dodecandra
-    origin: Native
+    origin: native
   - name: Polanisia dodecandra ssp. dodecandra
-    origin: Native
+    origin: native
   - name: Polanisia dodecandra ssp. trachysperma
-    origin: Native
+    origin: native
   - name: Polanisia jamesii
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   # - name: Polemonium lacustre
   - name: Polemonium occidentale ssp. lacustre
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Polemonium reptans var. reptans
-    origin: Native
+    origin: native
   - name: Polygala cruciata
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Polygala polygama
-    origin: Native
+    origin: native
   - name: Polygala sanguinea
-    origin: Native
+    origin: native
   - name: Polygala senega
-    origin: Native
+    origin: native
   - name: Polygala verticillata
-    origin: Native
+    origin: native
   # - name: Polygaloides paucifolia
   - name: Polygala paucifolia
-    origin: Native
+    origin: native
   - name: Polygonatum biflorum
-    origin: Native
+    origin: native
   - name: Polygonatum pubescens
-    origin: Native
+    origin: native
   - name: Polygonella articulata
-    origin: Native
+    origin: native
   - name: Polygonum achoreum
-    origin: Native
+    origin: native
   - name: Polygonum aviculare
-    origin: Introduced
+    origin: introduced
   - name: Polygonum aviculare ssp. aviculare
-    origin: Introduced
+    origin: introduced
   - name: Polygonum aviculare ssp. buxiforme
-    origin: Native
+    origin: native
   - name: Polygonum aviculare ssp. depressum
-    origin: Introduced
+    origin: introduced
   - name: Polygonum aviculare ssp. neglectum
-    origin: Introduced
+    origin: introduced
   - name: Polygonum douglasii
-    origin: Native
+    origin: native
   - name: Polygonum erectum
-    origin: Native
+    origin: native
   - name: Polygonum ramosissimum
-    origin: Native
+    origin: native
   - name: Polygonum ramosissimum ssp. prolificum
-    origin: Native
+    origin: native
   - name: Polygonum ramosissimum ssp. ramosissimum
-    origin: Native
+    origin: native
   - name: Polygonum tenue
-    origin: Native
+    origin: native
   - name: Polymnia canadensis
-    origin: Native
+    origin: native
   - name: Polypodium virginianum
-    origin: Native
+    origin: native
   - name: Polystichum acrostichoides
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Polystichum braunii
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Polytaenia nuttallii
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Pontederia cordata
-    origin: Native
+    origin: native
   - name: Populus alba
-    origin: Introduced
+    origin: introduced
   - name: Populus balsamifera
-    origin: Native
+    origin: native
   - name: Populus deltoides ssp. monilifera
-    origin: Native
+    origin: native
   - name: Populus grandidentata
-    origin: Native
+    origin: native
   - name: Populus tremuloides
-    origin: Native
+    origin: native
   - name: Populus X jackii
-    origin: Native
+    origin: native
   - name: Portulaca oleracea
-    origin: Introduced
+    origin: introduced
   - name: Potamogeton alpinus
-    origin: Native
+    origin: native
   - name: Potamogeton amplifolius
-    origin: Native
+    origin: native
   - name: Potamogeton bicupulatus
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Potamogeton confervoides
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Potamogeton crispus
-    origin: Introduced
+    origin: introduced
   - name: Potamogeton diversifolius
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Potamogeton epihydrus
-    origin: Native
+    origin: native
   - name: Potamogeton foliosus ssp. foliosus
-    origin: Native
+    origin: native
   - name: Potamogeton friesii
-    origin: Native
+    origin: native
   - name: Potamogeton gramineus
-    origin: Native
+    origin: native
   - name: Potamogeton illinoensis
-    origin: Native
+    origin: native
   - name: Potamogeton natans
-    origin: Native
+    origin: native
   - name: Potamogeton nodosus
-    origin: Native
+    origin: native
   - name: Potamogeton oakesianus
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Potamogeton obtusifolius
-    origin: Native
+    origin: native
   - name: Potamogeton praelongus
-    origin: Native
+    origin: native
   - name: Potamogeton pulcher
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Potamogeton pusillus
-    origin: Native
+    origin: native
   - name: Potamogeton pusillus ssp. pusillus
-    origin: Native
+    origin: native
   - name: Potamogeton pusillus ssp. tenuissimus
-    origin: Native
+    origin: native
   - name: Potamogeton richardsonii
-    origin: Native
+    origin: native
   - name: Potamogeton robbinsii
-    origin: Native
+    origin: native
   - name: Potamogeton spirillus
-    origin: Native
+    origin: native
   - name: Potamogeton strictifolius
-    origin: Native
+    origin: native
   - name: Potamogeton vaseyi
-    origin: Native
+    origin: native
   - name: Potamogeton X hagstroemii
-    origin: Native
+    origin: native
   - name: Potamogeton X haynesii
-    origin: Native
+    origin: native
   - name: Potamogeton zosteriformis
-    origin: Native
+    origin: native
   - name: Potentilla anserina ssp. anserina
-    origin: Native
+    origin: native
   - name: Potentilla argentea
-    origin: Introduced
+    origin: introduced
   - name: Potentilla bipinnatifida
-    origin: Native
+    origin: native
   - name: Potentilla gracilis var. flabelliformis
-    origin: Native
+    origin: native
   - name: Potentilla hippiana
-    origin: Native
+    origin: native
   - name: Potentilla lasiodonta
-    origin: Native
+    origin: native
   - name: Potentilla norvegica
-    origin: Native
+    origin: native
   - name: Potentilla pensylvanica
-    origin: Native
+    origin: native
   - name: Potentilla recta
-    origin: Introduced
+    origin: introduced
   - name: Potentilla rivalis
-    origin: Native
+    origin: native
   - name: Potentilla simplex
-    origin: Native
+    origin: native
   - name: Potentilla supina ssp. paradoxa
-    origin: Native
+    origin: native
   - name: Prenanthes alba
-    origin: Native
+    origin: native
   - name: Prenanthes aspera
-    origin: Native
+    origin: native
   - name: Prenanthes crepidinea
-    origin: Native
+    origin: native
   - name: Prenanthes racemosa
-    origin: Native
+    origin: native
   - name: Primula mistassinica
-    origin: Native
+    origin: native
   - name: Prosartes trachycarpa
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Prunella vulgaris
-    origin: Introduced
+    origin: introduced
   - name: Prunella vulgaris var. lanceolata
-    origin: Introduced
+    origin: introduced
   - name: Prunella vulgaris var. vulgaris
-    origin: Introduced
+    origin: introduced
   - name: Prunus americana
-    origin: Native
+    origin: native
   - name: Prunus nigra
-    origin: Native
+    origin: native
   - name: Prunus pensylvanica
-    origin: Native
+    origin: native
   - name: Prunus pumila
-    origin: Native
+    origin: native
   - name: Prunus pumila var. besseyi
-    origin: Native
+    origin: native
   - name: Prunus pumila var. pumila
-    origin: Native
+    origin: native
   - name: Prunus pumila var. susquehanae
-    origin: Native
+    origin: native
   - name: Prunus serotina var. serotina
-    origin: Native
+    origin: native
   - name: Prunus virginiana var. virginiana
-    origin: Native
+    origin: native
   - name: Pseudognaphalium macounii
-    origin: Native
+    origin: native
   - name: Pseudognaphalium obtusifolium
-    origin: Native
+    origin: native
   - name: Ptelea trifoliata ssp. trifoliata
-    origin: Introduced
+    origin: introduced
   - name: Pteridium aquilinum ssp. latiusculum
-    origin: Native
+    origin: native
   - name: Puccinellia distans
-    origin: Introduced
+    origin: introduced
   - name: Puccinellia nuttalliana
-    origin: Native
+    origin: native
   - name: Pycnanthemum virginianum
-    origin: Native
+    origin: native
   - name: Pyrola americana
-    origin: Native
+    origin: native
   - name: Pyrola asarifolia ssp. asarifolia
-    origin: Native
+    origin: native
   - name: Pyrola chlorantha
-    origin: Native
+    origin: native
   - name: Pyrola elliptica
-    origin: Native
+    origin: native
   - name: Pyrola minor
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Quercus alba
-    origin: Native
+    origin: native
   - name: Quercus bicolor
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   # - name: Quercus bicolor x macrocarpa
   - name: Quercus X schuettei
-    origin: Native
+    origin: native
   - name: Quercus ellipsoidalis
-    origin: Native
+    origin: native
   # - name: Quercus ellipsoidalis x rubra
-  #   origin: Native
+  #   origin: native
   - name: Quercus macrocarpa
-    origin: Native
+    origin: native
   - name: Quercus muhlenbergii
-    origin: Native
+    origin: native
   - name: Quercus rubra
-    origin: Native
+    origin: native
   - name: Quercus velutina
-    origin: Native
+    origin: native
   - name: Quercus X bebbiana
-    origin: Native
+    origin: native
   # - name: Quercus X hawkinsii
   - name: Quercus X hawkinsiae
-    origin: Native
+    origin: native
   - name: Quercus X hillii
-    origin: Native
+    origin: native
   # - name: Quercus X paleolithicola
   - name: Quercus X palaeolithicola
-    origin: Introduced
+    origin: introduced
   - name: Ranunculus abortivus
-    origin: Native
+    origin: native
   - name: Ranunculus acris
-    origin: Introduced
+    origin: introduced
   - name: Ranunculus aquatilis var. diffusus
-    origin: Native
+    origin: native
   - name: Ranunculus cymbalaria
-    origin: Native
+    origin: native
   - name: Ranunculus fascicularis
-    origin: Native
+    origin: native
   - name: Ranunculus ficaria
-    origin: Introduced
+    origin: introduced
   - name: Ranunculus flabellaris
-    origin: Native
+    origin: native
   - name: Ranunculus flammula
-    origin: Native
+    origin: native
   - name: Ranunculus flammula var. ovalis
-    origin: Native
+    origin: native
   - name: Ranunculus flammula var. reptans
-    origin: Native
+    origin: native
   - name: Ranunculus gmelinii
-    origin: Native
+    origin: native
   - name: Ranunculus hispidus
-    origin: Native
+    origin: native
   - name: Ranunculus hispidus var. caricetorum
-    origin: Native
+    origin: native
   - name: Ranunculus hispidus var. nitidus
-    origin: Native
+    origin: native
   - name: Ranunculus lapponicus
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Ranunculus macounii
-    origin: Native
+    origin: native
   - name: Ranunculus pensylvanicus
-    origin: Native
+    origin: native
   - name: Ranunculus recurvatus var. recurvatus
-    origin: Native
+    origin: native
   - name: Ranunculus repens
-    origin: Introduced
+    origin: introduced
   - name: Ranunculus rhomboideus
-    origin: Native
+    origin: native
   - name: Ranunculus sceleratus
-    origin: Native
+    origin: native
   - name: Ranunculus sceleratus var. multifidus
-    origin: Native
+    origin: native
   - name: Ranunculus sceleratus var. sceleratus
-    origin: Native
+    origin: native
   - name: Ranunculus testiculatus
-    origin: Introduced
+    origin: introduced
   - name: Raphanus raphanistrum
-    origin: Introduced
+    origin: introduced
   - name: Ratibida columnifera
-    origin: Native
+    origin: native
   - name: Ratibida pinnata
-    origin: Native
+    origin: native
   - name: Rhamnus alnifolia
-    origin: Native
+    origin: native
   - name: Rhamnus cathartica
-    origin: Introduced
+    origin: introduced
   - name: Rhodiola integrifolia ssp. leedyi
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Rhododendron groenlandicum
-    origin: Native
+    origin: native
   - name: Rhus aromatica var. aromatica
-    origin: Unknown
+    origin: unknown
   - name: Rhus glabra
-    origin: Native
+    origin: native
   - name: Rhus typhina
-    origin: Native
+    origin: native
   # - name: Rhus X borealis
-  #   origin: Native
+  #   origin: native
   - name: Rhynchospora alba
-    origin: Native
+    origin: native
   - name: Rhynchospora capillacea
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Rhynchospora capitellata
-    origin: Native
+    origin: native
   - name: Rhynchospora fusca
-    origin: Native
+    origin: native
   - name: Ribes americanum
-    origin: Native
+    origin: native
   - name: Ribes aureum var. villosum
-    origin: Native
+    origin: native
   - name: Ribes cynosbati
-    origin: Native
+    origin: native
   - name: Ribes glandulosum
-    origin: Native
+    origin: native
   - name: Ribes hirtellum
-    origin: Native
+    origin: native
   - name: Ribes hudsonianum
-    origin: Native
+    origin: native
   - name: Ribes lacustre
-    origin: Native
+    origin: native
   - name: Ribes missouriense
-    origin: Native
+    origin: native
   - name: Ribes nigrum
-    origin: Introduced
+    origin: introduced
   - name: Ribes oxyacanthoides var. oxyacanthoides
-    origin: Native
+    origin: native
   - name: Ribes rubrum
-    origin: Introduced
+    origin: introduced
   - name: Ribes triste
-    origin: Native
+    origin: native
   - name: Robinia hispida
-    origin: Introduced
+    origin: introduced
   - name: Robinia pseudoacacia
-    origin: Introduced
+    origin: introduced
   - name: Rorippa aquatica
-    origin: Native
+    origin: native
   - name: Rorippa curvipes
-    origin: Native
+    origin: native
   - name: Rorippa palustris
-    origin: Native
+    origin: native
   - name: Rorippa palustris ssp. hispida
-    origin: Native
+    origin: native
   - name: Rorippa palustris ssp. palustris
-    origin: Native
+    origin: native
   - name: Rorippa sessiliflora
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Rorippa sinuata
-    origin: Native
+    origin: native
   - name: Rorippa sphaerocarpa
-    origin: Native
+    origin: native
   - name: Rorippa sylvestris
-    origin: Introduced
+    origin: introduced
   - name: Rosa acicularis ssp. sayi
-    origin: Native
+    origin: native
   - name: Rosa arkansana
-    origin: Native
+    origin: native
   - name: Rosa blanda
-    origin: Native
+    origin: native
   - name: Rosa multiflora
-    origin: Introduced
+    origin: introduced
   - name: Rosa rugosa
-    origin: Introduced
+    origin: introduced
   - name: Rosa woodsii var. woodsii
-    origin: Native
+    origin: native
   - name: Rosa X dulcissima
-    origin: Native
+    origin: native
   - name: Rotala ramosior
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Rubus ablatus
-    origin: Native
+    origin: native
   - name: Rubus acridens
-    origin: Native
+    origin: native
   - name: Rubus allegheniensis
-    origin: Native
+    origin: native
   - name: Rubus alumnus
-    origin: Native
+    origin: native
   - name: Rubus arcticus ssp. acaulis
-    origin: Native
+    origin: native
   - name: Rubus caesius
-    origin: Introduced
+    origin: introduced
   - name: Rubus canadensis
-    origin: Native
+    origin: native
   - name: Rubus chamaemorus
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Rubus dissensus
-    origin: Native
+    origin: native
   - name: Rubus ferrofluvius
-    origin: Native
+    origin: native
   - name: Rubus frondosus
-    origin: Native
+    origin: native
   - name: Rubus fulleri
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Rubus glandicaulis
-    origin: Native
+    origin: native
   - name: Rubus groutianus
-    origin: Native
+    origin: native
   - name: Rubus idaeus
-    origin: Unknown
+    origin: unknown
   - name: Rubus idaeus var. idaeus
-    origin: Introduced
+    origin: introduced
   - name: Rubus idaeus var. strigosus
-    origin: Native
+    origin: native
   - name: Rubus ithacanus
-    origin: Native
+    origin: native
   - name: Rubus junceus
-    origin: Native
+    origin: native
   - name: Rubus missouricus
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Rubus multifer
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Rubus multiformis
-    origin: Native
+    origin: native
   - name: Rubus occidentalis
-    origin: Native
+    origin: native
   - name: Rubus parviflorus
-    origin: Native
+    origin: native
   - name: Rubus parvifolius
-    origin: Introduced
+    origin: introduced
   - name: Rubus plicatifolius
-    origin: Native
+    origin: native
   - name: Rubus pubescens
-    origin: Native
+    origin: native
   - name: Rubus quaesitus
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Rubus recurvans
-    origin: Native
+    origin: native
   - name: Rubus regionalis
-    origin: Native
+    origin: native
   - name: Rubus roribaccus
-    origin: Native
+    origin: native
   - name: Rubus rosa
-    origin: Native
+    origin: native
   - name: Rubus satis
-    origin: Native
+    origin: native
   - name: Rubus semisetosus
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Rubus spectatus
-    origin: Native
+    origin: native
   - name: Rubus steelei
-    origin: Native
+    origin: native
   - name: Rubus stipulatus
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Rubus superioris
-    origin: Native
+    origin: native
   - name: Rubus uniformis
-    origin: Native
+    origin: native
   - name: Rubus vermontanus
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Rubus wheeleri
-    origin: Native
+    origin: native
   - name: Rubus wisconsinensis
-    origin: Native
+    origin: native
   - name: Rubus X neglectus
-    origin: Native
+    origin: native
   - name: Rudbeckia hirta var. pulcherrima
-    origin: Native
+    origin: native
   - name: Rudbeckia laciniata var. laciniata
-    origin: Native
+    origin: native
   - name: Rudbeckia subtomentosa
-    origin: Introduced
+    origin: introduced
   - name: Rudbeckia triloba var. triloba
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Ruellia humilis
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Rumex acetosa
-    origin: Introduced
+    origin: introduced
   - name: Rumex acetosella
-    origin: Introduced
+    origin: introduced
   - name: Rumex altissimus
-    origin: Native
+    origin: native
   - name: Rumex britannica
-    origin: Native
+    origin: native
   - name: Rumex crispus
-    origin: Introduced
+    origin: introduced
   - name: Rumex fueginus
-    origin: Native
+    origin: native
   - name: Rumex longifolius
-    origin: Introduced
+    origin: introduced
   - name: Rumex obtusifolius
-    origin: Introduced
+    origin: introduced
   - name: Rumex patientia
-    origin: Introduced
+    origin: introduced
   - name: Rumex pseudonatronatus
-    origin: Introduced
+    origin: introduced
   - name: Rumex stenophyllus
-    origin: Introduced
+    origin: introduced
   - name: Rumex triangulivalvis
-    origin: Native
+    origin: native
   - name: Rumex verticillatus
-    origin: Native
+    origin: native
   - name: Ruppia cirrhosa
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Sagina nodosa ssp. borealis
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Sagina procumbens
-    origin: Introduced
+    origin: introduced
   - name: Sagittaria brevirostra
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Sagittaria calycina var. calycina
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Sagittaria cristata
-    origin: Native
+    origin: native
   - name: Sagittaria cuneata
-    origin: Native
+    origin: native
   - name: Sagittaria latifolia
-    origin: Native
+    origin: native
   - name: Sagittaria rigida
-    origin: Native
+    origin: native
   - name: Salicornia rubra
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Salix alba
-    origin: Introduced
+    origin: introduced
   - name: Salix amygdaloides
-    origin: Native
+    origin: native
   - name: Salix bebbiana
-    origin: Native
+    origin: native
   - name: Salix candida
-    origin: Native
+    origin: native
   - name: Salix discolor
-    origin: Native
+    origin: native
   - name: Salix eriocephala
-    origin: Native
+    origin: native
   - name: Salix famelica
-    origin: Native
+    origin: native
   - name: Salix humilis
-    origin: Native
+    origin: native
   - name: Salix humilis var. humilis
-    origin: Native
+    origin: native
   - name: Salix humilis var. tristis
-    origin: Native
+    origin: native
   - name: Salix interior
-    origin: Native
+    origin: native
   - name: Salix lucida
-    origin: Native
+    origin: native
   - name: Salix maccalliana
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Salix nigra
-    origin: Native
+    origin: native
   - name: Salix pedicellaris
-    origin: Native
+    origin: native
   - name: Salix pellita
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Salix pentandra
-    origin: Introduced
+    origin: introduced
   - name: Salix petiolaris
-    origin: Native
+    origin: native
   - name: Salix planifolia
-    origin: Native
+    origin: native
   - name: Salix pseudomonticola
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Salix pyrifolia
-    origin: Native
+    origin: native
   - name: Salix sericea
-    origin: Native
+    origin: native
   - name: Salix serissima
-    origin: Native
+    origin: native
   # - name: Salix X fragilis
   - name: Salix fragilis
-    origin: Introduced
+    origin: introduced
   - name: Salsola collina
-    origin: Introduced
+    origin: introduced
   - name: Salsola tragus
-    origin: Introduced
+    origin: introduced
   - name: Salvia reflexa
-    origin: Introduced
+    origin: introduced
   - name: Sambucus canadensis var. canadensis
-    origin: Native
+    origin: native
   - name: Sambucus racemosa var. pubens
-    origin: Native
+    origin: native
   - name: Sanguinaria canadensis
-    origin: Native
+    origin: native
   - name: Sanicula canadensis
-    origin: Native
+    origin: native
   - name: Sanicula canadensis var. canadensis
-    origin: Native
+    origin: native
   - name: Sanicula canadensis var. grandis
-    origin: Native
+    origin: native
   - name: Sanicula marilandica
-    origin: Native
+    origin: native
   - name: Sanicula odorata
-    origin: Native
+    origin: native
   - name: Sanicula trifoliata
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Saponaria officinalis
-    origin: Introduced
+    origin: introduced
   - name: Sarracenia purpurea ssp. purpurea
-    origin: Native
+    origin: native
   - name: Satureja vulgaris
-    origin: Native
+    origin: native
   - name: Saxifraga cernua
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Saxifraga paniculata
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Sceptridium dissectum
-    origin: Native
+    origin: native
   - name: Sceptridium multifidum
-    origin: Native
+    origin: native
   - name: Sceptridium oneidense
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   # - name: Sceptridium rugulosum
   - name: Botrychium rugulosum
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Schedonnardus paniculatus
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Schedonorus arundinaceus
-    origin: Introduced
+    origin: introduced
   - name: Schedonorus pratensis
-    origin: Introduced
+    origin: introduced
   - name: Scheuchzeria palustris
-    origin: Native
+    origin: native
   - name: Schizachne purpurascens
-    origin: Native
+    origin: native
   - name: Schizachyrium scoparium var. scoparium
-    origin: Native
+    origin: native
   # - name: Schoenoplectiella purshiana
   - name: Schoenoplectus purshianus
-    origin: Native
+    origin: native
   # - name: Schoenoplectiella purshiana var. purshiana
   - name: Schoenoplectus purshianus var. purshianus
-    origin: Native
+    origin: native
   # - name: Schoenoplectiella purshiana var. williamsii
   - name: Schoenoplectus purshianus var. williamsii
-    origin: Native
+    origin: native
   # - name: Schoenoplectiella smithii
   - name: Schoenoplectus smithii
-    origin: Native
+    origin: native
   # - name: Schoenoplectiella smithii var. setosa
   - name: Schoenoplectus smithii var. setosus
-    origin: Native
+    origin: native
   # - name: Schoenoplectiella smithii var. smithii
   - name: Schoenoplectus smithii var. smithii
-    origin: Native
+    origin: native
   - name: Schoenoplectus acutus var. acutus
-    origin: Native
+    origin: native
   # - name: Schoenoplectus acutus x tabernaemontani
-  #   origin: Native
+  #   origin: native
   - name: Schoenoplectus heterochaetus
-    origin: Native
+    origin: native
   - name: Schoenoplectus pungens
-    origin: Native
+    origin: native
   - name: Schoenoplectus subterminalis
-    origin: Native
+    origin: native
   - name: Schoenoplectus tabernaemontani
-    origin: Native
+    origin: native
   - name: Schoenoplectus torreyi
-    origin: Native
+    origin: native
   - name: Schoenoplectus X oblongus
-    origin: Native
+    origin: native
   - name: Scilla siberica
-    origin: Introduced
+    origin: introduced
   - name: Scirpus atrocinctus
-    origin: Native
+    origin: native
   - name: Scirpus atrovirens
-    origin: Native
+    origin: native
   - name: Scirpus cyperinus
-    origin: Native
+    origin: native
   - name: Scirpus georgianus
-    origin: Native
+    origin: native
   - name: Scirpus hattorianus
-    origin: Native
+    origin: native
   - name: Scirpus microcarpus
-    origin: Native
+    origin: native
   - name: Scirpus pallidus
-    origin: Native
+    origin: native
   - name: Scirpus pedicellatus
-    origin: Native
+    origin: native
   - name: Scirpus pendulus
-    origin: Native
+    origin: native
   - name: Scleranthus annuus ssp. annuus
-    origin: Introduced
+    origin: introduced
   - name: Scleranthus perennis
-    origin: Introduced
+    origin: introduced
   - name: Scleria triglomerata
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Scleria verticillata
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Scolochloa festucacea
-    origin: Native
+    origin: native
   - name: Scrophularia lanceolata
-    origin: Native
+    origin: native
   - name: Scrophularia marilandica
-    origin: Native
+    origin: native
   - name: Scutellaria galericulata
-    origin: Native
+    origin: native
   - name: Scutellaria lateriflora
-    origin: Native
+    origin: native
   - name: Scutellaria leonardii
-    origin: Native
+    origin: native
   - name: Scutellaria ovata var. versicolor
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Scutellaria parvula
-    origin: Native
+    origin: native
   - name: Securigera varia
-    origin: Introduced
+    origin: introduced
   - name: Sedum acre
-    origin: Introduced
+    origin: introduced
   - name: Selaginella rupestris
-    origin: Native
+    origin: native
   - name: Selaginella selaginoides
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Senecio integerrimus var. integerrimus
-    origin: Native
+    origin: native
   - name: Senecio viscosus
-    origin: Introduced
+    origin: introduced
   - name: Senecio vulgaris
-    origin: Introduced
+    origin: introduced
   - name: Setaria faberi
-    origin: Introduced
+    origin: introduced
   - name: Setaria italica
-    origin: Introduced
+    origin: introduced
   - name: Setaria pumila
-    origin: Introduced
+    origin: introduced
   # - name: Setaria pumila ssp. pallidefusca
   - name: Setaria pallide-fusca
-    origin: Introduced
+    origin: introduced
   - name: Setaria pumila ssp. pumila
-    origin: Introduced
+    origin: introduced
   - name: Setaria verticillata
-    origin: Introduced
+    origin: introduced
   - name: Setaria viridis
-    origin: Introduced
+    origin: introduced
   - name: Setaria viridis var. major
-    origin: Introduced
+    origin: introduced
   - name: Setaria viridis var. viridis
-    origin: Introduced
+    origin: introduced
   - name: Shepherdia argentea
-    origin: Native
+    origin: native
   - name: Shepherdia canadensis
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Shinnersoseris rostrata
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Sibbaldiopsis tridentata
-    origin: Native
+    origin: native
   - name: Sicyos angulatus
-    origin: Native
+    origin: native
   - name: Silene antirrhina
-    origin: Native
+    origin: native
   - name: Silene armeria
-    origin: Introduced
+    origin: introduced
   - name: Silene csereii
-    origin: Introduced
+    origin: introduced
   - name: Silene dichotoma ssp. dichotoma
-    origin: Introduced
+    origin: introduced
   - name: Silene dioica
-    origin: Introduced
+    origin: introduced
   - name: Silene drummondii ssp. drummondii
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Silene flos-cuculi ssp. flos-cuculi
-    origin: Introduced
+    origin: introduced
   - name: Silene hitchguirei
-    origin: Native
+    origin: native
   - name: Silene latifolia
-    origin: Introduced
+    origin: introduced
   - name: Silene nivea
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Silene noctiflora
-    origin: Introduced
+    origin: introduced
   - name: Silene stellata
-    origin: Native
+    origin: native
   # - name: Silene vulgaris ssp. vulgaris
   - name: Silene vulgaris
-    origin: Introduced
+    origin: introduced
   - name: Silphium laciniatum
-    origin: Native
+    origin: native
   - name: Silphium perfoliatum var. perfoliatum
-    origin: Native
+    origin: native
   - name: Sinapis arvensis
-    origin: Introduced
+    origin: introduced
   - name: Sisymbrium altissimum
-    origin: Introduced
+    origin: introduced
   - name: Sisymbrium loeselii
-    origin: Introduced
+    origin: introduced
   - name: Sisymbrium officinale
-    origin: Introduced
+    origin: introduced
   - name: Sisyrinchium angustifolium
-    origin: Native
+    origin: native
   - name: Sisyrinchium campestre
-    origin: Native
+    origin: native
   - name: Sisyrinchium montanum var. montanum
-    origin: Native
+    origin: native
   - name: Sisyrinchium mucronatum
-    origin: Native
+    origin: native
   - name: Sium suave
-    origin: Native
+    origin: native
   - name: Smilax ecirrhata
-    origin: Native
+    origin: native
   - name: Smilax herbacea
-    origin: Native
+    origin: native
   - name: Smilax illinoensis
-    origin: Native
+    origin: native
   - name: Smilax lasioneura
-    origin: Native
+    origin: native
   - name: Smilax tamnoides
-    origin: Native
+    origin: native
   - name: Solanum carolinense var. carolinense
-    origin: Introduced
+    origin: introduced
   - name: Solanum dulcamara
-    origin: Introduced
+    origin: introduced
   # - name: Solanum emulans
   - name: Solanum americanum
-    origin: Native
+    origin: native
   # - name: Solanum nitidibaccatum
   - name: Solanum physalifolium
-    origin: Native
+    origin: native
   - name: Solanum rostratum
-    origin: Native
+    origin: native
   - name: Solanum triflorum
-    origin: Native
+    origin: native
   - name: Solidago altissima
-    origin: Native
+    origin: native
   - name: Solidago altissima ssp. altissima
-    origin: Native
+    origin: native
   - name: Solidago altissima ssp. gilvocanescens
-    origin: Native
+    origin: native
   - name: Solidago canadensis
-    origin: Native
+    origin: native
   - name: Solidago canadensis var. canadensis
-    origin: Native
+    origin: native
   - name: Solidago canadensis var. hargeri
-    origin: Native
+    origin: native
   - name: Solidago flexicaulis
-    origin: Native
+    origin: native
   - name: Solidago gigantea
-    origin: Native
+    origin: native
   - name: Solidago hispida
-    origin: Native
+    origin: native
   - name: Solidago juncea
-    origin: Native
+    origin: native
   - name: Solidago missouriensis
-    origin: Native
+    origin: native
   - name: Solidago mollis
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Solidago nemoralis
-    origin: Native
+    origin: native
   - name: Solidago nemoralis ssp. decemflora
-    origin: Native
+    origin: native
   - name: Solidago nemoralis ssp. nemoralis
-    origin: Native
+    origin: native
   - name: Solidago ptarmicoides
-    origin: Native
+    origin: native
   - name: Solidago riddellii
-    origin: Native
+    origin: native
   - name: Solidago rigida
-    origin: Native
+    origin: native
   - name: Solidago rigida ssp. humilis
-    origin: Native
+    origin: native
   - name: Solidago rigida ssp. rigida
-    origin: Native
+    origin: native
   - name: Solidago sciaphila
-    origin: Native
+    origin: native
   - name: Solidago speciosa
-    origin: Native
+    origin: native
   - name: Solidago speciosa var. rigidiuscula
-    origin: Native
+    origin: native
   - name: Solidago speciosa var. speciosa
-    origin: Native
+    origin: native
   - name: Solidago uliginosa
-    origin: Native
+    origin: native
   - name: Solidago ulmifolia var. ulmifolia
-    origin: Native
+    origin: native
   - name: Solidago X bernardii
-    origin: Native
+    origin: native
   - name: Sonchus arvensis
-    origin: Introduced
+    origin: introduced
   - name: Sonchus arvensis ssp. arvensis
-    origin: Introduced
+    origin: introduced
   - name: Sonchus arvensis ssp. uliginosus
-    origin: Introduced
+    origin: introduced
   - name: Sonchus asper
-    origin: Introduced
+    origin: introduced
   - name: Sonchus oleraceus
-    origin: Introduced
+    origin: introduced
   - name: Sorbaria sorbifolia
-    origin: Introduced
+    origin: introduced
   - name: Sorbus americana
-    origin: Native
+    origin: native
   - name: Sorbus aucuparia
-    origin: Introduced
+    origin: introduced
   - name: Sorbus decora
-    origin: Native
+    origin: native
   - name: Sorghastrum nutans
-    origin: Native
+    origin: native
   - name: Sparganium americanum
-    origin: Native
+    origin: native
   - name: Sparganium androcladum
-    origin: Native
+    origin: native
   - name: Sparganium angustifolium
-    origin: Native
+    origin: native
   - name: Sparganium emersum
-    origin: Native
+    origin: native
   - name: Sparganium eurycarpum
-    origin: Native
+    origin: native
   - name: Sparganium fluctuans
-    origin: Native
+    origin: native
   - name: Sparganium glomeratum
-    origin: Native
+    origin: native
   - name: Sparganium natans
-    origin: Native
+    origin: native
   - name: Spartina gracilis
-    origin: Native
+    origin: native
   - name: Spartina pectinata
-    origin: Native
+    origin: native
   - name: Spergula arvensis
-    origin: Introduced
+    origin: introduced
   - name: Spergularia rubra
-    origin: Introduced
+    origin: introduced
   - name: Spermolepis inermis
-    origin: Unknown
+    origin: unknown
   - name: Sphaeralcea coccinea var. coccinea
-    origin: Native
+    origin: native
   - name: Sphenopholis intermedia
-    origin: Native
+    origin: native
   - name: Sphenopholis obtusata
-    origin: Native
+    origin: native
   - name: Spinulum annotinum
-    origin: Native
+    origin: native
   # - name: Spinulum canadense
-  #   origin: Native
+  #   origin: native
   - name: Spiraea alba var. alba
-    origin: Native
+    origin: native
   - name: Spiraea tomentosa var. rosea
-    origin: Native
+    origin: native
   - name: Spiranthes casei var. casei
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Spiranthes cernua
-    origin: Native
+    origin: native
   - name: Spiranthes lacera
-    origin: Native
+    origin: native
   - name: Spiranthes lacera var. gracilis
-    origin: Native
+    origin: native
   - name: Spiranthes lacera var. lacera
-    origin: Native
+    origin: native
   - name: Spiranthes magnicamporum
-    origin: Native
+    origin: native
   - name: Spiranthes ovalis var. erostellata
-    origin: Native
+    origin: native
   - name: Spiranthes romanzoffiana
-    origin: Native
+    origin: native
   - name: Spirodela polyrrhiza
-    origin: Native
+    origin: native
   - name: Sporobolus compositus var. compositus
-    origin: Native
+    origin: native
   - name: Sporobolus cryptandrus
-    origin: Native
+    origin: native
   - name: Sporobolus heterolepis
-    origin: Native
+    origin: native
   - name: Sporobolus neglectus
-    origin: Native
+    origin: native
   - name: Sporobolus vaginiflorus var. vaginiflorus
-    origin: Native
+    origin: native
   - name: Stachys hispida
-    origin: Native
+    origin: native
   - name: Stachys palustris
-    origin: Native
+    origin: native
   - name: Stachys palustris var. homotricha
-    origin: Native
+    origin: native
   - name: Stachys palustris var. pilosa
-    origin: Native
+    origin: native
   - name: Stachys tenuifolia
-    origin: Native
+    origin: native
   - name: Staphylea trifolia
-    origin: Native
+    origin: native
   - name: Stellaria alsine
-    origin: Introduced
+    origin: introduced
   - name: Stellaria borealis ssp. borealis
-    origin: Native
+    origin: native
   - name: Stellaria crassifolia
-    origin: Native
+    origin: native
   - name: Stellaria graminea
-    origin: Introduced
+    origin: introduced
   - name: Stellaria longifolia
-    origin: Native
+    origin: native
   - name: Stellaria longipes ssp. longipes
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Stellaria media
-    origin: Introduced
+    origin: introduced
   - name: Streptopus amplexifolius
-    origin: Native
+    origin: native
   - name: Streptopus lanceolatus
-    origin: Native
+    origin: native
   - name: Strophostyles helvola
-    origin: Native
+    origin: native
   - name: Strophostyles leiosperma
-    origin: Native
+    origin: native
   - name: Stuckenia filiformis
-    origin: Native
+    origin: native
   - name: Stuckenia filiformis ssp. alpina
-    origin: Native
+    origin: native
   - name: Stuckenia filiformis ssp. occidentalis
-    origin: Native
+    origin: native
   - name: Stuckenia pectinata
-    origin: Native
+    origin: native
   - name: Stuckenia vaginata
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Suaeda calceoliformis
-    origin: Native
+    origin: native
   - name: Subularia aquatica ssp. americana
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Sullivantia sullivantii
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Symphoricarpos albus
-    origin: Native
+    origin: native
   - name: Symphoricarpos occidentalis
-    origin: Native
+    origin: native
   - name: Symphyotrichum boreale
-    origin: Native
+    origin: native
   - name: Symphyotrichum ciliatum
-    origin: Native
+    origin: native
   - name: Symphyotrichum ciliolatum
-    origin: Native
+    origin: native
   - name: Symphyotrichum cordifolium
-    origin: Native
+    origin: native
   - name: Symphyotrichum drummondii var. drummondii
-    origin: Native
+    origin: native
   - name: Symphyotrichum ericoides
-    origin: Native
+    origin: native
   - name: Symphyotrichum ericoides var. ericoides
-    origin: Native
+    origin: native
   - name: Symphyotrichum ericoides var. pansum
-    origin: Native
+    origin: native
   - name: Symphyotrichum falcatum var. commutatum
-    origin: Native
+    origin: native
   - name: Symphyotrichum firmum
-    origin: Native
+    origin: native
   - name: Symphyotrichum laeve
-    origin: Native
+    origin: native
   - name: Symphyotrichum laeve var. geyeri
-    origin: Native
+    origin: native
   - name: Symphyotrichum laeve var. laeve
-    origin: Native
+    origin: native
   - name: Symphyotrichum lanceolatum
-    origin: Native
+    origin: native
   - name: Symphyotrichum lanceolatum var. hesperium
-    origin: Native
+    origin: native
   - name: Symphyotrichum lanceolatum var. hirsuticaule
-    origin: Native
+    origin: native
   - name: Symphyotrichum lanceolatum var. interior
-    origin: Native
+    origin: native
   - name: Symphyotrichum lanceolatum var. lanceolatum
-    origin: Native
+    origin: native
   - name: Symphyotrichum lateriflorum
-    origin: Native
+    origin: native
   - name: Symphyotrichum novae-angliae
-    origin: Native
+    origin: native
   - name: Symphyotrichum oblongifolium
-    origin: Native
+    origin: native
   - name: Symphyotrichum ontarionis var. ontarionis
-    origin: Native
+    origin: native
   - name: Symphyotrichum oolentangiense
-    origin: Native
+    origin: native
   - name: Symphyotrichum pilosum
-    origin: Native
+    origin: native
   - name: Symphyotrichum pilosum var. pilosum
-    origin: Native
+    origin: native
   - name: Symphyotrichum pilosum var. pringlei
-    origin: Native
+    origin: native
   - name: Symphyotrichum praealtum
-    origin: Native
+    origin: native
   - name: Symphyotrichum prenanthoides
-    origin: Native
+    origin: native
   - name: Symphyotrichum puniceum var. puniceum
-    origin: Native
+    origin: native
   - name: Symphyotrichum sericeum
-    origin: Native
+    origin: native
   - name: Symphyotrichum shortii
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Symphyotrichum urophyllum
-    origin: Native
+    origin: native
   - name: Symphyotrichum X amethystinum
-    origin: Native
+    origin: native
   - name: Symphyotrichum X longulum
-    origin: Native
+    origin: native
   - name: Symphytum officinale
-    origin: Introduced
+    origin: introduced
   - name: Symplocarpus foetidus
-    origin: Native
+    origin: native
   - name: Synthyris bullii
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Taenidia integerrima
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Tanacetum parthenium
-    origin: Introduced
+    origin: introduced
   - name: Tanacetum vulgare
-    origin: Introduced
+    origin: introduced
   - name: Taraxacum erythrospermum
-    origin: Introduced
+    origin: introduced
   - name: Taraxacum officinale
-    origin: Introduced
+    origin: introduced
   - name: Taxus canadensis
-    origin: Native
+    origin: native
   - name: Tephroseris palustris
-    origin: Native
+    origin: native
   - name: Tephrosia virginiana
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Teucrium canadense
-    origin: Native
+    origin: native
   - name: Teucrium canadense var. occidentale
-    origin: Native
+    origin: native
   - name: Teucrium canadense var. virginicum
-    origin: Native
+    origin: native
   # - name: Thalictrum amphibolum
-  #   origin: Native
+  #   origin: native
   - name: Thalictrum dasycarpum
-    origin: Native
+    origin: native
   - name: Thalictrum dioicum
-    origin: Native
+    origin: native
   - name: Thalictrum thalictroides
-    origin: Native
+    origin: native
   - name: Thalictrum venulosum
-    origin: Native
+    origin: native
   - name: Thaspium barbinode
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Thaspium chapmanii
-    origin: Native
+    origin: native
   - name: Thelypteris palustris var. pubescens
-    origin: Native
+    origin: native
   - name: Thladiantha dubia
-    origin: Introduced
+    origin: introduced
   - name: Thlaspi arvense
-    origin: Introduced
+    origin: introduced
   - name: Thuja occidentalis
-    origin: Native
+    origin: native
   - name: Tilia americana
-    origin: Native
+    origin: native
   - name: Tofieldia pusilla
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Torilis japonica
-    origin: Introduced
+    origin: introduced
   - name: Torreyochloa pallida
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Torreyochloa pallida var. fernaldii
-    origin: Native
+    origin: native
   - name: Torreyochloa pallida var. pallida
-    origin: Native
+    origin: native
   - name: Toxicodendron radicans
-    origin: Native
+    origin: native
   - name: Toxicodendron radicans ssp. radicans
-    origin: Native
+    origin: native
   - name: Toxicodendron radicans var. rydbergii
-    origin: Native
+    origin: native
   - name: Toxicodendron vernix
-    origin: Native
+    origin: native
   - name: Tradescantia bracteata
-    origin: Native
+    origin: native
   - name: Tradescantia occidentalis var. occidentalis
-    origin: Native
+    origin: native
   - name: Tradescantia ohiensis
-    origin: Native
+    origin: native
   - name: Tragopogon dubius
-    origin: Introduced
+    origin: introduced
   - name: Tragopogon pratensis
-    origin: Introduced
+    origin: introduced
   - name: Triadenum fraseri
-    origin: Native
+    origin: native
   - name: Triantha glutinosa
-    origin: Native
+    origin: native
   - name: Tribulus terrestris
-    origin: Introduced
+    origin: introduced
   - name: Trichophorum alpinum
-    origin: Native
+    origin: native
   - name: Trichophorum cespitosum
-    origin: Native
+    origin: native
   - name: Trichophorum clintonii
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Tridens flavus var. flavus
-    origin: Introduced
+    origin: introduced
   - name: Trientalis borealis
-    origin: Native
+    origin: native
   - name: Trifolium arvense
-    origin: Introduced
+    origin: introduced
   - name: Trifolium aureum
-    origin: Introduced
+    origin: introduced
   - name: Trifolium campestre
-    origin: Introduced
+    origin: introduced
   - name: Trifolium fragiferum
-    origin: Introduced
+    origin: introduced
   - name: Trifolium hybridum
-    origin: Introduced
+    origin: introduced
   - name: Trifolium incarnatum
-    origin: Introduced
+    origin: introduced
   - name: Trifolium pratense
-    origin: Introduced
+    origin: introduced
   - name: Trifolium repens
-    origin: Introduced
+    origin: introduced
   - name: Triglochin maritima
-    origin: Native
+    origin: native
   - name: Triglochin palustris
-    origin: Native
+    origin: native
   - name: Trillium cernuum
-    origin: Native
+    origin: native
   - name: Trillium flexipes
-    origin: Native
+    origin: native
   - name: Trillium grandiflorum
-    origin: Native
+    origin: native
   - name: Trillium nivale
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Triodanis leptocarpa
-    origin: Native
+    origin: native
   - name: Triodanis perfoliata
-    origin: Native
+    origin: native
   - name: Triosteum aurantiacum
-    origin: Native
+    origin: native
   - name: Triosteum perfoliatum
-    origin: Native
+    origin: native
   - name: Triplasis purpurea var. purpurea
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Tripleurospermum inodorum
-    origin: Introduced
+    origin: introduced
   - name: Trisetum spicatum
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Tsuga canadensis
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Turritis glabra
-    origin: Native
+    origin: native
   - name: Typha angustifolia
-    origin: Introduced
+    origin: introduced
   - name: Typha latifolia
-    origin: Native
+    origin: native
   - name: Typha X glauca
-    origin: Introduced
+    origin: introduced
   - name: Ulmus americana
-    origin: Native
+    origin: native
   - name: Ulmus pumila
-    origin: Introduced
+    origin: introduced
   - name: Ulmus rubra
-    origin: Native
+    origin: native
   - name: Ulmus thomasii
-    origin: Native
+    origin: native
   - name: Urtica dioica ssp. gracilis
-    origin: Native
+    origin: native
   - name: Utricularia cornuta
-    origin: Native
+    origin: native
   - name: Utricularia geminiscapa
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Utricularia gibba
-    origin: Native
+    origin: native
   - name: Utricularia intermedia
-    origin: Native
+    origin: native
   - name: Utricularia minor
-    origin: Native
+    origin: native
   - name: Utricularia purpurea
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Utricularia resupinata
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Utricularia vulgaris
-    origin: Native
+    origin: native
   - name: Uvularia grandiflora
-    origin: Native
+    origin: native
   - name: Uvularia sessilifolia
-    origin: Native
+    origin: native
   - name: Vaccaria hispanica
-    origin: Introduced
+    origin: introduced
   - name: Vaccinium angustifolium
-    origin: Native
+    origin: native
   - name: Vaccinium cespitosum
-    origin: Native
+    origin: native
   - name: Vaccinium macrocarpon
-    origin: Native
+    origin: native
   - name: Vaccinium myrtilloides
-    origin: Native
+    origin: native
   - name: Vaccinium oxycoccos
-    origin: Native
+    origin: native
   - name: Vaccinium uliginosum
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Vaccinium vitis-idaea
-    origin: Native
+    origin: native
   - name: Valeriana edulis var. ciliata
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Valeriana officinalis
-    origin: Introduced
+    origin: introduced
   - name: Vallisneria americana
-    origin: Native
+    origin: native
   - name: Verbascum blattaria
-    origin: Introduced
+    origin: introduced
   - name: Verbascum thapsus
-    origin: Introduced
+    origin: introduced
   - name: Verbena bracteata
-    origin: Native
+    origin: native
   - name: Verbena hastata
-    origin: Native
+    origin: native
   - name: Verbena simplex
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Verbena stricta
-    origin: Native
+    origin: native
   - name: Verbena urticifolia
-    origin: Native
+    origin: native
   - name: Verbena X deamii
-    origin: Native
+    origin: native
   - name: Verbena X perriana
-    origin: Native
+    origin: native
   - name: Vernonia baldwinii
-    origin: Unknown
+    origin: unknown
   - name: Vernonia fasciculata
-    origin: Native
+    origin: native
   - name: Veronica americana
-    origin: Native
+    origin: native
   - name: Veronica arvensis
-    origin: Introduced
+    origin: introduced
   - name: Veronica catenata
-    origin: Native
+    origin: native
   - name: Veronica longifolia
-    origin: Introduced
+    origin: introduced
   - name: Veronica officinalis
-    origin: Introduced
+    origin: introduced
   - name: Veronica peregrina
-    origin: Native
+    origin: native
   - name: Veronica persica
-    origin: Introduced
+    origin: introduced
   - name: Veronica scutellata
-    origin: Native
+    origin: native
   - name: Veronica serpyllifolia
-    origin: Unknown
+    origin: unknown
   - name: Veronicastrum virginicum
-    origin: Native
+    origin: native
   - name: Veronica verna
-    origin: Introduced
+    origin: introduced
   - name: Viburnum edule
-    origin: Native
+    origin: native
   - name: Viburnum lentago
-    origin: Native
+    origin: native
   - name: Viburnum opulus
-    origin: Unknown
+    origin: unknown
   - name: Viburnum opulus var. americanum
-    origin: Native
+    origin: native
   - name: Viburnum opulus var. opulus
-    origin: Introduced
+    origin: introduced
   - name: Viburnum rafinesquianum
-    origin: Native
+    origin: native
   - name: Viburnum rafinesquianum var. affine
-    origin: Native
+    origin: native
   - name: Viburnum rafinesquianum var. rafinesquianum
-    origin: Native
+    origin: native
   - name: Vicia americana
-    origin: Native
+    origin: native
   - name: Vicia americana var. americana
-    origin: Native
+    origin: native
   - name: Vicia americana var. minor
-    origin: Native
+    origin: native
   - name: Vicia cracca
-    origin: Introduced
+    origin: introduced
   - name: Vicia sativa
-    origin: Introduced
+    origin: introduced
   - name: Vicia sativa var. angustifolia
-    origin: Introduced
+    origin: introduced
   - name: Vicia sativa var. sativa
-    origin: Introduced
+    origin: introduced
   - name: Vicia villosa
-    origin: Introduced
+    origin: introduced
   - name: Vinca minor
-    origin: Introduced
+    origin: introduced
   - name: Viola adunca var. adunca
-    origin: Native
+    origin: native
   - name: Viola affinis
-    origin: Native
+    origin: native
   - name: Viola blanda
-    origin: Native
+    origin: native
   - name: Viola canadensis var. rugulosa
-    origin: Native
+    origin: native
   # - name: Viola communis
-  #   origin: Native
+  #   origin: native
   - name: Viola cucullata
-    origin: Native
+    origin: native
   - name: Viola epipsila ssp. repens
-    origin: Native
+    origin: native
   - name: Viola labradorica
-    origin: Native
+    origin: native
   - name: Viola lanceolata
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Viola macloskeyi
-    origin: Native
+    origin: native
   - name: Viola missouriensis
-    origin: Native
+    origin: native
   - name: Viola nephrophylla
-    origin: Native
+    origin: native
   - name: Viola novae-angliae
-    origin: Native
+    origin: native
   - name: Viola nuttallii
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Viola pedata var. pedata
-    origin: Native
+    origin: native
   - name: Viola pedatifida
-    origin: Native
+    origin: native
   - name: Viola pratincola
-    origin: Native
+    origin: native
   - name: Viola primulifolia var. primulifolia
-    origin: Native
+    origin: native
   - name: Viola pubescens
-    origin: Native
+    origin: native
   - name: Viola pubescens var. pubescens
-    origin: Native
+    origin: native
   - name: Viola pubescens var. scabriuscula
-    origin: Native
+    origin: native
   - name: Viola renifolia
-    origin: Native
+    origin: native
   - name: Viola sagittata var. sagittata
-    origin: Native
+    origin: native
   - name: Viola selkirkii
-    origin: Native
+    origin: native
   - name: Viola septentrionalis
-    origin: Native
+    origin: native
   - name: Viola sororia
-    origin: Native
+    origin: native
   # - name: Viola tricolor var. tricolor
   - name: Viola tricolor
-    origin: Introduced
+    origin: introduced
   - name: Vitis aestivalis
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Vitis riparia
-    origin: Native
+    origin: native
   - name: Vulpia octoflora
-    origin: Native
+    origin: native
   - name: Vulpia octoflora var. glauca
-    origin: Native
+    origin: native
   - name: Vulpia octoflora var. octoflora
-    origin: Native
+    origin: native
   - name: Waldsteinia fragarioides
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Wolffia borealis
-    origin: Native
+    origin: native
   - name: Wolffia brasiliensis
-    origin: Native
+    origin: native
   - name: Wolffia columbiana
-    origin: Native
+    origin: native
   - name: Woodsia alpina
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Woodsia glabella
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Woodsia ilvensis
-    origin: Native
+    origin: native
   - name: Woodsia obtusa ssp. obtusa
-    origin: Native
+    origin: native
   - name: Woodsia oregana ssp. cathcartiana
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Woodsia scopulina ssp. laurentiana
-    origin: Native
-    status: Threatened
+    origin: native
+    status: threatened
   - name: Woodsia X abbeae
-    origin: Native
+    origin: native
   - name: Woodsia X gracilis
-    origin: Native
+    origin: native
   - name: Woodsia X maxonii
-    origin: Native
+    origin: native
   - name: Xanthisma spinulosum var. spinulosum
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Xanthium strumarium
-    origin: Native
+    origin: native
   - name: X Elyhordeum macounii
-    origin: Native
+    origin: native
   - name: Xyris montana
-    origin: Native
-    status: SpecialConcern
+    origin: native
+    status: special-concern
   - name: Xyris torta
-    origin: Native
-    status: Endangered
+    origin: native
+    status: endangered
   - name: Zannichellia palustris
-    origin: Native
+    origin: native
   - name: Zanthoxylum americanum
-    origin: Native
+    origin: native
   - name: Zigadenus elegans
-    origin: Native
+    origin: native
   - name: Zizania aquatica var. aquatica
-    origin: Native
+    origin: native
   - name: Zizania palustris
-    origin: Native
+    origin: native
   - name: Zizania palustris var. interior
-    origin: Native
+    origin: native
   - name: Zizania palustris var. palustris
-    origin: Native
+    origin: native
   # - name: Zizia aptera var. aptera
   - name: Zizia aptera
-    origin: Native
+    origin: native
   - name: Zizia aurea
-    origin: Native
+    origin: native

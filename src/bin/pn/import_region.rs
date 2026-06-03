@@ -11,6 +11,7 @@ use propagation_notebook::{
 use tokio::io::AsyncReadExt;
 
 #[derive(Debug, Clone, Copy, PartialEq, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "kebab-case")]
 enum Origin {
     Native,
     Introduced,
