@@ -1,4 +1,3 @@
-use tabled::{Tabled, derive::display};
 use toasty::Deferred;
 
 use crate::taxonomy::Taxon;
@@ -45,52 +44,7 @@ pub struct CleaningProcedure {
     pub name: String,
     pub notes: Option<String>,
 
-    #[has_many(pair=procedure)]
-    pub steps: Deferred<Vec<CleaningProcedureStep>>,
+    pub instructions: String,
     #[has_many(pair=procedure)]
     pub taxon_links: Deferred<Vec<TaxonCleaningProcedure>>,
-}
-
-#[derive(Debug, Clone, Copy, toasty::Embed, strum::Display, clap::ValueEnum)]
-#[clap(rename_all = "kebab-case")]
-pub enum OperationType {
-    #[column(variant = 1)]
-    Rub, // remove fuzz?
-    #[column(variant = 2)]
-    Screen,
-    #[column(variant = 3)]
-    Air,
-    #[column(variant = 4)]
-    Other,
-}
-
-#[derive(Debug, Clone, toasty::Model, Tabled)]
-#[tabled(rename_all = "PascalCase")]
-pub struct CleaningProcedureStep {
-    #[auto]
-    #[key]
-    pub id: u64,
-
-    #[index]
-    pub procedure_id: u64,
-    #[belongs_to(key=procedure_id, references=id)]
-    #[tabled(skip)]
-    pub procedure: Deferred<CleaningProcedure>,
-
-    pub order: u64,
-    pub operation_type: OperationType,
-    #[tabled(display("display::option", "-"))]
-    pub equipment: Option<String>,
-    pub notes: String, // Description of the step
-}
-
-impl CleaningProcedureStep {
-    pub fn summary(&self) -> String {
-        format!(
-            "{} // {} // {}",
-            self.operation_type,
-            self.notes,
-            self.equipment.as_deref().unwrap_or("-"),
-        )
-    }
 }

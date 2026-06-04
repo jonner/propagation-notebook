@@ -4,9 +4,7 @@ use anyhow::anyhow;
 use clap::Parser;
 use directories::ProjectDirs;
 use propagation_notebook::{
-    collecting::{
-        CleaningProcedure, CleaningProcedureStep, CollectingData, TaxonCleaningProcedure,
-    },
+    collecting::{CleaningProcedure, CollectingData, TaxonCleaningProcedure},
     propagation::{Protocol, ProtocolType},
     region::{Region, RegionalTaxonStatus},
     taxonomy::{Synonym, Taxon, VernacularName},
@@ -20,7 +18,7 @@ use tracing_subscriber::{EnvFilter, layer::SubscriberExt, util::SubscriberInitEx
 use crate::{
     cli::{
         MainCommand, Options,
-        cleaning::{CleaningCommands, CleaningStepsCommands},
+        cleaning::CleaningCommands,
         collecting::CollectingCommands,
         propagation::PropagationCommands,
         region::{RegionCommands, RegionTaxaCommands},
@@ -291,7 +289,7 @@ async fn main() -> anyhow::Result<()> {
                     .include(Taxon::fields().synonyms())
                     .include(Taxon::fields().regional_statuses().region())
                     .include(Taxon::fields().collecting_data())
-                    .include(Taxon::fields().cleaning_procedure().procedure().steps())
+                    .include(Taxon::fields().cleaning_procedure().procedure())
                     .one()
                     .exec(&mut db)
                     .await?;
@@ -355,19 +353,12 @@ async fn main() -> anyhow::Result<()> {
                     if let Some(tcp) = taxon.cleaning_procedure.get() {
                         tbuilder.push_record(["Seed Cleaning", &{
                             let proc = tcp.procedure.get();
-                            let mut sorted_steps = proc.steps.get().iter().collect::<Vec<_>>();
-                            sorted_steps.sort_by_key(|v| v.order);
                             let mut inner_table = TableBuilder::default();
                             inner_table.push_record(["ID", &proc.id.to_string()]);
                             inner_table.push_record(["Name", &proc.name]);
                             inner_table
                                 .push_record(["Notes", proc.notes.as_deref().unwrap_or("-")]);
-                            inner_table.push_record([
-                                "Steps",
-                                &join_or_default(&sorted_steps, "[none]", |step| {
-                                    format!(" - {}", step.summary())
-                                }),
-                            ]);
+                            inner_table.push_record(["Instructions", &proc.instructions]);
                             let s = format!(
                                 "Taxon-specific Notes:\n{}\n\nProcedure:\n{}",
                                 tcp.notes.as_deref().unwrap_or("[none]"),
@@ -720,18 +711,16 @@ async fn main() -> anyhow::Result<()> {
         MainCommand::Cleaning { command } => match command {
             CleaningCommands::List => {
                 let items = CleaningProcedure::all()
-                    .include(CleaningProcedure::fields().steps())
                     .include(CleaningProcedure::fields().taxon_links().taxon())
                     .exec(&mut db)
                     .await?;
                 let nitems = items.len();
                 let mut tbuilder = TableBuilder::default();
-                tbuilder.push_record(["ID", "Name", "Steps", "Taxa"]);
+                tbuilder.push_record(["ID", "Name", "Taxa"]);
                 for item in items {
                     tbuilder.push_record([
                         item.id.to_string(),
                         item.name,
-                        item.steps.get().len().to_string(),
                         item.taxon_links.get().len().to_string(),
                     ])
                 }
@@ -740,7 +729,6 @@ async fn main() -> anyhow::Result<()> {
             }
             CleaningCommands::Show { id } => {
                 let procedure = CleaningProcedure::filter_by_id(id)
-                    .include(CleaningProcedure::fields().steps())
                     .include(CleaningProcedure::fields().taxon_links().taxon())
                     .one()
                     .exec(&mut db)
@@ -755,37 +743,54 @@ async fn main() -> anyhow::Result<()> {
                         v.taxon.get().reference()
                     }),
                 ]);
-                // sort steps in order
-                let mut sorted_steps = procedure.steps.get().iter().collect::<Vec<_>>();
-                sorted_steps.sort_by_key(|a| a.order);
-                tbuilder.push_record([
-                    "Steps",
-                    &join_or_default(&sorted_steps, "-", |step| format!(" - {}", step.summary())),
-                ]);
+                tbuilder.push_record(["Instructions", &procedure.instructions]);
                 println!("{}", tbuilder.build().with(style::BasicTable));
             }
-            CleaningCommands::Add { name, notes } => {
+            CleaningCommands::Add {
+                name,
+                instructions,
+                notes,
+            } => {
                 let item = CleaningProcedure::create()
                     .name(name)
+                    .instructions(instructions)
                     .notes(notes)
                     .exec(&mut db)
                     .await?;
                 println!("Added new procedure {}", item.id);
             }
             CleaningCommands::Remove { id } => {
-                if inquire::Confirm::new("Are you sure you wish to remove this cleaning procedure?")
-                    .with_default(false)
-                    .with_help_message("It will remove all related steps")
-                    .prompt()?
+                let item = CleaningProcedure::filter_by_id(id)
+                    .include(CleaningProcedure::fields().taxon_links())
+                    .one()
+                    .exec(&mut db)
+                    .await?;
+                if inquire::Confirm::new(&format!(
+                    "Are you sure you wish to remove cleaning procedure {id}?"
+                ))
+                .with_default(false)
+                .with_help_message(&format!(
+                    "It is used by {} taxa",
+                    item.taxon_links.get().len()
+                ))
+                .prompt()?
                 {
                     CleaningProcedure::delete_by_id(&mut db, id).await?;
                     println!("Removed cleaning procedure {id}");
                 }
             }
-            CleaningCommands::Modify { id, name, notes } => {
+            CleaningCommands::Modify {
+                id,
+                name,
+                instructions,
+                notes,
+            } => {
                 let mut query = CleaningProcedure::update_by_id(id);
                 if let Some(name) = name {
                     query = query.name(name);
+                }
+                if let Some(instructions) = instructions {
+                    query = query.instructions(instructions);
                 }
                 if let Some(notes) = notes {
                     query = query.notes(notes);
@@ -793,66 +798,6 @@ async fn main() -> anyhow::Result<()> {
                 query.exec(&mut db).await?;
                 println!("Modified cleaning procedure {id}");
             }
-            CleaningCommands::Steps { command } => match command {
-                CleaningStepsCommands::Add {
-                    procedure_id,
-                    order,
-                    step_type,
-                    equipment,
-                    notes,
-                } => {
-                    let step = CleaningProcedureStep::create()
-                        .procedure_id(procedure_id)
-                        .order(order)
-                        .operation_type(step_type)
-                        .equipment(equipment)
-                        .notes(notes)
-                        .exec(&mut db)
-                        .await?;
-                    println!("Added new step {}", step.id);
-                }
-                CleaningStepsCommands::List { procedure_id } => {
-                    let steps = CleaningProcedureStep::filter_by_procedure_id(procedure_id)
-                        .order_by(CleaningProcedureStep::fields().order().asc())
-                        .exec(&mut db)
-                        .await?;
-                    let mut table = tabled::Table::new(steps.iter());
-
-                    println!("{}", table.with(style::BasicTable));
-                }
-                CleaningStepsCommands::Modify {
-                    id,
-                    order,
-                    step_type,
-                    equipment,
-                    notes,
-                } => {
-                    let mut query = CleaningProcedureStep::update_by_id(id);
-                    if let Some(order) = order {
-                        query = query.order(order);
-                    }
-                    if let Some(step_type) = step_type {
-                        query = query.operation_type(step_type);
-                    }
-                    if let Some(equipment) = equipment {
-                        query = query.equipment(equipment);
-                    }
-                    if let Some(notes) = notes {
-                        query = query.notes(notes);
-                    }
-                    query.exec(&mut db).await?;
-                    println!("Updated step {}", id);
-                }
-                CleaningStepsCommands::Remove { id } => {
-                    if inquire::Confirm::new("Are you sure you wish to remove this step?")
-                        .with_default(false)
-                        .prompt()?
-                    {
-                        CleaningProcedureStep::delete_by_id(&mut db, id).await?;
-                        println!("Removed step {id}");
-                    }
-                }
-            },
         },
         MainCommand::Propagation { command } => match command {
             PropagationCommands::List { r#type } => {
