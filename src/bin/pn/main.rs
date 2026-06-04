@@ -22,7 +22,7 @@ use crate::{
         collecting::CollectingCommands,
         propagation::PropagationCommands,
         region::{RegionCommands, RegionTaxaCommands},
-        taxa::TaxonCommands,
+        taxa::{TaxonCleaningCommands, TaxonCommands},
     },
     import_region::import_region,
 };
@@ -439,13 +439,8 @@ async fn main() -> anyhow::Result<()> {
                     println!("{} taxa found", ntaxa);
                 }
             },
-            TaxonCommands::SetCleaningProcedure {
-                taxon_id,
-                procedure_id,
-                notes,
-                remove,
-            } => {
-                if remove {
+            TaxonCommands::Cleaning { taxon_id, command } => match command {
+                TaxonCleaningCommands::Remove { procedure_id } => {
                     if inquire::Confirm::new("Are you sure you wish to remove this procedure?")
                         .with_default(false)
                         .prompt()?
@@ -458,7 +453,11 @@ async fn main() -> anyhow::Result<()> {
                         .await?;
                         println!("Assignment removed");
                     }
-                } else {
+                }
+                TaxonCleaningCommands::Add {
+                    procedure_id,
+                    notes,
+                } => {
                     TaxonCleaningProcedure::create()
                         .taxon_id(taxon_id)
                         .procedure_id(procedure_id)
@@ -467,7 +466,7 @@ async fn main() -> anyhow::Result<()> {
                         .await?;
                     println!("Procedure {} assigned to taxon {}", taxon_id, procedure_id);
                 }
-            }
+            },
             TaxonCommands::Import { db_uri, authority } => {
                 let ntaxa = Taxon::all().count().exec(&mut db).await?;
                 if inquire::Confirm::new(
