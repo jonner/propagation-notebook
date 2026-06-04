@@ -35,5 +35,13 @@ pub enum CollectingCommands {
         storage: Option<String>,
     },
     #[command(about = "Remove seed collecting information")]
-    Remove { id: u64 },
+    Remove {
+        id: u64,
+        #[arg(
+            short = 'y',
+            long,
+            help = "Assume yes for all questions requiring confirmation"
+        )]
+        assumeyes: bool,
+    },
 }

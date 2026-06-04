@@ -37,7 +37,15 @@ pub enum PropagationCommands {
         notes: Option<String>,
     },
     #[command(about = "Remove a seed propagation protocol")]
-    Remove { id: u64 },
+    Remove {
+        id: u64,
+        #[arg(
+            short = 'y',
+            long,
+            help = "Assume yes for all questions requiring confirmation"
+        )]
+        assumeyes: bool,
+    },
     #[command(about = "Import seed propagation protocols from YAML")]
     Import { path: PathBuf },
 }

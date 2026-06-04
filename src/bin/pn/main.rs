@@ -440,10 +440,14 @@ async fn main() -> anyhow::Result<()> {
                 }
             },
             TaxonCommands::Cleaning { taxon_id, command } => match command {
-                TaxonCleaningCommands::Remove { procedure_id } => {
-                    if inquire::Confirm::new("Are you sure you wish to remove this procedure?")
-                        .with_default(false)
-                        .prompt()?
+                TaxonCleaningCommands::Remove {
+                    procedure_id,
+                    assumeyes,
+                } => {
+                    if assumeyes
+                        || inquire::Confirm::new("Are you sure you wish to remove this procedure?")
+                            .with_default(false)
+                            .prompt()?
                     {
                         TaxonCleaningProcedure::delete_by_taxon_id_and_procedure_id(
                             &mut db,
@@ -467,14 +471,19 @@ async fn main() -> anyhow::Result<()> {
                     println!("Procedure {} assigned to taxon {}", taxon_id, procedure_id);
                 }
             },
-            TaxonCommands::Import { db_uri, authority } => {
+            TaxonCommands::Import {
+                db_uri,
+                authority,
+                assumeyes,
+            } => {
                 let ntaxa = Taxon::all().count().exec(&mut db).await?;
-                if inquire::Confirm::new(
-                    "Are you sure you wish to import all taxa from the external database?",
-                )
-                .with_default(false)
-                .with_help_message(&format!("The database currently contains {ntaxa} taxa"))
-                .prompt()?
+                if assumeyes
+                    || inquire::Confirm::new(
+                        "Are you sure you wish to import all taxa from the external database?",
+                    )
+                    .with_default(false)
+                    .with_help_message(&format!("The database currently contains {ntaxa} taxa"))
+                    .prompt()?
                 {
                     // FIXME: we should probably clear the database if the
                     // user confirms rather than re-import a taxonomy into an
@@ -558,11 +567,12 @@ async fn main() -> anyhow::Result<()> {
             RegionCommands::Import { path } => {
                 import_region(&mut db, path).await?;
             }
-            RegionCommands::Remove { id } => {
-                if inquire::Confirm::new("Are you sure you wish to delete this region?")
-                    .with_default(false)
-                    .with_help_message("All associated data will be deleted")
-                    .prompt()?
+            RegionCommands::Remove { id, assumeyes } => {
+                if assumeyes
+                    || inquire::Confirm::new("Are you sure you wish to delete this region?")
+                        .with_default(false)
+                        .with_help_message("All associated data will be deleted")
+                        .prompt()?
                 {
                     Region::delete_by_id(&mut db, id).await?;
                     println!("Deleted region {id} from the database");
@@ -621,8 +631,11 @@ async fn main() -> anyhow::Result<()> {
                 RegionTaxaCommands::List { region_id } => {
                     list_regional_taxa(&mut db, region_id).await?
                 }
-                RegionTaxaCommands::Remove { id } => {
-                    if inquire::Confirm::new("Are you sure you wish to remove this regional taxon?")
+                RegionTaxaCommands::Remove { id, assumeyes } => {
+                    if assumeyes
+                        || inquire::Confirm::new(
+                            "Are you sure you wish to remove this regional taxon?",
+                        )
                         .with_default(false)
                         .prompt()?
                     {
@@ -682,8 +695,11 @@ async fn main() -> anyhow::Result<()> {
                     .await?;
                 println!("Added collection information {}", data.id);
             }
-            CollectingCommands::Remove { id } => {
-                if inquire::Confirm::new("Are you sure you wish to remove this collecting data?")
+            CollectingCommands::Remove { id, assumeyes } => {
+                if assumeyes
+                    || inquire::Confirm::new(
+                        "Are you sure you wish to remove this collecting data?",
+                    )
                     .with_default(false)
                     .prompt()?
                 {
@@ -758,21 +774,22 @@ async fn main() -> anyhow::Result<()> {
                     .await?;
                 println!("Added new procedure {}", item.id);
             }
-            CleaningCommands::Remove { id } => {
+            CleaningCommands::Remove { id, assumeyes } => {
                 let item = CleaningProcedure::filter_by_id(id)
                     .include(CleaningProcedure::fields().taxon_links())
                     .one()
                     .exec(&mut db)
                     .await?;
-                if inquire::Confirm::new(&format!(
-                    "Are you sure you wish to remove cleaning procedure {id}?"
-                ))
-                .with_default(false)
-                .with_help_message(&format!(
-                    "It is used by {} taxa",
-                    item.taxon_links.get().len()
-                ))
-                .prompt()?
+                if assumeyes
+                    || inquire::Confirm::new(&format!(
+                        "Are you sure you wish to remove cleaning procedure {id}?"
+                    ))
+                    .with_default(false)
+                    .with_help_message(&format!(
+                        "It is used by {} taxa",
+                        item.taxon_links.get().len()
+                    ))
+                    .prompt()?
                 {
                     CleaningProcedure::delete_by_id(&mut db, id).await?;
                     println!("Removed cleaning procedure {id}");
@@ -859,13 +876,14 @@ async fn main() -> anyhow::Result<()> {
                 query.exec(&mut db).await?;
                 println!("Updated protocol {id}");
             }
-            PropagationCommands::Remove { id } => {
-                if inquire::Confirm::new(
-                    "Are you sure you wish to remove this Propagation protocol?",
-                )
-                .with_default(false)
-                .with_help_message("It will remove all related steps")
-                .prompt()?
+            PropagationCommands::Remove { id, assumeyes } => {
+                if assumeyes
+                    || inquire::Confirm::new(
+                        "Are you sure you wish to remove this Propagation protocol?",
+                    )
+                    .with_default(false)
+                    .with_help_message("It will remove all related steps")
+                    .prompt()?
                 {
                     Protocol::delete_by_id(&mut db, id).await?;
                     println!("Removed propagation protocol {id}");

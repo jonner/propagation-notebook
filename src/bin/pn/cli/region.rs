@@ -104,7 +104,15 @@ pub enum RegionCommands {
         notes: Option<String>,
     },
     #[command(about = "Remove a region from the database")]
-    Remove { id: u64 },
+    Remove {
+        id: u64,
+        #[arg(
+            short = 'y',
+            long,
+            help = "Assume yes for all questions requiring confirmation"
+        )]
+        assumeyes: bool,
+    },
     #[command(about = "Manage taxa for a region")]
     Taxa {
         #[command(subcommand)]
@@ -137,5 +145,11 @@ pub enum RegionTaxaCommands {
     Remove {
         #[command(flatten)]
         id: RegionalTaxonId,
+        #[arg(
+            short = 'y',
+            long,
+            help = "Assume yes for all questions requiring confirmation"
+        )]
+        assumeyes: bool,
     },
 }

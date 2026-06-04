@@ -27,6 +27,12 @@ pub enum TaxonCommands {
             default_value_t = TaxonomicAuthority::Itis
         )]
         authority: TaxonomicAuthority,
+        #[arg(
+            short = 'y',
+            long,
+            help = "Assume yes for all questions requiring confirmation"
+        )]
+        assumeyes: bool,
     },
     #[command(about = "Manage cleaning information for a taxon")]
     Cleaning {
@@ -49,5 +55,11 @@ pub enum TaxonCleaningCommands {
     Remove {
         #[arg(short, long, help = "A cleaning procedure ID")]
         procedure_id: u64,
+        #[arg(
+            short = 'y',
+            long,
+            help = "Assume yes for all questions requiring confirmation"
+        )]
+        assumeyes: bool,
     },
 }

@@ -24,5 +24,13 @@ pub enum CleaningCommands {
         notes: Option<String>,
     },
     #[command(about = "Remove a seed cleaning procedure")]
-    Remove { id: u64 },
+    Remove {
+        id: u64,
+        #[arg(
+            short = 'y',
+            long,
+            help = "Assume yes for all questions requiring confirmation"
+        )]
+        assumeyes: bool,
+    },
 }
