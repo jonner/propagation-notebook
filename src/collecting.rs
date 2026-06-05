@@ -16,6 +16,7 @@ pub struct CollectingData {
 
     pub ripening_indicators: String,
     pub storage: Option<String>,
+    pub storage_life: Option<String>,
 }
 
 // pivot table for associating a cleaning procedure with a taxon

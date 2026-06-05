@@ -341,12 +341,21 @@ async fn main() -> anyhow::Result<()> {
                             .unwrap_or_else(|| "-"),
                     ]);
                     tbuilder.push_record([
-                        "Storage",
+                        "Storage Conditions",
                         taxon
                             .collecting_data
                             .get()
                             .as_ref()
                             .and_then(|d| d.storage.as_deref())
+                            .unwrap_or("-"),
+                    ]);
+                    tbuilder.push_record([
+                        "Storage Life",
+                        taxon
+                            .collecting_data
+                            .get()
+                            .as_ref()
+                            .and_then(|d| d.storage_life.as_deref())
                             .unwrap_or("-"),
                     ]);
                     tbuilder.push_record(["Seed Cleaning", &{
@@ -541,12 +550,15 @@ async fn main() -> anyhow::Result<()> {
                     {
                         Ok(data) => {
                             let mut tbuilder = TableBuilder::default();
-                            tbuilder.push_record(["ID", &data.taxon_id.to_string()]);
                             tbuilder.push_record(["Taxon", &data.taxon.get().reference()]);
                             tbuilder.push_record(["Ripening", &data.ripening_indicators]);
                             tbuilder.push_record([
-                                "Storage",
+                                "Storage Conditions",
                                 &data.storage.unwrap_or_else(|| "-".into()),
+                            ]);
+                            tbuilder.push_record([
+                                "Storage Life",
+                                &data.storage_life.unwrap_or_else(|| "-".into()),
                             ]);
                             println!("{}", tbuilder.build().with(style::DetailTable))
                         }
@@ -558,12 +570,14 @@ async fn main() -> anyhow::Result<()> {
                 }
                 TaxonCollectingCommands::Add {
                     ripening_indicators,
-                    storage,
+                    storage_conditions,
+                    storage_life,
                 } => {
                     let data = CollectingData::create()
                         .taxon_id(taxon_id)
                         .ripening_indicators(ripening_indicators)
-                        .storage(storage)
+                        .storage(storage_conditions)
+                        .storage_life(storage_life)
                         .exec(&mut db)
                         .await?;
                     println!("Added collection information for taxon {}", data.taxon_id);
@@ -582,14 +596,18 @@ async fn main() -> anyhow::Result<()> {
                 }
                 TaxonCollectingCommands::Modify {
                     ripening_indicators,
-                    storage,
+                    storage_conditions,
+                    storage_life,
                 } => {
                     let mut query = CollectingData::update_by_taxon_id(taxon_id);
                     if let Some(ripening) = ripening_indicators {
                         query = query.ripening_indicators(ripening);
                     }
-                    if let Some(storage) = storage {
+                    if let Some(storage) = storage_conditions {
                         query = query.storage(storage);
+                    }
+                    if let Some(storage_life) = storage_life {
+                        query = query.storage_life(storage_life);
                     }
                     query.exec(&mut db).await?;
                     println!("Modified collection information {taxon_id}");
