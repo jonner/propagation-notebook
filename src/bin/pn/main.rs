@@ -188,6 +188,19 @@ async fn main() -> anyhow::Result<()> {
         .connect(&db_uri)
         .await?;
     match options.command {
+        MainCommand::Init => {
+            match db.push_schema().await {
+                Ok(()) => Ok(()),
+                Err(e) => if e.is_driver_operation_failed() {
+                    // this is the error that occurs when we try to push a schema
+                    // after the schema has already been applied
+                    Ok(())
+                } else {
+                    // Report other errors
+                    Err(e)
+                },
+            }?;
+        }
         MainCommand::Taxa { command } => match command {
             TaxonCommands::Search { search_string } => {
                 tracing::debug!("Searching for exact complete name");

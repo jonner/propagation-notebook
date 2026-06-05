@@ -28,6 +28,8 @@ pub enum MainCommand {
         #[command(subcommand)]
         command: PropagationCommands,
     },
+    #[command(about = "Initialize the database")]
+    Init,
 }
 
 pub mod cleaning;
