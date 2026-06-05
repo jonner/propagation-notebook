@@ -430,8 +430,8 @@ async fn main() -> anyhow::Result<()> {
                     println!("{} taxa found", ntaxa);
                 }
             },
-            TaxonCommands::Cleaning { command } => match command {
-                TaxonCleaningCommands::List { taxon_id } => {
+            TaxonCommands::Cleaning { taxon_id, command } => match command {
+                TaxonCleaningCommands::List => {
                     let procedures = TaxonCleaningProcedure::filter_by_taxon_id(taxon_id)
                         .exec(&mut db)
                         .await?;
@@ -447,10 +447,7 @@ async fn main() -> anyhow::Result<()> {
                     }
                     println!("{}", tbuilder.build().with(style::BasicTable));
                 }
-                TaxonCleaningCommands::Show {
-                    taxon_id,
-                    procedure_id,
-                } => {
+                TaxonCleaningCommands::Show { procedure_id } => {
                     let tcp = TaxonCleaningProcedure::filter_by_taxon_id_and_procedure_id(
                         taxon_id,
                         procedure_id,
@@ -471,7 +468,6 @@ async fn main() -> anyhow::Result<()> {
                     println!("{}", tbuilder.build().with(style::DetailTable));
                 }
                 TaxonCleaningCommands::Add {
-                    taxon_id,
                     procedure_id,
                     notes,
                 } => {
@@ -484,7 +480,6 @@ async fn main() -> anyhow::Result<()> {
                     println!("Procedure {} assigned to taxon {}", taxon_id, procedure_id);
                 }
                 TaxonCleaningCommands::Modify {
-                    taxon_id,
                     procedure_id,
                     notes,
                 } => {
@@ -498,7 +493,6 @@ async fn main() -> anyhow::Result<()> {
                     println!("Procedure {} updated for taxon {}", procedure_id, taxon_id);
                 }
                 TaxonCleaningCommands::Remove {
-                    taxon_id,
                     procedure_id,
                     assumeyes,
                 } => {
@@ -537,8 +531,8 @@ async fn main() -> anyhow::Result<()> {
                     import_taxa::import_taxa(&mut db, &db_uri, authority).await?
                 }
             }
-            TaxonCommands::Collecting { command } => match command {
-                TaxonCollectingCommands::Show { taxon_id } => {
+            TaxonCommands::Collecting { taxon_id, command } => match command {
+                TaxonCollectingCommands::Show => {
                     match CollectingData::filter_by_taxon_id(taxon_id)
                         .include(CollectingData::fields().taxon())
                         .one()
@@ -563,7 +557,6 @@ async fn main() -> anyhow::Result<()> {
                     }
                 }
                 TaxonCollectingCommands::Add {
-                    taxon_id,
                     ripening_indicators,
                     storage,
                 } => {
@@ -575,10 +568,7 @@ async fn main() -> anyhow::Result<()> {
                         .await?;
                     println!("Added collection information for taxon {}", data.taxon_id);
                 }
-                TaxonCollectingCommands::Remove {
-                    taxon_id,
-                    assumeyes,
-                } => {
+                TaxonCollectingCommands::Remove { assumeyes } => {
                     if assumeyes
                         || inquire::Confirm::new(
                             "Are you sure you wish to remove this collecting data?",
@@ -591,7 +581,6 @@ async fn main() -> anyhow::Result<()> {
                     }
                 }
                 TaxonCollectingCommands::Modify {
-                    taxon_id,
                     ripening_indicators,
                     storage,
                 } => {
@@ -693,11 +682,11 @@ async fn main() -> anyhow::Result<()> {
                     println!("Deleted region {id} from the database");
                 }
             }
-            RegionCommands::Taxa { command } => match command {
-                RegionTaxaCommands::Add { id, props } => {
+            RegionCommands::Taxa { region_id, command } => match command {
+                RegionTaxaCommands::Add { taxon_id, props } => {
                     let s = RegionalTaxonStatus::create()
-                        .region_id(id.region_id)
-                        .taxon_id(id.taxon_id)
+                        .region_id(region_id)
+                        .taxon_id(taxon_id)
                         .origin(props.origin)
                         .c_value(props.c_value)
                         .conservation_status(props.conservation_status)
@@ -716,11 +705,9 @@ async fn main() -> anyhow::Result<()> {
                         .await?;
                     println!("Added regional taxon {}", s.id);
                 }
-                RegionTaxaCommands::Modify { id, props } => {
-                    let mut query = RegionalTaxonStatus::update_by_taxon_id_and_region_id(
-                        id.taxon_id,
-                        id.region_id,
-                    );
+                RegionTaxaCommands::Modify { taxon_id, props } => {
+                    let mut query =
+                        RegionalTaxonStatus::update_by_taxon_id_and_region_id(taxon_id, region_id);
                     if let Some(origin) = props.origin {
                         query = query.origin(origin);
                     }
@@ -741,12 +728,13 @@ async fn main() -> anyhow::Result<()> {
                         query = query.window_end(harvest_end.with().year(2000).build().unwrap());
                     }
                     query.exec(&mut db).await?;
-                    println!("Modified taxon {} in region {}", id.taxon_id, id.region_id);
+                    println!("Modified taxon {} in region {}", taxon_id, region_id);
                 }
-                RegionTaxaCommands::List { region_id } => {
-                    list_regional_taxa(&mut db, region_id).await?
-                }
-                RegionTaxaCommands::Remove { id, assumeyes } => {
+                RegionTaxaCommands::List => list_regional_taxa(&mut db, region_id).await?,
+                RegionTaxaCommands::Remove {
+                    taxon_id,
+                    assumeyes,
+                } => {
                     if assumeyes
                         || inquire::Confirm::new(
                             "Are you sure you wish to remove this regional taxon?",
@@ -755,12 +743,10 @@ async fn main() -> anyhow::Result<()> {
                         .prompt()?
                     {
                         RegionalTaxonStatus::delete_by_taxon_id_and_region_id(
-                            &mut db,
-                            id.taxon_id,
-                            id.region_id,
+                            &mut db, taxon_id, region_id,
                         )
                         .await?;
-                        println!("Removed taxon {} from region {}", id.taxon_id, id.region_id);
+                        println!("Removed taxon {} from region {}", taxon_id, region_id);
                     }
                 }
             },

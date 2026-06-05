@@ -2,13 +2,6 @@ use std::path::PathBuf;
 
 use propagation_notebook::region::{ConservationStatus, Origin, WetlandIndicator};
 
-#[derive(clap::Parser, Debug)]
-pub struct RegionalTaxonId {
-    #[arg(short, long, help = "ID of a region")]
-    pub region_id: u64,
-    #[arg(short, long, help = "ID of a taxon")]
-    pub taxon_id: u64,
-}
 #[derive(clap::Args, Debug)]
 #[group(required = false, multiple = false)]
 pub struct BoundsArg {
@@ -115,6 +108,8 @@ pub enum RegionCommands {
     },
     #[command(about = "Manage taxa for a region")]
     Taxa {
+        #[arg(short, long, help = "ID of a region")]
+        region_id: u64,
         #[command(subcommand)]
         command: RegionTaxaCommands,
     },
@@ -123,28 +118,25 @@ pub enum RegionCommands {
 #[derive(Debug, clap::Subcommand)]
 pub enum RegionTaxaCommands {
     #[command(about = "Print a list of taxa for a region")]
-    List {
-        #[arg(short, long, help = "ID of a region")]
-        region_id: u64,
-    },
+    List,
     #[command(about = "Add a taxon to a region")]
     Add {
-        #[command(flatten)]
-        id: RegionalTaxonId,
+        #[arg(short, long, help = "A taxon ID")]
+        taxon_id: u64,
         #[command(flatten)]
         props: RegionalTaxonProperties,
     },
     #[command(about = "Modify information about a taxon within a region", group(clap::ArgGroup::new("modify_taxon_fields").args(["origin", "c_value", "conservation_status", "wetland_indicator", "harvest_start", "harvest_end"]).required(true).multiple(false)))]
     Modify {
-        #[command(flatten)]
-        id: RegionalTaxonId,
+        #[arg(short, long, help = "A taxon ID")]
+        taxon_id: u64,
         #[command(flatten)]
         props: RegionalTaxonProperties,
     },
     #[command(about = "Remove a taxon from a region")]
     Remove {
-        #[command(flatten)]
-        id: RegionalTaxonId,
+        #[arg(short, long, help = "A taxon ID")]
+        taxon_id: u64,
         #[arg(
             short = 'y',
             long,
