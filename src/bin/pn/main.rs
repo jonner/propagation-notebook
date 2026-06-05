@@ -378,14 +378,22 @@ async fn main() -> anyhow::Result<()> {
                     }]);
                     tbuilder.push_record([
                         "Regions",
-                        &join_or_default(taxon.regional_statuses.get(), "-", |s| {
-                            format!(
-                                "{} ({})",
-                                s.region.get().reference(),
-                                s.origin
-                                    .unwrap_or(propagation_notebook::region::Origin::Unknown)
-                            )
-                        }),
+                        &{
+                            let regions = taxon.regional_statuses.get();
+                            if regions.is_empty() {
+                                "-".to_string()
+                            } else {
+                                let mut inner_table = TableBuilder::default();
+                                inner_table.push_record(["ID", "Name", "Origin"]);
+                                for rs in regions.iter() {
+                                    inner_table.push_record([
+                                    rs.id.to_string(),
+                                    rs.region.get().name.clone(),
+                                    rs.origin.map(|val| val.to_string()).unwrap_or_else(|| "-".into())
+                                    ]);
+                                }
+                                inner_table.build().with(style::BasicTable).to_string()
+                            }},
                     ]);
                     println!("{}", tbuilder.build().with(style::DetailTable));
                     println!();
