@@ -35,10 +35,6 @@ pub struct Protocol {
 
     #[serde(skip)]
     #[has_many]
-    pub citations: Deferred<Vec<ProtocolCitation>>,
-
-    #[serde(skip)]
-    #[has_many]
     pub taxon_protocols: Deferred<Vec<TaxonProtocol>>,
 }
 
@@ -61,70 +57,4 @@ pub struct TaxonProtocol {
 
     pub confidence: Option<u8>,
     pub notes: Option<String>,
-
-    #[has_many]
-    pub citations: Deferred<Vec<TaxonProtocolCitation>>,
-}
-
-#[derive(Debug, Clone, Copy, toasty::Embed, clap::ValueEnum, Deserialize)]
-#[clap(rename_all = "kebab-case")]
-#[serde(rename_all = "kebab-case")]
-pub enum CitationType {
-    #[column(variant = 1)]
-    PeerReviewedPaper,
-    #[column(variant = 2)]
-    Book,
-    #[column(variant = 3)]
-    VendorCatalog,
-    #[column(variant = 4)]
-    ExpertInterview,
-    #[column(variant = 5)]
-    GovernmentDatabase,
-    #[column(variant = 99)]
-    Other,
-}
-
-#[derive(Debug, Clone, toasty::Model)]
-pub struct Citation {
-    #[auto]
-    #[key]
-    pub id: u64,
-
-    pub r#type: CitationType,
-    pub title: String,
-    pub author: String,
-    pub author_organization: Option<String>,
-    pub publication_year: Option<u16>,
-    pub url_doi: Option<String>,
-    pub reliability: Option<u8>,
-}
-
-#[derive(Debug, Clone, toasty::Model)]
-pub struct ProtocolCitation {
-    #[key]
-    #[index]
-    protocol_id: u64,
-    #[belongs_to(key=protocol_id, references=id)]
-    protocol: Deferred<Protocol>,
-
-    #[key]
-    citation_id: u64,
-    #[belongs_to(key=citation_id, references=id)]
-    citation: Deferred<Citation>,
-}
-
-#[derive(Debug, Clone, toasty::Model)]
-pub struct TaxonProtocolCitation {
-    #[key]
-    id: u64,
-
-    #[index]
-    taxon_protocol_id: u64,
-    #[belongs_to(key=taxon_protocol_id, references=id)]
-    taxon_protocol: Deferred<TaxonProtocol>,
-
-    #[key]
-    citation_id: u64,
-    #[belongs_to(key=citation_id, references=id)]
-    citation: Deferred<Citation>,
 }
