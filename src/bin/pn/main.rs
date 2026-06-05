@@ -440,6 +440,67 @@ async fn main() -> anyhow::Result<()> {
                 }
             },
             TaxonCommands::Cleaning { taxon_id, command } => match command {
+                TaxonCleaningCommands::List => {
+                    let procedures = TaxonCleaningProcedure::filter_by_taxon_id(taxon_id)
+                        .exec(&mut db)
+                        .await?;
+
+                    let mut tbuilder = TableBuilder::default();
+                    tbuilder.push_record(["Taxon ID", "Procedure ID", "Notes"]);
+                    for proc in procedures {
+                        tbuilder.push_record([
+                            proc.taxon_id.to_string(),
+                            proc.procedure_id.to_string(),
+                            proc.notes.unwrap_or_else(|| "-".into()),
+                        ]);
+                    }
+                    println!("{}", tbuilder.build().with(style::BasicTable));
+                }
+                TaxonCleaningCommands::Show { procedure_id } => {
+                    let tcp = TaxonCleaningProcedure::filter_by_taxon_id_and_procedure_id(
+                        taxon_id,
+                        procedure_id,
+                    )
+                    .include(TaxonCleaningProcedure::fields().taxon())
+                    .include(TaxonCleaningProcedure::fields().procedure())
+                    .one()
+                    .exec(&mut db)
+                    .await?;
+
+                    let mut tbuilder = TableBuilder::default();
+                    tbuilder.push_record([
+                        "Taxon",
+                        &format!("{}: {}", tcp.taxon_id, tcp.taxon.get().complete_name),
+                    ]);
+                    tbuilder.push_record(["Procedure", &tcp.procedure_id.to_string()]);
+                    tbuilder.push_record(["Notes", &tcp.notes.unwrap_or_else(|| "-".into())]);
+                    println!("{}", tbuilder.build().with(style::DetailTable));
+                }
+                TaxonCleaningCommands::Add {
+                    procedure_id,
+                    notes,
+                } => {
+                    TaxonCleaningProcedure::create()
+                        .taxon_id(taxon_id)
+                        .procedure_id(procedure_id)
+                        .notes(notes)
+                        .exec(&mut db)
+                        .await?;
+                    println!("Procedure {} assigned to taxon {}", taxon_id, procedure_id);
+                }
+                TaxonCleaningCommands::Modify {
+                    procedure_id,
+                    notes,
+                } => {
+                    TaxonCleaningProcedure::update_by_taxon_id_and_procedure_id(
+                        taxon_id,
+                        procedure_id,
+                    )
+                    .notes(notes)
+                    .exec(&mut db)
+                    .await?;
+                    println!("Procedure {} updated for taxon {}", procedure_id, taxon_id);
+                }
                 TaxonCleaningCommands::Remove {
                     procedure_id,
                     assumeyes,
@@ -457,18 +518,6 @@ async fn main() -> anyhow::Result<()> {
                         .await?;
                         println!("Assignment removed");
                     }
-                }
-                TaxonCleaningCommands::Add {
-                    procedure_id,
-                    notes,
-                } => {
-                    TaxonCleaningProcedure::create()
-                        .taxon_id(taxon_id)
-                        .procedure_id(procedure_id)
-                        .notes(notes)
-                        .exec(&mut db)
-                        .await?;
-                    println!("Procedure {} assigned to taxon {}", taxon_id, procedure_id);
                 }
             },
             TaxonCommands::Import {
