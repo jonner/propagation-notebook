@@ -43,15 +43,14 @@ pub struct Protocol {
 #[derive(Debug, Clone, toasty::Model)]
 pub struct TaxonProtocol {
     #[key]
-    id: u64,
-
     #[index]
     pub taxon_id: u64,
     #[belongs_to(key=taxon_id, references=id)]
-    taxon: Deferred<Taxon>,
+    pub taxon: Deferred<Taxon>,
 
+    #[key]
     #[index]
-    pub protocol_id: Option<u64>,
+    pub protocol_id: u64,
     #[belongs_to(key=protocol_id, references=id)]
     pub protocol: Deferred<Protocol>,
 
