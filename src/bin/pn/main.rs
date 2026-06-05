@@ -289,7 +289,7 @@ async fn main() -> anyhow::Result<()> {
                     .include(Taxon::fields().synonyms())
                     .include(Taxon::fields().regional_statuses().region())
                     .include(Taxon::fields().collecting_data())
-                    .include(Taxon::fields().cleaning_procedure().procedure())
+                    .include(Taxon::fields().cleaning_procedures().procedure())
                     .one()
                     .exec(&mut db)
                     .await?;
@@ -350,23 +350,15 @@ async fn main() -> anyhow::Result<()> {
                             .and_then(|d| d.storage.as_deref())
                             .unwrap_or("-"),
                     ]);
-                    if let Some(tcp) = taxon.cleaning_procedure.get() {
-                        tbuilder.push_record(["Seed Cleaning", &{
+                    tbuilder.push_record(["Seed Cleaning", &{
+                        let mut inner_table = TableBuilder::default();
+                        inner_table.push_record(["ID", "Name"]);
+                        taxon.cleaning_procedures.get().iter().for_each(|tcp| {
                             let proc = tcp.procedure.get();
-                            let mut inner_table = TableBuilder::default();
-                            inner_table.push_record(["ID", &proc.id.to_string()]);
-                            inner_table.push_record(["Name", &proc.name]);
-                            inner_table
-                                .push_record(["Notes", proc.notes.as_deref().unwrap_or("-")]);
-                            inner_table.push_record(["Instructions", &proc.instructions]);
-                            let s = format!(
-                                "Taxon-specific Notes:\n{}\n\nProcedure:\n{}",
-                                tcp.notes.as_deref().unwrap_or("[none]"),
-                                inner_table.build().with(style::BasicTable)
-                            );
-                            s
-                        }])
-                    }
+                            inner_table.push_record([&proc.id.to_string(), &proc.name]);
+                        });
+                        inner_table.build().with(style::DetailTable).to_string()
+                    }]);
                     println!("{}", tbuilder.build().with(style::DetailTable));
                     println!();
                     println!("Regional Information:");

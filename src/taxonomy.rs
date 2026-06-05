@@ -137,8 +137,8 @@ pub struct Taxon {
     pub regional_statuses: Deferred<Vec<RegionalTaxonStatus>>,
     #[has_one]
     pub collecting_data: Deferred<Option<CollectingData>>,
-    #[has_one]
-    pub cleaning_procedure: Deferred<Option<TaxonCleaningProcedure>>,
+    #[has_many]
+    pub cleaning_procedures: Deferred<Vec<TaxonCleaningProcedure>>,
     #[has_many]
     pub protocols: Deferred<Vec<TaxonProtocol>>,
 }
