@@ -19,10 +19,9 @@ use crate::{
     cli::{
         MainCommand, Options,
         cleaning::CleaningCommands,
-        collecting::CollectingCommands,
         propagation::PropagationCommands,
         region::{RegionCommands, RegionTaxaCommands},
-        taxa::{TaxonCleaningCommands, TaxonCommands},
+        taxa::{TaxonCleaningCommands, TaxonCollectingCommands, TaxonCommands},
     },
     import_region::import_region,
 };
@@ -538,6 +537,75 @@ async fn main() -> anyhow::Result<()> {
                     import_taxa::import_taxa(&mut db, &db_uri, authority).await?
                 }
             }
+            TaxonCommands::Collecting { command } => match command {
+                TaxonCollectingCommands::Show { taxon_id } => {
+                    match CollectingData::filter_by_taxon_id(taxon_id)
+                        .include(CollectingData::fields().taxon())
+                        .one()
+                        .exec(&mut db)
+                        .await
+                    {
+                        Ok(data) => {
+                            let mut tbuilder = TableBuilder::default();
+                            tbuilder.push_record(["ID", &data.taxon_id.to_string()]);
+                            tbuilder.push_record(["Taxon", &data.taxon.get().reference()]);
+                            tbuilder.push_record(["Ripening", &data.ripening_indicators]);
+                            tbuilder.push_record([
+                                "Storage",
+                                &data.storage.unwrap_or_else(|| "-".into()),
+                            ]);
+                            println!("{}", tbuilder.build().with(style::DetailTable))
+                        }
+                        Err(e) if e.is_record_not_found() => println!(
+                            "Taxon {taxon_id} does not current have any collecting information defined"
+                        ),
+                        Err(e) => return Err(e.into()),
+                    }
+                }
+                TaxonCollectingCommands::Add {
+                    taxon_id,
+                    ripening_indicators,
+                    storage,
+                } => {
+                    let data = CollectingData::create()
+                        .taxon_id(taxon_id)
+                        .ripening_indicators(ripening_indicators)
+                        .storage(storage)
+                        .exec(&mut db)
+                        .await?;
+                    println!("Added collection information for taxon {}", data.taxon_id);
+                }
+                TaxonCollectingCommands::Remove {
+                    taxon_id,
+                    assumeyes,
+                } => {
+                    if assumeyes
+                        || inquire::Confirm::new(
+                            "Are you sure you wish to remove this collecting data?",
+                        )
+                        .with_default(false)
+                        .prompt()?
+                    {
+                        CollectingData::delete_by_taxon_id(&mut db, taxon_id).await?;
+                        println!("Removed collecting data {taxon_id}")
+                    }
+                }
+                TaxonCollectingCommands::Modify {
+                    taxon_id,
+                    ripening_indicators,
+                    storage,
+                } => {
+                    let mut query = CollectingData::update_by_taxon_id(taxon_id);
+                    if let Some(ripening) = ripening_indicators {
+                        query = query.ripening_indicators(ripening);
+                    }
+                    if let Some(storage) = storage {
+                        query = query.storage(storage);
+                    }
+                    query.exec(&mut db).await?;
+                    println!("Modified collection information {taxon_id}");
+                }
+            },
         },
         MainCommand::Regions { command } => match command {
             RegionCommands::List => {
@@ -696,79 +764,6 @@ async fn main() -> anyhow::Result<()> {
                     }
                 }
             },
-        },
-        MainCommand::Collecting { command } => match command {
-            CollectingCommands::List => {
-                let items = CollectingData::all()
-                    .include(CollectingData::fields().taxon())
-                    .exec(&mut db)
-                    .await?;
-                let nitems = items.len();
-                let mut tbuilder = TableBuilder::default();
-                tbuilder.push_record(["ID", "Taxon"]);
-                for item in items {
-                    tbuilder.push_record([item.id.to_string(), item.taxon.get().reference()])
-                }
-                println!("{}", tbuilder.build().with(style::BasicTable));
-                println!("\n{nitems} found");
-            }
-            CollectingCommands::Show { id, taxon_id } => {
-                let data = match (id, taxon_id) {
-                    (Some(id), None) => CollectingData::filter_by_id(id),
-                    (None, Some(taxon_id)) => CollectingData::filter_by_taxon_id(taxon_id),
-                    _ => return Err(anyhow!("must specify either an id or a taxon id")),
-                }
-                .include(CollectingData::fields().taxon())
-                .one()
-                .exec(&mut db)
-                .await?;
-                let mut tbuilder = TableBuilder::default();
-                tbuilder.push_record(["ID", &data.id.to_string()]);
-                tbuilder.push_record(["Taxon", &data.taxon.get().reference()]);
-                tbuilder.push_record(["Ripening", &data.ripening_indicators]);
-                tbuilder.push_record(["Storage", &data.storage.unwrap_or_else(|| "-".into())]);
-                println!("{}", tbuilder.build().with(style::DetailTable))
-            }
-            CollectingCommands::Add {
-                taxon_id,
-                ripening_indicators,
-                storage,
-            } => {
-                let data = CollectingData::create()
-                    .taxon_id(taxon_id)
-                    .ripening_indicators(ripening_indicators)
-                    .storage(storage)
-                    .exec(&mut db)
-                    .await?;
-                println!("Added collection information {}", data.id);
-            }
-            CollectingCommands::Remove { id, assumeyes } => {
-                if assumeyes
-                    || inquire::Confirm::new(
-                        "Are you sure you wish to remove this collecting data?",
-                    )
-                    .with_default(false)
-                    .prompt()?
-                {
-                    CollectingData::delete_by_id(&mut db, id).await?;
-                    println!("Removed collecting data {id}")
-                }
-            }
-            CollectingCommands::Modify {
-                id,
-                ripening_indicators,
-                storage,
-            } => {
-                let mut query = CollectingData::update_by_id(id);
-                if let Some(ripening) = ripening_indicators {
-                    query = query.ripening_indicators(ripening);
-                }
-                if let Some(storage) = storage {
-                    query = query.storage(storage);
-                }
-                query.exec(&mut db).await?;
-                println!("Modified collection information {id}");
-            }
         },
         MainCommand::Cleaning { command } => match command {
             CleaningCommands::List => {

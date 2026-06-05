@@ -34,6 +34,11 @@ pub enum TaxonCommands {
         )]
         assumeyes: bool,
     },
+    #[command(about = "Manage collecting information for a taxon")]
+    Collecting {
+        #[command(subcommand)]
+        command: TaxonCollectingCommands,
+    },
     #[command(about = "Manage cleaning information for a taxon")]
     Cleaning {
         #[command(subcommand)]
@@ -79,6 +84,49 @@ pub enum TaxonCleaningCommands {
         taxon_id: u64,
         #[arg(short, long, help = "A cleaning procedure ID")]
         procedure_id: u64,
+        #[arg(
+            short = 'y',
+            long,
+            help = "Assume yes for all questions requiring confirmation"
+        )]
+        assumeyes: bool,
+    },
+}
+#[derive(Debug, clap::Subcommand)]
+pub enum TaxonCollectingCommands {
+    #[command(about = "Show seed collecting information")]
+    Show {
+        #[arg(short, long, help = "ID of a Taxon")]
+        taxon_id: u64,
+    },
+    #[command(about = "Add new seed collecting information for a taxon")]
+    Add {
+        #[arg(short, long, help = "ID of a Taxon")]
+        taxon_id: u64,
+        #[arg(
+            short,
+            long,
+            help = "What to look for to determine if the seed is ready for collecting"
+        )]
+        ripening_indicators: String,
+        #[arg(short, long, help = "Instructions for storing the seed")]
+        storage: Option<String>,
+    },
+    #[command(about = "Add new seed collecting information for a taxon", group(clap::ArgGroup::new("modify_props").args(["ripening_indicators", "storage"]).required(true).multiple(false)))]
+    Modify {
+        taxon_id: u64,
+        #[arg(
+            short,
+            long,
+            help = "What to look for to determine if the seed is ready for collecting"
+        )]
+        ripening_indicators: Option<String>,
+        #[arg(short, long, help = "Instructions for storing the seed")]
+        storage: Option<String>,
+    },
+    #[command(about = "Remove seed collecting information")]
+    Remove {
+        taxon_id: u64,
         #[arg(
             short = 'y',
             long,
