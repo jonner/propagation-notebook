@@ -400,7 +400,7 @@ async fn main() -> anyhow::Result<()> {
                                 inner_table.push_record(["ID", "Name", "Origin"]);
                                 for rs in regions.iter() {
                                     inner_table.push_record([
-                                    rs.id.to_string(),
+                                    rs.region.get().id.to_string(),
                                     rs.region.get().name.clone(),
                                     rs.origin.map(|val| val.to_string()).unwrap_or_else(|| "-".into())
                                     ]);
