@@ -36,7 +36,6 @@ pub enum TaxonCommands {
     },
     #[command(about = "Manage cleaning information for a taxon")]
     Cleaning {
-        taxon_id: u64,
         #[command(subcommand)]
         command: TaxonCleaningCommands,
     },
@@ -45,14 +44,21 @@ pub enum TaxonCommands {
 #[derive(Debug, clap::Subcommand)]
 pub enum TaxonCleaningCommands {
     #[command(about = "Show all seed cleaning procedures for a taxon")]
-    List,
+    List {
+        #[arg(help = "A taxon ID")]
+        taxon_id: u64,
+    },
     #[command(about = "Show all seed cleaning procedures for a taxon")]
     Show {
+        #[arg(help = "A taxon ID")]
+        taxon_id: u64,
         #[arg(short, long, help = "A cleaning procedure ID")]
         procedure_id: u64,
     },
     #[command(about = "Associate a taxon with a seed cleaning procedure")]
     Add {
+        #[arg(help = "A taxon ID")]
+        taxon_id: u64,
         #[arg(short, long, help = "A cleaning procedure ID")]
         procedure_id: u64,
         #[arg(short, long, help = "Taxon-specific notes for this procedure")]
@@ -60,6 +66,8 @@ pub enum TaxonCleaningCommands {
     },
     #[command(about = "Modify taxon-specific information seed cleaning information")]
     Modify {
+        #[arg(help = "A taxon ID")]
+        taxon_id: u64,
         #[arg(short, long, help = "A cleaning procedure ID")]
         procedure_id: u64,
         #[arg(short, long, help = "Taxon-specific notes for this procedure")]
@@ -67,6 +75,8 @@ pub enum TaxonCleaningCommands {
     },
     #[command(about = "Remove a cleaning procedure from the specified taxon")]
     Remove {
+        #[arg(help = "A taxon ID")]
+        taxon_id: u64,
         #[arg(short, long, help = "A cleaning procedure ID")]
         procedure_id: u64,
         #[arg(

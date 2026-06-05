@@ -439,8 +439,8 @@ async fn main() -> anyhow::Result<()> {
                     println!("{} taxa found", ntaxa);
                 }
             },
-            TaxonCommands::Cleaning { taxon_id, command } => match command {
-                TaxonCleaningCommands::List => {
+            TaxonCommands::Cleaning { command } => match command {
+                TaxonCleaningCommands::List { taxon_id } => {
                     let procedures = TaxonCleaningProcedure::filter_by_taxon_id(taxon_id)
                         .exec(&mut db)
                         .await?;
@@ -456,7 +456,10 @@ async fn main() -> anyhow::Result<()> {
                     }
                     println!("{}", tbuilder.build().with(style::BasicTable));
                 }
-                TaxonCleaningCommands::Show { procedure_id } => {
+                TaxonCleaningCommands::Show {
+                    taxon_id,
+                    procedure_id,
+                } => {
                     let tcp = TaxonCleaningProcedure::filter_by_taxon_id_and_procedure_id(
                         taxon_id,
                         procedure_id,
@@ -477,6 +480,7 @@ async fn main() -> anyhow::Result<()> {
                     println!("{}", tbuilder.build().with(style::DetailTable));
                 }
                 TaxonCleaningCommands::Add {
+                    taxon_id,
                     procedure_id,
                     notes,
                 } => {
@@ -489,6 +493,7 @@ async fn main() -> anyhow::Result<()> {
                     println!("Procedure {} assigned to taxon {}", taxon_id, procedure_id);
                 }
                 TaxonCleaningCommands::Modify {
+                    taxon_id,
                     procedure_id,
                     notes,
                 } => {
@@ -502,6 +507,7 @@ async fn main() -> anyhow::Result<()> {
                     println!("Procedure {} updated for taxon {}", procedure_id, taxon_id);
                 }
                 TaxonCleaningCommands::Remove {
+                    taxon_id,
                     procedure_id,
                     assumeyes,
                 } => {
