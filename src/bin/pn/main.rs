@@ -289,6 +289,7 @@ async fn main() -> anyhow::Result<()> {
                     .include(Taxon::fields().regional_statuses().region())
                     .include(Taxon::fields().collecting_data())
                     .include(Taxon::fields().cleaning_procedures().procedure())
+                    .include(Taxon::fields().propagation_protocols().protocol())
                     .one()
                     .exec(&mut db)
                     .await?;
@@ -358,6 +359,20 @@ async fn main() -> anyhow::Result<()> {
                                     inner_table.push_record([&proc.id.to_string(), &proc.name]);
                                 });
                                 inner_table.build().with(style::DetailTable).to_string()
+                            }
+                        }
+                    }]);
+                    tbuilder.push_record(["Propagation Protocols", &{
+                        match taxon.propagation_protocols.get() {
+                            tp if tp.is_empty() => "-".to_string(),
+                            tps => {
+                                let mut inner_table = TableBuilder::default();
+                                inner_table.push_record(["ID", "Name", "Type"]);
+                                tps.iter().for_each(|tp| {
+                                    let protocol = tp.protocol.get();
+                                    inner_table.push_record([&protocol.id.to_string(), &protocol.name, &protocol.r#type.to_string()]);
+                                });
+                                inner_table.build().with(style::BasicTable).to_string()
                             }
                         }
                     }]);

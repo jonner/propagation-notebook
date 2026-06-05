@@ -140,7 +140,7 @@ pub struct Taxon {
     #[has_many]
     pub cleaning_procedures: Deferred<Vec<TaxonCleaningProcedure>>,
     #[has_many]
-    pub protocols: Deferred<Vec<TaxonProtocol>>,
+    pub propagation_protocols: Deferred<Vec<TaxonProtocol>>,
 }
 
 impl Taxon {
