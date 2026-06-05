@@ -119,6 +119,11 @@ pub enum RegionCommands {
 pub enum RegionTaxaCommands {
     #[command(about = "Print a list of taxa for a region")]
     List,
+    #[command(about = "Show regional information about a taxon")]
+    Show {
+        #[arg(short, long, help = "A taxon ID")]
+        taxon_id: u64,
+    },
     #[command(about = "Add a taxon to a region")]
     Add {
         #[arg(short, long, help = "A taxon ID")]

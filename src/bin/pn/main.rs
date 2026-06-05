@@ -321,17 +321,6 @@ async fn main() -> anyhow::Result<()> {
                         }),
                     ]);
                     tbuilder.push_record([
-                        "Regions",
-                        &join_or_default(taxon.regional_statuses.get(), "-", |s| {
-                            format!(
-                                "{} ({})",
-                                s.region.get().reference(),
-                                s.origin
-                                    .unwrap_or(propagation_notebook::region::Origin::Unknown)
-                            )
-                        }),
-                    ]);
-                    tbuilder.push_record([
                         "Ripening",
                         taxon
                             .collecting_data
@@ -359,66 +348,32 @@ async fn main() -> anyhow::Result<()> {
                             .unwrap_or("-"),
                     ]);
                     tbuilder.push_record(["Seed Cleaning", &{
-                        let mut inner_table = TableBuilder::default();
-                        inner_table.push_record(["ID", "Name"]);
-                        taxon.cleaning_procedures.get().iter().for_each(|tcp| {
-                            let proc = tcp.procedure.get();
-                            inner_table.push_record([&proc.id.to_string(), &proc.name]);
-                        });
-                        inner_table.build().with(style::DetailTable).to_string()
+                        match taxon.cleaning_procedures.get() {
+                            procedures if procedures.is_empty() => "-".to_string(),
+                            procedures => {
+                                let mut inner_table = TableBuilder::default();
+                                inner_table.push_record(["ID", "Name"]);
+                                procedures.iter().for_each(|tcp| {
+                                    let proc = tcp.procedure.get();
+                                    inner_table.push_record([&proc.id.to_string(), &proc.name]);
+                                });
+                                inner_table.build().with(style::DetailTable).to_string()
+                            }
+                        }
                     }]);
+                    tbuilder.push_record([
+                        "Regions",
+                        &join_or_default(taxon.regional_statuses.get(), "-", |s| {
+                            format!(
+                                "{} ({})",
+                                s.region.get().reference(),
+                                s.origin
+                                    .unwrap_or(propagation_notebook::region::Origin::Unknown)
+                            )
+                        }),
+                    ]);
                     println!("{}", tbuilder.build().with(style::DetailTable));
                     println!();
-                    println!("Regional Information:");
-                    for status in taxon.regional_statuses.get() {
-                        let mut tbuilder = TableBuilder::default();
-                        tbuilder.push_record(["Region", &status.region.get().reference()]);
-                        tbuilder.push_record([
-                            "Origin",
-                            &status
-                                .origin
-                                .unwrap_or(propagation_notebook::region::Origin::Unknown)
-                                .to_string(),
-                        ]);
-                        tbuilder.push_record([
-                            "C-value",
-                            &status
-                                .c_value
-                                .map(|v| v.to_string())
-                                .unwrap_or_else(|| "-".into()),
-                        ]);
-                        tbuilder.push_record([
-                            "Conservation Status",
-                            &status
-                                .conservation_status
-                                .map(|v| v.to_string())
-                                .unwrap_or_else(|| "-".into()),
-                        ]);
-                        tbuilder.push_record([
-                            "Wetland Indicator",
-                            &status
-                                .wetland_indicator
-                                .map(|v| v.to_string())
-                                .unwrap_or_else(|| "-".into()),
-                        ]);
-                        let window_str = match (status.window_start, status.window_end) {
-                            (None, None) => "-".into(),
-                            _ => format!(
-                                "{} - {}",
-                                status
-                                    .window_start
-                                    .map(|d| d.strftime("%b %d").to_string())
-                                    .unwrap_or("?".to_string()),
-                                status
-                                    .window_end
-                                    .map(|d| d.strftime("%b %d").to_string())
-                                    .unwrap_or("?".to_string())
-                            ),
-                        };
-                        tbuilder.push_record(["Harvest Window", &window_str]);
-                        println!("{}", tbuilder.build().with(style::DetailTable));
-                        println!();
-                    }
                 }
             }
             TaxonCommands::List { region_id } => match region_id {
@@ -701,6 +656,63 @@ async fn main() -> anyhow::Result<()> {
                 }
             }
             RegionCommands::Taxa { region_id, command } => match command {
+                RegionTaxaCommands::Show { taxon_id } => {
+                    let status =
+                        RegionalTaxonStatus::filter_by_taxon_id_and_region_id(taxon_id, region_id)
+                            .include(RegionalTaxonStatus::fields().region())
+                            .include(RegionalTaxonStatus::fields().taxon())
+                            .one()
+                            .exec(&mut db)
+                            .await?;
+                    let mut tbuilder = TableBuilder::default();
+                    tbuilder.push_record(["Taxon", &status.taxon.get().reference()]);
+                    tbuilder.push_record(["Region", &status.region.get().reference()]);
+                    tbuilder.push_record([
+                        "Origin",
+                        &status
+                            .origin
+                            .unwrap_or(propagation_notebook::region::Origin::Unknown)
+                            .to_string(),
+                    ]);
+                    tbuilder.push_record([
+                        "C-value",
+                        &status
+                            .c_value
+                            .map(|v| v.to_string())
+                            .unwrap_or_else(|| "-".into()),
+                    ]);
+                    tbuilder.push_record([
+                        "Conservation Status",
+                        &status
+                            .conservation_status
+                            .map(|v| v.to_string())
+                            .unwrap_or_else(|| "-".into()),
+                    ]);
+                    tbuilder.push_record([
+                        "Wetland Indicator",
+                        &status
+                            .wetland_indicator
+                            .map(|v| v.to_string())
+                            .unwrap_or_else(|| "-".into()),
+                    ]);
+                    let window_str = match (status.window_start, status.window_end) {
+                        (None, None) => "-".into(),
+                        _ => format!(
+                            "{} - {}",
+                            status
+                                .window_start
+                                .map(|d| d.strftime("%b %d").to_string())
+                                .unwrap_or("?".to_string()),
+                            status
+                                .window_end
+                                .map(|d| d.strftime("%b %d").to_string())
+                                .unwrap_or("?".to_string())
+                        ),
+                    };
+                    tbuilder.push_record(["Harvest Window", &window_str]);
+                    println!("{}", tbuilder.build().with(style::DetailTable));
+                    println!();
+                }
                 RegionTaxaCommands::Add { taxon_id, props } => {
                     let s = RegionalTaxonStatus::create()
                         .region_id(region_id)
