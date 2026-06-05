@@ -420,14 +420,17 @@ async fn main() -> anyhow::Result<()> {
                         .exec(&mut db)
                         .await?;
                     let ntaxa = taxa.len();
-
-                    let mut tbuilder = TableBuilder::default();
-                    tbuilder.push_record(["ID", "Name"]);
-                    for taxon in taxa {
-                        tbuilder.push_record([taxon.id.to_string(), taxon.complete_name]);
+                    if taxa.is_empty() {
+                        println!("The taxonomy has not been imported. Please download the ITIS taxonomy database from https://www.itis.gov/downloads/index.html and import it with `pn taxa import`")
+                    } else {
+                        let mut tbuilder = TableBuilder::default();
+                        tbuilder.push_record(["ID", "Name"]);
+                        for taxon in taxa {
+                            tbuilder.push_record([taxon.id.to_string(), taxon.complete_name]);
+                        }
+                        println!("{}", tbuilder.build().with(style::BasicTable));
+                        println!("{} taxa found", ntaxa);
                     }
-                    println!("{}", tbuilder.build().with(style::BasicTable));
-                    println!("{} taxa found", ntaxa);
                 }
             },
             TaxonCommands::Cleaning { taxon_id, command } => match command {
