@@ -48,6 +48,13 @@ pub enum TaxonCommands {
         #[command(subcommand)]
         command: TaxonCleaningCommands,
     },
+    #[command(about = "Manage cleaning information for a taxon")]
+    Propagation {
+        #[arg(short, long, help = "A Taxon ID")]
+        taxon_id: u64,
+        #[command(subcommand)]
+        command: TaxonPropagationCommands,
+    },
 }
 
 #[derive(Debug, clap::Subcommand)]
@@ -85,6 +92,7 @@ pub enum TaxonCleaningCommands {
         assumeyes: bool,
     },
 }
+
 #[derive(Debug, clap::Subcommand)]
 pub enum TaxonCollectingCommands {
     #[command(about = "Show seed collecting information")]
@@ -106,7 +114,7 @@ pub enum TaxonCollectingCommands {
         )]
         storage_life: Option<String>,
     },
-    #[command(about = "Add new seed collecting information for a taxon", group(clap::ArgGroup::new("modify_props").args(["ripening_indicators", "storage_conditions", "storage_life"]).required(true).multiple(false)))]
+    #[command(about = "Modify seed collecting information for a taxon", group(clap::ArgGroup::new("modify_props").args(["ripening_indicators", "storage_conditions", "storage_life"]).required(true).multiple(false)))]
     Modify {
         #[arg(
             short,
@@ -125,6 +133,68 @@ pub enum TaxonCollectingCommands {
     },
     #[command(about = "Remove seed collecting information")]
     Remove {
+        #[arg(
+            short = 'y',
+            long,
+            help = "Assume yes for all questions requiring confirmation"
+        )]
+        assumeyes: bool,
+    },
+}
+
+#[derive(Debug, clap::Subcommand)]
+pub enum TaxonPropagationCommands {
+    #[command(about = "List seed propagation protocols for the taxon")]
+    List,
+    #[command(about = "Show seed propagation information for the taxon")]
+    Show {
+        #[arg(
+            short,
+            long,
+            help = "An ID of a propagation protocol ID assigned to this taxon"
+        )]
+        protocol_id: u64,
+    },
+    #[command(about = "Assign a new seed propagation protocol to a taxon")]
+    Add {
+        #[arg(short, long, help = "An ID of a propagation protocol ID")]
+        protocol_id: u64,
+        #[arg(
+            short,
+            long,
+            help = "Confidence level in this propagation protocol (0-10)",
+            value_parser = clap::value_parser!(u8).range(0..=10)
+        )]
+        confidence: Option<u8>,
+        #[arg(
+            short,
+            long,
+            help = "Taxon-specific notes for this propagation protocol"
+        )]
+        notes: Option<String>,
+    },
+    #[command(about = "Modify propagation information for a taxon", group(clap::ArgGroup::new("modify_props").args(["confidence", "notes"]).required(true).multiple(false)))]
+    Modify {
+        #[arg(short, long, help = "A propagation protocol ID assigned to this taxon")]
+        protocol_id: u64,
+        #[arg(
+            short,
+            long,
+            help = "Confidence level in this propagation protocol (0-10)",
+            value_parser = clap::value_parser!(u8).range(0..=10)
+        )]
+        confidence: Option<u8>,
+        #[arg(
+            short,
+            long,
+            help = "Taxon-specific notes for this propagation protocol"
+        )]
+        notes: Option<String>,
+    },
+    #[command(about = "Remove propagation information from the taxon")]
+    Remove {
+        #[arg(short, long, help = "A propagation protocol ID assigned to this taxon")]
+        protocol_id: u64,
         #[arg(
             short = 'y',
             long,

@@ -5,7 +5,7 @@ use clap::Parser;
 use directories::ProjectDirs;
 use propagation_notebook::{
     collecting::{CleaningProcedure, CollectingData, TaxonCleaningProcedure},
-    propagation::{Protocol, ProtocolType},
+    propagation::{Protocol, ProtocolType, TaxonProtocol},
     region::{Region, RegionalTaxonStatus},
     taxonomy::{Synonym, Taxon, VernacularName},
 };
@@ -566,6 +566,100 @@ async fn main() -> anyhow::Result<()> {
                     }
                     query.exec(&mut db).await?;
                     println!("Modified collection information {taxon_id}");
+                }
+            },
+            TaxonCommands::Propagation { taxon_id, command } => match command {
+                cli::taxa::TaxonPropagationCommands::List => {
+                    let tps = TaxonProtocol::filter_by_taxon_id(taxon_id)
+                        .include(TaxonProtocol::fields().taxon())
+                        .include(TaxonProtocol::fields().protocol())
+                        .exec(&mut db)
+                        .await?;
+                    let mut tbuilder = TableBuilder::default();
+                    tbuilder.push_record(["Taxon", "Protocol", "Confidence", "Notes"]);
+                    for tp in tps {
+                        tbuilder.push_record([
+                            &tp.taxon.get().reference(),
+                            &tp.protocol.get().id.to_string(),
+                            tp.confidence
+                                .map(|v| v.to_string())
+                                .as_deref()
+                                .unwrap_or("-"),
+                            tp.notes.as_deref().unwrap_or("-"),
+                        ])
+                    }
+                    println!("{}", tbuilder.build().with(style::BasicTable));
+                }
+                cli::taxa::TaxonPropagationCommands::Show { protocol_id } => {
+                    let tp =
+                        TaxonProtocol::filter_by_taxon_id_and_protocol_id(taxon_id, protocol_id)
+                            .include(TaxonProtocol::fields().taxon())
+                            .include(TaxonProtocol::fields().protocol())
+                            .one()
+                            .exec(&mut db)
+                            .await?;
+                    let mut tbuilder = TableBuilder::default();
+                    tbuilder.push_record(["Taxon", &tp.taxon.get().reference()]);
+                    tbuilder.push_record([
+                        "Confidence",
+                        tp.confidence
+                            .map(|v| v.to_string())
+                            .as_deref()
+                            .unwrap_or("-"),
+                    ]);
+                    tbuilder
+                        .push_record(["Taxon-specific notes", tp.notes.as_deref().unwrap_or("-")]);
+                    tbuilder.push_record(["Protocol", &tp.protocol.get().id.to_string()]);
+                    println!("{}", tbuilder.build().with(style::DetailTable));
+                }
+                cli::taxa::TaxonPropagationCommands::Add {
+                    protocol_id,
+                    confidence,
+                    notes,
+                } => {
+                    TaxonProtocol::create()
+                        .protocol_id(protocol_id)
+                        .taxon_id(taxon_id)
+                        .confidence(confidence)
+                        .notes(notes)
+                        .exec(&mut db)
+                        .await?;
+                    println!("Added propagation protocol {protocol_id} to taxon {taxon_id}");
+                }
+                cli::taxa::TaxonPropagationCommands::Modify {
+                    protocol_id,
+                    confidence,
+                    notes,
+                } => {
+                    let mut query =
+                        TaxonProtocol::update_by_taxon_id_and_protocol_id(taxon_id, protocol_id);
+                    if let Some(confidence) = confidence {
+                        query = query.confidence(confidence);
+                    } else if let Some(notes) = notes {
+                        query = query.notes(notes);
+                    }
+                    query.exec(&mut db).await?;
+                    println!("Updated propagation info");
+                }
+                cli::taxa::TaxonPropagationCommands::Remove {
+                    protocol_id,
+                    assumeyes,
+                } => {
+                    if assumeyes
+                        || inquire::Confirm::new(
+                            "Are you sure you wish to remove this propagation protocol from taxon {taxon_id}?",
+                        )
+                        .with_default(false)
+                        .prompt()?
+                    {
+                        TaxonProtocol::delete_by_taxon_id_and_protocol_id(
+                            &mut db,
+                            taxon_id,
+                            protocol_id,
+                        )
+                        .await?;
+                        println!("Removed propagation protocol {protocol_id} for taxon {taxon_id}");
+                    }
                 }
             },
         },
