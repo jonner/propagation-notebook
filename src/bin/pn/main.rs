@@ -344,6 +344,15 @@ async fn main() -> anyhow::Result<()> {
                             .unwrap_or("-"),
                     ]);
                     tbuilder.push_record([
+                        "Harvesting",
+                        taxon
+                            .collecting_data
+                            .get()
+                            .as_ref()
+                            .and_then(|d| d.harvesting_notes.as_deref())
+                            .unwrap_or("-"),
+                    ]);
+                    tbuilder.push_record([
                         "Storage Conditions",
                         taxon
                             .collecting_data
@@ -550,6 +559,10 @@ async fn main() -> anyhow::Result<()> {
                                 data.ripening_indicators.as_deref().unwrap_or("-"),
                             ]);
                             tbuilder.push_record([
+                                "Harvesting",
+                                data.harvesting_notes.as_deref().unwrap_or("-"),
+                            ]);
+                            tbuilder.push_record([
                                 "Storage Conditions",
                                 data.storage.as_deref().unwrap_or("-"),
                             ]);
@@ -567,12 +580,14 @@ async fn main() -> anyhow::Result<()> {
                 }
                 TaxonCollectingCommands::Add {
                     ripening_indicators,
+                    harvesting_notes,
                     storage_conditions,
                     storage_life,
                 } => {
                     let data = CollectingData::create()
                         .taxon_id(taxon_id)
                         .ripening_indicators(ripening_indicators)
+                        .harvesting_notes(harvesting_notes)
                         .storage(storage_conditions)
                         .storage_life(storage_life)
                         .exec(&mut db)
@@ -593,12 +608,16 @@ async fn main() -> anyhow::Result<()> {
                 }
                 TaxonCollectingCommands::Modify {
                     ripening_indicators,
+                    harvesting_notes,
                     storage_conditions,
                     storage_life,
                 } => {
                     let mut query = CollectingData::update_by_taxon_id(taxon_id);
                     if let Some(ripening) = ripening_indicators {
                         query = query.ripening_indicators(ripening);
+                    }
+                    if let Some(harvesting) = harvesting_notes {
+                        query = query.harvesting_notes(harvesting);
                     }
                     if let Some(storage) = storage_conditions {
                         query = query.storage(storage);

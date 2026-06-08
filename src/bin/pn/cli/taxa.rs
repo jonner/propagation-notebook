@@ -105,6 +105,8 @@ pub enum TaxonCollectingCommands {
             help = "What to look for to determine if the seed is ready for collecting"
         )]
         ripening_indicators: Option<String>,
+        #[arg(long, help = "Harvesting notes")]
+        harvesting_notes: Option<String>,
         #[arg(short, long, help = "Instructions for storing the seed")]
         storage_conditions: Option<String>,
         #[arg(
@@ -114,7 +116,7 @@ pub enum TaxonCollectingCommands {
         )]
         storage_life: Option<String>,
     },
-    #[command(about = "Modify seed collecting information for a taxon", group(clap::ArgGroup::new("modify_props").args(["ripening_indicators", "storage_conditions", "storage_life"]).required(true).multiple(false)))]
+    #[command(about = "Modify seed collecting information for a taxon", group(clap::ArgGroup::new("modify_props").args(["ripening_indicators", "harvesting_notes", "storage_conditions", "storage_life"]).required(true).multiple(false)))]
     Modify {
         #[arg(
             short,
@@ -122,6 +124,8 @@ pub enum TaxonCollectingCommands {
             help = "What to look for to determine if the seed is ready for collecting"
         )]
         ripening_indicators: Option<String>,
+        #[arg(long, help = "Harvesting notes")]
+        harvesting_notes: Option<String>,
         #[arg(short, long, help = "Instructions for storing the seed")]
         storage_conditions: Option<String>,
         #[arg(

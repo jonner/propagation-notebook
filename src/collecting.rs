@@ -15,6 +15,7 @@ pub struct CollectingData {
     pub taxon: Deferred<Taxon>,
 
     pub ripening_indicators: Option<String>,
+    pub harvesting_notes: Option<String>,
     pub storage: Option<String>,
     pub storage_life: Option<String>,
 }
