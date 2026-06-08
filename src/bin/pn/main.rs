@@ -340,8 +340,8 @@ async fn main() -> anyhow::Result<()> {
                             .collecting_data
                             .get()
                             .as_ref()
-                            .map(|d| d.ripening_indicators.as_str())
-                            .unwrap_or_else(|| "-"),
+                            .and_then(|d| d.ripening_indicators.as_deref())
+                            .unwrap_or("-"),
                     ]);
                     tbuilder.push_record([
                         "Storage Conditions",
@@ -545,14 +545,17 @@ async fn main() -> anyhow::Result<()> {
                         Ok(data) => {
                             let mut tbuilder = TableBuilder::default();
                             tbuilder.push_record(["Taxon", &data.taxon.get().reference()]);
-                            tbuilder.push_record(["Ripening", &data.ripening_indicators]);
+                            tbuilder.push_record([
+                                "Ripening",
+                                data.ripening_indicators.as_deref().unwrap_or("-"),
+                            ]);
                             tbuilder.push_record([
                                 "Storage Conditions",
-                                &data.storage.unwrap_or_else(|| "-".into()),
+                                data.storage.as_deref().unwrap_or("-"),
                             ]);
                             tbuilder.push_record([
                                 "Storage Life",
-                                &data.storage_life.unwrap_or_else(|| "-".into()),
+                                data.storage_life.as_deref().unwrap_or("-"),
                             ]);
                             println!("{}", tbuilder.build().with(style::DetailTable))
                         }

@@ -104,7 +104,7 @@ pub enum TaxonCollectingCommands {
             long,
             help = "What to look for to determine if the seed is ready for collecting"
         )]
-        ripening_indicators: String,
+        ripening_indicators: Option<String>,
         #[arg(short, long, help = "Instructions for storing the seed")]
         storage_conditions: Option<String>,
         #[arg(

@@ -14,7 +14,7 @@ pub struct CollectingData {
     #[belongs_to(key=taxon_id, references=id)]
     pub taxon: Deferred<Taxon>,
 
-    pub ripening_indicators: String,
+    pub ripening_indicators: Option<String>,
     pub storage: Option<String>,
     pub storage_life: Option<String>,
 }
