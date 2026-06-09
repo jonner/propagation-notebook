@@ -198,6 +198,14 @@ async fn import_taxa_itis(
             .exec(ourtxn)
             .await?;
     }
+    println!("Loading synonym links...");
+    let synonym_links: HashMap<u64, u64> = SynonymLink::all()
+        .exec(&mut itisdb)
+        .await?
+        .into_iter()
+        .map(|link| (link.tsn, link.tsn_accepted))
+        .collect();
+
     println!("Importing synonyms...");
     let records = TaxonomicUnit::filter(
         TaxonomicUnit::fields().name_usage().eq("not accepted").and(
@@ -211,25 +219,25 @@ async fn import_taxa_itis(
     .await?;
 
     for chunk in &records.into_iter().progress().chunks(CHUNK_SIZE) {
-        let mut creates = Vec::new();
-
-        for theirs in chunk {
-            match SynonymLink::get_by_tsn(&mut itisdb, theirs.tsn).await {
-                Ok(link) => {
-                    let ourid = tsn_to_id
-                        .get(&link.tsn_accepted)
-                        .expect("Failed to find id of accepted taxon");
-                    let synonym = propagation_notebook::taxonomy::Synonym::create()
+        let creates: Vec<_> = chunk
+            .filter_map(|theirs| {
+                let tsn_accepted = match synonym_links.get(&theirs.tsn) {
+                    Some(id) => id,
+                    None => {
+                        tracing::warn!(tsn = theirs.tsn, "No synonym link found");
+                        return None;
+                    }
+                };
+                tsn_to_id.get(tsn_accepted).map(|ourid| {
+                    propagation_notebook::taxonomy::Synonym::create()
                         .name1(&theirs.unit_name1)
                         .name2(&theirs.unit_name2)
                         .name3(&theirs.unit_name3)
                         .complete_name(&theirs.complete_name)
-                        .taxon_id(ourid);
-                    creates.push(synonym);
-                }
-                Err(e) => tracing::warn!(?e),
-            };
-        }
+                        .taxon_id(ourid)
+                })
+            })
+            .collect();
         if !creates.is_empty() {
             toasty::batch(creates).exec(ourtxn).await?;
         }
