@@ -21,7 +21,9 @@ use crate::{
         cleaning::CleaningCommands,
         propagation::PropagationCommands,
         region::{RegionCommands, RegionTaxaCommands},
-        taxa::{TaxonCleaningCommands, TaxonCollectingCommands, TaxonCommands},
+        taxa::{
+            TaxonCleaningCommands, TaxonCollectingCommands, TaxonCommands, TaxonPropagationCommands,
+        },
     },
     import_region::import_region,
 };
@@ -188,542 +190,8 @@ async fn main() -> anyhow::Result<()> {
         .connect(&db_uri)
         .await?;
     match options.command {
-        MainCommand::Init => {
-            match db.push_schema().await {
-                Ok(()) => Ok(()),
-                Err(e) => if e.is_driver_operation_failed() {
-                    // this is the error that occurs when we try to push a schema
-                    // after the schema has already been applied
-                    Ok(())
-                } else {
-                    // Report other errors
-                    Err(e)
-                },
-            }?;
-        }
-        MainCommand::Taxa { command } => match command {
-            TaxonCommands::Search { search_string } => {
-                tracing::debug!("Searching for exact complete name");
-                if let Ok(found) = Taxon::filter(Taxon::fields().complete_name().eq(&search_string))
-                    .one()
-                    .exec(&mut db)
-                    .await
-                {
-                    println!("found taxon {}", found.reference());
-                } else {
-                    tracing::debug!("Searching for approximate complete name");
-                    let wildcard = format!("%{search_string}%");
-                    let taxa = Taxon::filter(Taxon::fields().complete_name().like(&wildcard))
-                        .exec(&mut db)
-                        .await?;
-                    if !taxa.is_empty() {
-                        println!("Possible options for '{search_string}':");
-                        for t in taxa {
-                            println!("- {}", t.reference());
-                        }
-                    } else {
-                        tracing::debug!("Searching for exact scientific synonym");
-                        if let Ok(found) =
-                            Synonym::filter(Synonym::fields().complete_name().eq(&search_string))
-                                .include(Synonym::fields().taxon())
-                                .one()
-                                .exec(&mut db)
-                                .await
-                        {
-                            println!(
-                                "Found '{}' which is a synonym for {}",
-                                found.complete_name,
-                                found.taxon.get().reference(),
-                            );
-                        } else {
-                            tracing::debug!("Searching for approximate scientific synonyms");
-                            let synonyms =
-                                Synonym::filter(Synonym::fields().complete_name().like(&wildcard))
-                                    .include(Synonym::fields().taxon())
-                                    .exec(&mut db)
-                                    .await?;
-                            if !synonyms.is_empty() {
-                                println!("Possible options for '{search_string}':");
-                                for syn in synonyms {
-                                    println!(
-                                        "'{}' is a synonym for {}",
-                                        syn.complete_name,
-                                        syn.taxon.get().reference(),
-                                    );
-                                }
-                            } else {
-                                tracing::debug!("Searching for exact vernacular name");
-                                // look up common names
-                                if let Ok(vernacular) = VernacularName::filter(
-                                    VernacularName::fields().name().eq(&search_string),
-                                )
-                                .include(VernacularName::fields().taxon())
-                                .one()
-                                .exec(&mut db)
-                                .await
-                                {
-                                    println!(
-                                        "Found {} ({})",
-                                        vernacular.taxon.get().reference(),
-                                        vernacular.name
-                                    );
-                                } else {
-                                    tracing::debug!("Searching for approximate vernacular names");
-                                    let vernaculars = VernacularName::filter(
-                                        VernacularName::fields().name().like(&wildcard),
-                                    )
-                                    .include(VernacularName::fields().taxon())
-                                    .exec(&mut db)
-                                    .await?;
-                                    if !vernaculars.is_empty() {
-                                        println!("Possible options for '{search_string}':");
-                                        for vernacular in vernaculars {
-                                            println!(
-                                                "{} ({})",
-                                                vernacular.taxon.get().reference(),
-                                                vernacular.name,
-                                            );
-                                        }
-                                    } else {
-                                        println!("No options found");
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            TaxonCommands::Show { id } => {
-                let taxon = Taxon::filter_by_id(id)
-                    .include(Taxon::fields().parent())
-                    .include(Taxon::fields().children())
-                    .include(Taxon::fields().vernaculars())
-                    .include(Taxon::fields().synonyms())
-                    .include(Taxon::fields().regional_statuses().region())
-                    .include(Taxon::fields().collecting_data())
-                    .include(Taxon::fields().cleaning_procedures().procedure())
-                    .include(Taxon::fields().propagation_protocols().protocol())
-                    .one()
-                    .exec(&mut db)
-                    .await?;
-                {
-                    let mut tbuilder = TableBuilder::default();
-                    tbuilder.push_record(["ID", &taxon.id.to_string()]);
-                    tbuilder.push_record(["Name", &taxon.complete_name]);
-                    tbuilder.push_record(["Rank", &taxon.rank.to_string()]);
-                    tbuilder.push_record([
-                        "Parent",
-                        &taxon
-                            .parent
-                            .get()
-                            .as_ref()
-                            .map(|p| format!("{} ({})", p.reference(), p.rank))
-                            .unwrap_or_else(|| "-".into()),
-                    ]);
-                    tbuilder.push_record([
-                        "Synonyms",
-                        &join_or_default(taxon.synonyms.get(), "-", |v| v.complete_name.clone()),
-                    ]);
-                    tbuilder.push_record([
-                        "Common Name(s)",
-                        &join_or_default(taxon.vernaculars.get(), "-", |v| v.name.clone()),
-                    ]);
-                    tbuilder.push_record([
-                        "Child taxa",
-                        &join_or_default(taxon.children.get(), "-", |t| {
-                            format!("{} ({})", t.reference(), t.rank)
-                        }),
-                    ]);
-                    tbuilder.push_record([
-                        "Ripening",
-                        taxon
-                            .collecting_data
-                            .get()
-                            .as_ref()
-                            .and_then(|d| d.ripening_indicators.as_deref())
-                            .unwrap_or("-"),
-                    ]);
-                    tbuilder.push_record([
-                        "Harvesting",
-                        taxon
-                            .collecting_data
-                            .get()
-                            .as_ref()
-                            .and_then(|d| d.harvesting_notes.as_deref())
-                            .unwrap_or("-"),
-                    ]);
-                    tbuilder.push_record([
-                        "Storage Conditions",
-                        taxon
-                            .collecting_data
-                            .get()
-                            .as_ref()
-                            .and_then(|d| d.storage.as_deref())
-                            .unwrap_or("-"),
-                    ]);
-                    tbuilder.push_record([
-                        "Storage Life",
-                        taxon
-                            .collecting_data
-                            .get()
-                            .as_ref()
-                            .and_then(|d| d.storage_life.as_deref())
-                            .unwrap_or("-"),
-                    ]);
-                    tbuilder.push_record(["Seed Cleaning", &{
-                        match taxon.cleaning_procedures.get() {
-                            procedures if procedures.is_empty() => "-".to_string(),
-                            procedures => {
-                                let mut inner_table = TableBuilder::default();
-                                inner_table.push_record(["ID", "Name"]);
-                                procedures.iter().for_each(|tcp| {
-                                    let proc = tcp.procedure.get();
-                                    inner_table.push_record([&proc.id.to_string(), &proc.name]);
-                                });
-                                inner_table.build().with(style::DetailTable).to_string()
-                            }
-                        }
-                    }]);
-                    tbuilder.push_record(["Propagation Protocols", &{
-                        match taxon.propagation_protocols.get() {
-                            tp if tp.is_empty() => "-".to_string(),
-                            tps => {
-                                let mut inner_table = TableBuilder::default();
-                                inner_table.push_record(["ID", "Name", "Type"]);
-                                tps.iter().for_each(|tp| {
-                                    let protocol = tp.protocol.get();
-                                    inner_table.push_record([&protocol.id.to_string(), &protocol.name, &protocol.r#type.to_string()]);
-                                });
-                                inner_table.build().with(style::BasicTable).to_string()
-                            }
-                        }
-                    }]);
-                    tbuilder.push_record([
-                        "Regions",
-                        &{
-                            let regions = taxon.regional_statuses.get();
-                            if regions.is_empty() {
-                                "-".to_string()
-                            } else {
-                                let mut inner_table = TableBuilder::default();
-                                inner_table.push_record(["ID", "Name", "Origin"]);
-                                for rs in regions.iter() {
-                                    inner_table.push_record([
-                                    rs.region.get().id.to_string(),
-                                    rs.region.get().name.clone(),
-                                    rs.origin.map(|val| val.to_string()).unwrap_or_else(|| "-".into())
-                                    ]);
-                                }
-                                inner_table.build().with(style::BasicTable).to_string()
-                            }},
-                    ]);
-                    println!("{}", tbuilder.build().with(style::DetailTable));
-                    println!();
-                }
-            }
-            TaxonCommands::List { region_id } => match region_id {
-                Some(id) => list_regional_taxa(&mut db, id).await?,
-                None => {
-                    let taxa = Taxon::all()
-                        .order_by(Taxon::fields().sequence().asc())
-                        .exec(&mut db)
-                        .await?;
-                    let ntaxa = taxa.len();
-                    if taxa.is_empty() {
-                        println!("The taxonomy has not been imported. Please download the ITIS taxonomy database from https://www.itis.gov/downloads/index.html and import it with `pn taxa import`")
-                    } else {
-                        let mut tbuilder = TableBuilder::default();
-                        tbuilder.push_record(["ID", "Name"]);
-                        for taxon in taxa {
-                            tbuilder.push_record([taxon.id.to_string(), taxon.complete_name]);
-                        }
-                        println!("{}", tbuilder.build().with(style::BasicTable));
-                        println!("{} taxa found", ntaxa);
-                    }
-                }
-            },
-            TaxonCommands::Cleaning { taxon_id, command } => match command {
-                TaxonCleaningCommands::List => {
-                    let procedures = TaxonCleaningProcedure::filter_by_taxon_id(taxon_id)
-                        .exec(&mut db)
-                        .await?;
-
-                    let mut tbuilder = TableBuilder::default();
-                    tbuilder.push_record(["Taxon ID", "Procedure ID", "Notes"]);
-                    for proc in procedures {
-                        tbuilder.push_record([
-                            proc.taxon_id.to_string(),
-                            proc.procedure_id.to_string(),
-                            proc.notes.unwrap_or_else(|| "-".into()),
-                        ]);
-                    }
-                    println!("{}", tbuilder.build().with(style::BasicTable));
-                }
-                TaxonCleaningCommands::Show { procedure_id } => {
-                    let tcp = TaxonCleaningProcedure::filter_by_taxon_id_and_procedure_id(
-                        taxon_id,
-                        procedure_id,
-                    )
-                    .include(TaxonCleaningProcedure::fields().taxon())
-                    .include(TaxonCleaningProcedure::fields().procedure())
-                    .one()
-                    .exec(&mut db)
-                    .await?;
-
-                    let mut tbuilder = TableBuilder::default();
-                    tbuilder.push_record([
-                        "Taxon",
-                        &format!("{}: {}", tcp.taxon_id, tcp.taxon.get().complete_name),
-                    ]);
-                    tbuilder.push_record(["Procedure", &tcp.procedure_id.to_string()]);
-                    tbuilder.push_record(["Notes", &tcp.notes.unwrap_or_else(|| "-".into())]);
-                    println!("{}", tbuilder.build().with(style::DetailTable));
-                }
-                TaxonCleaningCommands::Add {
-                    procedure_id,
-                    notes,
-                } => {
-                    TaxonCleaningProcedure::create()
-                        .taxon_id(taxon_id)
-                        .procedure_id(procedure_id)
-                        .notes(notes)
-                        .exec(&mut db)
-                        .await?;
-                    println!("Procedure {} assigned to taxon {}", taxon_id, procedure_id);
-                }
-                TaxonCleaningCommands::Modify {
-                    procedure_id,
-                    notes,
-                } => {
-                    TaxonCleaningProcedure::update_by_taxon_id_and_procedure_id(
-                        taxon_id,
-                        procedure_id,
-                    )
-                    .notes(notes)
-                    .exec(&mut db)
-                    .await?;
-                    println!("Procedure {} updated for taxon {}", procedure_id, taxon_id);
-                }
-                TaxonCleaningCommands::Remove {
-                    procedure_id,
-                    assumeyes,
-                } => {
-                    if assumeyes
-                        || inquire::Confirm::new("Are you sure you wish to remove this procedure?")
-                            .with_default(false)
-                            .prompt()?
-                    {
-                        TaxonCleaningProcedure::delete_by_taxon_id_and_procedure_id(
-                            &mut db,
-                            taxon_id,
-                            procedure_id,
-                        )
-                        .await?;
-                        println!("Assignment removed");
-                    }
-                }
-            },
-            TaxonCommands::Import {
-                db_uri,
-                authority,
-                assumeyes,
-            } => {
-                let ntaxa = Taxon::all().count().exec(&mut db).await?;
-                if assumeyes
-                    || inquire::Confirm::new(
-                        "Are you sure you wish to import all taxa from the external database?",
-                    )
-                    .with_default(false)
-                    .with_help_message(&format!("The database currently contains {ntaxa} taxa"))
-                    .prompt()?
-                {
-                    // FIXME: we should probably clear the database if the
-                    // user confirms rather than re-import a taxonomy into an
-                    // existing taxonomy
-                    import_taxa::import_taxa(&mut db, &db_uri, authority).await?
-                }
-            }
-            TaxonCommands::Collecting { taxon_id, command } => match command {
-                TaxonCollectingCommands::Show => {
-                    match CollectingData::filter_by_taxon_id(taxon_id)
-                        .include(CollectingData::fields().taxon())
-                        .one()
-                        .exec(&mut db)
-                        .await
-                    {
-                        Ok(data) => {
-                            let mut tbuilder = TableBuilder::default();
-                            tbuilder.push_record(["Taxon", &data.taxon.get().reference()]);
-                            tbuilder.push_record([
-                                "Ripening",
-                                data.ripening_indicators.as_deref().unwrap_or("-"),
-                            ]);
-                            tbuilder.push_record([
-                                "Harvesting",
-                                data.harvesting_notes.as_deref().unwrap_or("-"),
-                            ]);
-                            tbuilder.push_record([
-                                "Storage Conditions",
-                                data.storage.as_deref().unwrap_or("-"),
-                            ]);
-                            tbuilder.push_record([
-                                "Storage Life",
-                                data.storage_life.as_deref().unwrap_or("-"),
-                            ]);
-                            println!("{}", tbuilder.build().with(style::DetailTable))
-                        }
-                        Err(e) if e.is_record_not_found() => println!(
-                            "Taxon {taxon_id} does not current have any collecting information defined"
-                        ),
-                        Err(e) => return Err(e.into()),
-                    }
-                }
-                TaxonCollectingCommands::Add {
-                    ripening_indicators,
-                    harvesting_notes,
-                    storage_conditions,
-                    storage_life,
-                } => {
-                    let data = CollectingData::create()
-                        .taxon_id(taxon_id)
-                        .ripening_indicators(ripening_indicators)
-                        .harvesting_notes(harvesting_notes)
-                        .storage(storage_conditions)
-                        .storage_life(storage_life)
-                        .exec(&mut db)
-                        .await?;
-                    println!("Added collection information for taxon {}", data.taxon_id);
-                }
-                TaxonCollectingCommands::Remove { assumeyes } => {
-                    if assumeyes
-                        || inquire::Confirm::new(
-                            "Are you sure you wish to remove this collecting data?",
-                        )
-                        .with_default(false)
-                        .prompt()?
-                    {
-                        CollectingData::delete_by_taxon_id(&mut db, taxon_id).await?;
-                        println!("Removed collecting data {taxon_id}")
-                    }
-                }
-                TaxonCollectingCommands::Modify {
-                    ripening_indicators,
-                    harvesting_notes,
-                    storage_conditions,
-                    storage_life,
-                } => {
-                    let mut query = CollectingData::update_by_taxon_id(taxon_id);
-                    if let Some(ripening) = ripening_indicators {
-                        query = query.ripening_indicators(ripening);
-                    }
-                    if let Some(harvesting) = harvesting_notes {
-                        query = query.harvesting_notes(harvesting);
-                    }
-                    if let Some(storage) = storage_conditions {
-                        query = query.storage(storage);
-                    }
-                    if let Some(storage_life) = storage_life {
-                        query = query.storage_life(storage_life);
-                    }
-                    query.exec(&mut db).await?;
-                    println!("Modified collection information {taxon_id}");
-                }
-            },
-            TaxonCommands::Propagation { taxon_id, command } => match command {
-                cli::taxa::TaxonPropagationCommands::List => {
-                    let tps = TaxonProtocol::filter_by_taxon_id(taxon_id)
-                        .include(TaxonProtocol::fields().taxon())
-                        .include(TaxonProtocol::fields().protocol())
-                        .exec(&mut db)
-                        .await?;
-                    let mut tbuilder = TableBuilder::default();
-                    tbuilder.push_record(["Taxon", "Protocol", "Confidence", "Notes"]);
-                    for tp in tps {
-                        tbuilder.push_record([
-                            &tp.taxon.get().reference(),
-                            &tp.protocol.get().id.to_string(),
-                            tp.confidence
-                                .map(|v| v.to_string())
-                                .as_deref()
-                                .unwrap_or("-"),
-                            tp.notes.as_deref().unwrap_or("-"),
-                        ])
-                    }
-                    println!("{}", tbuilder.build().with(style::BasicTable));
-                }
-                cli::taxa::TaxonPropagationCommands::Show { protocol_id } => {
-                    let tp =
-                        TaxonProtocol::filter_by_taxon_id_and_protocol_id(taxon_id, protocol_id)
-                            .include(TaxonProtocol::fields().taxon())
-                            .include(TaxonProtocol::fields().protocol())
-                            .one()
-                            .exec(&mut db)
-                            .await?;
-                    let mut tbuilder = TableBuilder::default();
-                    tbuilder.push_record(["Taxon", &tp.taxon.get().reference()]);
-                    tbuilder.push_record([
-                        "Confidence",
-                        tp.confidence
-                            .map(|v| v.to_string())
-                            .as_deref()
-                            .unwrap_or("-"),
-                    ]);
-                    tbuilder
-                        .push_record(["Taxon-specific notes", tp.notes.as_deref().unwrap_or("-")]);
-                    tbuilder.push_record(["Protocol", &tp.protocol.get().id.to_string()]);
-                    println!("{}", tbuilder.build().with(style::DetailTable));
-                }
-                cli::taxa::TaxonPropagationCommands::Add {
-                    protocol_id,
-                    confidence,
-                    notes,
-                } => {
-                    TaxonProtocol::create()
-                        .protocol_id(protocol_id)
-                        .taxon_id(taxon_id)
-                        .confidence(confidence)
-                        .notes(notes)
-                        .exec(&mut db)
-                        .await?;
-                    println!("Added propagation protocol {protocol_id} to taxon {taxon_id}");
-                }
-                cli::taxa::TaxonPropagationCommands::Modify {
-                    protocol_id,
-                    confidence,
-                    notes,
-                } => {
-                    let mut query =
-                        TaxonProtocol::update_by_taxon_id_and_protocol_id(taxon_id, protocol_id);
-                    if let Some(confidence) = confidence {
-                        query = query.confidence(confidence);
-                    } else if let Some(notes) = notes {
-                        query = query.notes(notes);
-                    }
-                    query.exec(&mut db).await?;
-                    println!("Updated propagation info");
-                }
-                cli::taxa::TaxonPropagationCommands::Remove {
-                    protocol_id,
-                    assumeyes,
-                } => {
-                    if assumeyes
-                        || inquire::Confirm::new(
-                            "Are you sure you wish to remove this propagation protocol from taxon {taxon_id}?",
-                        )
-                        .with_default(false)
-                        .prompt()?
-                    {
-                        TaxonProtocol::delete_by_taxon_id_and_protocol_id(
-                            &mut db,
-                            taxon_id,
-                            protocol_id,
-                        )
-                        .await?;
-                        println!("Removed propagation protocol {protocol_id} for taxon {taxon_id}");
-                    }
-                }
-            },
-        },
+        MainCommand::Init => init_command(&mut db).await?,
+        MainCommand::Taxa { command } => taxa_command(&mut db, command).await?,
         MainCommand::Regions { command } => match command {
             RegionCommands::List => {
                 let regions = Region::all()
@@ -1128,5 +596,576 @@ async fn main() -> anyhow::Result<()> {
             }
         },
     };
+    Ok(())
+}
+
+async fn init_command(db: &mut Db) -> anyhow::Result<()> {
+    match db.push_schema().await {
+        Ok(()) => Ok(()),
+        Err(e) => {
+            if e.is_driver_operation_failed() {
+                // this is the error that occurs when we try to push a schema
+                // after the schema has already been applied
+                Ok(())
+            } else {
+                // Report other errors
+                Err(e.into())
+            }
+        }
+    }
+}
+
+async fn taxa_command(db: &mut Db, command: TaxonCommands) -> anyhow::Result<()> {
+    match command {
+        TaxonCommands::Search { search_string } => {
+            tracing::debug!("Searching for exact complete name");
+            if let Ok(found) = Taxon::filter(Taxon::fields().complete_name().eq(&search_string))
+                .one()
+                .exec(db)
+                .await
+            {
+                println!("found taxon {}", found.reference());
+            } else {
+                tracing::debug!("Searching for approximate complete name");
+                let wildcard = format!("%{search_string}%");
+                let taxa = Taxon::filter(Taxon::fields().complete_name().like(&wildcard))
+                    .exec(db)
+                    .await?;
+                if !taxa.is_empty() {
+                    println!("Possible options for '{search_string}':");
+                    for t in taxa {
+                        println!("- {}", t.reference());
+                    }
+                } else {
+                    tracing::debug!("Searching for exact scientific synonym");
+                    if let Ok(found) =
+                        Synonym::filter(Synonym::fields().complete_name().eq(&search_string))
+                            .include(Synonym::fields().taxon())
+                            .one()
+                            .exec(db)
+                            .await
+                    {
+                        println!(
+                            "Found '{}' which is a synonym for {}",
+                            found.complete_name,
+                            found.taxon.get().reference(),
+                        );
+                    } else {
+                        tracing::debug!("Searching for approximate scientific synonyms");
+                        let synonyms =
+                            Synonym::filter(Synonym::fields().complete_name().like(&wildcard))
+                                .include(Synonym::fields().taxon())
+                                .exec(db)
+                                .await?;
+                        if !synonyms.is_empty() {
+                            println!("Possible options for '{search_string}':");
+                            for syn in synonyms {
+                                println!(
+                                    "'{}' is a synonym for {}",
+                                    syn.complete_name,
+                                    syn.taxon.get().reference(),
+                                );
+                            }
+                        } else {
+                            tracing::debug!("Searching for exact vernacular name");
+                            // look up common names
+                            if let Ok(vernacular) = VernacularName::filter(
+                                VernacularName::fields().name().eq(&search_string),
+                            )
+                            .include(VernacularName::fields().taxon())
+                            .one()
+                            .exec(db)
+                            .await
+                            {
+                                println!(
+                                    "Found {} ({})",
+                                    vernacular.taxon.get().reference(),
+                                    vernacular.name
+                                );
+                            } else {
+                                tracing::debug!("Searching for approximate vernacular names");
+                                let vernaculars = VernacularName::filter(
+                                    VernacularName::fields().name().like(&wildcard),
+                                )
+                                .include(VernacularName::fields().taxon())
+                                .exec(db)
+                                .await?;
+                                if !vernaculars.is_empty() {
+                                    println!("Possible options for '{search_string}':");
+                                    for vernacular in vernaculars {
+                                        println!(
+                                            "{} ({})",
+                                            vernacular.taxon.get().reference(),
+                                            vernacular.name,
+                                        );
+                                    }
+                                } else {
+                                    println!("No options found");
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        TaxonCommands::Show { id } => {
+            let taxon = Taxon::filter_by_id(id)
+                .include(Taxon::fields().parent())
+                .include(Taxon::fields().children())
+                .include(Taxon::fields().vernaculars())
+                .include(Taxon::fields().synonyms())
+                .include(Taxon::fields().regional_statuses().region())
+                .include(Taxon::fields().collecting_data())
+                .include(Taxon::fields().cleaning_procedures().procedure())
+                .include(Taxon::fields().propagation_protocols().protocol())
+                .one()
+                .exec(db)
+                .await?;
+            {
+                let mut tbuilder = TableBuilder::default();
+                tbuilder.push_record(["ID", &taxon.id.to_string()]);
+                tbuilder.push_record(["Name", &taxon.complete_name]);
+                tbuilder.push_record(["Rank", &taxon.rank.to_string()]);
+                tbuilder.push_record([
+                    "Parent",
+                    &taxon
+                        .parent
+                        .get()
+                        .as_ref()
+                        .map(|p| format!("{} ({})", p.reference(), p.rank))
+                        .unwrap_or_else(|| "-".into()),
+                ]);
+                tbuilder.push_record([
+                    "Synonyms",
+                    &join_or_default(taxon.synonyms.get(), "-", |v| v.complete_name.clone()),
+                ]);
+                tbuilder.push_record([
+                    "Common Name(s)",
+                    &join_or_default(taxon.vernaculars.get(), "-", |v| v.name.clone()),
+                ]);
+                tbuilder.push_record([
+                    "Child taxa",
+                    &join_or_default(taxon.children.get(), "-", |t| {
+                        format!("{} ({})", t.reference(), t.rank)
+                    }),
+                ]);
+                tbuilder.push_record([
+                    "Ripening",
+                    taxon
+                        .collecting_data
+                        .get()
+                        .as_ref()
+                        .and_then(|d| d.ripening_indicators.as_deref())
+                        .unwrap_or("-"),
+                ]);
+                tbuilder.push_record([
+                    "Harvesting",
+                    taxon
+                        .collecting_data
+                        .get()
+                        .as_ref()
+                        .and_then(|d| d.harvesting_notes.as_deref())
+                        .unwrap_or("-"),
+                ]);
+                tbuilder.push_record([
+                    "Storage Conditions",
+                    taxon
+                        .collecting_data
+                        .get()
+                        .as_ref()
+                        .and_then(|d| d.storage.as_deref())
+                        .unwrap_or("-"),
+                ]);
+                tbuilder.push_record([
+                    "Storage Life",
+                    taxon
+                        .collecting_data
+                        .get()
+                        .as_ref()
+                        .and_then(|d| d.storage_life.as_deref())
+                        .unwrap_or("-"),
+                ]);
+                tbuilder.push_record(["Seed Cleaning", &{
+                    match taxon.cleaning_procedures.get() {
+                        procedures if procedures.is_empty() => "-".to_string(),
+                        procedures => {
+                            let mut inner_table = TableBuilder::default();
+                            inner_table.push_record(["ID", "Name"]);
+                            procedures.iter().for_each(|tcp| {
+                                let proc = tcp.procedure.get();
+                                inner_table.push_record([&proc.id.to_string(), &proc.name]);
+                            });
+                            inner_table.build().with(style::DetailTable).to_string()
+                        }
+                    }
+                }]);
+                tbuilder.push_record(["Propagation Protocols", &{
+                    match taxon.propagation_protocols.get() {
+                        tp if tp.is_empty() => "-".to_string(),
+                        tps => {
+                            let mut inner_table = TableBuilder::default();
+                            inner_table.push_record(["ID", "Name", "Type"]);
+                            tps.iter().for_each(|tp| {
+                                let protocol = tp.protocol.get();
+                                inner_table.push_record([
+                                    &protocol.id.to_string(),
+                                    &protocol.name,
+                                    &protocol.r#type.to_string(),
+                                ]);
+                            });
+                            inner_table.build().with(style::BasicTable).to_string()
+                        }
+                    }
+                }]);
+                tbuilder.push_record(["Regions", &{
+                    let regions = taxon.regional_statuses.get();
+                    if regions.is_empty() {
+                        "-".to_string()
+                    } else {
+                        let mut inner_table = TableBuilder::default();
+                        inner_table.push_record(["ID", "Name", "Origin"]);
+                        for rs in regions.iter() {
+                            inner_table.push_record([
+                                rs.region.get().id.to_string(),
+                                rs.region.get().name.clone(),
+                                rs.origin
+                                    .map(|val| val.to_string())
+                                    .unwrap_or_else(|| "-".into()),
+                            ]);
+                        }
+                        inner_table.build().with(style::BasicTable).to_string()
+                    }
+                }]);
+                println!("{}", tbuilder.build().with(style::DetailTable));
+                println!();
+            }
+        }
+        TaxonCommands::List { region_id } => match region_id {
+            Some(id) => list_regional_taxa(db, id).await?,
+            None => {
+                let taxa = Taxon::all()
+                    .order_by(Taxon::fields().sequence().asc())
+                    .exec(db)
+                    .await?;
+                let ntaxa = taxa.len();
+                if taxa.is_empty() {
+                    println!(
+                        "The taxonomy has not been imported. Please download the ITIS taxonomy database from https://www.itis.gov/downloads/index.html and import it with `pn taxa import`"
+                    )
+                } else {
+                    let mut tbuilder = TableBuilder::default();
+                    tbuilder.push_record(["ID", "Name"]);
+                    for taxon in taxa {
+                        tbuilder.push_record([taxon.id.to_string(), taxon.complete_name]);
+                    }
+                    println!("{}", tbuilder.build().with(style::BasicTable));
+                    println!("{} taxa found", ntaxa);
+                }
+            }
+        },
+        TaxonCommands::Import {
+            db_uri,
+            authority,
+            assumeyes,
+        } => {
+            let ntaxa = Taxon::all().count().exec(db).await?;
+            if assumeyes
+                || inquire::Confirm::new(
+                    "Are you sure you wish to import all taxa from the external database?",
+                )
+                .with_default(false)
+                .with_help_message(&format!("The database currently contains {ntaxa} taxa"))
+                .prompt()?
+            {
+                // FIXME: we should probably clear the database if the
+                // user confirms rather than re-import a taxonomy into an
+                // existing taxonomy
+                import_taxa::import_taxa(db, &db_uri, authority).await?
+            }
+        }
+        TaxonCommands::Cleaning { taxon_id, command } => {
+            taxon_cleaning_command(db, taxon_id, command).await?
+        }
+        TaxonCommands::Collecting { taxon_id, command } => {
+            taxon_collecting_command(db, taxon_id, command).await?
+        }
+        TaxonCommands::Propagation { taxon_id, command } => {
+            taxon_propagation_command(db, taxon_id, command).await?
+        }
+    }
+    Ok(())
+}
+
+async fn taxon_collecting_command(
+    db: &mut Db,
+    taxon_id: u64,
+    command: TaxonCollectingCommands,
+) -> anyhow::Result<()> {
+    match command {
+        TaxonCollectingCommands::Show => {
+            match CollectingData::filter_by_taxon_id(taxon_id)
+                .include(CollectingData::fields().taxon())
+                .one()
+                .exec(db)
+                .await
+            {
+                Ok(data) => {
+                    let mut tbuilder = TableBuilder::default();
+                    tbuilder.push_record(["Taxon", &data.taxon.get().reference()]);
+                    tbuilder.push_record([
+                        "Ripening",
+                        data.ripening_indicators.as_deref().unwrap_or("-"),
+                    ]);
+                    tbuilder.push_record([
+                        "Harvesting",
+                        data.harvesting_notes.as_deref().unwrap_or("-"),
+                    ]);
+                    tbuilder.push_record([
+                        "Storage Conditions",
+                        data.storage.as_deref().unwrap_or("-"),
+                    ]);
+                    tbuilder
+                        .push_record(["Storage Life", data.storage_life.as_deref().unwrap_or("-")]);
+                    println!("{}", tbuilder.build().with(style::DetailTable))
+                }
+                Err(e) if e.is_record_not_found() => println!(
+                    "Taxon {taxon_id} does not current have any collecting information defined"
+                ),
+                Err(e) => return Err(e.into()),
+            }
+        }
+        TaxonCollectingCommands::Add {
+            ripening_indicators,
+            harvesting_notes,
+            storage_conditions,
+            storage_life,
+        } => {
+            let data = CollectingData::create()
+                .taxon_id(taxon_id)
+                .ripening_indicators(ripening_indicators)
+                .harvesting_notes(harvesting_notes)
+                .storage(storage_conditions)
+                .storage_life(storage_life)
+                .exec(db)
+                .await?;
+            println!("Added collection information for taxon {}", data.taxon_id);
+        }
+        TaxonCollectingCommands::Remove { assumeyes } => {
+            if assumeyes
+                || inquire::Confirm::new("Are you sure you wish to remove this collecting data?")
+                    .with_default(false)
+                    .prompt()?
+            {
+                CollectingData::delete_by_taxon_id(db, taxon_id).await?;
+                println!("Removed collecting data {taxon_id}")
+            }
+        }
+        TaxonCollectingCommands::Modify {
+            ripening_indicators,
+            harvesting_notes,
+            storage_conditions,
+            storage_life,
+        } => {
+            let mut query = CollectingData::update_by_taxon_id(taxon_id);
+            if let Some(ripening) = ripening_indicators {
+                query = query.ripening_indicators(ripening);
+            }
+            if let Some(harvesting) = harvesting_notes {
+                query = query.harvesting_notes(harvesting);
+            }
+            if let Some(storage) = storage_conditions {
+                query = query.storage(storage);
+            }
+            if let Some(storage_life) = storage_life {
+                query = query.storage_life(storage_life);
+            }
+            query.exec(db).await?;
+            println!("Modified collection information {taxon_id}");
+        }
+    }
+    Ok(())
+}
+
+async fn taxon_cleaning_command(
+    db: &mut Db,
+    taxon_id: u64,
+    command: TaxonCleaningCommands,
+) -> anyhow::Result<()> {
+    match command {
+        TaxonCleaningCommands::List => {
+            let procedures = TaxonCleaningProcedure::filter_by_taxon_id(taxon_id)
+                .exec(db)
+                .await?;
+
+            let mut tbuilder = TableBuilder::default();
+            tbuilder.push_record(["Taxon ID", "Procedure ID", "Notes"]);
+            for proc in procedures {
+                tbuilder.push_record([
+                    proc.taxon_id.to_string(),
+                    proc.procedure_id.to_string(),
+                    proc.notes.unwrap_or_else(|| "-".into()),
+                ]);
+            }
+            println!("{}", tbuilder.build().with(style::BasicTable));
+        }
+        TaxonCleaningCommands::Show { procedure_id } => {
+            let tcp =
+                TaxonCleaningProcedure::filter_by_taxon_id_and_procedure_id(taxon_id, procedure_id)
+                    .include(TaxonCleaningProcedure::fields().taxon())
+                    .include(TaxonCleaningProcedure::fields().procedure())
+                    .one()
+                    .exec(db)
+                    .await?;
+
+            let mut tbuilder = TableBuilder::default();
+            tbuilder.push_record([
+                "Taxon",
+                &format!("{}: {}", tcp.taxon_id, tcp.taxon.get().complete_name),
+            ]);
+            tbuilder.push_record(["Procedure", &tcp.procedure_id.to_string()]);
+            tbuilder.push_record(["Notes", &tcp.notes.unwrap_or_else(|| "-".into())]);
+            println!("{}", tbuilder.build().with(style::DetailTable));
+        }
+        TaxonCleaningCommands::Add {
+            procedure_id,
+            notes,
+        } => {
+            TaxonCleaningProcedure::create()
+                .taxon_id(taxon_id)
+                .procedure_id(procedure_id)
+                .notes(notes)
+                .exec(db)
+                .await?;
+            println!("Procedure {} assigned to taxon {}", taxon_id, procedure_id);
+        }
+        TaxonCleaningCommands::Modify {
+            procedure_id,
+            notes,
+        } => {
+            TaxonCleaningProcedure::update_by_taxon_id_and_procedure_id(taxon_id, procedure_id)
+                .notes(notes)
+                .exec(db)
+                .await?;
+            println!("Procedure {} updated for taxon {}", procedure_id, taxon_id);
+        }
+        TaxonCleaningCommands::Remove {
+            procedure_id,
+            assumeyes,
+        } => {
+            if assumeyes
+                || inquire::Confirm::new("Are you sure you wish to remove this procedure?")
+                    .with_default(false)
+                    .prompt()?
+            {
+                TaxonCleaningProcedure::delete_by_taxon_id_and_procedure_id(
+                    db,
+                    taxon_id,
+                    procedure_id,
+                )
+                .await?;
+                println!("Assignment removed");
+            }
+        }
+    }
+    Ok(())
+}
+
+async fn taxon_propagation_command(
+    db: &mut Db,
+    taxon_id: u64,
+    command: TaxonPropagationCommands,
+) -> anyhow::Result<()> {
+    match command {
+        cli::taxa::TaxonPropagationCommands::List => {
+            let tps = TaxonProtocol::filter_by_taxon_id(taxon_id)
+                .include(TaxonProtocol::fields().taxon())
+                .include(TaxonProtocol::fields().protocol())
+                .exec(db)
+                .await?;
+            let mut tbuilder = TableBuilder::default();
+            tbuilder.push_record(["Taxon", "Protocol", "Confidence", "Notes"]);
+            for tp in tps {
+                tbuilder.push_record([
+                    &tp.taxon.get().reference(),
+                    &tp.protocol.get().id.to_string(),
+                    tp.confidence
+                        .map(|v| v.to_string())
+                        .as_deref()
+                        .unwrap_or("-"),
+                    tp.notes.as_deref().unwrap_or("-"),
+                ])
+            }
+            println!("{}", tbuilder.build().with(style::BasicTable));
+        }
+        cli::taxa::TaxonPropagationCommands::Show { protocol_id } => {
+            let tp = TaxonProtocol::filter_by_taxon_id_and_protocol_id(taxon_id, protocol_id)
+                .include(TaxonProtocol::fields().taxon())
+                .include(TaxonProtocol::fields().protocol())
+                .one()
+                .exec(db)
+                .await?;
+            let mut tbuilder = TableBuilder::default();
+            tbuilder.push_record(["Taxon", &tp.taxon.get().reference()]);
+            tbuilder.push_record([
+                "Confidence",
+                tp.confidence
+                    .map(|v| v.to_string())
+                    .as_deref()
+                    .unwrap_or("-"),
+            ]);
+            tbuilder.push_record(["Taxon-specific notes", tp.notes.as_deref().unwrap_or("-")]);
+            tbuilder.push_record(["Protocol", &tp.protocol.get().id.to_string()]);
+            println!("{}", tbuilder.build().with(style::DetailTable));
+        }
+        cli::taxa::TaxonPropagationCommands::Add {
+            protocol_id,
+            confidence,
+            notes,
+        } => {
+            TaxonProtocol::create()
+                .protocol_id(protocol_id)
+                .taxon_id(taxon_id)
+                .confidence(confidence)
+                .notes(notes)
+                .exec(db)
+                .await?;
+            println!("Added propagation protocol {protocol_id} to taxon {taxon_id}");
+        }
+        cli::taxa::TaxonPropagationCommands::Modify {
+            protocol_id,
+            confidence,
+            notes,
+        } => {
+            let mut query =
+                TaxonProtocol::update_by_taxon_id_and_protocol_id(taxon_id, protocol_id);
+            if let Some(confidence) = confidence {
+                query = query.confidence(confidence);
+            } else if let Some(notes) = notes {
+                query = query.notes(notes);
+            }
+            query.exec(db).await?;
+            println!("Updated propagation info");
+        }
+        cli::taxa::TaxonPropagationCommands::Remove {
+            protocol_id,
+            assumeyes,
+        } => {
+            if assumeyes
+                        || inquire::Confirm::new(
+                            "Are you sure you wish to remove this propagation protocol from taxon {taxon_id}?",
+                        )
+                        .with_default(false)
+                        .prompt()?
+                    {
+                        TaxonProtocol::delete_by_taxon_id_and_protocol_id(
+                            db,
+                            taxon_id,
+                            protocol_id,
+                        )
+                        .await?;
+                        println!("Removed propagation protocol {protocol_id} for taxon {taxon_id}");
+                    }
+        }
+    }
     Ok(())
 }
