@@ -5,7 +5,7 @@ use propagation_notebook::region::{
 };
 use toasty::Db;
 
-use crate::{list_regional_taxa, style, util::truncate_with_summary};
+use crate::{cli::list_regional_taxa, style, util::truncate_with_summary};
 
 mod import;
 

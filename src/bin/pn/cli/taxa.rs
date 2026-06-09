@@ -1,7 +1,7 @@
 use propagation_notebook::taxonomy::{Synonym, Taxon, VernacularName};
 use toasty::Db;
 
-use crate::{list_regional_taxa, style, util::join_or_default};
+use crate::{cli::list_regional_taxa, style, util::join_or_default};
 
 pub mod cleaning;
 pub mod collecting;
