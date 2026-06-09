@@ -97,26 +97,7 @@ pub enum TaxonCleaningCommands {
 pub enum TaxonCollectingCommands {
     #[command(about = "Show seed collecting information")]
     Show,
-    #[command(about = "Add new seed collecting information for a taxon")]
-    Add {
-        #[arg(
-            short,
-            long,
-            help = "What to look for to determine if the seed is ready for collecting"
-        )]
-        ripening_indicators: Option<String>,
-        #[arg(long, help = "Harvesting notes")]
-        harvesting_notes: Option<String>,
-        #[arg(short, long, help = "Instructions for storing the seed")]
-        storage_conditions: Option<String>,
-        #[arg(
-            short = 'l',
-            long,
-            help = "How long the seed will stay viable in storage"
-        )]
-        storage_life: Option<String>,
-    },
-    #[command(about = "Modify seed collecting information for a taxon", group(clap::ArgGroup::new("modify_props").args(["ripening_indicators", "harvesting_notes", "storage_conditions", "storage_life"]).required(true).multiple(false)))]
+    #[command(about = "Modify seed collecting information for a taxon", group(clap::ArgGroup::new("modify_props").args(["ripening_indicators", "harvesting_notes", "storage_conditions", "storage_life"]).required(true).multiple(true)))]
     Modify {
         #[arg(
             short,

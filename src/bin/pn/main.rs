@@ -934,22 +934,6 @@ async fn taxon_collecting_command(
                 Err(e) => return Err(e.into()),
             }
         }
-        TaxonCollectingCommands::Add {
-            ripening_indicators,
-            harvesting_notes,
-            storage_conditions,
-            storage_life,
-        } => {
-            let data = CollectingData::create()
-                .taxon_id(taxon_id)
-                .ripening_indicators(ripening_indicators)
-                .harvesting_notes(harvesting_notes)
-                .storage(storage_conditions)
-                .storage_life(storage_life)
-                .exec(db)
-                .await?;
-            println!("Added collection information for taxon {}", data.taxon_id);
-        }
         TaxonCollectingCommands::Remove { assumeyes } => {
             if assumeyes
                 || inquire::Confirm::new("Are you sure you wish to remove this collecting data?")
@@ -966,21 +950,39 @@ async fn taxon_collecting_command(
             storage_conditions,
             storage_life,
         } => {
-            let mut query = CollectingData::update_by_taxon_id(taxon_id);
-            if let Some(ripening) = ripening_indicators {
-                query = query.ripening_indicators(ripening);
-            }
-            if let Some(harvesting) = harvesting_notes {
-                query = query.harvesting_notes(harvesting);
-            }
-            if let Some(storage) = storage_conditions {
-                query = query.storage(storage);
-            }
-            if let Some(storage_life) = storage_life {
-                query = query.storage_life(storage_life);
-            }
-            query.exec(db).await?;
-            println!("Modified collection information {taxon_id}");
+            // Try to create the object first
+            match CollectingData::create()
+                .taxon_id(taxon_id)
+                .ripening_indicators(&ripening_indicators)
+                .harvesting_notes(&harvesting_notes)
+                .storage(&storage_conditions)
+                .storage_life(&storage_life)
+                .exec(db)
+                .await
+            {
+                Ok(data) => println!("Added collection information for taxon {}", data.taxon_id),
+                Err(e) if e.is_condition_failed() => {
+                    // the creation likely failed because CollectionData already
+                    // exists for taxon_id, which has a unique constraint. Just
+                    // update the object
+                    let mut query = CollectingData::update_by_taxon_id(taxon_id);
+                    if let Some(ripening) = ripening_indicators {
+                        query = query.ripening_indicators(ripening);
+                    }
+                    if let Some(harvesting) = harvesting_notes {
+                        query = query.harvesting_notes(harvesting);
+                    }
+                    if let Some(storage) = storage_conditions {
+                        query = query.storage(storage);
+                    }
+                    if let Some(storage_life) = storage_life {
+                        query = query.storage_life(storage_life);
+                    }
+                    query.exec(db).await?;
+                    println!("Modified collection information {taxon_id}");
+                }
+                Err(e) => Err(e)?,
+            };
         }
     }
     Ok(())
