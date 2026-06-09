@@ -44,14 +44,22 @@ pub struct RegionalTaxonProperties {
     // harvest phenology
     #[arg(
         long,
-        help = "Start of the harvest window for the species in the given region"
+        help = "Start of the harvest window for the species in the given region (format: MM-DD)",
+        value_parser = parse_month_day,
     )]
     pub harvest_start: Option<jiff::civil::Date>,
     #[arg(
         long,
-        help = "End of the harvest window for the species in the given region"
+        help = "End of the harvest window for the species in the given region (format: MM-DD)",
+        value_parser = parse_month_day,
     )]
     pub harvest_end: Option<jiff::civil::Date>,
+}
+
+pub fn parse_month_day(input: &str) -> anyhow::Result<jiff::civil::Date> {
+    let mut parsed = jiff::fmt::strtime::parse("%m-%d", input)?;
+    parsed.set_year(Some(2000))?;
+    parsed.to_date().map_err(|e| e.into())
 }
 
 impl BoundsArg {
