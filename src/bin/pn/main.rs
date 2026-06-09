@@ -869,6 +869,8 @@ async fn main() -> anyhow::Result<()> {
                     println!();
                 }
                 RegionTaxaCommands::Add { taxon_id, props } => {
+                    // make sure region exists
+                    let _r = Region::get_by_id(&mut db, region_id).await?;
                     let s = RegionalTaxonStatus::create()
                         .region_id(region_id)
                         .taxon_id(taxon_id)
@@ -891,6 +893,8 @@ async fn main() -> anyhow::Result<()> {
                     println!("Added regional taxon {}", s.id);
                 }
                 RegionTaxaCommands::Modify { taxon_id, props } => {
+                    // make sure region exists
+                    let _r = Region::get_by_id(&mut db, region_id).await?;
                     let mut query =
                         RegionalTaxonStatus::update_by_taxon_id_and_region_id(taxon_id, region_id);
                     if let Some(origin) = props.origin {
