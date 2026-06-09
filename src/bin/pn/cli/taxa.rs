@@ -1,3 +1,12 @@
+use propagation_notebook::{
+    collecting::{CollectingData, TaxonCleaningProcedure},
+    propagation::TaxonProtocol,
+};
+use tabled::builder::Builder as TableBuilder;
+use toasty::Db;
+
+use crate::style;
+
 #[derive(Debug, Clone, Copy, clap::ValueEnum)]
 #[clap(rename_all = "kebab-case")]
 pub enum TaxonomicAuthority {
@@ -93,6 +102,90 @@ pub enum TaxonCleaningCommands {
     },
 }
 
+impl TaxonCleaningCommands {
+    pub async fn run(&self, db: &mut Db, taxon_id: u64) -> anyhow::Result<()> {
+        match self {
+            TaxonCleaningCommands::List => {
+                let procedures = TaxonCleaningProcedure::filter_by_taxon_id(taxon_id)
+                    .exec(db)
+                    .await?;
+
+                let mut tbuilder = TableBuilder::default();
+                tbuilder.push_record(["Taxon ID", "Procedure ID", "Notes"]);
+                for proc in procedures {
+                    tbuilder.push_record([
+                        proc.taxon_id.to_string(),
+                        proc.procedure_id.to_string(),
+                        proc.notes.unwrap_or_else(|| "-".into()),
+                    ]);
+                }
+                println!("{}", tbuilder.build().with(style::BasicTable));
+            }
+            TaxonCleaningCommands::Show { procedure_id } => {
+                let tcp = TaxonCleaningProcedure::filter_by_taxon_id_and_procedure_id(
+                    taxon_id,
+                    procedure_id,
+                )
+                .include(TaxonCleaningProcedure::fields().taxon())
+                .include(TaxonCleaningProcedure::fields().procedure())
+                .one()
+                .exec(db)
+                .await?;
+
+                let mut tbuilder = TableBuilder::default();
+                tbuilder.push_record([
+                    "Taxon",
+                    &format!("{}: {}", tcp.taxon_id, tcp.taxon.get().complete_name),
+                ]);
+                tbuilder.push_record(["Procedure", &tcp.procedure_id.to_string()]);
+                tbuilder.push_record(["Notes", &tcp.notes.unwrap_or_else(|| "-".into())]);
+                println!("{}", tbuilder.build().with(style::DetailTable));
+            }
+            TaxonCleaningCommands::Add {
+                procedure_id,
+                notes,
+            } => {
+                TaxonCleaningProcedure::create()
+                    .taxon_id(taxon_id)
+                    .procedure_id(procedure_id)
+                    .notes(notes)
+                    .exec(db)
+                    .await?;
+                println!("Procedure {} assigned to taxon {}", taxon_id, procedure_id);
+            }
+            TaxonCleaningCommands::Modify {
+                procedure_id,
+                notes,
+            } => {
+                TaxonCleaningProcedure::update_by_taxon_id_and_procedure_id(taxon_id, procedure_id)
+                    .notes(notes)
+                    .exec(db)
+                    .await?;
+                println!("Procedure {} updated for taxon {}", procedure_id, taxon_id);
+            }
+            TaxonCleaningCommands::Remove {
+                procedure_id,
+                assumeyes,
+            } => {
+                if *assumeyes
+                    || inquire::Confirm::new("Are you sure you wish to remove this procedure?")
+                        .with_default(false)
+                        .prompt()?
+                {
+                    TaxonCleaningProcedure::delete_by_taxon_id_and_procedure_id(
+                        db,
+                        taxon_id,
+                        procedure_id,
+                    )
+                    .await?;
+                    println!("Assignment removed");
+                }
+            }
+        }
+        Ok(())
+    }
+}
+
 #[derive(Debug, clap::Subcommand)]
 pub enum TaxonCollectingCommands {
     #[command(about = "Show seed collecting information")]
@@ -125,6 +218,102 @@ pub enum TaxonCollectingCommands {
         )]
         assumeyes: bool,
     },
+}
+
+impl TaxonCollectingCommands {
+    pub async fn run(&self, db: &mut Db, taxon_id: u64) -> anyhow::Result<()> {
+        match self {
+            TaxonCollectingCommands::Show => {
+                match CollectingData::filter_by_taxon_id(taxon_id)
+                    .include(CollectingData::fields().taxon())
+                    .one()
+                    .exec(db)
+                    .await
+                {
+                    Ok(data) => {
+                        let mut tbuilder = TableBuilder::default();
+                        tbuilder.push_record(["Taxon", &data.taxon.get().reference()]);
+                        tbuilder.push_record([
+                            "Ripening",
+                            data.ripening_indicators.as_deref().unwrap_or("-"),
+                        ]);
+                        tbuilder.push_record([
+                            "Harvesting",
+                            data.harvesting_notes.as_deref().unwrap_or("-"),
+                        ]);
+                        tbuilder.push_record([
+                            "Storage Conditions",
+                            data.storage.as_deref().unwrap_or("-"),
+                        ]);
+                        tbuilder.push_record([
+                            "Storage Life",
+                            data.storage_life.as_deref().unwrap_or("-"),
+                        ]);
+                        println!("{}", tbuilder.build().with(crate::style::DetailTable))
+                    }
+                    Err(e) if e.is_record_not_found() => println!(
+                        "Taxon {taxon_id} does not current have any collecting information defined"
+                    ),
+                    Err(e) => return Err(e.into()),
+                }
+            }
+            TaxonCollectingCommands::Remove { assumeyes } => {
+                if *assumeyes
+                    || inquire::Confirm::new(
+                        "Are you sure you wish to remove this collecting data?",
+                    )
+                    .with_default(false)
+                    .prompt()?
+                {
+                    CollectingData::delete_by_taxon_id(db, taxon_id).await?;
+                    println!("Removed collecting data {taxon_id}")
+                }
+            }
+            TaxonCollectingCommands::Modify {
+                ripening_indicators,
+                harvesting_notes,
+                storage_conditions,
+                storage_life,
+            } => {
+                // Try to create the object first
+                match CollectingData::create()
+                    .taxon_id(taxon_id)
+                    .ripening_indicators(ripening_indicators)
+                    .harvesting_notes(harvesting_notes)
+                    .storage(storage_conditions)
+                    .storage_life(storage_life)
+                    .exec(db)
+                    .await
+                {
+                    Ok(data) => {
+                        println!("Added collection information for taxon {}", data.taxon_id)
+                    }
+                    Err(e) if e.is_condition_failed() => {
+                        // the creation likely failed because CollectionData already
+                        // exists for taxon_id, which has a unique constraint. Just
+                        // update the object
+                        let mut query = CollectingData::update_by_taxon_id(taxon_id);
+                        if let Some(ripening) = ripening_indicators {
+                            query = query.ripening_indicators(ripening);
+                        }
+                        if let Some(harvesting) = harvesting_notes {
+                            query = query.harvesting_notes(harvesting);
+                        }
+                        if let Some(storage) = storage_conditions {
+                            query = query.storage(storage);
+                        }
+                        if let Some(storage_life) = storage_life {
+                            query = query.storage_life(storage_life);
+                        }
+                        query.exec(db).await?;
+                        println!("Modified collection information {taxon_id}");
+                    }
+                    Err(e) => Err(e)?,
+                };
+            }
+        }
+        Ok(())
+    }
 }
 
 #[derive(Debug, clap::Subcommand)]
@@ -187,4 +376,102 @@ pub enum TaxonPropagationCommands {
         )]
         assumeyes: bool,
     },
+}
+
+impl TaxonPropagationCommands {
+    pub async fn run(&self, db: &mut Db, taxon_id: u64) -> anyhow::Result<()> {
+        match self {
+        TaxonPropagationCommands::List => {
+            let tps = TaxonProtocol::filter_by_taxon_id(taxon_id)
+                .include(TaxonProtocol::fields().taxon())
+                .include(TaxonProtocol::fields().protocol())
+                .exec(db)
+                .await?;
+            let mut tbuilder = TableBuilder::default();
+            tbuilder.push_record(["Taxon", "Protocol", "Confidence", "Notes"]);
+            for tp in tps {
+                tbuilder.push_record([
+                    &tp.taxon.get().reference(),
+                    &tp.protocol.get().id.to_string(),
+                    tp.confidence
+                        .map(|v| v.to_string())
+                        .as_deref()
+                        .unwrap_or("-"),
+                    tp.notes.as_deref().unwrap_or("-"),
+                ])
+            }
+            println!("{}", tbuilder.build().with(style::BasicTable));
+        }
+        TaxonPropagationCommands::Show { protocol_id } => {
+            let tp = TaxonProtocol::filter_by_taxon_id_and_protocol_id(taxon_id, protocol_id)
+                .include(TaxonProtocol::fields().taxon())
+                .include(TaxonProtocol::fields().protocol())
+                .one()
+                .exec(db)
+                .await?;
+            let mut tbuilder = TableBuilder::default();
+            tbuilder.push_record(["Taxon", &tp.taxon.get().reference()]);
+            tbuilder.push_record([
+                "Confidence",
+                tp.confidence
+                    .map(|v| v.to_string())
+                    .as_deref()
+                    .unwrap_or("-"),
+            ]);
+            tbuilder.push_record(["Taxon-specific notes", tp.notes.as_deref().unwrap_or("-")]);
+            tbuilder.push_record(["Protocol", &tp.protocol.get().id.to_string()]);
+            println!("{}", tbuilder.build().with(style::DetailTable));
+        }
+        TaxonPropagationCommands::Add {
+            protocol_id,
+            confidence,
+            notes,
+        } => {
+            TaxonProtocol::create()
+                .protocol_id(protocol_id)
+                .taxon_id(taxon_id)
+                .confidence(confidence)
+                .notes(notes)
+                .exec(db)
+                .await?;
+            println!("Added propagation protocol {protocol_id} to taxon {taxon_id}");
+        }
+        TaxonPropagationCommands::Modify {
+            protocol_id,
+            confidence,
+            notes,
+        } => {
+            let mut query =
+                TaxonProtocol::update_by_taxon_id_and_protocol_id(taxon_id, protocol_id);
+            if let Some(confidence) = confidence {
+                query = query.confidence(confidence);
+            } else if let Some(notes) = notes {
+                query = query.notes(notes);
+            }
+            query.exec(db).await?;
+            println!("Updated propagation info");
+        }
+        TaxonPropagationCommands::Remove {
+            protocol_id,
+            assumeyes,
+        } => {
+            if *assumeyes
+                        || inquire::Confirm::new(
+                            "Are you sure you wish to remove this propagation protocol from taxon {taxon_id}?",
+                        )
+                        .with_default(false)
+                        .prompt()?
+                    {
+                        TaxonProtocol::delete_by_taxon_id_and_protocol_id(
+                            db,
+                            taxon_id,
+                            protocol_id,
+                        )
+                        .await?;
+                        println!("Removed propagation protocol {protocol_id} for taxon {taxon_id}");
+                    }
+        }
+    }
+        Ok(())
+    }
 }
