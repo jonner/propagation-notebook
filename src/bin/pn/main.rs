@@ -4,7 +4,7 @@ use anyhow::anyhow;
 use clap::Parser;
 use directories::ProjectDirs;
 use propagation_notebook::{
-    collecting::{CleaningProcedure, TaxonCleaningProcedure},
+    collecting::CleaningProcedure,
     propagation::{Protocol, ProtocolType},
     region::{Region, RegionalTaxonStatus},
     taxonomy::{Synonym, Taxon, VernacularName},
@@ -21,7 +21,7 @@ use crate::{
         cleaning::CleaningCommands,
         propagation::PropagationCommands,
         region::{RegionCommands, RegionTaxaCommands},
-        taxa::{TaxonCleaningCommands, TaxonCommands},
+        taxa::TaxonCommands,
     },
     import_region::import_region,
 };
