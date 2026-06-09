@@ -1,6 +1,10 @@
 use std::path::PathBuf;
 
-use propagation_notebook::propagation::ProtocolType;
+use propagation_notebook::propagation::{Protocol, ProtocolType};
+use serde::Deserialize;
+use toasty::Db;
+
+use crate::style;
 
 #[derive(Debug, clap::Subcommand)]
 pub enum PropagationCommands {
@@ -48,4 +52,105 @@ pub enum PropagationCommands {
     },
     #[command(about = "Import seed propagation protocols from YAML")]
     Import { path: PathBuf },
+}
+
+impl PropagationCommands {
+    pub async fn run(&self, db: &mut Db) -> anyhow::Result<()> {
+        match self {
+            PropagationCommands::List { r#type } => {
+                let mut query = Protocol::all();
+                if let Some(t) = r#type {
+                    query = query.filter(Protocol::fields().r#type().eq(t));
+                }
+                let protocols = query.exec(db).await?;
+                let mut tbuilder = tabled::builder::Builder::default();
+                tbuilder.push_record(["ID", "Name", "Type"]);
+                for protocol in protocols {
+                    tbuilder.push_record([
+                        protocol.id.to_string(),
+                        protocol.name,
+                        protocol.r#type.to_string(),
+                    ])
+                }
+                println!("{}", tbuilder.build().with(style::BasicTable));
+            }
+            PropagationCommands::Show { id } => {
+                let p = Protocol::filter_by_id(id).one().exec(db).await?;
+                let mut tbuilder = tabled::builder::Builder::default();
+                tbuilder.push_record(["ID", &p.id.to_string()]);
+                tbuilder.push_record(["Name", &p.name]);
+                tbuilder.push_record(["Type", &p.r#type.to_string()]);
+                tbuilder.push_record(["Notes", &p.notes.unwrap_or_else(|| "-".into())]);
+                tbuilder.push_record(["Instructions", &p.instructions]);
+                println!("{}", tbuilder.build().with(style::DetailTable));
+            }
+            PropagationCommands::Add {
+                name,
+                r#type,
+                notes,
+            } => {
+                let item = Protocol::create()
+                    .name(name)
+                    .r#type(r#type)
+                    .notes(notes)
+                    .exec(db)
+                    .await?;
+                println!("Added protocol {}", item.id);
+            }
+            PropagationCommands::Modify {
+                id,
+                name,
+                r#type,
+                notes,
+            } => {
+                let mut query = Protocol::update_by_id(id);
+                if let Some(name) = name {
+                    query = query.name(name);
+                }
+                if let Some(t) = r#type {
+                    query = query.r#type(t);
+                }
+
+                if let Some(notes) = notes {
+                    query = query.notes(notes);
+                }
+                query.exec(db).await?;
+                println!("Updated protocol {id}");
+            }
+            PropagationCommands::Remove { id, assumeyes } => {
+                if *assumeyes
+                    || inquire::Confirm::new(
+                        "Are you sure you wish to remove this Propagation protocol?",
+                    )
+                    .with_default(false)
+                    .with_help_message("It will remove all related steps")
+                    .prompt()?
+                {
+                    Protocol::delete_by_id(db, id).await?;
+                    println!("Removed propagation protocol {id}");
+                }
+            }
+            PropagationCommands::Import { path } => {
+                #[derive(Debug, Deserialize)]
+                struct ProtocolInfo {
+                    pub name: String,
+                    pub instructions: String,
+                    pub notes: Option<String>,
+                    pub r#type: ProtocolType,
+                }
+                let protocols: Vec<ProtocolInfo> =
+                    serde_yaml::from_reader(std::fs::File::open(path)?)?;
+                for p in protocols {
+                    Protocol::create()
+                        .name(p.name)
+                        .instructions(p.instructions)
+                        .notes(p.notes)
+                        .r#type(p.r#type)
+                        .exec(db)
+                        .await?;
+                }
+            }
+        }
+        Ok(())
+    }
 }

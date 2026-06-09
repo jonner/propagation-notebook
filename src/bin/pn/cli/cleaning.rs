@@ -1,7 +1,7 @@
 use propagation_notebook::collecting::CleaningProcedure;
 use toasty::Db;
 
-use crate::{join_or_default, style};
+use crate::{style, util::join_or_default};
 
 #[derive(Debug, clap::Subcommand)]
 pub enum CleaningCommands {

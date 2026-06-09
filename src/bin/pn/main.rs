@@ -3,83 +3,16 @@ use std::collections::HashMap;
 use anyhow::anyhow;
 use clap::Parser;
 use directories::ProjectDirs;
-use propagation_notebook::{
-    propagation::{Protocol, ProtocolType},
-    region::RegionalTaxonStatus,
-    taxonomy::Taxon,
-};
-use serde::Deserialize;
-use tabled::builder::Builder as TableBuilder;
+use propagation_notebook::{region::RegionalTaxonStatus, taxonomy::Taxon};
 use toasty::Db;
 use tracing::level_filters::LevelFilter;
 use tracing_subscriber::{EnvFilter, layer::SubscriberExt, util::SubscriberInitExt};
 
-use crate::cli::{MainCommand, Options, propagation::PropagationCommands};
+use crate::cli::{MainCommand, Options};
 
 mod cli;
-
-mod style {
-    use tabled::{
-        grid::{
-            config::ColoredConfig,
-            dimension::CompleteDimension,
-            records::{ExactRecords, Records},
-        },
-        settings::{Alignment, Modify, Style, TableOption, object::Columns},
-    };
-
-    pub struct BasicTable;
-
-    impl<R> TableOption<R, ColoredConfig, CompleteDimension> for BasicTable
-    where
-        R: Records,
-    {
-        fn change(
-            self,
-            records: &mut R,
-            cfg: &mut ColoredConfig,
-            dimension: &mut CompleteDimension,
-        ) {
-            Style::empty().change(records, cfg, dimension);
-        }
-    }
-    pub struct DetailTable;
-    impl<R> TableOption<R, ColoredConfig, CompleteDimension> for DetailTable
-    where
-        R: ExactRecords + Records,
-    {
-        fn change(
-            self,
-            records: &mut R,
-            cfg: &mut ColoredConfig,
-            dimension: &mut CompleteDimension,
-        ) {
-            BasicTable.change(records, cfg, dimension);
-            Modify::new(Columns::first())
-                .with(Alignment::right())
-                .change(records, cfg, dimension);
-        }
-    }
-}
-
-fn truncate_with_summary(s: &str, max_chars: usize) -> String {
-    let extra_chars = s.chars().count().saturating_sub(max_chars);
-    if extra_chars == 0 {
-        return s.to_string();
-    }
-    s.chars().take(max_chars).collect::<String>() + &format!("... [{extra_chars} more characters]")
-}
-
-fn join_or_default<T, F>(items: &[T], default: &str, extract: F) -> String
-where
-    F: Fn(&T) -> String,
-{
-    if items.is_empty() {
-        default.to_string()
-    } else {
-        items.iter().map(extract).collect::<Vec<_>>().join("\n")
-    }
-}
+mod style;
+mod util;
 
 async fn list_regional_taxa(db: &mut toasty::Db, region_id: u64) -> anyhow::Result<()> {
     let regional_statuses =
@@ -110,7 +43,7 @@ async fn list_regional_taxa(db: &mut toasty::Db, region_id: u64) -> anyhow::Resu
         .map(|s| (s.taxon_id, s))
         .collect::<HashMap<_, _>>();
 
-    let mut tbuilder = TableBuilder::default();
+    let mut tbuilder = tabled::builder::Builder::default();
     tbuilder.push_record([
         "ID",
         "Taxon",
@@ -180,101 +113,7 @@ async fn main() -> anyhow::Result<()> {
         MainCommand::Taxa { command } => command.run(&mut db).await?,
         MainCommand::Regions { command } => command.run(&mut db).await?,
         MainCommand::Cleaning { command } => command.run(&mut db).await?,
-        MainCommand::Propagation { command } => match command {
-            PropagationCommands::List { r#type } => {
-                let mut query = Protocol::all();
-                if let Some(t) = r#type {
-                    query = query.filter(Protocol::fields().r#type().eq(t));
-                }
-                let protocols = query.exec(&mut db).await?;
-                let mut tbuilder = TableBuilder::default();
-                tbuilder.push_record(["ID", "Name", "Type"]);
-                for protocol in protocols {
-                    tbuilder.push_record([
-                        protocol.id.to_string(),
-                        protocol.name,
-                        protocol.r#type.to_string(),
-                    ])
-                }
-                println!("{}", tbuilder.build().with(style::BasicTable));
-            }
-            PropagationCommands::Show { id } => {
-                let p = Protocol::filter_by_id(id).one().exec(&mut db).await?;
-                let mut tbuilder = TableBuilder::default();
-                tbuilder.push_record(["ID", &p.id.to_string()]);
-                tbuilder.push_record(["Name", &p.name]);
-                tbuilder.push_record(["Type", &p.r#type.to_string()]);
-                tbuilder.push_record(["Notes", &p.notes.unwrap_or_else(|| "-".into())]);
-                tbuilder.push_record(["Instructions", &p.instructions]);
-                println!("{}", tbuilder.build().with(style::DetailTable));
-            }
-            PropagationCommands::Add {
-                name,
-                r#type,
-                notes,
-            } => {
-                let item = Protocol::create()
-                    .name(name)
-                    .r#type(r#type)
-                    .notes(notes)
-                    .exec(&mut db)
-                    .await?;
-                println!("Added protocol {}", item.id);
-            }
-            PropagationCommands::Modify {
-                id,
-                name,
-                r#type,
-                notes,
-            } => {
-                let mut query = Protocol::update_by_id(id);
-                if let Some(name) = name {
-                    query = query.name(name);
-                }
-                if let Some(t) = r#type {
-                    query = query.r#type(t);
-                }
-
-                if let Some(notes) = notes {
-                    query = query.notes(notes);
-                }
-                query.exec(&mut db).await?;
-                println!("Updated protocol {id}");
-            }
-            PropagationCommands::Remove { id, assumeyes } => {
-                if assumeyes
-                    || inquire::Confirm::new(
-                        "Are you sure you wish to remove this Propagation protocol?",
-                    )
-                    .with_default(false)
-                    .with_help_message("It will remove all related steps")
-                    .prompt()?
-                {
-                    Protocol::delete_by_id(&mut db, id).await?;
-                    println!("Removed propagation protocol {id}");
-                }
-            }
-            PropagationCommands::Import { path } => {
-                #[derive(Debug, Deserialize)]
-                struct ProtocolInfo {
-                    pub name: String,
-                    pub instructions: String,
-                    pub notes: Option<String>,
-                    pub r#type: ProtocolType,
-                }
-                let protocols: Vec<ProtocolInfo> =
-                    serde_yaml::from_reader(std::fs::File::open(path)?)?;
-                for p in protocols {
-                    Protocol::create()
-                        .name(p.name)
-                        .instructions(p.instructions)
-                        .notes(p.notes)
-                        .r#type(p.r#type)
-                        .exec(&mut db)
-                        .await?;
-                }
-            }
-        },
+        MainCommand::Propagation { command } => command.run(&mut db).await?,
     };
     Ok(())
 }
