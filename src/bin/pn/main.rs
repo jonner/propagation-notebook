@@ -7,7 +7,7 @@ use propagation_notebook::{
     collecting::CleaningProcedure,
     propagation::{Protocol, ProtocolType},
     region::{Region, RegionalTaxonStatus},
-    taxonomy::{Synonym, Taxon, VernacularName},
+    taxonomy::Taxon,
 };
 use serde::Deserialize;
 use tabled::builder::Builder as TableBuilder;
@@ -21,14 +21,12 @@ use crate::{
         cleaning::CleaningCommands,
         propagation::PropagationCommands,
         region::{RegionCommands, RegionTaxaCommands},
-        taxa::TaxonCommands,
     },
     import_region::import_region,
 };
 
 mod cli;
 mod import_region;
-mod import_taxa;
 
 mod style {
     use tabled::{
@@ -189,7 +187,7 @@ async fn main() -> anyhow::Result<()> {
         .await?;
     match options.command {
         MainCommand::Init => init_command(&mut db).await?,
-        MainCommand::Taxa { command } => taxa_command(&mut db, command).await?,
+        MainCommand::Taxa { command } => command.run(&mut db).await?,
         MainCommand::Regions { command } => match command {
             RegionCommands::List => {
                 let regions = Region::all()
@@ -611,279 +609,4 @@ async fn init_command(db: &mut Db) -> anyhow::Result<()> {
             }
         }
     }
-}
-
-async fn taxa_command(db: &mut Db, command: TaxonCommands) -> anyhow::Result<()> {
-    match command {
-        TaxonCommands::Search { search_string } => {
-            tracing::debug!("Searching for exact complete name");
-            if let Ok(found) = Taxon::filter(Taxon::fields().complete_name().eq(&search_string))
-                .one()
-                .exec(db)
-                .await
-            {
-                println!("found taxon {}", found.reference());
-            } else {
-                tracing::debug!("Searching for approximate complete name");
-                let wildcard = format!("%{search_string}%");
-                let taxa = Taxon::filter(Taxon::fields().complete_name().like(&wildcard))
-                    .exec(db)
-                    .await?;
-                if !taxa.is_empty() {
-                    println!("Possible options for '{search_string}':");
-                    for t in taxa {
-                        println!("- {}", t.reference());
-                    }
-                } else {
-                    tracing::debug!("Searching for exact scientific synonym");
-                    if let Ok(found) =
-                        Synonym::filter(Synonym::fields().complete_name().eq(&search_string))
-                            .include(Synonym::fields().taxon())
-                            .one()
-                            .exec(db)
-                            .await
-                    {
-                        println!(
-                            "Found '{}' which is a synonym for {}",
-                            found.complete_name,
-                            found.taxon.get().reference(),
-                        );
-                    } else {
-                        tracing::debug!("Searching for approximate scientific synonyms");
-                        let synonyms =
-                            Synonym::filter(Synonym::fields().complete_name().like(&wildcard))
-                                .include(Synonym::fields().taxon())
-                                .exec(db)
-                                .await?;
-                        if !synonyms.is_empty() {
-                            println!("Possible options for '{search_string}':");
-                            for syn in synonyms {
-                                println!(
-                                    "'{}' is a synonym for {}",
-                                    syn.complete_name,
-                                    syn.taxon.get().reference(),
-                                );
-                            }
-                        } else {
-                            tracing::debug!("Searching for exact vernacular name");
-                            // look up common names
-                            if let Ok(vernacular) = VernacularName::filter(
-                                VernacularName::fields().name().eq(&search_string),
-                            )
-                            .include(VernacularName::fields().taxon())
-                            .one()
-                            .exec(db)
-                            .await
-                            {
-                                println!(
-                                    "Found {} ({})",
-                                    vernacular.taxon.get().reference(),
-                                    vernacular.name
-                                );
-                            } else {
-                                tracing::debug!("Searching for approximate vernacular names");
-                                let vernaculars = VernacularName::filter(
-                                    VernacularName::fields().name().like(&wildcard),
-                                )
-                                .include(VernacularName::fields().taxon())
-                                .exec(db)
-                                .await?;
-                                if !vernaculars.is_empty() {
-                                    println!("Possible options for '{search_string}':");
-                                    for vernacular in vernaculars {
-                                        println!(
-                                            "{} ({})",
-                                            vernacular.taxon.get().reference(),
-                                            vernacular.name,
-                                        );
-                                    }
-                                } else {
-                                    println!("No options found");
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        TaxonCommands::Show { id } => {
-            let taxon = Taxon::filter_by_id(id)
-                .include(Taxon::fields().parent())
-                .include(Taxon::fields().children())
-                .include(Taxon::fields().vernaculars())
-                .include(Taxon::fields().synonyms())
-                .include(Taxon::fields().regional_statuses().region())
-                .include(Taxon::fields().collecting_data())
-                .include(Taxon::fields().cleaning_procedures().procedure())
-                .include(Taxon::fields().propagation_protocols().protocol())
-                .one()
-                .exec(db)
-                .await?;
-            {
-                let mut tbuilder = TableBuilder::default();
-                tbuilder.push_record(["ID", &taxon.id.to_string()]);
-                tbuilder.push_record(["Name", &taxon.complete_name]);
-                tbuilder.push_record(["Rank", &taxon.rank.to_string()]);
-                tbuilder.push_record([
-                    "Parent",
-                    &taxon
-                        .parent
-                        .get()
-                        .as_ref()
-                        .map(|p| format!("{} ({})", p.reference(), p.rank))
-                        .unwrap_or_else(|| "-".into()),
-                ]);
-                tbuilder.push_record([
-                    "Synonyms",
-                    &join_or_default(taxon.synonyms.get(), "-", |v| v.complete_name.clone()),
-                ]);
-                tbuilder.push_record([
-                    "Common Name(s)",
-                    &join_or_default(taxon.vernaculars.get(), "-", |v| v.name.clone()),
-                ]);
-                tbuilder.push_record([
-                    "Child taxa",
-                    &join_or_default(taxon.children.get(), "-", |t| {
-                        format!("{} ({})", t.reference(), t.rank)
-                    }),
-                ]);
-                tbuilder.push_record([
-                    "Ripening",
-                    taxon
-                        .collecting_data
-                        .get()
-                        .as_ref()
-                        .and_then(|d| d.ripening_indicators.as_deref())
-                        .unwrap_or("-"),
-                ]);
-                tbuilder.push_record([
-                    "Harvesting",
-                    taxon
-                        .collecting_data
-                        .get()
-                        .as_ref()
-                        .and_then(|d| d.harvesting_notes.as_deref())
-                        .unwrap_or("-"),
-                ]);
-                tbuilder.push_record([
-                    "Storage Conditions",
-                    taxon
-                        .collecting_data
-                        .get()
-                        .as_ref()
-                        .and_then(|d| d.storage.as_deref())
-                        .unwrap_or("-"),
-                ]);
-                tbuilder.push_record([
-                    "Storage Life",
-                    taxon
-                        .collecting_data
-                        .get()
-                        .as_ref()
-                        .and_then(|d| d.storage_life.as_deref())
-                        .unwrap_or("-"),
-                ]);
-                tbuilder.push_record(["Seed Cleaning", &{
-                    match taxon.cleaning_procedures.get() {
-                        procedures if procedures.is_empty() => "-".to_string(),
-                        procedures => {
-                            let mut inner_table = TableBuilder::default();
-                            inner_table.push_record(["ID", "Name"]);
-                            procedures.iter().for_each(|tcp| {
-                                let proc = tcp.procedure.get();
-                                inner_table.push_record([&proc.id.to_string(), &proc.name]);
-                            });
-                            inner_table.build().with(style::DetailTable).to_string()
-                        }
-                    }
-                }]);
-                tbuilder.push_record(["Propagation Protocols", &{
-                    match taxon.propagation_protocols.get() {
-                        tp if tp.is_empty() => "-".to_string(),
-                        tps => {
-                            let mut inner_table = TableBuilder::default();
-                            inner_table.push_record(["ID", "Name", "Type"]);
-                            tps.iter().for_each(|tp| {
-                                let protocol = tp.protocol.get();
-                                inner_table.push_record([
-                                    &protocol.id.to_string(),
-                                    &protocol.name,
-                                    &protocol.r#type.to_string(),
-                                ]);
-                            });
-                            inner_table.build().with(style::BasicTable).to_string()
-                        }
-                    }
-                }]);
-                tbuilder.push_record(["Regions", &{
-                    let regions = taxon.regional_statuses.get();
-                    if regions.is_empty() {
-                        "-".to_string()
-                    } else {
-                        let mut inner_table = TableBuilder::default();
-                        inner_table.push_record(["ID", "Name", "Origin"]);
-                        for rs in regions.iter() {
-                            inner_table.push_record([
-                                rs.region.get().id.to_string(),
-                                rs.region.get().name.clone(),
-                                rs.origin
-                                    .map(|val| val.to_string())
-                                    .unwrap_or_else(|| "-".into()),
-                            ]);
-                        }
-                        inner_table.build().with(style::BasicTable).to_string()
-                    }
-                }]);
-                println!("{}", tbuilder.build().with(style::DetailTable));
-                println!();
-            }
-        }
-        TaxonCommands::List { region_id } => match region_id {
-            Some(id) => list_regional_taxa(db, id).await?,
-            None => {
-                let taxa = Taxon::all()
-                    .order_by(Taxon::fields().sequence().asc())
-                    .exec(db)
-                    .await?;
-                let ntaxa = taxa.len();
-                if taxa.is_empty() {
-                    println!(
-                        "The taxonomy has not been imported. Please download the ITIS taxonomy database from https://www.itis.gov/downloads/index.html and import it with `pn taxa import`"
-                    )
-                } else {
-                    let mut tbuilder = TableBuilder::default();
-                    tbuilder.push_record(["ID", "Name"]);
-                    for taxon in taxa {
-                        tbuilder.push_record([taxon.id.to_string(), taxon.complete_name]);
-                    }
-                    println!("{}", tbuilder.build().with(style::BasicTable));
-                    println!("{} taxa found", ntaxa);
-                }
-            }
-        },
-        TaxonCommands::Import {
-            db_uri,
-            authority,
-            assumeyes,
-        } => {
-            let ntaxa = Taxon::all().count().exec(db).await?;
-            if assumeyes
-                || inquire::Confirm::new(
-                    "Are you sure you wish to import all taxa from the external database?",
-                )
-                .with_default(false)
-                .with_help_message(&format!("The database currently contains {ntaxa} taxa"))
-                .prompt()?
-            {
-                // FIXME: we should probably clear the database if the
-                // user confirms rather than re-import a taxonomy into an
-                // existing taxonomy
-                import_taxa::import_taxa(db, &db_uri, authority).await?
-            }
-        }
-        TaxonCommands::Cleaning { taxon_id, command } => command.run(db, taxon_id).await?,
-        TaxonCommands::Collecting { taxon_id, command } => command.run(db, taxon_id).await?,
-        TaxonCommands::Propagation { taxon_id, command } => command.run(db, taxon_id).await?,
-    }
-    Ok(())
 }
