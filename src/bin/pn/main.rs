@@ -4,7 +4,6 @@ use anyhow::anyhow;
 use clap::Parser;
 use directories::ProjectDirs;
 use propagation_notebook::{
-    collecting::CleaningProcedure,
     propagation::{Protocol, ProtocolType},
     region::RegionalTaxonStatus,
     taxonomy::Taxon,
@@ -15,9 +14,7 @@ use toasty::Db;
 use tracing::level_filters::LevelFilter;
 use tracing_subscriber::{EnvFilter, layer::SubscriberExt, util::SubscriberInitExt};
 
-use crate::cli::{
-    MainCommand, Options, cleaning::CleaningCommands, propagation::PropagationCommands,
-};
+use crate::cli::{MainCommand, Options, propagation::PropagationCommands};
 
 mod cli;
 
@@ -182,98 +179,7 @@ async fn main() -> anyhow::Result<()> {
         MainCommand::Init => init_command(&mut db).await?,
         MainCommand::Taxa { command } => command.run(&mut db).await?,
         MainCommand::Regions { command } => command.run(&mut db).await?,
-        MainCommand::Cleaning { command } => match command {
-            CleaningCommands::List => {
-                let items = CleaningProcedure::all()
-                    .include(CleaningProcedure::fields().taxon_links().taxon())
-                    .exec(&mut db)
-                    .await?;
-                let nitems = items.len();
-                let mut tbuilder = TableBuilder::default();
-                tbuilder.push_record(["ID", "Name", "Taxa"]);
-                for item in items {
-                    tbuilder.push_record([
-                        item.id.to_string(),
-                        item.name,
-                        item.taxon_links.get().len().to_string(),
-                    ])
-                }
-                println!("{}", tbuilder.build().with(style::BasicTable));
-                println!("\n{nitems} found");
-            }
-            CleaningCommands::Show { id } => {
-                let procedure = CleaningProcedure::filter_by_id(id)
-                    .include(CleaningProcedure::fields().taxon_links().taxon())
-                    .one()
-                    .exec(&mut db)
-                    .await?;
-                let mut tbuilder = TableBuilder::default();
-                tbuilder.push_record(["ID", &procedure.id.to_string()]);
-                tbuilder.push_record(["Name", &procedure.name]);
-                tbuilder.push_record(["Notes", &procedure.notes.unwrap_or_else(|| "-".into())]);
-                tbuilder.push_record([
-                    "Taxa",
-                    &join_or_default(procedure.taxon_links.get(), "-", |v| {
-                        v.taxon.get().reference()
-                    }),
-                ]);
-                tbuilder.push_record(["Instructions", &procedure.instructions]);
-                println!("{}", tbuilder.build().with(style::BasicTable));
-            }
-            CleaningCommands::Add {
-                name,
-                instructions,
-                notes,
-            } => {
-                let item = CleaningProcedure::create()
-                    .name(name)
-                    .instructions(instructions)
-                    .notes(notes)
-                    .exec(&mut db)
-                    .await?;
-                println!("Added new procedure {}", item.id);
-            }
-            CleaningCommands::Remove { id, assumeyes } => {
-                let item = CleaningProcedure::filter_by_id(id)
-                    .include(CleaningProcedure::fields().taxon_links())
-                    .one()
-                    .exec(&mut db)
-                    .await?;
-                if assumeyes
-                    || inquire::Confirm::new(&format!(
-                        "Are you sure you wish to remove cleaning procedure {id}?"
-                    ))
-                    .with_default(false)
-                    .with_help_message(&format!(
-                        "It is used by {} taxa",
-                        item.taxon_links.get().len()
-                    ))
-                    .prompt()?
-                {
-                    CleaningProcedure::delete_by_id(&mut db, id).await?;
-                    println!("Removed cleaning procedure {id}");
-                }
-            }
-            CleaningCommands::Modify {
-                id,
-                name,
-                instructions,
-                notes,
-            } => {
-                let mut query = CleaningProcedure::update_by_id(id);
-                if let Some(name) = name {
-                    query = query.name(name);
-                }
-                if let Some(instructions) = instructions {
-                    query = query.instructions(instructions);
-                }
-                if let Some(notes) = notes {
-                    query = query.notes(notes);
-                }
-                query.exec(&mut db).await?;
-                println!("Modified cleaning procedure {id}");
-            }
-        },
+        MainCommand::Cleaning { command } => command.run(&mut db).await?,
         MainCommand::Propagation { command } => match command {
             PropagationCommands::List { r#type } => {
                 let mut query = Protocol::all();
