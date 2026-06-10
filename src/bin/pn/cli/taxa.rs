@@ -314,9 +314,13 @@ impl TaxonCommands {
                                 .gt(0)
                                 .or(Taxon::fields().regional_statuses().any(
                                     RegionalTaxonStatus::fields()
-                                        .window_start()
+                                        .harvest_window()
+                                        .start()
                                         .is_some()
-                                        .or(RegionalTaxonStatus::fields().window_end().is_some()),
+                                        .or(RegionalTaxonStatus::fields()
+                                            .harvest_window()
+                                            .end()
+                                            .is_some()),
                                 ))
                                 .or(Taxon::fields()
                                     .cleaning_procedures()

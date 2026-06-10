@@ -1,7 +1,8 @@
 use std::path::PathBuf;
 
 use propagation_notebook::region::{
-    ConservationStatus, Origin, Region, RegionalTaxonStatus, WetlandIndicator,
+    ConservationStatus, Origin, Region, RegionalHarvestWindow, RegionalTaxonStatus,
+    WetlandIndicator,
 };
 use toasty::Db;
 
@@ -258,16 +259,19 @@ impl RegionCommands {
                             .map(|v| v.to_string())
                             .unwrap_or_else(|| "-".into()),
                     ]);
-                    let window_str = match (status.window_start, status.window_end) {
+                    let window_str = match (status.harvest_window.start, status.harvest_window.end)
+                    {
                         (None, None) => "-".into(),
                         _ => format!(
                             "{} - {}",
                             status
-                                .window_start
+                                .harvest_window
+                                .start
                                 .map(|d| d.strftime("%b %d").to_string())
                                 .unwrap_or("?".to_string()),
                             status
-                                .window_end
+                                .harvest_window
+                                .end
                                 .map(|d| d.strftime("%b %d").to_string())
                                 .unwrap_or("?".to_string())
                         ),
@@ -286,16 +290,14 @@ impl RegionCommands {
                         .c_value(props.c_value)
                         .conservation_status(props.conservation_status)
                         .wetland_indicator(props.wetland_indicator)
-                        .window_start(
-                            props
+                        .harvest_window(RegionalHarvestWindow {
+                            start: props
                                 .harvest_start
                                 .map(|d| d.with().year(2000).build().unwrap()),
-                        )
-                        .window_end(
-                            props
+                            end: props
                                 .harvest_end
                                 .map(|d| d.with().year(2000).build().unwrap()),
-                        )
+                        })
                         .exec(db)
                         .await?;
                     println!("Added regional taxon {}", s.id);
@@ -318,11 +320,16 @@ impl RegionCommands {
                         query = query.wetland_indicator(wetland_indicator);
                     }
                     if let Some(harvest_start) = props.harvest_start {
-                        query =
-                            query.window_start(harvest_start.with().year(2000).build().unwrap());
+                        query = query.harvest_window(toasty::stmt::patch(
+                            RegionalHarvestWindow::fields().start(),
+                            harvest_start.with().year(2000).build().unwrap(),
+                        ));
                     }
                     if let Some(harvest_end) = props.harvest_end {
-                        query = query.window_end(harvest_end.with().year(2000).build().unwrap());
+                        query = query.harvest_window(toasty::stmt::patch(
+                            RegionalHarvestWindow::fields().end(),
+                            harvest_end.with().year(2000).build().unwrap(),
+                        ));
                     }
                     query.exec(db).await?;
                     println!("Modified taxon {} in region {}", taxon_id, region_id);
