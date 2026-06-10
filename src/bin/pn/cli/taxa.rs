@@ -1,4 +1,9 @@
-use propagation_notebook::taxonomy::{Synonym, Taxon, VernacularName};
+use propagation_notebook::{
+    collecting::TaxonCleaningProcedure,
+    propagation::TaxonProtocol,
+    region::RegionalTaxonStatus,
+    taxonomy::{Synonym, Taxon, VernacularName},
+};
 use toasty::Db;
 
 use crate::{cli::list_regional_taxa, style, util::join_or_default};
@@ -20,6 +25,8 @@ pub enum TaxonCommands {
     List {
         #[arg(short, long, help = "Show only taxa in the specified region")]
         region_id: Option<u64>,
+        #[arg(long, help = "Show only taxa with custom data", hide = true)]
+        has_data: bool,
     },
     #[command(about = "Show detailed information about a Taxon")]
     Show { id: u64 },
@@ -293,27 +300,54 @@ impl TaxonCommands {
                     println!();
                 }
             }
-            TaxonCommands::List { region_id } => match region_id {
+            TaxonCommands::List {
+                region_id,
+                has_data,
+            } => match region_id {
                 Some(id) => list_regional_taxa(db, *id).await?,
                 None => {
-                    let taxa = Taxon::all()
+                    let taxa = if *has_data {
+                        Taxon::filter(
+                            Taxon::fields()
+                                .collecting_data()
+                                .id()
+                                .gt(0)
+                                .or(Taxon::fields().regional_statuses().any(
+                                    RegionalTaxonStatus::fields()
+                                        .window_start()
+                                        .is_some()
+                                        .or(RegionalTaxonStatus::fields().window_end().is_some()),
+                                ))
+                                .or(Taxon::fields()
+                                    .cleaning_procedures()
+                                    .any(TaxonCleaningProcedure::fields().taxon_id().gt(0)))
+                                .or(Taxon::fields()
+                                    .propagation_protocols()
+                                    .any(TaxonProtocol::fields().taxon_id().gt(0))),
+                        )
                         .order_by(Taxon::fields().sequence().asc())
                         .exec(db)
-                        .await?;
-                    let ntaxa = taxa.len();
-                    if taxa.is_empty() {
-                        println!(
-                            "The taxonomy has not been imported. Please download the ITIS taxonomy database from https://www.itis.gov/downloads/index.html and import it with `pn taxa import`"
-                        )
+                        .await?
                     } else {
-                        let mut tbuilder = tabled::builder::Builder::default();
-                        tbuilder.push_record(["ID", "Name"]);
-                        for taxon in taxa {
-                            tbuilder.push_record([taxon.id.to_string(), taxon.complete_name]);
+                        let taxa = Taxon::all()
+                            .order_by(Taxon::fields().sequence().asc())
+                            .exec(db)
+                            .await?;
+                        if taxa.is_empty() {
+                            println!(
+                                "The taxonomy has not been imported. Please download the ITIS taxonomy database from https://www.itis.gov/downloads/index.html and import it with `pn taxa import`"
+                            )
                         }
-                        println!("{}", tbuilder.build().with(style::BasicTable));
-                        println!("{} taxa found", ntaxa);
+                        taxa
+                    };
+                    let ntaxa = taxa.len();
+                    let mut tbuilder = tabled::builder::Builder::default();
+                    tbuilder.push_record(["ID", "Name"]);
+                    for taxon in taxa {
+                        tbuilder.push_record([taxon.id.to_string(), taxon.complete_name]);
                     }
+                    println!("{}", tbuilder.build().with(style::BasicTable));
+                    println!("{} taxa found", ntaxa);
                 }
             },
             TaxonCommands::Import {
