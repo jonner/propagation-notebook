@@ -1,16 +1,29 @@
-use anyhow::Context;
+use anyhow::anyhow;
+use directories::ProjectDirs;
 use toasty_cli::{Config, ToastyCli};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     let config = Config::load()?;
 
-    let uri = std::env::var("DB_URI").with_context(
-        || "Please set DB_URI to the database connection URI (e.g. 'sqlite:./file.sqlite')",
-    )?;
+    let project_dir = ProjectDirs::from("org", "quotidian", "propagation-notebook")
+        .ok_or_else(|| anyhow!("Unable to determine project data directory"))?
+        .data_dir()
+        .to_path_buf();
+    let db_uri = match std::env::var("PN_DB_URI") {
+        Ok(s) => Ok(s),
+        Err(std::env::VarError::NotPresent) => Ok(format!(
+            "sqlite:{}",
+            project_dir
+                .join("propagation-notebook.sqlite")
+                .to_str()
+                .unwrap()
+        )),
+        e => e,
+    }?;
     let db = toasty::Db::builder()
         .models(propagation_notebook::models())
-        .connect(&uri)
+        .connect(&db_uri)
         .await?;
 
     let cli = ToastyCli::with_config(db, config);
