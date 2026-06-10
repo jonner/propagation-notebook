@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use serde::{Deserialize, Serialize};
 use toasty::Deferred;
 
@@ -84,6 +86,21 @@ pub enum Origin {
 pub struct RegionalHarvestWindow {
     pub start: Option<jiff::civil::Date>,
     pub end: Option<jiff::civil::Date>,
+}
+
+impl Display for RegionalHarvestWindow {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{} - {}",
+            self.start
+                .map(|d| d.strftime("%b %d").to_string())
+                .unwrap_or("?".to_string()),
+            self.end
+                .map(|d| d.strftime("%b %d").to_string())
+                .unwrap_or("?".to_string())
+        )
+    }
 }
 
 #[derive(Debug, Clone, toasty::Model)]

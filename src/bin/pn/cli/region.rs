@@ -259,24 +259,7 @@ impl RegionCommands {
                             .map(|v| v.to_string())
                             .unwrap_or_else(|| "-".into()),
                     ]);
-                    let window_str = match (status.harvest_window.start, status.harvest_window.end)
-                    {
-                        (None, None) => "-".into(),
-                        _ => format!(
-                            "{} - {}",
-                            status
-                                .harvest_window
-                                .start
-                                .map(|d| d.strftime("%b %d").to_string())
-                                .unwrap_or("?".to_string()),
-                            status
-                                .harvest_window
-                                .end
-                                .map(|d| d.strftime("%b %d").to_string())
-                                .unwrap_or("?".to_string())
-                        ),
-                    };
-                    tbuilder.push_record(["Harvest Window", &window_str]);
+                    tbuilder.push_record(["Harvest Window", &status.harvest_window.to_string()]);
                     println!("{}", tbuilder.build().with(style::DetailTable));
                     println!();
                 }
