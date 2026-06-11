@@ -1,7 +1,7 @@
 use toasty::Deferred;
 
 use crate::{
-    collecting::{CollectingData, TaxonCleaningProcedure},
+    collecting::{CollectingData, HarvestEvent, TaxonCleaningProcedure},
     propagation::TaxonProtocol,
     region::RegionalTaxonStatus,
 };
@@ -143,6 +143,8 @@ pub struct Taxon {
     pub propagation_protocols: Deferred<Vec<TaxonProtocol>>,
     #[has_many]
     pub notes: Deferred<Vec<TaxonNote>>,
+    #[has_many]
+    pub harvest_events: Deferred<Vec<HarvestEvent>>,
 }
 
 impl Taxon {

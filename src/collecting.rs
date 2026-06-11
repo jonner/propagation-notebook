@@ -51,3 +51,37 @@ pub struct CleaningProcedure {
     #[has_many(pair=procedure)]
     pub taxon_links: Deferred<Vec<TaxonCleaningProcedure>>,
 }
+
+#[derive(Debug, Clone, toasty::Model)]
+pub struct HarvestLocation {
+    #[auto]
+    #[key]
+    pub id: u64,
+
+    name: String,
+    latitude: f32,
+    longitude: f32,
+
+    #[has_many(pair=location)]
+    pub harvest_events: Deferred<Vec<HarvestEvent>>,
+}
+
+#[derive(Debug, Clone, toasty::Model)]
+pub struct HarvestEvent {
+    #[auto]
+    #[key]
+    pub id: u64,
+
+    #[index]
+    pub taxon_id: u64,
+    #[belongs_to(key=taxon_id, references=id)]
+    pub taxon: Deferred<Taxon>,
+
+    pub date: jiff::civil::Date,
+    pub notes: Option<String>,
+
+    #[index]
+    pub location_id: u64,
+    #[belongs_to(key=location_id, references=id)]
+    pub location: HarvestLocation,
+}
