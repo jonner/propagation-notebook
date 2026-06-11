@@ -141,6 +141,8 @@ pub struct Taxon {
     pub cleaning_procedures: Deferred<Vec<TaxonCleaningProcedure>>,
     #[has_many]
     pub propagation_protocols: Deferred<Vec<TaxonProtocol>>,
+    #[has_many]
+    pub notes: Deferred<Vec<TaxonNote>>,
 }
 
 impl Taxon {
@@ -183,4 +185,23 @@ pub struct Synonym {
     #[index]
     pub complete_name: String,
     // is_accepted: bool,
+}
+
+#[derive(Debug, Clone, toasty::Model)]
+pub struct TaxonNote {
+    #[auto]
+    #[key]
+    pub id: u64,
+
+    #[index]
+    pub taxon_id: u64,
+    #[belongs_to(key=taxon_id, references=id)]
+    pub taxon: Deferred<Taxon>,
+
+    pub text: String,
+
+    #[auto]
+    pub created_at: jiff::Timestamp,
+    #[auto]
+    pub updated_at: jiff::Timestamp,
 }

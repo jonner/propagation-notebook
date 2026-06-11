@@ -2,7 +2,7 @@ use propagation_notebook::{
     collecting::TaxonCleaningProcedure,
     propagation::TaxonProtocol,
     region::RegionalTaxonStatus,
-    taxonomy::{Synonym, Taxon, VernacularName},
+    taxonomy::{Synonym, Taxon, TaxonNote, VernacularName},
 };
 use toasty::Db;
 
@@ -11,6 +11,7 @@ use crate::{cli::list_regional_taxa, style, util::join_or_default};
 pub mod cleaning;
 pub mod collecting;
 mod import;
+pub mod note;
 pub mod propagation;
 
 #[derive(Debug, Clone, Copy, clap::ValueEnum)]
@@ -71,6 +72,13 @@ pub enum TaxonCommands {
         taxon_id: u64,
         #[command(subcommand)]
         command: propagation::TaxonPropagationCommands,
+    },
+    #[command(about = "Manage notes for a taxon")]
+    Notes {
+        #[arg(short, long, help = "A Taxon ID")]
+        taxon_id: u64,
+        #[command(subcommand)]
+        command: note::TaxonNoteCommands,
     },
 }
 
@@ -178,6 +186,7 @@ impl TaxonCommands {
                     .include(Taxon::fields().collecting_data())
                     .include(Taxon::fields().cleaning_procedures().procedure())
                     .include(Taxon::fields().propagation_protocols().protocol())
+                    .include(Taxon::fields().notes())
                     .one()
                     .exec(db)
                     .await?;
@@ -319,6 +328,19 @@ impl TaxonCommands {
                             inner_table.build().with(style::BasicTable).to_string()
                         }
                     }]);
+                    tbuilder.push_record(["Notes", &{
+                        let notes = taxon.notes.get();
+                        if notes.is_empty() {
+                            "-".to_string()
+                        } else {
+                            let mut inner_table = tabled::builder::Builder::default();
+                            inner_table.push_record(["ID", "Text"]);
+                            for note in notes.iter() {
+                                inner_table.push_record([&note.id.to_string(), &note.text]);
+                            }
+                            inner_table.build().with(style::BasicTable).to_string()
+                        }
+                    }]);
                     println!("{}", tbuilder.build().with(style::DetailTable));
                     println!();
                 }
@@ -350,7 +372,10 @@ impl TaxonCommands {
                                     .any(TaxonCleaningProcedure::fields().taxon_id().gt(0)))
                                 .or(Taxon::fields()
                                     .propagation_protocols()
-                                    .any(TaxonProtocol::fields().taxon_id().gt(0))),
+                                    .any(TaxonProtocol::fields().taxon_id().gt(0)))
+                                .or(Taxon::fields()
+                                    .notes()
+                                    .any(TaxonNote::fields().taxon_id().gt(0))),
                         )
                         .order_by(Taxon::fields().sequence().asc())
                         .exec(db)
@@ -400,6 +425,7 @@ impl TaxonCommands {
             TaxonCommands::Cleaning { taxon_id, command } => command.run(db, *taxon_id).await?,
             TaxonCommands::Collecting { taxon_id, command } => command.run(db, *taxon_id).await?,
             TaxonCommands::Propagation { taxon_id, command } => command.run(db, *taxon_id).await?,
+            TaxonCommands::Notes { taxon_id, command } => command.run(db, *taxon_id).await?,
         }
         Ok(())
     }
