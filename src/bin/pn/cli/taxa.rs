@@ -236,7 +236,7 @@ impl TaxonCommands {
                             .unwrap_or("-"),
                     ]);
                     tbuilder.push_record([
-                        "Harvesting",
+                        "Harvesting Notes",
                         taxon
                             .collecting_data
                             .get()
@@ -244,29 +244,6 @@ impl TaxonCommands {
                             .and_then(|d| d.harvesting_notes.as_deref())
                             .unwrap_or("-"),
                     ]);
-                    tbuilder.push_record(["Harvesting Dates", &{
-                        let regions = taxon
-                            .regional_statuses
-                            .get()
-                            .iter()
-                            .filter(|rs| {
-                                rs.harvest_window.start.is_some() || rs.harvest_window.end.is_some()
-                            })
-                            .collect::<Vec<_>>();
-                        if regions.is_empty() {
-                            "-".to_string()
-                        } else {
-                            let mut inner_table = tabled::builder::Builder::default();
-                            inner_table.push_record(["Region", "Dates"]);
-                            for rs in regions {
-                                inner_table.push_record([
-                                    rs.region.get().reference(),
-                                    rs.harvest_window.to_string(),
-                                ])
-                            }
-                            inner_table.build().with(style::ListTable).to_string()
-                        }
-                    }]);
                     tbuilder.push_record([
                         "Storage Conditions",
                         taxon
@@ -323,7 +300,7 @@ impl TaxonCommands {
                             "-".to_string()
                         } else {
                             let mut inner_table = tabled::builder::Builder::default();
-                            inner_table.push_record(["ID", "Name", "Origin"]);
+                            inner_table.push_record(["ID", "Name", "Origin", "Harvest Dates"]);
                             for rs in regions.iter() {
                                 inner_table.push_record([
                                     rs.region.get().id.to_string(),
@@ -331,6 +308,7 @@ impl TaxonCommands {
                                     rs.origin
                                         .map(|val| val.to_string())
                                         .unwrap_or_else(|| "-".into()),
+                                    rs.harvest_window.to_string(),
                                 ]);
                             }
                             inner_table.build().with(style::ListTable).to_string()
