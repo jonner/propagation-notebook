@@ -26,10 +26,12 @@ pub enum PropagationCommands {
         name: String,
         #[arg(short, long, value_enum)]
         r#type: ProtocolType,
-        #[arg(long, help = "Notes specific to this protocol")]
+        #[arg(long, help = "Instructions for this protocol")]
+        instructions: String,
+        #[arg(long, help = "Additional notes for this protocol")]
         notes: Option<String>,
     },
-    #[command(about = "Add a seed propagation protocol", group(clap::ArgGroup::new("modify_fields").args(["name", "type", "notes"]).required(true).multiple(false)))]
+    #[command(about = "Add a seed propagation protocol", group(clap::ArgGroup::new("modify_fields").args(["name", "type", "notes", "instructions"]).required(true).multiple(true)))]
     Modify {
         #[arg(help = "A protocol ID")]
         id: u64,
@@ -37,7 +39,9 @@ pub enum PropagationCommands {
         name: Option<String>,
         #[arg(short, long, value_enum)]
         r#type: Option<ProtocolType>,
-        #[arg(long, help = "Notes specific to this protocol")]
+        #[arg(long, help = "Instructions for this protocol")]
+        instructions: Option<String>,
+        #[arg(long, help = "Additional notes for this protocol")]
         notes: Option<String>,
     },
     #[command(about = "Remove a seed propagation protocol")]
@@ -87,11 +91,13 @@ impl PropagationCommands {
             PropagationCommands::Add {
                 name,
                 r#type,
+                instructions,
                 notes,
             } => {
                 let item = Protocol::create()
                     .name(name)
                     .r#type(r#type)
+                    .instructions(instructions)
                     .notes(notes)
                     .exec(db)
                     .await?;
@@ -101,6 +107,7 @@ impl PropagationCommands {
                 id,
                 name,
                 r#type,
+                instructions,
                 notes,
             } => {
                 let mut query = Protocol::update_by_id(id);
@@ -110,7 +117,9 @@ impl PropagationCommands {
                 if let Some(t) = r#type {
                     query = query.r#type(t);
                 }
-
+                if let Some(instructions) = instructions {
+                    query = query.instructions(instructions);
+                }
                 if let Some(notes) = notes {
                     query = query.notes(notes);
                 }
