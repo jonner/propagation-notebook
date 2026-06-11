@@ -105,10 +105,16 @@ impl TaxonCollectingCommands {
                     Ok(data) => {
                         println!("Added collection information for taxon {}", data.taxon_id)
                     }
-                    Err(e) if e.is_condition_failed() => {
-                        // the creation likely failed because CollectionData already
-                        // exists for taxon_id, which has a unique constraint. Just
-                        // update the object
+                    Err(e)
+                        if e.is_driver_operation_failed()
+                            // FIXME: it would be nicer if the error categories
+                            // were more fine-grained and I didn't have to
+                            // examine the error string
+                            && e.to_string().contains("constraint failed") =>
+                    {
+                        // The insertion failed because CollectionData already
+                        // exists for taxon_id, which has a unique constraint.
+                        // Just update the existing row
                         let mut query = CollectingData::update_by_taxon_id(taxon_id);
                         if let Some(ripening) = ripening_indicators {
                             query = query.ripening_indicators(ripening);
