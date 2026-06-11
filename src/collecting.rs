@@ -58,12 +58,18 @@ pub struct Location {
     #[key]
     pub id: u64,
 
-    name: String,
-    latitude: f32,
-    longitude: f32,
+    pub name: String,
+    pub latitude: f32,
+    pub longitude: f32,
 
     #[has_many(pair=location)]
     pub harvest_events: Deferred<Vec<HarvestEvent>>,
+}
+
+impl Location {
+    pub fn reference(&self) -> String {
+        format!("{}: {}", self.id, self.name)
+    }
 }
 
 #[derive(Debug, Clone, toasty::Model)]

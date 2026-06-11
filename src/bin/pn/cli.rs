@@ -3,7 +3,9 @@ use std::collections::HashMap;
 use propagation_notebook::{region::RegionalTaxonStatus, taxonomy::Taxon};
 
 use crate::{
-    cli::{cleaning::CleaningCommands, propagation::PropagationCommands},
+    cli::{
+        cleaning::CleaningCommands, location::LocationCommands, propagation::PropagationCommands,
+    },
     style,
 };
 
@@ -35,11 +37,17 @@ pub enum MainCommand {
         #[command(subcommand)]
         command: PropagationCommands,
     },
+    #[command(about = "Location-related commands")]
+    Locations {
+        #[command(subcommand)]
+        command: LocationCommands,
+    },
     #[command(about = "Initialize the database")]
     Init,
 }
 
 pub mod cleaning;
+pub mod location;
 pub mod propagation;
 pub mod region;
 pub mod taxa;

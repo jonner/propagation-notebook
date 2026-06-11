@@ -46,6 +46,7 @@ async fn main() -> anyhow::Result<()> {
         MainCommand::Regions { command } => command.run(&mut db).await?,
         MainCommand::Cleaning { command } => command.run(&mut db).await?,
         MainCommand::Propagation { command } => command.run(&mut db).await?,
+        MainCommand::Locations { command } => command.run(&mut db).await?,
     };
     Ok(())
 }
