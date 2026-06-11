@@ -1,0 +1,222 @@
+- name: Direct sow
+  type: germination
+  instructions: >
+    No pre-treatment is necessary. Seeds should germinate upon sowing in a warm location.
+  notes: This is code 'A' from prairie moon
+- name: Hot Water Treatment
+  type: pretreatment
+  instructions: |
+    1. Bring water to a boil, remove from heat, and pour over seeds.
+    2. Soak the seeds at room temperature for 24 hours.
+    3. Filter through a coffee filter and fine mesh strainer.
+  notes: >
+    This hot water treatment helps break open the hard seed coat. This may
+    happen naturally with freeze/thaw cycles, but better germination can be
+    expected if hot water treatment is done before fall planting outside, or
+    artificial cold-moist stratification in a fridge
+
+    This is code 'B' from prairie moon
+- name: 10-day Cold, moist stratification
+  type: pretreatment
+  instructions: |
+    1. Using our germination codes, calculate the date to start cold, moist stratification pre-treatment. Briefly give your seeds a soak in a container, and pour contents over a coffee filter, paper towel, and/or fine screen to drain.
+    2. Arrange seed in a single layer and allow all excess water to drain off.
+    3. Fold seed loosely into the coffee filter or paper towel to allow for weekly spot checks. The seed and paper should be damp but not wet.
+    4. Add a dry paper towel to your labeled resealable bag to help to maintain even moisture while pulling excessive moisture away. Do not allow the stratification medium to completely dry out or stay soggy.
+    5. Place the sealed bag in your refrigerator (not freezer) and monitor weekly, or as needed, until it is time to remove for sowing. Replace coffee filter or paper towel often; repeat from step 1. Once seed had completed the recommended stratification period, or if excessive early sprouting occurs, plant immediately.
+  parameters:
+    max_temp: 4.5
+    duration: 30
+  notes: >
+    To naturally stratify seed, surface sow outdoors late fall on a bare
+    (weed-free), compact site and allow seed to overwinter. If you are
+    new to perennial seed starting, this would be the preferred method.
+    To artificially stratify seed, place seed and seed starting medium in
+    a labeled, sealed plastic bag and store in a refrigerator (33-40°F).
+    Seed starting medium could be a damp paper towel, coffee filter, sand,
+    vermiculite, or other horticultural-use medium.
+
+    We recommend mixing equal parts sand and seed, or slightly more sand
+    than seed. Whatever stratifying medium you choose, be sure to moisten
+    the mixture slowly to a damp, but not wet, consistency. You should not
+    be able to squeeze any excess water out of the medium.
+
+    Stratify for 10 days. Some seeds may sprout in the storage bag. If this
+    occurs with more than a few seeds, plant immediately.
+
+    This is code 'C(10)' from prairie moon
+- name: 30-day Cold, moist stratification
+  type: pretreatment
+  instructions: |
+    1. Using our germination codes, calculate the date to start cold, moist stratification pre-treatment. Briefly give your seeds a soak in a container, and pour contents over a coffee filter, paper towel, and/or fine screen to drain.
+    2. Arrange seed in a single layer and allow all excess water to drain off.
+    3. Fold seed loosely into the coffee filter or paper towel to allow for weekly spot checks. The seed and paper should be damp but not wet.
+    4. Add a dry paper towel to your labeled resealable bag to help to maintain even moisture while pulling excessive moisture away. Do not allow the stratification medium to completely dry out or stay soggy.
+    5. Place the sealed bag in your refrigerator (not freezer) and monitor weekly, or as needed, until it is time to remove for sowing. Replace coffee filter or paper towel often; repeat from step 1. Once seed had completed the recommended stratification period, or if excessive early sprouting occurs, plant immediately.
+  parameters:
+    max_temp: 4.5
+    duration: 30
+  notes: >
+    To naturally stratify seed, surface sow outdoors late fall on a bare
+    (weed-free), compact site and allow seed to overwinter. If you are
+    new to perennial seed starting, this would be the preferred method.
+    To artificially stratify seed, place seed and seed starting medium in
+    a labeled, sealed plastic bag and store in a refrigerator (33-40°F).
+    Seed starting medium could be a damp paper towel, coffee filter, sand,
+    vermiculite, or other horticultural-use medium.
+
+    We recommend mixing equal parts sand and seed, or slightly more sand
+    than seed. Whatever stratifying medium you choose, be sure to moisten
+    the mixture slowly to a damp, but not wet, consistency. You should not
+    be able to squeeze any excess water out of the medium.
+
+    Stratify for 30 days. Some seeds may sprout in the storage bag. If this
+    occurs with more than a few seeds, plant immediately.
+
+    This is code 'C(30)' from prairie moon
+- name: 60-day Cold, moist stratification
+  type: pretreatment
+  instructions: |
+    1. Using our germination codes, calculate the date to start cold, moist stratification pre-treatment. Briefly give your seeds a soak in a container, and pour contents over a coffee filter, paper towel, and/or fine screen to drain.
+    2. Arrange seed in a single layer and allow all excess water to drain off.
+    3. Fold seed loosely into the coffee filter or paper towel to allow for weekly spot checks. The seed and paper should be damp but not wet.
+    4. Add a dry paper towel to your labeled resealable bag to help to maintain even moisture while pulling excessive moisture away. Do not allow the stratification medium to completely dry out or stay soggy.
+    5. Place the sealed bag in your refrigerator (not freezer) and monitor weekly, or as needed, until it is time to remove for sowing. Replace coffee filter or paper towel often; repeat from step 1. Once seed had completed the recommended stratification period, or if excessive early sprouting occurs, plant immediately.
+  parameters:
+    max_temp: 4.5
+    duration: 30
+  notes: >
+    To naturally stratify seed, surface sow outdoors late fall on a bare
+    (weed-free), compact site and allow seed to overwinter. If you are
+    new to perennial seed starting, this would be the preferred method.
+    To artificially stratify seed, place seed and seed starting medium in
+    a labeled, sealed plastic bag and store in a refrigerator (33-40°F).
+    Seed starting medium could be a damp paper towel, coffee filter, sand,
+    vermiculite, or other horticultural-use medium.
+
+    We recommend mixing equal parts sand and seed, or slightly more sand
+    than seed. Whatever stratifying medium you choose, be sure to moisten
+    the mixture slowly to a damp, but not wet, consistency. You should not
+    be able to squeeze any excess water out of the medium.
+
+    Stratify for 60 days. One month may work for many species if time is a
+    constraint. Some seeds may sprout in the storage bag. If this occurs with
+    more than a few seeds, plant immediately.
+
+    This is code 'C(60)' from prairie moon
+- name: 90-day Cold, moist stratification
+  type: pretreatment
+  instructions: |
+    1. Using our germination codes, calculate the date to start cold, moist stratification pre-treatment. Briefly give your seeds a soak in a container, and pour contents over a coffee filter, paper towel, and/or fine screen to drain.
+    2. Arrange seed in a single layer and allow all excess water to drain off.
+    3. Fold seed loosely into the coffee filter or paper towel to allow for weekly spot checks. The seed and paper should be damp but not wet.
+    4. Add a dry paper towel to your labeled resealable bag to help to maintain even moisture while pulling excessive moisture away. Do not allow the stratification medium to completely dry out or stay soggy.
+    5. Place the sealed bag in your refrigerator (not freezer) and monitor weekly, or as needed, until it is time to remove for sowing. Replace coffee filter or paper towel often; repeat from step 1. Once seed had completed the recommended stratification period, or if excessive early sprouting occurs, plant immediately.
+  parameters:
+    max_temp: 4.5
+    duration: 30
+  notes: >
+    To naturally stratify seed, surface sow outdoors late fall on a bare
+    (weed-free), compact site and allow seed to overwinter. If you are
+    new to perennial seed starting, this would be the preferred method.
+    To artificially stratify seed, place seed and seed starting medium in
+    a labeled, sealed plastic bag and store in a refrigerator (33-40°F).
+    Seed starting medium could be a damp paper towel, coffee filter, sand,
+    vermiculite, or other horticultural-use medium.
+
+    We recommend mixing equal parts sand and seed, or slightly more sand
+    than seed. Whatever stratifying medium you choose, be sure to moisten
+    the mixture slowly to a damp, but not wet, consistency. You should not
+    be able to squeeze any excess water out of the medium.
+
+    Stratify for 90 days. Some seeds may sprout in the storage bag. If this
+    occurs with more than a few seeds, plant immediately.
+
+    This is code 'C(90)' from prairie moon
+- name: 120-day Cold, moist stratification
+  type: pretreatment
+  instructions: |
+    1. Using our germination codes, calculate the date to start cold, moist stratification pre-treatment. Briefly give your seeds a soak in a container, and pour contents over a coffee filter, paper towel, and/or fine screen to drain.
+    2. Arrange seed in a single layer and allow all excess water to drain off.
+    3. Fold seed loosely into the coffee filter or paper towel to allow for weekly spot checks. The seed and paper should be damp but not wet.
+    4. Add a dry paper towel to your labeled resealable bag to help to maintain even moisture while pulling excessive moisture away. Do not allow the stratification medium to completely dry out or stay soggy.
+    5. Place the sealed bag in your refrigerator (not freezer) and monitor weekly, or as needed, until it is time to remove for sowing. Replace coffee filter or paper towel often; repeat from step 1. Once seed had completed the recommended stratification period, or if excessive early sprouting occurs, plant immediately.
+  parameters:
+    max_temp: 4.5
+    duration: 30
+  notes: >
+    To naturally stratify seed, surface sow outdoors late fall on a bare
+    (weed-free), compact site and allow seed to overwinter. If you are
+    new to perennial seed starting, this would be the preferred method.
+    To artificially stratify seed, place seed and seed starting medium in
+    a labeled, sealed plastic bag and store in a refrigerator (33-40°F).
+    Seed starting medium could be a damp paper towel, coffee filter, sand,
+    vermiculite, or other horticultural-use medium.
+
+    We recommend mixing equal parts sand and seed, or slightly more sand
+    than seed. Whatever stratifying medium you choose, be sure to moisten
+    the mixture slowly to a damp, but not wet, consistency. You should not
+    be able to squeeze any excess water out of the medium.
+
+    Stratify for 120 days. Some seeds may sprout in the storage bag. If this
+    occurs with more than a few seeds, plant immediately.
+
+    This is code 'C(120)' from prairie moon
+- name: Surface sow (light required)
+  type: germination
+  instructions: >
+    Seeds are very small or need light to naturally break dormancy and
+    germinate. Seed requiring this treatment should be surface-sown. No soil cover,
+    or just a dusting of soil, should be applied. If grown in outdoor beds,
+    sow stratified (if required) seed on a level surface. Cover with a single
+    layer of burlap or cotton sheet to help retain moisture at the soil surface.
+    Remove cover after germination. Do not let soil dry out until seedlings are
+    established. Shading with a window screen set 12” above the soil during the
+    first season will also help prevent drying. If sowing seeds in containers,
+    water from the bottom as necessary.
+  notes: This is code 'D' from prairie moon
+- name: Warm -> Cold moist stratification
+  type: pretreatment
+  instructions: >
+    In order to germinate, seeds need a warm, moist period (summer) followed by a cold, moist period (winter):  Sow outdoors in spring and allow one full year for germination. To artificially start this stratification process, mix seeds with horticultural-use medium, place mixture in a labeled, sealed, plastic bag and store in a warm place (about 80°F) for 60–90 days. Then place in your refrigerator (33–40°F) for 60–90 days before sowing.
+  notes: This is code 'E' from prairie moon
+- name: Cold -> Warm -> Cold moist stratification (Double dormancy)
+  type: pretreatment
+  instructions: >
+    Seeds need cold, moist period (winter) followed by a warm, moist period (summer) followed by a 2nd cold, moist period: Sow outdoors and allow 2 years or longer to germinate. To artificially start this stratification process, follow the instructions for Germination Code C for 60-90 days, then store in a warm (about 80°F) place for 60-90 days, followed by a 2nd cold period in the refrigerator.
+  notes: This is code 'F' from prairie moon
+- name: Requires Scarification
+  type: pretreatment
+  instructions: >
+    These species require weakening of the seed coat in order to come out of dormancy. Scarify by rubbing seed between two sheets of medium-grit sandpaper. The goal is to abrade seed coats – stop if seeds are being crushed. Scarification should be done before stratification if needed. Fall or winter sown seed should not be scarified to prevent the chance of premature germination and winter kill.
+  notes: This is code 'H' from prairie moon
+- name: Sow in cold soil
+  type: germination
+  instructions: >
+    Seeds germinate most successfully in cool soil. Sow seeds in late fall
+    (after hard frost) or early spring.
+  notes: This is code 'G' from prairie moon
+- name: Inoculate with rhizobia
+  type: pretreatment
+  instructions: >
+    Some species harbor beneficial bacteria called rhizobia on their roots, particularly legume species. Genus-specific strains of this bacterium called inoculum can aid in the fixation of atmospheric nitrogen and improve long-term health of native plant communities. Inoculum is naturally occurring in most soils and additional amendments are not needed.
+  notes: This is code 'I' from prairie moon
+- name: Requires a host plant
+  type: germination
+  instructions: >
+    Hemiparasitic species require a host plant. Good hosts for many hemiparasitic species include low-growing grasses and sedges. With a knife, make a small cut at the base of the host plant. Sow seed in the cut, making sure seed is not more than 1/8” deep. If host is transplanted at sowing time, the cut is not needed because damaged roots will be available for attachment by the hemiparasite. You may also try sowing hemiparasitic and host species seeds together at the same time. To add hemiparasitic species to existing sites, scatter seed on soil surface (rake in if seed is large) in late fall.
+  notes: This is code 'K' from prairie moon
+- name: Plant seed fresh or keep moist
+  type: germination
+  instructions: Refrigerate until planting or starting other treatment.
+  notes: This is code 'L' from prairie moon
+- name: Outdoor Stratification
+  type: germination
+  instructions: >
+    Best planted outdoors in the fall. Artificial stratification may not work well
+  notes: This is code 'M' from prairie moon
+- name: Nick seed coat
+  type: pretreatment
+  instructions: >
+    Seed coat is impermeable. Nick seed coat with a knife or a file and soak in water overnight before planting.
+  notes: This is code 'O' from prairie moon
