@@ -194,6 +194,7 @@ impl TaxonCommands {
                     .include(Taxon::fields().collecting_data())
                     .include(Taxon::fields().cleaning_procedures().procedure())
                     .include(Taxon::fields().propagation_protocols().protocol())
+                    .include(Taxon::fields().harvest_events().location())
                     .include(Taxon::fields().notes())
                     .one()
                     .exec(db)
@@ -309,6 +310,23 @@ impl TaxonCommands {
                                         .map(|val| val.to_string())
                                         .unwrap_or_else(|| "-".into()),
                                     rs.harvest_window.to_string(),
+                                ]);
+                            }
+                            inner_table.build().with(style::ListTable).to_string() + "\n"
+                        }
+                    }]);
+                    tbuilder.push_record(["Harvesting Events", &{
+                        let events = taxon.harvest_events.get();
+                        if events.is_empty() {
+                            "-".to_string()
+                        } else {
+                            let mut inner_table = tabled::builder::Builder::default();
+                            inner_table.push_record(["ID", "Date", "Location"]);
+                            for event in events.iter() {
+                                inner_table.push_record([
+                                    &event.id.to_string(),
+                                    &event.date.to_string(),
+                                    &event.location.get().reference(),
                                 ]);
                             }
                             inner_table.build().with(style::ListTable).to_string() + "\n"
