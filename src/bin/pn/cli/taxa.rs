@@ -272,7 +272,7 @@ impl TaxonCommands {
                                     let proc = tcp.procedure.get();
                                     inner_table.push_record([&proc.id.to_string(), &proc.name]);
                                 });
-                                inner_table.build().with(style::DetailTable).to_string()
+                                inner_table.build().with(style::DetailTable).to_string() + "\n"
                             }
                         }
                     }]);
@@ -290,7 +290,7 @@ impl TaxonCommands {
                                         &protocol.r#type.to_string(),
                                     ]);
                                 });
-                                inner_table.build().with(style::ListTable).to_string()
+                                inner_table.build().with(style::ListTable).to_string() + "\n"
                             }
                         }
                     }]);
@@ -311,7 +311,7 @@ impl TaxonCommands {
                                     rs.harvest_window.to_string(),
                                 ]);
                             }
-                            inner_table.build().with(style::ListTable).to_string()
+                            inner_table.build().with(style::ListTable).to_string() + "\n"
                         }
                     }]);
                     tbuilder.push_record(["Notes", &{
@@ -324,7 +324,7 @@ impl TaxonCommands {
                             for note in notes.iter() {
                                 inner_table.push_record([&note.id.to_string(), &note.text]);
                             }
-                            inner_table.build().with(style::ListTable).to_string()
+                            inner_table.build().with(style::ListTable).to_string() + "\n"
                         }
                     }]);
                     println!("{}", tbuilder.build().with(style::DetailTable));
