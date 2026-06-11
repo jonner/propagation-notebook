@@ -53,7 +53,7 @@ pub struct CleaningProcedure {
 }
 
 #[derive(Debug, Clone, toasty::Model)]
-pub struct HarvestLocation {
+pub struct Location {
     #[auto]
     #[key]
     pub id: u64,
@@ -83,5 +83,5 @@ pub struct HarvestEvent {
     #[index]
     pub location_id: u64,
     #[belongs_to(key=location_id, references=id)]
-    pub location: HarvestLocation,
+    pub location: Deferred<Location>,
 }
