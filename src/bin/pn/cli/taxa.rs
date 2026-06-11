@@ -227,6 +227,29 @@ impl TaxonCommands {
                             .and_then(|d| d.harvesting_notes.as_deref())
                             .unwrap_or("-"),
                     ]);
+                    tbuilder.push_record(["Harvesting Dates", &{
+                        let regions = taxon
+                            .regional_statuses
+                            .get()
+                            .iter()
+                            .filter(|rs| {
+                                rs.harvest_window.start.is_some() || rs.harvest_window.end.is_some()
+                            })
+                            .collect::<Vec<_>>();
+                        if regions.is_empty() {
+                            "-".to_string()
+                        } else {
+                            let mut inner_table = tabled::builder::Builder::default();
+                            inner_table.push_record(["Region", "Dates"]);
+                            for rs in regions {
+                                inner_table.push_record([
+                                    rs.region.get().reference(),
+                                    rs.harvest_window.to_string(),
+                                ])
+                            }
+                            inner_table.build().with(style::BasicTable).to_string()
+                        }
+                    }]);
                     tbuilder.push_record([
                         "Storage Conditions",
                         taxon
