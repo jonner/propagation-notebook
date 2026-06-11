@@ -94,95 +94,57 @@ impl TaxonCommands {
     pub async fn run(&self, db: &mut Db) -> anyhow::Result<()> {
         match self {
             TaxonCommands::Search { search_string } => {
-                tracing::debug!("Searching for exact complete name");
-                if let Ok(found) = Taxon::filter(Taxon::fields().complete_name().eq(search_string))
-                    .one()
-                    .exec(db)
-                    .await
+                let wildcard = format!("%{search_string}%");
+                let mut tbuilder = tabled::builder::Builder::default();
+                tbuilder.push_record(["ID", "Name", "Common Names", "Synonym"]);
+
+                if let Ok(found) = Taxon::filter(
+                    Taxon::fields()
+                        .complete_name()
+                        .like(&wildcard)
+                        .or(Taxon::fields()
+                            .vernaculars()
+                            .any(VernacularName::fields().name().like(&wildcard)))
+                        .or(Taxon::fields()
+                            .synonyms()
+                            .any(Synonym::fields().complete_name().like(&wildcard))),
+                )
+                .order_by(Taxon::fields().sequence().asc())
+                .include(Taxon::fields().vernaculars())
+                .include(Taxon::fields().synonyms())
+                .exec(db)
+                .await
                 {
-                    println!("found taxon {}", found.reference());
-                } else {
-                    tracing::debug!("Searching for approximate complete name");
-                    let wildcard = format!("%{search_string}%");
-                    let taxa = Taxon::filter(Taxon::fields().complete_name().like(&wildcard))
-                        .exec(db)
-                        .await?;
-                    if !taxa.is_empty() {
-                        println!("Possible options for '{search_string}':");
-                        for t in taxa {
-                            println!("- {}", t.reference());
-                        }
-                    } else {
-                        tracing::debug!("Searching for exact scientific synonym");
-                        if let Ok(found) =
-                            Synonym::filter(Synonym::fields().complete_name().eq(search_string))
-                                .include(Synonym::fields().taxon())
-                                .one()
-                                .exec(db)
-                                .await
-                        {
-                            println!(
-                                "Found '{}' which is a synonym for {}",
-                                found.complete_name,
-                                found.taxon.get().reference(),
-                            );
-                        } else {
-                            tracing::debug!("Searching for approximate scientific synonyms");
-                            let synonyms =
-                                Synonym::filter(Synonym::fields().complete_name().like(&wildcard))
-                                    .include(Synonym::fields().taxon())
-                                    .exec(db)
-                                    .await?;
-                            if !synonyms.is_empty() {
-                                println!("Possible options for '{search_string}':");
-                                for syn in synonyms {
-                                    println!(
-                                        "'{}' is a synonym for {}",
-                                        syn.complete_name,
-                                        syn.taxon.get().reference(),
-                                    );
-                                }
-                            } else {
-                                tracing::debug!("Searching for exact vernacular name");
-                                // look up common names
-                                if let Ok(vernacular) = VernacularName::filter(
-                                    VernacularName::fields().name().eq(search_string),
-                                )
-                                .include(VernacularName::fields().taxon())
-                                .one()
-                                .exec(db)
-                                .await
-                                {
-                                    println!(
-                                        "Found {} ({})",
-                                        vernacular.taxon.get().reference(),
-                                        vernacular.name
-                                    );
-                                } else {
-                                    tracing::debug!("Searching for approximate vernacular names");
-                                    let vernaculars = VernacularName::filter(
-                                        VernacularName::fields().name().like(&wildcard),
-                                    )
-                                    .include(VernacularName::fields().taxon())
-                                    .exec(db)
-                                    .await?;
-                                    if !vernaculars.is_empty() {
-                                        println!("Possible options for '{search_string}':");
-                                        for vernacular in vernaculars {
-                                            println!(
-                                                "{} ({})",
-                                                vernacular.taxon.get().reference(),
-                                                vernacular.name,
-                                            );
-                                        }
-                                    } else {
-                                        println!("No options found");
+                    for t in found {
+                        tbuilder.push_record([
+                            t.id.to_string(),
+                            t.complete_name,
+                            t.vernaculars
+                                .get()
+                                .iter()
+                                .map(|v| v.name.as_str())
+                                .collect::<Vec<_>>()
+                                .join("\n"),
+                            t.synonyms
+                                .get()
+                                .iter()
+                                .filter_map(|s| {
+                                    match s
+                                        .complete_name
+                                        .to_lowercase()
+                                        .contains(&search_string.to_lowercase())
+                                    {
+                                        true => Some(s.complete_name.as_str()),
+                                        false => None,
                                     }
-                                }
-                            }
-                        }
+                                })
+                                .collect::<Vec<_>>()
+                                .join("\n"),
+                        ]);
                     }
                 }
+
+                println!("{}", tbuilder.build().with(style::ListTable));
             }
             TaxonCommands::Show { id } => {
                 let taxon = Taxon::filter_by_id(id)
