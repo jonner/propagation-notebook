@@ -82,7 +82,7 @@ pub enum Origin {
     Unknown,
 }
 
-#[derive(Debug, Clone, toasty::Embed)]
+#[derive(Debug, Clone, Default, toasty::Embed)]
 pub struct RegionalHarvestWindow {
     pub start: Option<jiff::civil::Date>,
     pub end: Option<jiff::civil::Date>,

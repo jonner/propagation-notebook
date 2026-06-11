@@ -5,7 +5,9 @@ use std::{
 
 use indicatif::ProgressIterator;
 use propagation_notebook::{
-    region::{ConservationStatus, Region, RegionalTaxonStatus, WetlandIndicator},
+    region::{
+        ConservationStatus, Region, RegionalHarvestWindow, RegionalTaxonStatus, WetlandIndicator,
+    },
     taxonomy::Synonym,
 };
 use tokio::io::AsyncReadExt;
@@ -94,6 +96,7 @@ where
                 .origin(taxon_info.origin.map(|x| x.into()))
                 .conservation_status(taxon_info.status)
                 .wetland_indicator(taxon_info.wetland_indicator)
+                .harvest_window(RegionalHarvestWindow::default())
                 .c_value(taxon_info.c_value),
         );
     }
