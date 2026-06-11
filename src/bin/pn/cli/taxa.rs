@@ -264,7 +264,7 @@ impl TaxonCommands {
                                     rs.harvest_window.to_string(),
                                 ])
                             }
-                            inner_table.build().with(style::BasicTable).to_string()
+                            inner_table.build().with(style::ListTable).to_string()
                         }
                     }]);
                     tbuilder.push_record([
@@ -313,7 +313,7 @@ impl TaxonCommands {
                                         &protocol.r#type.to_string(),
                                     ]);
                                 });
-                                inner_table.build().with(style::BasicTable).to_string()
+                                inner_table.build().with(style::ListTable).to_string()
                             }
                         }
                     }]);
@@ -333,7 +333,7 @@ impl TaxonCommands {
                                         .unwrap_or_else(|| "-".into()),
                                 ]);
                             }
-                            inner_table.build().with(style::BasicTable).to_string()
+                            inner_table.build().with(style::ListTable).to_string()
                         }
                     }]);
                     tbuilder.push_record(["Notes", &{
@@ -346,7 +346,7 @@ impl TaxonCommands {
                             for note in notes.iter() {
                                 inner_table.push_record([&note.id.to_string(), &note.text]);
                             }
-                            inner_table.build().with(style::BasicTable).to_string()
+                            inner_table.build().with(style::ListTable).to_string()
                         }
                     }]);
                     println!("{}", tbuilder.build().with(style::DetailTable));
@@ -409,7 +409,7 @@ impl TaxonCommands {
                     for taxon in taxa {
                         tbuilder.push_record([taxon.id.to_string(), taxon.complete_name]);
                     }
-                    println!("{}", tbuilder.build().with(style::BasicTable));
+                    println!("{}", tbuilder.build().with(style::ListTable));
                     println!("{} taxa found", ntaxa);
                 }
             },

@@ -58,7 +58,7 @@ impl CleaningCommands {
                         item.taxon_links.get().len().to_string(),
                     ])
                 }
-                println!("{}", tbuilder.build().with(style::BasicTable));
+                println!("{}", tbuilder.build().with(style::ListTable));
                 println!("\n{nitems} found");
             }
             CleaningCommands::Show { id } => {
@@ -78,7 +78,7 @@ impl CleaningCommands {
                     }),
                 ]);
                 tbuilder.push_record(["Instructions", &procedure.instructions]);
-                println!("{}", tbuilder.build().with(style::BasicTable));
+                println!("{}", tbuilder.build().with(style::ListTable));
             }
             CleaningCommands::Add {
                 name,

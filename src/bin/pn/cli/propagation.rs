@@ -76,7 +76,7 @@ impl PropagationCommands {
                         protocol.r#type.to_string(),
                     ])
                 }
-                println!("{}", tbuilder.build().with(style::BasicTable));
+                println!("{}", tbuilder.build().with(style::ListTable));
             }
             PropagationCommands::Show { id } => {
                 let p = Protocol::filter_by_id(id).one().exec(db).await?;

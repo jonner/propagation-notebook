@@ -57,7 +57,7 @@ impl TaxonCleaningCommands {
                         proc.notes.unwrap_or_else(|| "-".into()),
                     ]);
                 }
-                println!("{}", tbuilder.build().with(style::BasicTable));
+                println!("{}", tbuilder.build().with(style::ListTable));
             }
             TaxonCleaningCommands::Show { procedure_id } => {
                 let tcp = TaxonCleaningProcedure::filter_by_taxon_id_and_procedure_id(

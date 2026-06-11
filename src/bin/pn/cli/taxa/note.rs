@@ -47,7 +47,7 @@ impl TaxonNoteCommands {
                 for note in notes {
                     tbuilder.push_record([note.id.to_string(), note.text]);
                 }
-                println!("{}", tbuilder.build().with(style::BasicTable));
+                println!("{}", tbuilder.build().with(style::ListTable));
             }
             TaxonNoteCommands::Show { note_id } => {
                 let note = TaxonNote::get_by_id(db, note_id).await?;

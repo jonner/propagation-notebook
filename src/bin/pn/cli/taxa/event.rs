@@ -35,7 +35,7 @@ impl TaxonHarvestEventCommands {
                         event.location.get().reference(),
                     ])
                 }
-                println!("{}", tbuilder.build().with(style::BasicTable));
+                println!("{}", tbuilder.build().with(style::ListTable));
             }
             TaxonHarvestEventCommands::Add {
                 date,

@@ -114,6 +114,6 @@ async fn list_regional_taxa(db: &mut toasty::Db, region_id: u64) -> anyhow::Resu
                 .unwrap_or_else(|| "-".into()),
         ]);
     }
-    println!("{}", tbuilder.build().with(style::BasicTable));
+    println!("{}", tbuilder.build().with(style::ListTable));
     Ok(())
 }

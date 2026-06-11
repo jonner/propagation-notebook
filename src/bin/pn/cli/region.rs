@@ -151,7 +151,7 @@ impl RegionCommands {
                             region.taxon_statuses.get().len().to_string(),
                         ])
                     }
-                    println!("{}", tbuilder.build().with(style::BasicTable));
+                    println!("{}", tbuilder.build().with(style::ListTable));
                 }
             }
             RegionCommands::Show { id } => {

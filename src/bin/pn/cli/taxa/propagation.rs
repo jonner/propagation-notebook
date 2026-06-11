@@ -89,7 +89,7 @@ impl TaxonPropagationCommands {
                     tp.notes.as_deref().unwrap_or("-"),
                 ])
             }
-            println!("{}", tbuilder.build().with(style::BasicTable));
+            println!("{}", tbuilder.build().with(style::ListTable));
         }
         TaxonPropagationCommands::Show { protocol_id } => {
             let tp = TaxonProtocol::filter_by_taxon_id_and_protocol_id(taxon_id, protocol_id)

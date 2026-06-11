@@ -55,7 +55,7 @@ impl LocationCommands {
                 for location in locations {
                     tbuilder.push_record([location.id.to_string(), location.name])
                 }
-                println!("{}", tbuilder.build().with(style::BasicTable));
+                println!("{}", tbuilder.build().with(style::ListTable));
             }
             LocationCommands::Show { id } => {
                 let loc = Location::get_by_id(db, id).await?;
