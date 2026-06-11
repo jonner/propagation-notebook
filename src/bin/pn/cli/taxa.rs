@@ -10,6 +10,7 @@ use crate::{cli::list_regional_taxa, style, util::join_or_default};
 
 pub mod cleaning;
 pub mod collecting;
+pub mod event;
 mod import;
 pub mod note;
 pub mod propagation;
@@ -79,6 +80,13 @@ pub enum TaxonCommands {
         taxon_id: u64,
         #[command(subcommand)]
         command: note::TaxonNoteCommands,
+    },
+    #[command(about = "Harvest events for a taxon")]
+    HarvestEvents {
+        #[arg(short, long, help = "A Taxon ID")]
+        taxon_id: u64,
+        #[command(subcommand)]
+        command: event::TaxonHarvestEventCommands,
     },
 }
 
@@ -375,6 +383,9 @@ impl TaxonCommands {
                                     .any(TaxonProtocol::fields().taxon_id().gt(0)))
                                 .or(Taxon::fields()
                                     .notes()
+                                    .any(TaxonNote::fields().taxon_id().gt(0)))
+                                .or(Taxon::fields()
+                                    .harvest_events()
                                     .any(TaxonNote::fields().taxon_id().gt(0))),
                         )
                         .order_by(Taxon::fields().sequence().asc())
@@ -426,6 +437,9 @@ impl TaxonCommands {
             TaxonCommands::Collecting { taxon_id, command } => command.run(db, *taxon_id).await?,
             TaxonCommands::Propagation { taxon_id, command } => command.run(db, *taxon_id).await?,
             TaxonCommands::Notes { taxon_id, command } => command.run(db, *taxon_id).await?,
+            TaxonCommands::HarvestEvents { taxon_id, command } => {
+                command.run(db, *taxon_id).await?
+            }
         }
         Ok(())
     }
