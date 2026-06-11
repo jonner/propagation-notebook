@@ -300,7 +300,7 @@ impl TaxonCommands {
                             "-".to_string()
                         } else {
                             let mut inner_table = tabled::builder::Builder::default();
-                            inner_table.push_record(["ID", "Name", "Origin", "Harvest Dates"]);
+                            inner_table.push_record(["ID", "Name", "Origin", "Harvest Window"]);
                             for rs in regions.iter() {
                                 inner_table.push_record([
                                     rs.region.get().id.to_string(),
