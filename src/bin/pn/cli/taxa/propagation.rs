@@ -81,7 +81,7 @@ impl TaxonPropagationCommands {
             for tp in tps {
                 tbuilder.push_record([
                     &tp.taxon.get().reference(),
-                    &tp.protocol.get().id.to_string(),
+                    &tp.protocol.get().reference(),
                     tp.confidence
                         .map(|v| v.to_string())
                         .as_deref()

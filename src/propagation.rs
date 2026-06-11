@@ -38,6 +38,12 @@ pub struct Protocol {
     pub taxon_protocols: Deferred<Vec<TaxonProtocol>>,
 }
 
+impl Protocol {
+    pub fn reference(&self) -> String {
+        format!("{}: {}", self.id, self.name)
+    }
+}
+
 // TODO: if protocols become parametrized, we'd need to add the parameters to
 // this model...
 #[derive(Debug, Clone, toasty::Model)]
