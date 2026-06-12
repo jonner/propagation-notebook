@@ -1058,7 +1058,7 @@ taxa:
     status: endangered
   - name: Carex sychnocephala
     origin: native
-  - name: Carex tenera
+  - name: Carex tenera var. tenera # Carex tenera
     origin: native
   - name: Carex tenuiflora
     origin: native
