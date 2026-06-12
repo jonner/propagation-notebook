@@ -13,6 +13,7 @@ indicatif = "0.18.4"
 inquire = "0.9.4"
 itertools = "0.14.0"
 jiff = { version = "0.2.24", features = ["serde"] }
+reqwest = { version = "0.13.4", features = ["json", "query"] }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_yaml = "0.9.34"
 strum = { version = "0.28.0", features = ["derive"] }
@@ -23,6 +24,7 @@ tokio = { version = "1.52.1", features = ["rt-multi-thread"] }
 tracing = "0.1.44"
 tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
 url = { version = "2.5.8", features = ["serde"] }
+uuid = { version = "1.23.3", features = ["serde", "v4", "v7"] }
 
 [dev-dependencies]
 divan = "0.1.21"
