@@ -1,6 +1,7 @@
 use anyhow::anyhow;
 use clap::Parser;
 use directories::ProjectDirs;
+use indicatif::ProgressIterator;
 use jiff::civil::Date;
 use propagation_notebook::region::RegionalTaxonStatus;
 use propagation_notebook::taxonomy::Taxon;
@@ -308,8 +309,8 @@ async fn main() -> anyhow::Result<()> {
     };
 
     let mut results = Vec::default();
-    for taxon in taxa {
-        match inat_seed_dates(&client, &taxon).await {
+    for taxon in taxa.iter().progress() {
+        match inat_seed_dates(&client, taxon).await {
             Ok(dates) => results.push(TaxonHarvestDates {
                 taxon_id: taxon.id,
                 start: dates.0,
