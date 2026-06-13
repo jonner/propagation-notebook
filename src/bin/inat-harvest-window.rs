@@ -7,12 +7,11 @@ use propagation_notebook::taxonomy::Taxon;
 use reqwest::header::{HeaderMap, HeaderValue};
 use serde::{Deserialize, Serialize};
 use std::f64::consts::PI;
+use std::io::stdout;
 use std::sync::LazyLock;
 use std::thread::sleep;
-use std::{error::Error, io::stdout};
 use toasty::Db;
 use tracing::{debug, trace, warn};
-use uuid::Uuid;
 
 #[derive(Debug, clap::Parser)]
 struct Args {
@@ -39,15 +38,12 @@ struct TaxonSearchResponse {
 
 #[derive(Deserialize, Debug)]
 struct Observation {
-    uuid: Uuid,
     observed_on: Option<String>,
 }
 
 #[derive(Deserialize, Debug)]
 struct ObservationResponse {
     total_results: u32,
-    page: u32,
-    per_page: u32,
     results: Vec<Observation>,
 }
 
