@@ -51,6 +51,7 @@ struct ObservationResponse {
 #[derive(Serialize, Debug)]
 struct TaxonHarvestDates {
     taxon_id: u64,
+    name: String,
     start: jiff::civil::Date,
     end: jiff::civil::Date,
 }
@@ -86,7 +87,8 @@ async fn find_taxon(client: &reqwest::Client, taxon_name: &str) -> anyhow::Resul
             Ok(t.id)
         }
         None => Err(anyhow::anyhow!(
-            "No active taxon found matching that string."
+            "No active taxon found matching '{}'.",
+            taxon_name
         )),
     }
 }
@@ -313,6 +315,7 @@ async fn main() -> anyhow::Result<()> {
         match inat_seed_dates(&client, taxon).await {
             Ok(dates) => results.push(TaxonHarvestDates {
                 taxon_id: taxon.id,
+                name: taxon.complete_name.clone(),
                 start: dates.0,
                 end: dates.1,
             }),
