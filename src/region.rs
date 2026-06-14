@@ -52,8 +52,7 @@ pub struct Region {
     #[index]
     pub name: String,
     // FIXME: geojson??
-    pub bounds: Option<String>,
-
+    pub geometry: Option<toasty::Json<geojson::Geometry>>,
     pub notes: Option<String>,
 
     #[has_many]

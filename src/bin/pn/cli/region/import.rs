@@ -42,7 +42,7 @@ struct TaxonInfo {
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 struct RegionInfo {
     name: String,
-    bounds: Option<String>,
+    geometry: Option<geojson::Geometry>,
     taxa: Vec<TaxonInfo>,
     notes: Option<String>,
     // npcs: Vec<NativePlantCommunityInfo>,
@@ -100,11 +100,10 @@ where
                 .c_value(taxon_info.c_value),
         );
     }
-
     let n_taxa = taxa_create.len();
     let region = Region::create()
         .name(info.name)
-        .bounds(info.bounds)
+        .geometry(info.geometry.map(|v| v.into()))
         .notes(info.notes)
         .taxon_statuses(taxa_create)
         .exec(&mut txn)

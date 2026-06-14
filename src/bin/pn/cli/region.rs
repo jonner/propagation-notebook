@@ -6,26 +6,26 @@ use propagation_notebook::region::{
 };
 use toasty::Db;
 
-use crate::{cli::list_regional_taxa, style, util::truncate_with_summary};
+use crate::{cli::list_regional_taxa, style};
 
 mod import;
 
 #[derive(clap::Args, Debug)]
 #[group(required = false, multiple = false)]
-pub struct BoundsArg {
+pub struct GeometryArg {
     #[arg(
         long,
-        help = "path to a geojson file whose contents represent the bounds of the region",
-        conflicts_with = "bounds_string"
+        help = "path to a geojson file whose contents represent the geometry of the region",
+        conflicts_with = "geometry_string"
     )]
-    pub bounds_file: Option<PathBuf>,
+    pub geometry_file: Option<PathBuf>,
     #[arg(
         short,
-        long = "bounds",
-        help = "geojson string representing the bounds of the region",
-        conflicts_with = "bounds_file"
+        long = "geometry",
+        help = "geojson string representing the geometry of the region",
+        conflicts_with = "geometry_file"
     )]
-    pub bounds_string: Option<String>,
+    pub geometry_string: Option<geojson::Geometry>,
 }
 
 #[derive(clap::Args, Debug)]
@@ -70,14 +70,17 @@ pub fn parse_month_day(input: &str) -> anyhow::Result<jiff::civil::Date> {
     parsed.to_date().map_err(|e| e.into())
 }
 
-impl BoundsArg {
-    pub async fn resolve(&self) -> anyhow::Result<Option<String>> {
-        match (self.bounds_string.as_ref(), self.bounds_file.as_ref()) {
-            (Some(bounds_string), None) => Ok(Some(bounds_string.clone())),
-            (None, Some(bounds_file)) => Ok(Some(tokio::fs::read_to_string(bounds_file).await?)),
+impl GeometryArg {
+    pub async fn resolve(&self) -> anyhow::Result<Option<geojson::Geometry>> {
+        match (self.geometry_string.as_ref(), self.geometry_file.as_ref()) {
+            (Some(geometry_string), None) => Ok(Some(geometry_string.clone())),
+            (None, Some(geometry_file)) => {
+                let s = tokio::fs::read_to_string(geometry_file).await?;
+                Ok(Some(s.parse()?))
+            }
             (None, None) => Ok(None),
             _ => Err(anyhow::anyhow!(
-                "Only one of 'bounds' or 'bounds_file' can be specified at the same time"
+                "Only one of 'geometry' or 'geometry_file' can be specified at the same time"
             )),
         }
     }
@@ -93,7 +96,7 @@ pub enum RegionCommands {
     Add {
         region_name: String,
         #[clap(flatten)]
-        bounds: BoundsArg,
+        geometry: GeometryArg,
         #[arg(long, help = "Free-form notes about the region")]
         notes: Option<String>,
     },
@@ -102,11 +105,11 @@ pub enum RegionCommands {
         #[arg(help = "A path to a yaml file describing a region")]
         path: PathBuf,
     },
-    #[command(about = "Modify information about a region", group(clap::ArgGroup::new("modify_fields").args(["name", "bounds_string", "bounds_file", "notes"]).required(true).multiple(true)))]
+    #[command(about = "Modify information about a region", group(clap::ArgGroup::new("modify_fields").args(["name", "geometry_string", "geometry_file", "notes"]).required(true).multiple(true)))]
     Modify {
         id: u64,
         #[command(flatten)]
-        bounds: BoundsArg,
+        geometry: GeometryArg,
         #[arg(short, long, help = "Specify a new name for the region")]
         name: Option<String>,
         #[arg(long, help = "Set notes for a region")]
@@ -166,24 +169,50 @@ impl RegionCommands {
                 tbuilder.push_record(["Notes", &region.notes.unwrap_or_else(|| "-".to_string())]);
                 tbuilder.push_record(["Taxa", &region.taxon_statuses.get().len().to_string()]);
                 tbuilder.push_record([
-                    "Bounds",
-                    &truncate_with_summary(&region.bounds.unwrap_or_else(|| "-".to_string()), 500),
+                    "Geometry",
+                    {
+                        region.geometry.map(|v| match &v.value {
+                            geojson::GeometryValue::Point { coordinates } => {
+                                format!("Point: ({}, {})", coordinates[0], coordinates[1])
+                            }
+                            geojson::GeometryValue::LineString { coordinates } => {
+                                format!("LineString: {} coordinates", coordinates.len())
+                            }
+                            geojson::GeometryValue::Polygon { coordinates } => {
+                                format!("Polygon: {} linear rings", coordinates.len())
+                            }
+                            geojson::GeometryValue::MultiPoint { coordinates } => {
+                                format!("MultiPoint: {} points", coordinates.len())
+                            }
+                            geojson::GeometryValue::MultiLineString { coordinates } => {
+                                format!("MultiLineString: {} lines", coordinates.len())
+                            }
+                            geojson::GeometryValue::MultiPolygon { coordinates } => {
+                                format!("MultiPolygon: {} polygons", coordinates.len())
+                            }
+                            geojson::GeometryValue::GeometryCollection { geometries } => {
+                                format!("GeometryCollection: {} sub-geometries", geometries.len())
+                            }
+                        })
+                    }
+                    .as_deref()
+                    .unwrap_or("-"),
                 ]);
                 println!("{}", tbuilder.build().with(style::DetailTable))
             }
             RegionCommands::Modify {
                 id,
-                bounds,
+                geometry,
                 name,
                 notes,
             } => {
                 let mut update_query = Region::update_by_id(id);
-                let bounds = bounds.resolve().await?;
+                let geometry = geometry.resolve().await?;
                 if let Some(name) = name {
                     update_query = update_query.name(name);
                 }
-                if let Some(bounds) = bounds {
-                    update_query = update_query.bounds(bounds);
+                if let Some(geometry) = geometry {
+                    update_query = update_query.geometry(Some(geometry.into()));
                 }
                 if let Some(notes) = notes {
                     update_query = update_query.notes(notes);
@@ -193,13 +222,12 @@ impl RegionCommands {
             }
             RegionCommands::Add {
                 region_name,
-                bounds,
+                geometry,
                 notes,
             } => {
-                let bounds = bounds.resolve().await?;
                 let new_region = Region::create()
                     .name(region_name)
-                    .bounds(bounds)
+                    .geometry(geometry.resolve().await?.map(|v| v.into()))
                     .notes(notes)
                     .exec(db)
                     .await?;
