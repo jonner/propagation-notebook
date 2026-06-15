@@ -1,10 +1,19 @@
 use std::{f64::consts::PI, fmt::Display, sync::LazyLock, time::Duration};
 
-use anyhow::anyhow;
 use jiff::civil::Date;
 use reqwest::header::{HeaderMap, HeaderValue};
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use tracing::{debug, trace};
+
+#[derive(thiserror::Error, Debug)]
+pub enum Error {
+    #[error("Not enough observations found {0}")]
+    InsufficientObservations(usize),
+    #[error(transparent)]
+    Reqwest(#[from] reqwest::Error),
+    #[error(transparent)]
+    Url(#[from] url::ParseError),
+}
 
 #[derive(Deserialize, Debug)]
 pub struct InaturalistTaxon {
@@ -61,7 +70,7 @@ pub fn client() -> anyhow::Result<reqwest::Client> {
 pub async fn find_taxon(
     client: &reqwest::Client,
     taxon_name: &str,
-) -> anyhow::Result<Vec<InaturalistTaxon>> {
+) -> Result<Vec<InaturalistTaxon>, Error> {
     let taxa_endpoint = API_BASE_URL.join("taxa")?;
     let res: TaxonSearchResponse = client
         .get(taxa_endpoint)
@@ -81,8 +90,8 @@ pub async fn find_taxon(
 async fn fetch_seed_observations(
     client: &reqwest::Client,
     taxon_id: u32,
-    location: SearchArea,
-) -> anyhow::Result<Vec<ObservationDate>> {
+    location: &SearchArea,
+) -> Result<Vec<ObservationDate>, Error> {
     let mut observations: Vec<ObservationDate> = Vec::new();
     let (mut page, per_page) = (1, 200);
     let obs_endpoint = API_BASE_URL.join("observations")?;
@@ -95,7 +104,7 @@ async fn fetch_seed_observations(
             // ("identifications", "most_agree"),
             ("page", &page.to_string()),
             ("per_page", &per_page.to_string()),
-            ("fields", "id, observed_on"),
+            ("fields", "id,observed_on"),
         ]);
 
         match location {
@@ -132,10 +141,10 @@ async fn fetch_seed_observations(
 }
 
 async fn calculate_harvest_window(
-    observations: Vec<ObservationDate>,
-) -> anyhow::Result<(u16, u16)> {
+    observations: &Vec<ObservationDate>,
+) -> Result<(u16, u16), Error> {
     if observations.is_empty() {
-        return Err(anyhow!("No fruiting observations found."));
+        return Err(Error::InsufficientObservations(0));
     }
     let observations_doy: Vec<u16> = observations
         .into_iter()
@@ -191,9 +200,8 @@ async fn calculate_harvest_window(
         .collect();
 
     if valid_days.is_empty() {
-        return Err(anyhow!(
-            "All observations filtered out as statistical noise."
-        ));
+        debug!("All observations filtered out as statistical noise.");
+        return Err(Error::InsufficientObservations(0));
     }
 
     // 5. CORRECT CHRONOLOGICAL SORTING (WINTER-SAFE)
@@ -219,26 +227,23 @@ pub enum SearchArea {
 pub async fn seed_observation_window(
     client: &reqwest::Client,
     taxon_id: u32,
-    area: SearchArea,
-) -> anyhow::Result<(Date, Date)> {
+    area: &SearchArea,
+    min_samples: usize,
+) -> Result<((Date, Date), usize), Error> {
     trace!(
         "Fetching fruiting observations for taxon {} in area {:?}...",
         taxon_id, area
     );
     let observation_list = fetch_seed_observations(client, taxon_id, area).await?;
-    if observation_list.len() < 10 {
-        return Err(anyhow!(
-            "{}: not enough observations for an accurate estimate: {}",
-            taxon_id,
-            observation_list.len()
-        ));
+    if observation_list.len() < min_samples {
+        return Err(Error::InsufficientObservations(observation_list.len()));
     }
     trace!(
         "Got {} observations for {}",
         observation_list.len(),
         taxon_id
     );
-    let (start, end) = calculate_harvest_window(observation_list).await?;
+    let (start, end) = calculate_harvest_window(&observation_list).await?;
 
     let target_year = 2000;
     let map_back_to_date = |actual_day: u16| -> Date {
@@ -259,7 +264,7 @@ pub async fn seed_observation_window(
         start_date.strftime("%b-%d"),
         end_date.strftime("%b-%d")
     );
-    Ok((start_date, end_date))
+    Ok(((start_date, end_date), observation_list.len()))
 }
 
 #[derive(Debug, Deserialize)]

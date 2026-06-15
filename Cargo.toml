@@ -20,6 +20,7 @@ serde = { version = "1.0.228", features = ["derive"] }
 serde_yaml = "0.9.34"
 strum = { version = "0.28.0", features = ["derive"] }
 tabled = "0.21.0"
+thiserror = "2.0.18"
 toasty = { version = "0.7.0", features = ["jiff", "sqlite", "serde"] }
 toasty-cli = "0.7.0"
 tokio = { version = "1.52.1", features = ["rt-multi-thread"] }

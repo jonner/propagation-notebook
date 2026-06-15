@@ -3,6 +3,8 @@ use std::path::PathBuf;
 use crate::{cli::list_regional_taxa, style};
 use anyhow::anyhow;
 use geo::BoundingRect;
+use geo::ChamberlainDuquetteArea;
+use jiff::civil::Date;
 use propagation_notebook::{
     inaturalist::{self, SearchArea},
     region::{
@@ -303,6 +305,13 @@ pub enum RegionTaxaCommands {
     LookupHarvestDates {
         #[arg(short, long, help = "A taxon ID")]
         taxon_id: u64,
+        #[arg(
+            short,
+            long,
+            help = "Minimum number of observations to use for calculating the harvest window",
+            default_value_t = 10
+        )]
+        min_samples: usize,
     },
 }
 
@@ -434,7 +443,10 @@ impl RegionTaxaCommands {
                     println!("Removed taxon {} from region {}", taxon_id, region_id);
                 }
             }
-            Self::LookupHarvestDates { taxon_id } => {
+            Self::LookupHarvestDates {
+                taxon_id,
+                min_samples,
+            } => {
                 println!("Attempting to find seed-bearing dates at iNaturalist.org");
                 let mut rts =
                     RegionalTaxonStatus::filter_by_taxon_id_and_region_id(taxon_id, region_id)
@@ -503,18 +515,19 @@ impl RegionTaxaCommands {
                         SearchArea::Place(selected.id)
                     }
                 };
-                let (start, end) =
-                    inaturalist::seed_observation_window(&client, taxon_id, loc).await?;
+                let ((start, end), n) =
+                    fetch_with_expansion(client, taxon_id, loc, *min_samples).await?;
                 let window = RegionalHarvestWindow {
                     start: Some(start),
                     end: Some(end),
                 };
-                println!(
-                    "Estimated harvest window for '{}' in region {region_id} is {}",
-                    rts.taxon.get().complete_name,
+                println!();
+                if inquire::Confirm::new(&format!(
+                    "Based on {n} samples, the approximate harvest window for '{}' in region '{}' is [{}]. Update database?",
+                    rts.taxon.get().reference(),
+                    rts.region.get().reference(),
                     window
-                );
-                if inquire::Confirm::new("Would you like to update this data in the database?")
+                ))
                     .with_default(false)
                     .with_help_message(&format!("Curent harvest window: {}", rts.harvest_window))
                     .prompt()?
@@ -524,6 +537,55 @@ impl RegionTaxaCommands {
             }
         }
         Ok(())
+    }
+}
+
+async fn fetch_with_expansion(
+    client: reqwest::Client,
+    taxon_id: u32,
+    mut loc: SearchArea,
+    min_samples: usize,
+) -> anyhow::Result<((Date, Date), usize)> {
+    loop {
+        match inaturalist::seed_observation_window(&client, taxon_id, &loc, min_samples).await {
+            e @ Err(inaturalist::Error::InsufficientObservations(n)) => {
+                let expand = inquire::Confirm::new(&format!(
+                    "Only {n} relevant obervations found. This is below the required minimum for calcuating a harvest window. Would you like to expand the search area?"
+                ))
+                .prompt()?;
+                if expand {
+                    let newloc = match &loc {
+                        SearchArea::Place(_) => todo!(),
+                        SearchArea::BoundingBox(rect) => {
+                            let mut newrect = *rect;
+                            newrect.set_min(geo::Coord {
+                                x: rect.min().x - rect.width() / 10.0,
+                                y: rect.min().y - rect.height() / 10.0,
+                            });
+                            newrect.set_max(geo::Coord {
+                                x: rect.max().x + rect.width() / 10.0,
+                                y: rect.max().y + rect.height() / 10.0,
+                            });
+                            // Chamberlain Duquette area gives square meters
+                            const M_PER_KM: f64 = 1000.0;
+                            let old_area =
+                                rect.chamberlain_duquette_unsigned_area() / (M_PER_KM * M_PER_KM);
+                            let new_area = newrect.chamberlain_duquette_unsigned_area()
+                                / (M_PER_KM * M_PER_KM);
+                            println!(
+                                "Original search area was {old_area:.1} km^2. Expanding search area to {new_area:.2} km^2",
+                            );
+                            SearchArea::BoundingBox(newrect)
+                        }
+                    };
+                    loc = newloc;
+                } else {
+                    e?;
+                }
+            }
+            Err(e) => Err(e)?,
+            Ok(res) => return anyhow::Ok(res),
+        };
     }
 }
 
