@@ -158,47 +158,8 @@ impl RegionCommands {
                 }
             }
             RegionCommands::Show { id } => {
-                let region = Region::filter_by_id(id)
-                    .include(Region::fields().taxon_statuses())
-                    .one()
-                    .exec(db)
-                    .await?;
-                let mut tbuilder = tabled::builder::Builder::default();
-                tbuilder.push_record(["ID", &region.id.to_string()]);
-                tbuilder.push_record(["Name", &region.name]);
-                tbuilder.push_record(["Notes", &region.notes.unwrap_or_else(|| "-".to_string())]);
-                tbuilder.push_record(["Taxa", &region.taxon_statuses.get().len().to_string()]);
-                tbuilder.push_record([
-                    "Geometry",
-                    {
-                        region.geometry.map(|v| match &v.value {
-                            geojson::GeometryValue::Point { coordinates } => {
-                                format!("Point: ({}, {})", coordinates[0], coordinates[1])
-                            }
-                            geojson::GeometryValue::LineString { coordinates } => {
-                                format!("LineString: {} coordinates", coordinates.len())
-                            }
-                            geojson::GeometryValue::Polygon { coordinates } => {
-                                format!("Polygon: {} linear rings", coordinates.len())
-                            }
-                            geojson::GeometryValue::MultiPoint { coordinates } => {
-                                format!("MultiPoint: {} points", coordinates.len())
-                            }
-                            geojson::GeometryValue::MultiLineString { coordinates } => {
-                                format!("MultiLineString: {} lines", coordinates.len())
-                            }
-                            geojson::GeometryValue::MultiPolygon { coordinates } => {
-                                format!("MultiPolygon: {} polygons", coordinates.len())
-                            }
-                            geojson::GeometryValue::GeometryCollection { geometries } => {
-                                format!("GeometryCollection: {} sub-geometries", geometries.len())
-                            }
-                        })
-                    }
-                    .as_deref()
-                    .unwrap_or("-"),
-                ]);
-                println!("{}", tbuilder.build().with(style::DetailTable))
+                let mut table = region_details_table(db, id).await?;
+                println!("{}", table.with(style::DetailTable))
             }
             RegionCommands::Modify {
                 id,
@@ -237,59 +198,25 @@ impl RegionCommands {
                 import::import_region(db, path).await?;
             }
             RegionCommands::Remove { id, assumeyes } => {
-                if *assumeyes
-                    || inquire::Confirm::new("Are you sure you wish to delete this region?")
+                if *assumeyes || {
+                    println!(
+                        "{}",
+                        region_details_table(db, id).await?.with(style::DetailTable)
+                    );
+                    inquire::Confirm::new("Are you sure you wish to delete this region?")
                         .with_default(false)
                         .with_help_message("All associated data will be deleted")
                         .prompt()?
-                {
+                } {
                     Region::delete_by_id(db, id).await?;
                     println!("Deleted region {id} from the database");
                 }
             }
             RegionCommands::Taxa { region_id, command } => match command {
                 RegionTaxaCommands::Show { taxon_id } => {
-                    let status =
-                        RegionalTaxonStatus::filter_by_taxon_id_and_region_id(taxon_id, region_id)
-                            .include(RegionalTaxonStatus::fields().region())
-                            .include(RegionalTaxonStatus::fields().taxon())
-                            .one()
-                            .exec(db)
-                            .await?;
-                    let mut tbuilder = tabled::builder::Builder::default();
-                    tbuilder.push_record(["Taxon", &status.taxon.get().reference()]);
-                    tbuilder.push_record(["Region", &status.region.get().reference()]);
-                    tbuilder.push_record([
-                        "Origin",
-                        &status
-                            .origin
-                            .unwrap_or(propagation_notebook::region::Origin::Unknown)
-                            .to_string(),
-                    ]);
-                    tbuilder.push_record([
-                        "C-value",
-                        &status
-                            .c_value
-                            .map(|v| v.to_string())
-                            .unwrap_or_else(|| "-".into()),
-                    ]);
-                    tbuilder.push_record([
-                        "Conservation Status",
-                        &status
-                            .conservation_status
-                            .map(|v| v.to_string())
-                            .unwrap_or_else(|| "-".into()),
-                    ]);
-                    tbuilder.push_record([
-                        "Wetland Indicator",
-                        &status
-                            .wetland_indicator
-                            .map(|v| v.to_string())
-                            .unwrap_or_else(|| "-".into()),
-                    ]);
-                    tbuilder.push_record(["Harvest Window", &status.harvest_window.to_string()]);
-                    println!("{}", tbuilder.build().with(style::DetailTable));
-                    println!();
+                    let mut table =
+                        regional_taxa_status_details_table(db, region_id, taxon_id).await?;
+                    println!("{}", table.with(style::DetailTable));
                 }
                 RegionTaxaCommands::Add { taxon_id, props } => {
                     // make sure region exists
@@ -350,13 +277,16 @@ impl RegionCommands {
                     taxon_id,
                     assumeyes,
                 } => {
-                    if *assumeyes
-                        || inquire::Confirm::new(
-                            "Are you sure you wish to remove this regional taxon?",
+                    if *assumeyes || {
+                        let mut table =
+                            regional_taxa_status_details_table(db, region_id, taxon_id).await?;
+                        println!("{}", table.with(style::DetailTable));
+                        inquire::Confirm::new(
+                            "Are you sure you wish to remove this taxon from the region? ",
                         )
                         .with_default(false)
                         .prompt()?
-                    {
+                    } {
                         RegionalTaxonStatus::delete_by_taxon_id_and_region_id(
                             db, taxon_id, region_id,
                         )
@@ -368,6 +298,96 @@ impl RegionCommands {
         }
         Ok(())
     }
+}
+
+async fn regional_taxa_status_details_table(
+    db: &mut Db,
+    region_id: &u64,
+    taxon_id: &u64,
+) -> Result<tabled::Table, anyhow::Error> {
+    let status = RegionalTaxonStatus::filter_by_taxon_id_and_region_id(taxon_id, region_id)
+        .include(RegionalTaxonStatus::fields().region())
+        .include(RegionalTaxonStatus::fields().taxon())
+        .one()
+        .exec(db)
+        .await?;
+    let mut tbuilder = tabled::builder::Builder::default();
+    tbuilder.push_record(["Taxon", &status.taxon.get().reference()]);
+    tbuilder.push_record(["Region", &status.region.get().reference()]);
+    tbuilder.push_record([
+        "Origin",
+        &status
+            .origin
+            .unwrap_or(propagation_notebook::region::Origin::Unknown)
+            .to_string(),
+    ]);
+    tbuilder.push_record([
+        "C-value",
+        &status
+            .c_value
+            .map(|v| v.to_string())
+            .unwrap_or_else(|| "-".into()),
+    ]);
+    tbuilder.push_record([
+        "Conservation Status",
+        &status
+            .conservation_status
+            .map(|v| v.to_string())
+            .unwrap_or_else(|| "-".into()),
+    ]);
+    tbuilder.push_record([
+        "Wetland Indicator",
+        &status
+            .wetland_indicator
+            .map(|v| v.to_string())
+            .unwrap_or_else(|| "-".into()),
+    ]);
+    tbuilder.push_record(["Harvest Window", &status.harvest_window.to_string()]);
+    Ok(tbuilder.build())
+}
+
+async fn region_details_table(db: &mut Db, id: &u64) -> Result<tabled::Table, anyhow::Error> {
+    let region = Region::filter_by_id(id)
+        .include(Region::fields().taxon_statuses())
+        .one()
+        .exec(db)
+        .await?;
+    let mut tbuilder = tabled::builder::Builder::default();
+    tbuilder.push_record(["ID", &region.id.to_string()]);
+    tbuilder.push_record(["Name", &region.name]);
+    tbuilder.push_record(["Notes", &region.notes.unwrap_or_else(|| "-".to_string())]);
+    tbuilder.push_record(["Taxa", &region.taxon_statuses.get().len().to_string()]);
+    tbuilder.push_record([
+        "Geometry",
+        {
+            region.geometry.map(|v| match &v.value {
+                geojson::GeometryValue::Point { coordinates } => {
+                    format!("Point: ({}, {})", coordinates[0], coordinates[1])
+                }
+                geojson::GeometryValue::LineString { coordinates } => {
+                    format!("LineString: {} coordinates", coordinates.len())
+                }
+                geojson::GeometryValue::Polygon { coordinates } => {
+                    format!("Polygon: {} linear rings", coordinates.len())
+                }
+                geojson::GeometryValue::MultiPoint { coordinates } => {
+                    format!("MultiPoint: {} points", coordinates.len())
+                }
+                geojson::GeometryValue::MultiLineString { coordinates } => {
+                    format!("MultiLineString: {} lines", coordinates.len())
+                }
+                geojson::GeometryValue::MultiPolygon { coordinates } => {
+                    format!("MultiPolygon: {} polygons", coordinates.len())
+                }
+                geojson::GeometryValue::GeometryCollection { geometries } => {
+                    format!("GeometryCollection: {} sub-geometries", geometries.len())
+                }
+            })
+        }
+        .as_deref()
+        .unwrap_or("-"),
+    ]);
+    Ok(tbuilder.build())
 }
 
 #[derive(Debug, clap::Subcommand)]
