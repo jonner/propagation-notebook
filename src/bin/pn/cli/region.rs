@@ -28,48 +28,6 @@ pub struct GeometryArg {
     pub geometry_string: Option<geojson::Geometry>,
 }
 
-#[derive(clap::Args, Debug)]
-pub struct RegionalTaxonProperties {
-    #[arg(short, long, help = "Origin of the taxon vis-a-vis this region")]
-    pub origin: Option<Origin>,
-    #[arg(
-        long,
-        help = "Coefficient of conservatism (0-10) for the species in this region"
-    )]
-    pub c_value: Option<u64>,
-    #[arg(
-        short,
-        long,
-        help = "Conservation status for the species in the given region"
-    )]
-    pub conservation_status: Option<ConservationStatus>,
-    #[arg(
-        short,
-        long,
-        help = "Whether the species is a wetland indicator in the given region"
-    )]
-    pub wetland_indicator: Option<WetlandIndicator>,
-    // harvest phenology
-    #[arg(
-        long,
-        help = "Start of the harvest window for the species in the given region (format: MM-DD)",
-        value_parser = parse_month_day,
-    )]
-    pub harvest_start: Option<jiff::civil::Date>,
-    #[arg(
-        long,
-        help = "End of the harvest window for the species in the given region (format: MM-DD)",
-        value_parser = parse_month_day,
-    )]
-    pub harvest_end: Option<jiff::civil::Date>,
-}
-
-pub fn parse_month_day(input: &str) -> anyhow::Result<jiff::civil::Date> {
-    let mut parsed = jiff::fmt::strtime::parse("%m-%d", input)?;
-    parsed.set_year(Some(2000))?;
-    parsed.to_date().map_err(|e| e.into())
-}
-
 impl GeometryArg {
     pub async fn resolve(&self) -> anyhow::Result<Option<geojson::Geometry>> {
         match (self.geometry_string.as_ref(), self.geometry_file.as_ref()) {
@@ -388,6 +346,47 @@ async fn region_details_table(db: &mut Db, id: &u64) -> Result<tabled::Table, an
         .unwrap_or("-"),
     ]);
     Ok(tbuilder.build())
+}
+fn parse_month_day(input: &str) -> anyhow::Result<jiff::civil::Date> {
+    let mut parsed = jiff::fmt::strtime::parse("%m-%d", input)?;
+    parsed.set_year(Some(2000))?;
+    parsed.to_date().map_err(|e| e.into())
+}
+
+#[derive(clap::Args, Debug)]
+pub struct RegionalTaxonProperties {
+    #[arg(short, long, help = "Origin of the taxon vis-a-vis this region")]
+    pub origin: Option<Origin>,
+    #[arg(
+        long,
+        help = "Coefficient of conservatism (0-10) for the species in this region"
+    )]
+    pub c_value: Option<u64>,
+    #[arg(
+        short,
+        long,
+        help = "Conservation status for the species in the given region"
+    )]
+    pub conservation_status: Option<ConservationStatus>,
+    #[arg(
+        short,
+        long,
+        help = "Whether the species is a wetland indicator in the given region"
+    )]
+    pub wetland_indicator: Option<WetlandIndicator>,
+    // harvest phenology
+    #[arg(
+        long,
+        help = "Start of the harvest window for the species in the given region (format: MM-DD)",
+        value_parser = parse_month_day,
+    )]
+    pub harvest_start: Option<jiff::civil::Date>,
+    #[arg(
+        long,
+        help = "End of the harvest window for the species in the given region (format: MM-DD)",
+        value_parser = parse_month_day,
+    )]
+    pub harvest_end: Option<jiff::civil::Date>,
 }
 
 #[derive(Debug, clap::Subcommand)]
