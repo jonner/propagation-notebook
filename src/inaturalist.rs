@@ -267,16 +267,6 @@ pub async fn seed_observation_window(
     Ok((start_date, end_date))
 }
 
-pub enum AdminLevel {
-    Continent = -10,
-    Region = -5,
-    Country = 0,
-    State = 10,
-    County = 20,
-    Town = 30,
-    Park = 100,
-}
-
 #[derive(Debug, Deserialize)]
 pub struct InaturalistPlace {
     pub id: u32,
