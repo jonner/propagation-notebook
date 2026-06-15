@@ -1,12 +1,16 @@
 use std::path::PathBuf;
 
-use propagation_notebook::region::{
-    ConservationStatus, Origin, Region, RegionalHarvestWindow, RegionalTaxonStatus,
-    WetlandIndicator,
+use crate::{cli::list_regional_taxa, style};
+use anyhow::anyhow;
+use geo::BoundingRect;
+use propagation_notebook::{
+    inaturalist::{self, ObservationLocation},
+    region::{
+        ConservationStatus, Origin, Region, RegionalHarvestWindow, RegionalTaxonStatus,
+        WetlandIndicator,
+    },
 };
 use toasty::Db;
-
-use crate::{cli::list_regional_taxa, style};
 
 mod import;
 
@@ -37,7 +41,7 @@ impl GeometryArg {
                 Ok(Some(s.parse()?))
             }
             (None, None) => Ok(None),
-            _ => Err(anyhow::anyhow!(
+            _ => Err(anyhow!(
                 "Only one of 'geometry' or 'geometry_file' can be specified at the same time"
             )),
         }
@@ -295,6 +299,11 @@ pub enum RegionTaxaCommands {
         )]
         assumeyes: bool,
     },
+    #[command(about = "Look up harvest dates from iNaturalist")]
+    LookupHarvestDates {
+        #[arg(short, long, help = "A taxon ID")]
+        taxon_id: u64,
+    },
 }
 
 async fn regional_taxa_status_details_table(
@@ -425,7 +434,126 @@ impl RegionTaxaCommands {
                     println!("Removed taxon {} from region {}", taxon_id, region_id);
                 }
             }
+            Self::LookupHarvestDates { taxon_id } => {
+                println!("Attempting to find seed-bearing dates at iNaturalist.org");
+                let mut rts =
+                    RegionalTaxonStatus::filter_by_taxon_id_and_region_id(taxon_id, region_id)
+                        .include(RegionalTaxonStatus::fields().taxon().vernaculars())
+                        .include(RegionalTaxonStatus::fields().region())
+                        .one()
+                        .exec(db)
+                        .await?;
+                let taxon = rts.taxon.get();
+                let client = inaturalist::client()?;
+                let taxon_id = async {
+                    if let Ok(taxon_id) =
+                        get_taxon_for_query(&rts, &client, &taxon.complete_name).await
+                    {
+                        Ok(taxon_id)
+                    } else {
+                        println!(
+                            "Couldn't find a matching taxon for the scientific name '{}'",
+                            taxon.complete_name
+                        );
+                        let vernaculars = taxon.vernaculars.get();
+                        if !vernaculars.is_empty() {
+                            println!("Attempting to find a match by common name...");
+                            for vn in taxon.vernaculars.get() {
+                                if let Ok(taxon_id) =
+                                    get_taxon_for_query(&rts, &client, &vn.name).await
+                                {
+                                    return Ok(taxon_id);
+                                }
+                                println!(
+                                    "Couldn't find a matching taxon for the common name '{}'",
+                                    vn.name
+                                );
+                            }
+                        }
+                        Err(anyhow!(
+                            "Unable to find a match for '{}' in iNaturalist",
+                            rts.taxon.get().complete_name
+                        ))
+                    }
+                }
+                .await?;
+                let bounding_box = match &rts.region.get().geometry {
+                    Some(value) => {
+                        let geom: geo::Geometry = value.value.clone().try_into()?;
+                        geom.bounding_rect()
+                    }
+                    None => None,
+                };
+                let loc = match bounding_box {
+                    Some(rect) => ObservationLocation::BoundingBox(rect),
+                    None => {
+                        let options = inaturalist::places_search(
+                            &client,
+                            &inquire::Text::new(
+                                "Search for a place on inaturalist that represents this region:",
+                            )
+                            .prompt()?,
+                        )
+                        .await?;
+                        let selected = inquire::Select::new(
+                            "Please select one of the following iNaturalist places:",
+                            options,
+                        )
+                        .prompt()?;
+                        ObservationLocation::Place(selected.id)
+                    }
+                };
+                let (start, end) =
+                    inaturalist::seed_observation_window(&client, taxon_id, loc).await?;
+                let window = RegionalHarvestWindow {
+                    start: Some(start),
+                    end: Some(end),
+                };
+                println!(
+                    "Estimated harvest window for '{}' in region {region_id} is {}",
+                    rts.taxon.get().complete_name,
+                    window
+                );
+                if inquire::Confirm::new("Would you like to update this data in the database?")
+                    .with_default(false)
+                    .with_help_message(&format!("Curent harvest window: {}", rts.harvest_window))
+                    .prompt()?
+                {
+                    rts.update().harvest_window(window).exec(db).await?;
+                }
+            }
         }
         Ok(())
     }
+}
+
+async fn get_taxon_for_query(
+    rts: &RegionalTaxonStatus,
+    client: &reqwest::Client,
+    query: &str,
+) -> anyhow::Result<u32> {
+    let possible_taxa = inaturalist::find_taxon(client, query)
+        .await?
+        .into_iter()
+        .filter(|t| t.is_active)
+        .collect::<Vec<_>>();
+    let taxon_id = if possible_taxa.len() > 1 {
+        let selected = inquire::Select::new(
+            &format!(
+                "Please select an iNaturalist taxon that matches '{}'",
+                query
+            ),
+            possible_taxa,
+        )
+        .prompt()?;
+        selected.id
+    } else if possible_taxa.len() == 1 {
+        possible_taxa[0].id
+    } else {
+        return Err(anyhow!(
+            "Unable to find an iNaturalist taxon for '{}'",
+            rts.taxon.get().complete_name
+        ));
+    };
+    Ok(taxon_id)
 }
