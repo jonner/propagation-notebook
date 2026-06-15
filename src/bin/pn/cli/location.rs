@@ -58,13 +58,8 @@ impl LocationCommands {
                 println!("{}", tbuilder.build().with(style::ListTable));
             }
             LocationCommands::Show { id } => {
-                let loc = Location::get_by_id(db, id).await?;
-                let mut tbuilder = tabled::builder::Builder::default();
-                tbuilder.push_record(["ID", &loc.id.to_string()]);
-                tbuilder.push_record(["Name", &loc.name]);
-                tbuilder.push_record(["Latitude", &loc.latitude.to_string()]);
-                tbuilder.push_record(["Longitude", &loc.longitude.to_string()]);
-                println!("{}", tbuilder.build().with(style::DetailTable));
+                let mut table = location_details_table(db, id).await?;
+                println!("{}", table.with(style::DetailTable));
             }
             LocationCommands::Add {
                 name,
@@ -99,12 +94,18 @@ impl LocationCommands {
                 println!("Modified location {}", id);
             }
             LocationCommands::Remove { id, assumeyes } => {
-                if *assumeyes
-                    || inquire::Confirm::new("Are you sure you wish to delete this location?")
+                if *assumeyes || {
+                    println!(
+                        "{}",
+                        location_details_table(db, id)
+                            .await?
+                            .with(style::DetailTable)
+                    );
+                    inquire::Confirm::new("Are you sure you wish to delete this location?")
                         .with_default(false)
                         .with_help_message("All associated data will be deleted")
                         .prompt()?
-                {
+                } {
                     Location::delete_by_id(db, id).await?;
                     println!("Deleted location {id} from the database");
                 }
@@ -112,4 +113,14 @@ impl LocationCommands {
         }
         Ok(())
     }
+}
+
+async fn location_details_table(db: &mut Db, id: &u64) -> Result<tabled::Table, anyhow::Error> {
+    let loc = Location::get_by_id(db, id).await?;
+    let mut tbuilder = tabled::builder::Builder::default();
+    tbuilder.push_record(["ID", &loc.id.to_string()]);
+    tbuilder.push_record(["Name", &loc.name]);
+    tbuilder.push_record(["Latitude", &loc.latitude.to_string()]);
+    tbuilder.push_record(["Longitude", &loc.longitude.to_string()]);
+    Ok(tbuilder.build())
 }

@@ -79,14 +79,8 @@ impl PropagationCommands {
                 println!("{}", tbuilder.build().with(style::ListTable));
             }
             PropagationCommands::Show { id } => {
-                let p = Protocol::filter_by_id(id).one().exec(db).await?;
-                let mut tbuilder = tabled::builder::Builder::default();
-                tbuilder.push_record(["ID", &p.id.to_string()]);
-                tbuilder.push_record(["Name", &p.name]);
-                tbuilder.push_record(["Type", &p.r#type.to_string()]);
-                tbuilder.push_record(["Notes", &p.notes.unwrap_or_else(|| "-".into())]);
-                tbuilder.push_record(["Instructions", &p.instructions]);
-                println!("{}", tbuilder.build().with(style::DetailTable));
+                let mut table = propagation_protocol_details_table(db, id).await?;
+                println!("{}", table.with(style::DetailTable));
             }
             PropagationCommands::Add {
                 name,
@@ -127,14 +121,16 @@ impl PropagationCommands {
                 println!("Updated protocol {id}");
             }
             PropagationCommands::Remove { id, assumeyes } => {
-                if *assumeyes
-                    || inquire::Confirm::new(
+                if *assumeyes || {
+                    let mut table = propagation_protocol_details_table(db, id).await?;
+                    println!("{}", table.with(style::DetailTable));
+                    inquire::Confirm::new(
                         "Are you sure you wish to remove this Propagation protocol?",
                     )
                     .with_default(false)
                     .with_help_message("It will remove all related steps")
                     .prompt()?
-                {
+                } {
                     Protocol::delete_by_id(db, id).await?;
                     println!("Removed propagation protocol {id}");
                 }
@@ -162,4 +158,18 @@ impl PropagationCommands {
         }
         Ok(())
     }
+}
+
+async fn propagation_protocol_details_table(
+    db: &mut Db,
+    id: &u64,
+) -> Result<tabled::Table, anyhow::Error> {
+    let p = Protocol::filter_by_id(id).one().exec(db).await?;
+    let mut tbuilder = tabled::builder::Builder::default();
+    tbuilder.push_record(["ID", &p.id.to_string()]);
+    tbuilder.push_record(["Name", &p.name]);
+    tbuilder.push_record(["Type", &p.r#type.to_string()]);
+    tbuilder.push_record(["Notes", &p.notes.unwrap_or_else(|| "-".into())]);
+    tbuilder.push_record(["Instructions", &p.instructions]);
+    Ok(tbuilder.build())
 }

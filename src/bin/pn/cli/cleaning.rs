@@ -62,23 +62,8 @@ impl CleaningCommands {
                 println!("\n{nitems} found");
             }
             CleaningCommands::Show { id } => {
-                let procedure = CleaningProcedure::filter_by_id(id)
-                    .include(CleaningProcedure::fields().taxon_links().taxon())
-                    .one()
-                    .exec(db)
-                    .await?;
-                let mut tbuilder = tabled::builder::Builder::default();
-                tbuilder.push_record(["ID", &procedure.id.to_string()]);
-                tbuilder.push_record(["Name", &procedure.name]);
-                tbuilder.push_record(["Notes", &procedure.notes.unwrap_or_else(|| "-".into())]);
-                tbuilder.push_record([
-                    "Taxa",
-                    &join_or_default(procedure.taxon_links.get(), "-", |v| {
-                        v.taxon.get().reference()
-                    }),
-                ]);
-                tbuilder.push_record(["Instructions", &procedure.instructions]);
-                println!("{}", tbuilder.build().with(style::ListTable));
+                let mut table = cleaning_procedure_details_table(db, id).await?;
+                println!("{}", table.with(style::ListTable));
             }
             CleaningCommands::Add {
                 name,
@@ -99,8 +84,14 @@ impl CleaningCommands {
                     .one()
                     .exec(db)
                     .await?;
-                if *assumeyes
-                    || inquire::Confirm::new(&format!(
+                if *assumeyes || {
+                    println!(
+                        "{}",
+                        cleaning_procedure_details_table(db, id)
+                            .await?
+                            .with(style::ListTable)
+                    );
+                    inquire::Confirm::new(&format!(
                         "Are you sure you wish to remove cleaning procedure {id}?"
                     ))
                     .with_default(false)
@@ -109,7 +100,7 @@ impl CleaningCommands {
                         item.taxon_links.get().len()
                     ))
                     .prompt()?
-                {
+                } {
                     CleaningProcedure::delete_by_id(db, id).await?;
                     println!("Removed cleaning procedure {id}");
                 }
@@ -136,4 +127,27 @@ impl CleaningCommands {
         }
         Ok(())
     }
+}
+
+async fn cleaning_procedure_details_table(
+    db: &mut Db,
+    id: &u64,
+) -> Result<tabled::Table, anyhow::Error> {
+    let procedure = CleaningProcedure::filter_by_id(id)
+        .include(CleaningProcedure::fields().taxon_links().taxon())
+        .one()
+        .exec(db)
+        .await?;
+    let mut tbuilder = tabled::builder::Builder::default();
+    tbuilder.push_record(["ID", &procedure.id.to_string()]);
+    tbuilder.push_record(["Name", &procedure.name]);
+    tbuilder.push_record(["Notes", &procedure.notes.unwrap_or_else(|| "-".into())]);
+    tbuilder.push_record([
+        "Taxa",
+        &join_or_default(procedure.taxon_links.get(), "-", |v| {
+            v.taxon.get().reference()
+        }),
+    ]);
+    tbuilder.push_record(["Instructions", &procedure.instructions]);
+    Ok(tbuilder.build())
 }
