@@ -170,138 +170,10 @@ impl RegionCommands {
                     println!("Deleted region {id} from the database");
                 }
             }
-            RegionCommands::Taxa { region_id, command } => match command {
-                RegionTaxaCommands::Show { taxon_id } => {
-                    let mut table =
-                        regional_taxa_status_details_table(db, region_id, taxon_id).await?;
-                    println!("{}", table.with(style::DetailTable));
-                }
-                RegionTaxaCommands::Add { taxon_id, props } => {
-                    // make sure region exists
-                    let _r = Region::get_by_id(db, region_id).await?;
-                    let s = RegionalTaxonStatus::create()
-                        .region_id(region_id)
-                        .taxon_id(taxon_id)
-                        .origin(props.origin)
-                        .c_value(props.c_value)
-                        .conservation_status(props.conservation_status)
-                        .wetland_indicator(props.wetland_indicator)
-                        .harvest_window(RegionalHarvestWindow {
-                            start: props
-                                .harvest_start
-                                .map(|d| d.with().year(2000).build().unwrap()),
-                            end: props
-                                .harvest_end
-                                .map(|d| d.with().year(2000).build().unwrap()),
-                        })
-                        .exec(db)
-                        .await?;
-                    println!("Added regional taxon {}", s.id);
-                }
-                RegionTaxaCommands::Modify { taxon_id, props } => {
-                    // make sure region exists
-                    let _r = Region::get_by_id(db, region_id).await?;
-                    let mut query =
-                        RegionalTaxonStatus::update_by_taxon_id_and_region_id(taxon_id, region_id);
-                    if let Some(origin) = props.origin {
-                        query = query.origin(origin);
-                    }
-                    if let Some(c_value) = props.c_value {
-                        query = query.c_value(c_value);
-                    }
-                    if let Some(conservation_status) = props.conservation_status {
-                        query = query.conservation_status(conservation_status);
-                    }
-                    if let Some(wetland_indicator) = props.wetland_indicator {
-                        query = query.wetland_indicator(wetland_indicator);
-                    }
-                    if let Some(harvest_start) = props.harvest_start {
-                        query = query.harvest_window(toasty::stmt::patch(
-                            RegionalHarvestWindow::fields().start(),
-                            harvest_start.with().year(2000).build().unwrap(),
-                        ));
-                    }
-                    if let Some(harvest_end) = props.harvest_end {
-                        query = query.harvest_window(toasty::stmt::patch(
-                            RegionalHarvestWindow::fields().end(),
-                            harvest_end.with().year(2000).build().unwrap(),
-                        ));
-                    }
-                    query.exec(db).await?;
-                    println!("Modified taxon {} in region {}", taxon_id, region_id);
-                }
-                RegionTaxaCommands::List => list_regional_taxa(db, *region_id).await?,
-                RegionTaxaCommands::Remove {
-                    taxon_id,
-                    assumeyes,
-                } => {
-                    if *assumeyes || {
-                        let mut table =
-                            regional_taxa_status_details_table(db, region_id, taxon_id).await?;
-                        println!("{}", table.with(style::DetailTable));
-                        inquire::Confirm::new(
-                            "Are you sure you wish to remove this taxon from the region? ",
-                        )
-                        .with_default(false)
-                        .prompt()?
-                    } {
-                        RegionalTaxonStatus::delete_by_taxon_id_and_region_id(
-                            db, taxon_id, region_id,
-                        )
-                        .await?;
-                        println!("Removed taxon {} from region {}", taxon_id, region_id);
-                    }
-                }
-            },
+            RegionCommands::Taxa { region_id, command } => command.run(db, *region_id).await?,
         }
         Ok(())
     }
-}
-
-async fn regional_taxa_status_details_table(
-    db: &mut Db,
-    region_id: &u64,
-    taxon_id: &u64,
-) -> Result<tabled::Table, anyhow::Error> {
-    let status = RegionalTaxonStatus::filter_by_taxon_id_and_region_id(taxon_id, region_id)
-        .include(RegionalTaxonStatus::fields().region())
-        .include(RegionalTaxonStatus::fields().taxon())
-        .one()
-        .exec(db)
-        .await?;
-    let mut tbuilder = tabled::builder::Builder::default();
-    tbuilder.push_record(["Taxon", &status.taxon.get().reference()]);
-    tbuilder.push_record(["Region", &status.region.get().reference()]);
-    tbuilder.push_record([
-        "Origin",
-        &status
-            .origin
-            .unwrap_or(propagation_notebook::region::Origin::Unknown)
-            .to_string(),
-    ]);
-    tbuilder.push_record([
-        "C-value",
-        &status
-            .c_value
-            .map(|v| v.to_string())
-            .unwrap_or_else(|| "-".into()),
-    ]);
-    tbuilder.push_record([
-        "Conservation Status",
-        &status
-            .conservation_status
-            .map(|v| v.to_string())
-            .unwrap_or_else(|| "-".into()),
-    ]);
-    tbuilder.push_record([
-        "Wetland Indicator",
-        &status
-            .wetland_indicator
-            .map(|v| v.to_string())
-            .unwrap_or_else(|| "-".into()),
-    ]);
-    tbuilder.push_record(["Harvest Window", &status.harvest_window.to_string()]);
-    Ok(tbuilder.build())
 }
 
 async fn region_details_table(db: &mut Db, id: &u64) -> Result<tabled::Table, anyhow::Error> {
@@ -423,4 +295,137 @@ pub enum RegionTaxaCommands {
         )]
         assumeyes: bool,
     },
+}
+
+async fn regional_taxa_status_details_table(
+    db: &mut Db,
+    region_id: u64,
+    taxon_id: u64,
+) -> Result<tabled::Table, anyhow::Error> {
+    let status = RegionalTaxonStatus::filter_by_taxon_id_and_region_id(taxon_id, region_id)
+        .include(RegionalTaxonStatus::fields().region())
+        .include(RegionalTaxonStatus::fields().taxon())
+        .one()
+        .exec(db)
+        .await?;
+    let mut tbuilder = tabled::builder::Builder::default();
+    tbuilder.push_record(["Taxon", &status.taxon.get().reference()]);
+    tbuilder.push_record(["Region", &status.region.get().reference()]);
+    tbuilder.push_record([
+        "Origin",
+        &status
+            .origin
+            .unwrap_or(propagation_notebook::region::Origin::Unknown)
+            .to_string(),
+    ]);
+    tbuilder.push_record([
+        "C-value",
+        &status
+            .c_value
+            .map(|v| v.to_string())
+            .unwrap_or_else(|| "-".into()),
+    ]);
+    tbuilder.push_record([
+        "Conservation Status",
+        &status
+            .conservation_status
+            .map(|v| v.to_string())
+            .unwrap_or_else(|| "-".into()),
+    ]);
+    tbuilder.push_record([
+        "Wetland Indicator",
+        &status
+            .wetland_indicator
+            .map(|v| v.to_string())
+            .unwrap_or_else(|| "-".into()),
+    ]);
+    tbuilder.push_record(["Harvest Window", &status.harvest_window.to_string()]);
+    Ok(tbuilder.build())
+}
+
+impl RegionTaxaCommands {
+    pub async fn run(&self, db: &mut Db, region_id: u64) -> anyhow::Result<()> {
+        match self {
+            RegionTaxaCommands::Show { taxon_id } => {
+                let mut table =
+                    regional_taxa_status_details_table(db, region_id, *taxon_id).await?;
+                println!("{}", table.with(style::DetailTable));
+            }
+            RegionTaxaCommands::Add { taxon_id, props } => {
+                // make sure region exists
+                let _r = Region::get_by_id(db, region_id).await?;
+                let s = RegionalTaxonStatus::create()
+                    .region_id(region_id)
+                    .taxon_id(taxon_id)
+                    .origin(props.origin)
+                    .c_value(props.c_value)
+                    .conservation_status(props.conservation_status)
+                    .wetland_indicator(props.wetland_indicator)
+                    .harvest_window(RegionalHarvestWindow {
+                        start: props
+                            .harvest_start
+                            .map(|d| d.with().year(2000).build().unwrap()),
+                        end: props
+                            .harvest_end
+                            .map(|d| d.with().year(2000).build().unwrap()),
+                    })
+                    .exec(db)
+                    .await?;
+                println!("Added regional taxon {}", s.id);
+            }
+            RegionTaxaCommands::Modify { taxon_id, props } => {
+                // make sure region exists
+                let _r = Region::get_by_id(db, region_id).await?;
+                let mut query =
+                    RegionalTaxonStatus::update_by_taxon_id_and_region_id(taxon_id, region_id);
+                if let Some(origin) = props.origin {
+                    query = query.origin(origin);
+                }
+                if let Some(c_value) = props.c_value {
+                    query = query.c_value(c_value);
+                }
+                if let Some(conservation_status) = props.conservation_status {
+                    query = query.conservation_status(conservation_status);
+                }
+                if let Some(wetland_indicator) = props.wetland_indicator {
+                    query = query.wetland_indicator(wetland_indicator);
+                }
+                if let Some(harvest_start) = props.harvest_start {
+                    query = query.harvest_window(toasty::stmt::patch(
+                        RegionalHarvestWindow::fields().start(),
+                        harvest_start.with().year(2000).build().unwrap(),
+                    ));
+                }
+                if let Some(harvest_end) = props.harvest_end {
+                    query = query.harvest_window(toasty::stmt::patch(
+                        RegionalHarvestWindow::fields().end(),
+                        harvest_end.with().year(2000).build().unwrap(),
+                    ));
+                }
+                query.exec(db).await?;
+                println!("Modified taxon {} in region {}", taxon_id, region_id);
+            }
+            RegionTaxaCommands::List => list_regional_taxa(db, region_id).await?,
+            RegionTaxaCommands::Remove {
+                taxon_id,
+                assumeyes,
+            } => {
+                if *assumeyes || {
+                    let mut table =
+                        regional_taxa_status_details_table(db, region_id, *taxon_id).await?;
+                    println!("{}", table.with(style::DetailTable));
+                    inquire::Confirm::new(
+                        "Are you sure you wish to remove this taxon from the region? ",
+                    )
+                    .with_default(false)
+                    .prompt()?
+                } {
+                    RegionalTaxonStatus::delete_by_taxon_id_and_region_id(db, taxon_id, region_id)
+                        .await?;
+                    println!("Removed taxon {} from region {}", taxon_id, region_id);
+                }
+            }
+        }
+        Ok(())
+    }
 }
