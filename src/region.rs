@@ -83,8 +83,8 @@ pub enum Origin {
 
 #[derive(Debug, Clone, Default, toasty::Embed)]
 pub struct RegionalHarvestWindow {
-    pub start: Option<jiff::civil::Date>,
-    pub end: Option<jiff::civil::Date>,
+    pub start_doy: Option<i16>,
+    pub end_doy: Option<i16>,
 }
 
 impl Display for RegionalHarvestWindow {
@@ -92,12 +92,30 @@ impl Display for RegionalHarvestWindow {
         write!(
             f,
             "{} - {}",
-            self.start
-                .map(|d| d.strftime("%b %d").to_string())
-                .unwrap_or("?".to_string()),
-            self.end
-                .map(|d| d.strftime("%b %d").to_string())
-                .unwrap_or("?".to_string())
+            self.start_doy
+                .and_then(|d| {
+                    jiff::civil::Date::default()
+                        .with()
+                        .year(2000)
+                        .day_of_year(d)
+                        .build()
+                        .map(|d| d.strftime("%b %d").to_string())
+                        .ok()
+                })
+                .as_deref()
+                .unwrap_or("?"),
+            self.end_doy
+                .and_then(|d| {
+                    jiff::civil::Date::default()
+                        .with()
+                        .year(2000)
+                        .day_of_year(d)
+                        .build()
+                        .map(|d| d.strftime("%b %d").to_string())
+                        .ok()
+                })
+                .as_deref()
+                .unwrap_or("?"),
         )
     }
 }

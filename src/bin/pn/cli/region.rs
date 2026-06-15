@@ -380,12 +380,8 @@ impl RegionTaxaCommands {
                     .conservation_status(props.conservation_status)
                     .wetland_indicator(props.wetland_indicator)
                     .harvest_window(RegionalHarvestWindow {
-                        start: props
-                            .harvest_start
-                            .map(|d| d.with().year(2000).build().unwrap()),
-                        end: props
-                            .harvest_end
-                            .map(|d| d.with().year(2000).build().unwrap()),
+                        start_doy: props.harvest_start.map(|d| d.day_of_year()),
+                        end_doy: props.harvest_end.map(|d| d.day_of_year()),
                     })
                     .exec(db)
                     .await?;
@@ -410,14 +406,14 @@ impl RegionTaxaCommands {
                 }
                 if let Some(harvest_start) = props.harvest_start {
                     query = query.harvest_window(toasty::stmt::patch(
-                        RegionalHarvestWindow::fields().start(),
-                        harvest_start.with().year(2000).build().unwrap(),
+                        RegionalHarvestWindow::fields().start_doy(),
+                        harvest_start.day_of_year(),
                     ));
                 }
                 if let Some(harvest_end) = props.harvest_end {
                     query = query.harvest_window(toasty::stmt::patch(
-                        RegionalHarvestWindow::fields().end(),
-                        harvest_end.with().year(2000).build().unwrap(),
+                        RegionalHarvestWindow::fields().end_doy(),
+                        harvest_end.day_of_year(),
                     ));
                 }
                 query.exec(db).await?;
@@ -518,8 +514,8 @@ impl RegionTaxaCommands {
                 let ((start, end), n) =
                     fetch_with_expansion(client, taxon_id, loc, *min_samples).await?;
                 let window = RegionalHarvestWindow {
-                    start: Some(start),
-                    end: Some(end),
+                    start_doy: Some(start),
+                    end_doy: Some(end),
                 };
                 println!();
                 if inquire::Confirm::new(&format!(
@@ -545,7 +541,7 @@ async fn fetch_with_expansion(
     taxon_id: u32,
     mut loc: SearchArea,
     min_samples: usize,
-) -> anyhow::Result<((Date, Date), usize)> {
+) -> anyhow::Result<((i16, i16), usize)> {
     loop {
         match inaturalist::seed_observation_window(&client, taxon_id, &loc, min_samples).await {
             e @ Err(inaturalist::Error::InsufficientObservations(n)) => {

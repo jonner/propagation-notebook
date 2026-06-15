@@ -13,6 +13,8 @@ pub enum Error {
     Reqwest(#[from] reqwest::Error),
     #[error(transparent)]
     Url(#[from] url::ParseError),
+    #[error(transparent)]
+    Date(#[from] jiff::Error),
 }
 
 #[derive(Deserialize, Debug)]
@@ -142,13 +144,13 @@ async fn fetch_seed_observations(
 
 async fn calculate_harvest_window(
     observations: &Vec<ObservationDate>,
-) -> Result<(u16, u16), Error> {
+) -> Result<(i16, i16), Error> {
     if observations.is_empty() {
         return Err(Error::InsufficientObservations(0));
     }
-    let observations_doy: Vec<u16> = observations
+    let observations_doy: Vec<i16> = observations
         .into_iter()
-        .filter_map(|ob| ob.observed_on.map(|d| d.day_of_year().try_into().unwrap()))
+        .filter_map(|ob| ob.observed_on.map(|d| d.day_of_year()))
         .collect();
 
     let total_count = observations_doy.len();
@@ -189,11 +191,11 @@ async fn calculate_harvest_window(
     );
 
     // 4. FILTER OUTLIERS USING CIRCULAR DISTANCE
-    let mut valid_days: Vec<u16> = observations_doy
+    let mut valid_days: Vec<i16> = observations_doy
         .iter()
         .copied()
         .filter(|&day| {
-            let diff = (day as i16 - mean_day).abs();
+            let diff = (day - mean_day).abs();
             let circular_distance = diff.min(365 - diff) as f64;
             circular_distance <= threshold_days
         })
@@ -205,7 +207,7 @@ async fn calculate_harvest_window(
     }
 
     // 5. CORRECT CHRONOLOGICAL SORTING (WINTER-SAFE)
-    let anchor_day = ((mean_day + 182) % 365) as u16;
+    let anchor_day = (mean_day + 182) % 365;
 
     valid_days.sort_by_key(|&day| {
         if day > anchor_day {
@@ -229,7 +231,7 @@ pub async fn seed_observation_window(
     taxon_id: u32,
     area: &SearchArea,
     min_samples: usize,
-) -> Result<((Date, Date), usize), Error> {
+) -> Result<((i16, i16), usize), Error> {
     trace!(
         "Fetching fruiting observations for taxon {} in area {:?}...",
         taxon_id, area
@@ -245,26 +247,21 @@ pub async fn seed_observation_window(
     );
     let (start, end) = calculate_harvest_window(&observation_list).await?;
 
-    let target_year = 2000;
-    let map_back_to_date = |actual_day: u16| -> Date {
-        let day_normalized = if actual_day == 0 { 365 } else { actual_day };
-        Date::default()
-            .with()
-            .year(target_year)
-            .day_of_year(day_normalized as i16)
-            .build()
-            .unwrap()
-    };
-
-    let start_date = map_back_to_date(start);
-    let end_date = map_back_to_date(end);
     debug!(
         "Harvest dates for {}: {} - {}",
         taxon_id,
-        start_date.strftime("%b-%d"),
-        end_date.strftime("%b-%d")
+        Date::default()
+            .with()
+            .day_of_year(start)
+            .build()?
+            .strftime("%b-%d"),
+        Date::default()
+            .with()
+            .day_of_year(end)
+            .build()?
+            .strftime("%b-%d")
     );
-    Ok(((start_date, end_date), observation_list.len()))
+    Ok(((start, end), observation_list.len()))
 }
 
 #[derive(Debug, Deserialize)]

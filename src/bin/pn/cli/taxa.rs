@@ -326,11 +326,11 @@ impl TaxonCommands {
                                 .or(Taxon::fields().regional_statuses().any(
                                     RegionalTaxonStatus::fields()
                                         .harvest_window()
-                                        .start()
+                                        .start_doy()
                                         .is_some()
                                         .or(RegionalTaxonStatus::fields()
                                             .harvest_window()
-                                            .end()
+                                            .end_doy()
                                             .is_some()),
                                 ))
                                 .or(Taxon::fields()
