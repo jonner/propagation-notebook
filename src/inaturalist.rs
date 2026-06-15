@@ -1,4 +1,4 @@
-use std::{f64::consts::PI, fmt::Display, sync::LazyLock};
+use std::{f64::consts::PI, fmt::Display, sync::LazyLock, time::Duration};
 
 use anyhow::anyhow;
 use jiff::civil::Date;
@@ -28,22 +28,15 @@ struct TaxonSearchResponse {
 }
 
 #[derive(Deserialize, Debug)]
-struct Observation {
-    observed_on: Option<String>,
+pub struct ObservationDate {
+    pub id: u64,
+    pub observed_on: Option<Date>,
 }
 
 #[derive(Deserialize, Debug)]
-struct ObservationResponse {
+struct ObservationDateResponse {
     total_results: u32,
-    results: Vec<Observation>,
-}
-
-#[derive(Serialize, Debug)]
-struct TaxonHarvestDates {
-    taxon_id: u64,
-    name: String,
-    start: jiff::civil::Date,
-    end: jiff::civil::Date,
+    results: Vec<ObservationDate>,
 }
 
 const PLANT_PHENOLOGY: &str = "12";
@@ -88,9 +81,9 @@ pub async fn find_taxon(
 async fn fetch_seed_observations(
     client: &reqwest::Client,
     taxon_id: u32,
-    location: ObservationLocation,
-) -> anyhow::Result<Vec<u16>> {
-    let mut day_of_year_list: Vec<u16> = Vec::new();
+    location: SearchArea,
+) -> anyhow::Result<Vec<ObservationDate>> {
+    let mut observations: Vec<ObservationDate> = Vec::new();
     let (mut page, per_page) = (1, 200);
     let obs_endpoint = API_BASE_URL.join("observations")?;
 
@@ -102,14 +95,14 @@ async fn fetch_seed_observations(
             // ("identifications", "most_agree"),
             ("page", &page.to_string()),
             ("per_page", &per_page.to_string()),
-            ("fields", "observed_on"),
+            ("fields", "id, observed_on"),
         ]);
 
         match location {
-            ObservationLocation::Place(place_id) => {
+            SearchArea::Place(place_id) => {
                 builder = builder.query(&[("place_id", &place_id.to_string())])
             }
-            ObservationLocation::BoundingBox(rect) => {
+            SearchArea::BoundingBox(rect) => {
                 builder = builder.query(&[
                     ("swlat", rect.min().y),
                     ("swlng", rect.min().x),
@@ -119,41 +112,42 @@ async fn fetch_seed_observations(
             }
         }
 
-        let res: ObservationResponse = builder.send().await?.json().await?;
+        let res: ObservationDateResponse = builder.send().await?.json().await?;
 
         if res.results.is_empty() {
             break;
         }
 
-        for obs in res.results {
-            if let Some(date_str) = obs.observed_on
-                && let Ok(parsed_date) = date_str.parse::<Date>()
-            {
-                day_of_year_list.push(parsed_date.day_of_year().try_into().unwrap());
-            }
-        }
+        observations.extend(res.results);
 
-        // Break based entirely on total page allocations or API bounds
-        if page * per_page >= res.total_results as usize || page >= 5 {
+        if page * per_page >= res.total_results as usize {
             break;
         }
         page += 1;
+        // short pause to avoid triggering API limits
+        std::thread::sleep(Duration::from_millis(200));
     }
 
-    Ok(day_of_year_list)
+    Ok(observations)
 }
 
-async fn calculate_harvest_window(observations: Vec<u16>) -> anyhow::Result<(u16, u16)> {
+async fn calculate_harvest_window(
+    observations: Vec<ObservationDate>,
+) -> anyhow::Result<(u16, u16)> {
     if observations.is_empty() {
         return Err(anyhow!("No fruiting observations found."));
     }
+    let observations_doy: Vec<u16> = observations
+        .into_iter()
+        .filter_map(|ob| ob.observed_on.map(|d| d.day_of_year().try_into().unwrap()))
+        .collect();
 
-    let total_count = observations.len();
+    let total_count = observations_doy.len();
     // 2. CALCULATE CIRCULAR MEAN
     let mut sum_sin = 0.0;
     let mut sum_cos = 0.0;
 
-    for &day in &observations {
+    for &day in &observations_doy {
         let angle = (day as f64 / 365.25) * 2.0 * PI;
         sum_sin += angle.sin();
         sum_cos += angle.cos();
@@ -186,7 +180,7 @@ async fn calculate_harvest_window(observations: Vec<u16>) -> anyhow::Result<(u16
     );
 
     // 4. FILTER OUTLIERS USING CIRCULAR DISTANCE
-    let mut valid_days: Vec<u16> = observations
+    let mut valid_days: Vec<u16> = observations_doy
         .iter()
         .copied()
         .filter(|&day| {
@@ -217,40 +211,41 @@ async fn calculate_harvest_window(observations: Vec<u16>) -> anyhow::Result<(u16
 }
 
 #[derive(Debug)]
-pub enum ObservationLocation {
+pub enum SearchArea {
     Place(u32),
     BoundingBox(geo::Rect),
 }
+
 pub async fn seed_observation_window(
     client: &reqwest::Client,
     taxon_id: u32,
-    location: ObservationLocation,
-) -> anyhow::Result<(jiff::civil::Date, jiff::civil::Date)> {
+    area: SearchArea,
+) -> anyhow::Result<(Date, Date)> {
     trace!(
-        "Fetching fruiting observations for taxon {} in place {:?}...",
-        taxon_id, location
+        "Fetching fruiting observations for taxon {} in area {:?}...",
+        taxon_id, area
     );
-    let day_of_year_list = fetch_seed_observations(client, taxon_id, location).await?;
-    if day_of_year_list.len() < 10 {
+    let observation_list = fetch_seed_observations(client, taxon_id, area).await?;
+    if observation_list.len() < 10 {
         return Err(anyhow!(
             "{}: not enough observations for an accurate estimate: {}",
             taxon_id,
-            day_of_year_list.len()
+            observation_list.len()
         ));
     }
     trace!(
         "Got {} observations for {}",
-        day_of_year_list.len(),
+        observation_list.len(),
         taxon_id
     );
-    let (start, end) = calculate_harvest_window(day_of_year_list).await?;
+    let (start, end) = calculate_harvest_window(observation_list).await?;
 
     let target_year = 2000;
-    let map_back_to_date = |actual_day: u16| -> jiff::civil::Date {
+    let map_back_to_date = |actual_day: u16| -> Date {
         let day_normalized = if actual_day == 0 { 365 } else { actual_day };
-        jiff::civil::Date::new(target_year, 1, 1)
-            .unwrap()
+        Date::default()
             .with()
+            .year(target_year)
             .day_of_year(day_normalized as i16)
             .build()
             .unwrap()

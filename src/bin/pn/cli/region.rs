@@ -4,7 +4,7 @@ use crate::{cli::list_regional_taxa, style};
 use anyhow::anyhow;
 use geo::BoundingRect;
 use propagation_notebook::{
-    inaturalist::{self, ObservationLocation},
+    inaturalist::{self, SearchArea},
     region::{
         ConservationStatus, Origin, Region, RegionalHarvestWindow, RegionalTaxonStatus,
         WetlandIndicator,
@@ -485,7 +485,7 @@ impl RegionTaxaCommands {
                     None => None,
                 };
                 let loc = match bounding_box {
-                    Some(rect) => ObservationLocation::BoundingBox(rect),
+                    Some(rect) => SearchArea::BoundingBox(rect),
                     None => {
                         let options = inaturalist::places_search(
                             &client,
@@ -500,7 +500,7 @@ impl RegionTaxaCommands {
                             options,
                         )
                         .prompt()?;
-                        ObservationLocation::Place(selected.id)
+                        SearchArea::Place(selected.id)
                     }
                 };
                 let (start, end) =
