@@ -463,9 +463,7 @@ impl RegionTaxaCommands {
                 let taxon = rts.taxon.get();
                 let client = inaturalist::client()?;
                 let taxon_id = async {
-                    if let Ok(taxon_id) =
-                        get_taxon_for_query(&rts, &client, &taxon.complete_name).await
-                    {
+                    if let Ok(taxon_id) = get_taxon_for_query(&rts, &client, &taxon.names()).await {
                         Ok(taxon_id)
                     } else {
                         println!(

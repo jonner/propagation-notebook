@@ -151,6 +151,14 @@ impl Taxon {
     pub fn reference(&self) -> String {
         format!("{}: {}", self.id, self.complete_name)
     }
+
+    pub fn names(&self) -> String {
+        [Some(&self.name1), self.name2.as_ref(), self.name3.as_ref()]
+            .into_iter()
+            .filter_map(|val| val.cloned())
+            .collect::<Vec<_>>()
+            .join(" ")
+    }
 }
 
 #[derive(Debug, Clone, toasty::Model)]
