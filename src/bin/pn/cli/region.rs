@@ -469,40 +469,7 @@ impl RegionTaxaCommands {
                     region.reference(),
                 );
                 let client = inaturalist::client()?;
-                let inat_taxon = async {
-                    if let Ok(taxon) = get_taxon_for_query(&rts, &client, &taxon.names()).await {
-                        Ok(taxon)
-                    } else {
-                        println!(
-                            "Couldn't find a matching taxon for the scientific name '{}'",
-                            taxon.complete_name
-                        );
-                        let vernaculars = taxon.vernaculars.get();
-                        if !vernaculars.is_empty() {
-                            println!("Attempting to find a match by common name...");
-                            for vn in taxon.vernaculars.get() {
-                                if let Ok(inat_taxon) =
-                                    get_taxon_for_query(&rts, &client, &vn.name).await
-                                {
-                                    println!(
-                                        "Using inaturalist taxon '{} ({})'",
-                                        inat_taxon.name, inat_taxon.rank
-                                    );
-                                    return Ok(inat_taxon);
-                                }
-                                println!(
-                                    "Couldn't find a matching taxon for the common name '{}'",
-                                    vn.name
-                                );
-                            }
-                        }
-                        Err(anyhow!(
-                            "Unable to find a match for '{}' in iNaturalist",
-                            rts.taxon.get().complete_name
-                        ))
-                    }
-                }
-                .await?;
+                let inat_taxon = inat_taxon_for_taxon(taxon, &client).await?;
                 let bounding_box = match &region.geometry {
                     Some(value) => {
                         let geom: geo::Geometry = value.value.clone().try_into()?;
@@ -588,6 +555,41 @@ impl RegionTaxaCommands {
     }
 }
 
+async fn inat_taxon_for_taxon(
+    taxon: &propagation_notebook::taxonomy::Taxon,
+    client: &reqwest::Client,
+) -> anyhow::Result<InaturalistTaxon> {
+    if let Ok(taxon) = inat_taxon_for_query(client, &taxon.names()).await {
+        Ok(taxon)
+    } else {
+        println!(
+            "Couldn't find a matching taxon for the scientific name '{}'",
+            taxon.complete_name
+        );
+        let vernaculars = taxon.vernaculars.get();
+        if !vernaculars.is_empty() {
+            println!("Attempting to find a match by common name...");
+            for vn in taxon.vernaculars.get() {
+                if let Ok(inat_taxon) = inat_taxon_for_query(client, &vn.name).await {
+                    println!(
+                        "Using inaturalist taxon '{} ({})'",
+                        inat_taxon.name, inat_taxon.rank
+                    );
+                    return Ok(inat_taxon);
+                }
+                println!(
+                    "Couldn't find a matching taxon for the common name '{}'",
+                    vn.name
+                );
+            }
+        }
+        Err(anyhow!(
+            "Unable to find a match for '{}' in iNaturalist",
+            taxon.reference()
+        ))
+    }
+}
+
 async fn seed_observation_window_with_expansion(
     client: reqwest::Client,
     taxon_id: u32,
@@ -637,8 +639,7 @@ async fn seed_observation_window_with_expansion(
     }
 }
 
-async fn get_taxon_for_query(
-    rts: &RegionalTaxonStatus,
+async fn inat_taxon_for_query(
     client: &reqwest::Client,
     query: &str,
 ) -> anyhow::Result<InaturalistTaxon> {
@@ -660,10 +661,7 @@ async fn get_taxon_for_query(
     } else if possible_taxa.len() == 1 {
         possible_taxa.pop().unwrap()
     } else {
-        return Err(anyhow!(
-            "Unable to find an iNaturalist taxon for '{}'",
-            rts.taxon.get().complete_name
-        ));
+        return Err(anyhow!("Unable to find an iNaturalist taxon for '{query}'",));
     };
     Ok(taxon)
 }
