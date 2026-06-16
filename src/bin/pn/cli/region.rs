@@ -5,6 +5,7 @@ use anyhow::anyhow;
 use geo::BoundingRect;
 use geo::ChamberlainDuquetteArea;
 use jiff::civil::Date;
+use propagation_notebook::inaturalist::ObservationWindow;
 use propagation_notebook::{
     inaturalist::{self, SearchArea},
     region::{
@@ -518,15 +519,17 @@ impl RegionTaxaCommands {
                         SearchArea::Place(selected.id)
                     }
                 };
-                let ((start, end), n) =
-                    fetch_with_expansion(client, taxon_id, loc, *min_samples).await?;
+                let observation_window =
+                    seed_observation_window_with_expansion(client, taxon_id, loc, *min_samples)
+                        .await?;
                 let window = RegionalHarvestWindow {
-                    start_doy: Some(start),
-                    end_doy: Some(end),
+                    start_doy: Some(observation_window.start_doy),
+                    end_doy: Some(observation_window.end_doy),
                 };
                 println!();
                 if inquire::Confirm::new(&format!(
-                    "Based on {n} samples, the approximate harvest window for '{}' in region '{}' is [{}]. Update database?",
+                    "Based on {} samples, the harvest window for '{}' in region '{}' is [{}]. Update database?",
+                    observation_window.nsamples,
                     rts.taxon.get().reference(),
                     rts.region.get().reference(),
                     window
@@ -571,12 +574,12 @@ impl RegionTaxaCommands {
     }
 }
 
-async fn fetch_with_expansion(
+async fn seed_observation_window_with_expansion(
     client: reqwest::Client,
     taxon_id: u32,
     mut loc: SearchArea,
     min_samples: usize,
-) -> anyhow::Result<((i16, i16), usize)> {
+) -> anyhow::Result<ObservationWindow> {
     loop {
         match inaturalist::seed_observation_window(&client, taxon_id, &loc, min_samples).await {
             e @ Err(inaturalist::Error::InsufficientObservations(n)) => {

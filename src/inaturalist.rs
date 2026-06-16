@@ -224,12 +224,17 @@ pub enum SearchArea {
     BoundingBox(geo::Rect),
 }
 
+pub struct ObservationWindow {
+    pub start_doy: i16,
+    pub end_doy: i16,
+    pub nsamples: usize,
+}
 pub async fn seed_observation_window(
     client: &reqwest::Client,
     taxon_id: u32,
     area: &SearchArea,
     min_samples: usize,
-) -> Result<((i16, i16), usize), Error> {
+) -> Result<ObservationWindow, Error> {
     trace!(
         "Fetching fruiting observations for taxon {} in area {:?}...",
         taxon_id, area
@@ -259,7 +264,11 @@ pub async fn seed_observation_window(
             .build()?
             .strftime("%b-%d")
     );
-    Ok(((start, end), observation_list.len()))
+    Ok(ObservationWindow {
+        start_doy: start,
+        end_doy: end,
+        nsamples: observation_list.len(),
+    })
 }
 
 #[derive(Debug, Deserialize)]
