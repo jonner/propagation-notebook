@@ -142,14 +142,12 @@ async fn fetch_seed_observations(
     Ok(observations)
 }
 
-async fn calculate_harvest_window(
-    observations: &Vec<ObservationDate>,
-) -> Result<(i16, i16), Error> {
+async fn calculate_harvest_window(observations: &[ObservationDate]) -> Result<(i16, i16), Error> {
     if observations.is_empty() {
         return Err(Error::InsufficientObservations(0));
     }
     let observations_doy: Vec<i16> = observations
-        .into_iter()
+        .iter()
         .filter_map(|ob| ob.observed_on.map(|d| d.day_of_year()))
         .collect();
 
