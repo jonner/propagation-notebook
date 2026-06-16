@@ -649,15 +649,14 @@ async fn inat_taxon_for_query(
         .filter(|t| t.is_active)
         .collect::<Vec<_>>();
     let taxon = if possible_taxa.len() > 1 {
-        let selected = inquire::Select::new(
+        inquire::Select::new(
             &format!(
                 "Please select an iNaturalist taxon that matches '{}'",
                 query
             ),
             possible_taxa,
         )
-        .prompt()?;
-        selected
+        .prompt()?
     } else if possible_taxa.len() == 1 {
         possible_taxa.pop().unwrap()
     } else {
