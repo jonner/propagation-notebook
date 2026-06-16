@@ -5,6 +5,7 @@ use anyhow::anyhow;
 use geo::BoundingRect;
 use geo::ChamberlainDuquetteArea;
 use jiff::civil::Date;
+use propagation_notebook::inaturalist::InaturalistTaxon;
 use propagation_notebook::inaturalist::ObservationWindow;
 use propagation_notebook::{
     inaturalist::{self, SearchArea},
@@ -453,7 +454,6 @@ impl RegionTaxaCommands {
                 taxon_id,
                 min_samples,
             } => {
-                println!("Attempting to find seed-bearing dates at iNaturalist.org");
                 let mut rts =
                     RegionalTaxonStatus::filter_by_taxon_id_and_region_id(taxon_id, region_id)
                         .include(RegionalTaxonStatus::fields().taxon().vernaculars())
@@ -462,10 +462,16 @@ impl RegionTaxaCommands {
                         .exec(db)
                         .await?;
                 let taxon = rts.taxon.get();
+                let region = rts.region.get();
+                println!(
+                    "Looking up observations of '{}' with seed annotations within region '{}' at iNaturalist.org",
+                    taxon.reference(),
+                    region.reference(),
+                );
                 let client = inaturalist::client()?;
-                let taxon_id = async {
-                    if let Ok(taxon_id) = get_taxon_for_query(&rts, &client, &taxon.names()).await {
-                        Ok(taxon_id)
+                let inat_taxon = async {
+                    if let Ok(taxon) = get_taxon_for_query(&rts, &client, &taxon.names()).await {
+                        Ok(taxon)
                     } else {
                         println!(
                             "Couldn't find a matching taxon for the scientific name '{}'",
@@ -475,10 +481,14 @@ impl RegionTaxaCommands {
                         if !vernaculars.is_empty() {
                             println!("Attempting to find a match by common name...");
                             for vn in taxon.vernaculars.get() {
-                                if let Ok(taxon_id) =
+                                if let Ok(inat_taxon) =
                                     get_taxon_for_query(&rts, &client, &vn.name).await
                                 {
-                                    return Ok(taxon_id);
+                                    println!(
+                                        "Using inaturalist taxon '{} ({})'",
+                                        inat_taxon.name, inat_taxon.rank
+                                    );
+                                    return Ok(inat_taxon);
                                 }
                                 println!(
                                     "Couldn't find a matching taxon for the common name '{}'",
@@ -493,7 +503,7 @@ impl RegionTaxaCommands {
                     }
                 }
                 .await?;
-                let bounding_box = match &rts.region.get().geometry {
+                let bounding_box = match &region.geometry {
                     Some(value) => {
                         let geom: geo::Geometry = value.value.clone().try_into()?;
                         geom.bounding_rect()
@@ -519,9 +529,13 @@ impl RegionTaxaCommands {
                         SearchArea::Place(selected.id)
                     }
                 };
-                let observation_window =
-                    seed_observation_window_with_expansion(client, taxon_id, loc, *min_samples)
-                        .await?;
+                let observation_window = seed_observation_window_with_expansion(
+                    client,
+                    inat_taxon.id,
+                    loc,
+                    *min_samples,
+                )
+                .await?;
                 let window = RegionalHarvestWindow {
                     start_doy: Some(observation_window.start_doy),
                     end_doy: Some(observation_window.end_doy),
@@ -530,8 +544,8 @@ impl RegionTaxaCommands {
                 if inquire::Confirm::new(&format!(
                     "Based on {} samples, the harvest window for '{}' in region '{}' is [{}]. Update database?",
                     observation_window.nsamples,
-                    rts.taxon.get().reference(),
-                    rts.region.get().reference(),
+                    taxon.reference(),
+                    region.reference(),
                     window
                 ))
                     .with_default(false)
@@ -627,13 +641,13 @@ async fn get_taxon_for_query(
     rts: &RegionalTaxonStatus,
     client: &reqwest::Client,
     query: &str,
-) -> anyhow::Result<u32> {
-    let possible_taxa = inaturalist::find_taxon(client, query)
+) -> anyhow::Result<InaturalistTaxon> {
+    let mut possible_taxa = inaturalist::find_taxon(client, query)
         .await?
         .into_iter()
         .filter(|t| t.is_active)
         .collect::<Vec<_>>();
-    let taxon_id = if possible_taxa.len() > 1 {
+    let taxon = if possible_taxa.len() > 1 {
         let selected = inquire::Select::new(
             &format!(
                 "Please select an iNaturalist taxon that matches '{}'",
@@ -642,14 +656,14 @@ async fn get_taxon_for_query(
             possible_taxa,
         )
         .prompt()?;
-        selected.id
+        selected
     } else if possible_taxa.len() == 1 {
-        possible_taxa[0].id
+        possible_taxa.pop().unwrap()
     } else {
         return Err(anyhow!(
             "Unable to find an iNaturalist taxon for '{}'",
             rts.taxon.get().complete_name
         ));
     };
-    Ok(taxon_id)
+    Ok(taxon)
 }
