@@ -313,6 +313,15 @@ pub enum RegionTaxaCommands {
         )]
         min_samples: usize,
     },
+    ReadyToHarvest {
+        #[arg(
+            short,
+            long,
+            help = "Show species ready to harvest on this date",
+            default_value_t = jiff::Zoned::now().date()
+        )]
+        date: Date,
+    },
 }
 
 async fn regional_taxa_status_details_table(
@@ -530,6 +539,34 @@ impl RegionTaxaCommands {
                 {
                     rts.update().harvest_window(window).exec(db).await?;
                 }
+            }
+            Self::ReadyToHarvest { date } => {
+                let window = RegionalTaxonStatus::fields().harvest_window();
+                let day = date.day_of_year();
+                let expr = RegionalTaxonStatus::fields()
+                    .region_id()
+                    .eq(region_id)
+                    .and(window.start_doy().le(day).and(window.end_doy().ge(day)))
+                    .or(window
+                        .start_doy()
+                        .gt(window.end_doy())
+                        .and(window.start_doy().le(day).or(window.end_doy().ge(day))));
+                let regional_taxa = RegionalTaxonStatus::filter(expr)
+                    .include(RegionalTaxonStatus::fields().taxon())
+                    .include(RegionalTaxonStatus::fields().region())
+                    .exec(db)
+                    .await?;
+
+                let mut tbuilder = tabled::builder::Builder::default();
+                tbuilder.push_record(["Region", "Taxon", "Harvest Dates"]);
+                for regional_taxon in regional_taxa {
+                    tbuilder.push_record([
+                        regional_taxon.region.get().reference(),
+                        regional_taxon.taxon.get().reference(),
+                        regional_taxon.harvest_window.to_string(),
+                    ])
+                }
+                println!("{}", tbuilder.build().with(style::ListTable));
             }
         }
         Ok(())
