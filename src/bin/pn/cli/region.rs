@@ -1,3 +1,5 @@
+use std::f64::consts::PI;
+use std::fmt::Display;
 use std::path::PathBuf;
 
 use crate::{cli::list_regional_taxa, style};
@@ -5,16 +7,16 @@ use anyhow::anyhow;
 use geo::BoundingRect;
 use geo::ChamberlainDuquetteArea;
 use jiff::civil::Date;
-use propagation_notebook::inaturalist::InaturalistTaxon;
-use propagation_notebook::inaturalist::ObservationWindow;
 use propagation_notebook::{
-    inaturalist::{self, SearchArea},
+    inaturalist::{self, InaturalistTaxon, ObservationDate, SearchArea},
     region::{
         ConservationStatus, Origin, Region, RegionalHarvestWindow, RegionalTaxonStatus,
         WetlandIndicator,
     },
 };
 use toasty::Db;
+use tracing::debug;
+use tracing::trace;
 
 mod import;
 
@@ -507,14 +509,14 @@ impl RegionTaxaCommands {
                     start_doy: Some(observation_window.start_doy),
                     end_doy: Some(observation_window.end_doy),
                 };
-                println!();
-                if inquire::Confirm::new(&format!(
-                    "Based on {} samples, the harvest window for '{}' in region '{}' is [{}]. Update database?",
+                println!(
+                    "Based on {} samples, the harvest window for '{}' in region '{}' is [{}]. ",
                     observation_window.nsamples,
                     taxon.reference(),
                     region.reference(),
                     window
-                ))
+                );
+                if inquire::Confirm::new("Update database?")
                     .with_default(false)
                     .with_help_message(&format!("Current harvest window: {}", rts.harvest_window))
                     .prompt()?
@@ -590,6 +592,109 @@ async fn inat_taxon_for_taxon(
     }
 }
 
+async fn calculate_harvest_window(
+    observations: &[ObservationDate],
+) -> Result<(i16, i16), inaturalist::Error> {
+    if observations.is_empty() {
+        return Err(inaturalist::Error::InsufficientObservations(0));
+    }
+    let observations_doy: Vec<i16> = observations
+        .iter()
+        .filter_map(|ob| ob.observed_on.map(|d| d.day_of_year()))
+        .collect();
+
+    let total_count = observations_doy.len();
+    // 2. CALCULATE CIRCULAR MEAN
+    let mut sum_sin = 0.0;
+    let mut sum_cos = 0.0;
+
+    for &day in &observations_doy {
+        let angle = (day as f64 / 365.25) * 2.0 * PI;
+        sum_sin += angle.sin();
+        sum_cos += angle.cos();
+    }
+
+    let avg_sin = sum_sin / total_count as f64;
+    let avg_cos = sum_cos / total_count as f64;
+
+    // REPAIRED DIRECTIONAL ANGLE CALCULATION
+    let mut mean_angle = avg_sin.atan2(avg_cos);
+    if mean_angle < 0.0 {
+        mean_angle += 2.0 * PI; // Safely normalizes standard negative radians to 0..2*PI range
+    }
+    let mean_day = ((mean_angle / (2.0 * PI)) * 365.25).round() as i16 % 365;
+
+    let r = (avg_sin.powi(2) + avg_cos.powi(2)).sqrt();
+    let r_clamped = r.clamp(0.001, 1.0);
+    let circ_std_dev_radians = (-2.0 * r_clamped.ln()).sqrt();
+    let std_dev_days = (circ_std_dev_radians / (2.0 * PI)) * 365.25;
+
+    // Use a conservative threshold factor (1.25 to 1.5 dev standard bounds)
+    let threshold_days = (std_dev_days * 1.25).max(14.0);
+
+    trace!("Data Center: Day {}", mean_day);
+    trace!("Data Clustering Strength (R): {:.2}", r);
+    trace!("Calculated Standard Deviation: {:.1} days", std_dev_days);
+    trace!(
+        "Filtering out entries further than {:.1} days from center...",
+        threshold_days
+    );
+
+    // 4. FILTER OUTLIERS USING CIRCULAR DISTANCE
+    let mut valid_days: Vec<i16> = observations_doy
+        .iter()
+        .copied()
+        .filter(|&day| {
+            let diff = (day - mean_day).abs();
+            let circular_distance = diff.min(365 - diff) as f64;
+            circular_distance <= threshold_days
+        })
+        .collect();
+
+    if valid_days.is_empty() {
+        debug!("All observations filtered out as statistical noise.");
+        return Err(inaturalist::Error::InsufficientObservations(0));
+    }
+
+    // 5. CORRECT CHRONOLOGICAL SORTING (WINTER-SAFE)
+    let anchor_day = (mean_day + 182) % 365;
+
+    valid_days.sort_by_key(|&day| {
+        if day > anchor_day {
+            day - anchor_day
+        } else {
+            (day + 365) - anchor_day
+        }
+    });
+
+    Ok((valid_days[0], valid_days[valid_days.len() - 1]))
+}
+
+struct ObservationWindow {
+    pub start_doy: i16,
+    pub end_doy: i16,
+    pub nsamples: usize,
+}
+
+enum MinimumObservationsAction {
+    ExpandSearch,
+    Calculate,
+    Abort,
+}
+
+impl Display for MinimumObservationsAction {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let msg = match self {
+            MinimumObservationsAction::ExpandSearch => "Expand search area",
+            MinimumObservationsAction::Calculate => {
+                "Calculate harvest window with the existing observations"
+            }
+            MinimumObservationsAction::Abort => "Cancel",
+        };
+        write!(f, "{msg}")
+    }
+}
+
 async fn seed_observation_window_with_expansion(
     client: reqwest::Client,
     taxon_id: u32,
@@ -597,13 +702,37 @@ async fn seed_observation_window_with_expansion(
     min_samples: usize,
 ) -> anyhow::Result<ObservationWindow> {
     loop {
-        match inaturalist::seed_observation_window(&client, taxon_id, &loc, min_samples).await {
-            e @ Err(inaturalist::Error::InsufficientObservations(n)) => {
-                let expand = inquire::Confirm::new(&format!(
-                    "Only {n} relevant obervations found. This is below the required minimum for calcuating a harvest window. Would you like to expand the search area?"
-                ))
-                .prompt()?;
-                if expand {
+        let observations = inaturalist::fetch_seed_observations(&client, taxon_id, &loc).await?;
+        if observations.len() < min_samples {
+            let (msg, options) = match observations.len() {
+                0 => (
+                    "No observations with seeds found in the current search area.".to_string(),
+                    vec![
+                        MinimumObservationsAction::ExpandSearch,
+                        MinimumObservationsAction::Abort,
+                    ],
+                ),
+                n => (
+                    format!(
+                        "Too few obervations with seeds found in the current search area ({n}/{min_samples})."
+                    ),
+                    if n < 2 {
+                        vec![
+                            MinimumObservationsAction::ExpandSearch,
+                            MinimumObservationsAction::Abort,
+                        ]
+                    } else {
+                        vec![
+                            MinimumObservationsAction::ExpandSearch,
+                            MinimumObservationsAction::Calculate,
+                            MinimumObservationsAction::Abort,
+                        ]
+                    },
+                ),
+            };
+            let action = inquire::Select::new(&msg, options).prompt()?;
+            match action {
+                MinimumObservationsAction::ExpandSearch => {
                     let newloc = match &loc {
                         SearchArea::Place(_) => todo!(),
                         SearchArea::BoundingBox(rect) => {
@@ -623,19 +752,42 @@ async fn seed_observation_window_with_expansion(
                             let new_area = newrect.chamberlain_duquette_unsigned_area()
                                 / (M_PER_KM * M_PER_KM);
                             println!(
-                                "Original search area was {old_area:.1} km^2. Expanding search area to {new_area:.2} km^2",
+                                "Expanding search area from {old_area:.1} km^2 to {new_area:.2} km^2",
                             );
                             SearchArea::BoundingBox(newrect)
                         }
                     };
                     loc = newloc;
-                } else {
-                    e?;
+                    continue;
+                }
+                MinimumObservationsAction::Calculate => (),
+                MinimumObservationsAction::Abort => {
+                    return Err(anyhow!(
+                        "Not enough observations to calculate a harvest window"
+                    ));
                 }
             }
-            Err(e) => Err(e)?,
-            Ok(res) => return anyhow::Ok(res),
-        };
+        }
+        let (start, end) = calculate_harvest_window(&observations).await?;
+        debug!(
+            "Harvest dates for {}: {} - {}",
+            taxon_id,
+            Date::default()
+                .with()
+                .day_of_year(start)
+                .build()?
+                .strftime("%b-%d"),
+            Date::default()
+                .with()
+                .day_of_year(end)
+                .build()?
+                .strftime("%b-%d")
+        );
+        break Ok(ObservationWindow {
+            start_doy: start,
+            end_doy: end,
+            nsamples: observations.len(),
+        });
     }
 }
 

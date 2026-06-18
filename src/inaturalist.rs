@@ -1,9 +1,8 @@
-use std::{f64::consts::PI, fmt::Display, sync::LazyLock, time::Duration};
+use std::{fmt::Display, sync::LazyLock, time::Duration};
 
 use jiff::civil::Date;
 use reqwest::header::{HeaderMap, HeaderValue};
 use serde::Deserialize;
-use tracing::{debug, trace};
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
@@ -89,7 +88,7 @@ pub async fn find_taxon(
     Ok(res.results)
 }
 
-async fn fetch_seed_observations(
+pub async fn fetch_seed_observations(
     client: &reqwest::Client,
     taxon_id: u32,
     location: &SearchArea,
@@ -142,133 +141,10 @@ async fn fetch_seed_observations(
     Ok(observations)
 }
 
-async fn calculate_harvest_window(observations: &[ObservationDate]) -> Result<(i16, i16), Error> {
-    if observations.is_empty() {
-        return Err(Error::InsufficientObservations(0));
-    }
-    let observations_doy: Vec<i16> = observations
-        .iter()
-        .filter_map(|ob| ob.observed_on.map(|d| d.day_of_year()))
-        .collect();
-
-    let total_count = observations_doy.len();
-    // 2. CALCULATE CIRCULAR MEAN
-    let mut sum_sin = 0.0;
-    let mut sum_cos = 0.0;
-
-    for &day in &observations_doy {
-        let angle = (day as f64 / 365.25) * 2.0 * PI;
-        sum_sin += angle.sin();
-        sum_cos += angle.cos();
-    }
-
-    let avg_sin = sum_sin / total_count as f64;
-    let avg_cos = sum_cos / total_count as f64;
-
-    // REPAIRED DIRECTIONAL ANGLE CALCULATION
-    let mut mean_angle = avg_sin.atan2(avg_cos);
-    if mean_angle < 0.0 {
-        mean_angle += 2.0 * PI; // Safely normalizes standard negative radians to 0..2*PI range
-    }
-    let mean_day = ((mean_angle / (2.0 * PI)) * 365.25).round() as i16 % 365;
-
-    let r = (avg_sin.powi(2) + avg_cos.powi(2)).sqrt();
-    let r_clamped = r.clamp(0.001, 1.0);
-    let circ_std_dev_radians = (-2.0 * r_clamped.ln()).sqrt();
-    let std_dev_days = (circ_std_dev_radians / (2.0 * PI)) * 365.25;
-
-    // Use a conservative threshold factor (1.25 to 1.5 dev standard bounds)
-    let threshold_days = (std_dev_days * 1.25).max(14.0);
-
-    trace!("Data Center: Day {}", mean_day);
-    trace!("Data Clustering Strength (R): {:.2}", r);
-    trace!("Calculated Standard Deviation: {:.1} days", std_dev_days);
-    trace!(
-        "Filtering out entries further than {:.1} days from center...",
-        threshold_days
-    );
-
-    // 4. FILTER OUTLIERS USING CIRCULAR DISTANCE
-    let mut valid_days: Vec<i16> = observations_doy
-        .iter()
-        .copied()
-        .filter(|&day| {
-            let diff = (day - mean_day).abs();
-            let circular_distance = diff.min(365 - diff) as f64;
-            circular_distance <= threshold_days
-        })
-        .collect();
-
-    if valid_days.is_empty() {
-        debug!("All observations filtered out as statistical noise.");
-        return Err(Error::InsufficientObservations(0));
-    }
-
-    // 5. CORRECT CHRONOLOGICAL SORTING (WINTER-SAFE)
-    let anchor_day = (mean_day + 182) % 365;
-
-    valid_days.sort_by_key(|&day| {
-        if day > anchor_day {
-            day - anchor_day
-        } else {
-            (day + 365) - anchor_day
-        }
-    });
-
-    Ok((valid_days[0], valid_days[valid_days.len() - 1]))
-}
-
 #[derive(Debug)]
 pub enum SearchArea {
     Place(u32),
     BoundingBox(geo::Rect),
-}
-
-pub struct ObservationWindow {
-    pub start_doy: i16,
-    pub end_doy: i16,
-    pub nsamples: usize,
-}
-pub async fn seed_observation_window(
-    client: &reqwest::Client,
-    taxon_id: u32,
-    area: &SearchArea,
-    min_samples: usize,
-) -> Result<ObservationWindow, Error> {
-    trace!(
-        "Fetching fruiting observations for taxon {} in area {:?}...",
-        taxon_id, area
-    );
-    let observation_list = fetch_seed_observations(client, taxon_id, area).await?;
-    if observation_list.len() < min_samples {
-        return Err(Error::InsufficientObservations(observation_list.len()));
-    }
-    trace!(
-        "Got {} observations for {}",
-        observation_list.len(),
-        taxon_id
-    );
-    let (start, end) = calculate_harvest_window(&observation_list).await?;
-
-    debug!(
-        "Harvest dates for {}: {} - {}",
-        taxon_id,
-        Date::default()
-            .with()
-            .day_of_year(start)
-            .build()?
-            .strftime("%b-%d"),
-        Date::default()
-            .with()
-            .day_of_year(end)
-            .build()?
-            .strftime("%b-%d")
-    );
-    Ok(ObservationWindow {
-        start_doy: start,
-        end_doy: end,
-        nsamples: observation_list.len(),
-    })
 }
 
 #[derive(Debug, Deserialize)]
