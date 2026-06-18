@@ -516,7 +516,7 @@ impl RegionTaxaCommands {
                     window
                 ))
                     .with_default(false)
-                    .with_help_message(&format!("Curent harvest window: {}", rts.harvest_window))
+                    .with_help_message(&format!("Current harvest window: {}", rts.harvest_window))
                     .prompt()?
                 {
                     rts.update().harvest_window(window).exec(db).await?;
