@@ -5,7 +5,7 @@ taxa:
   - name: Abutilon theophrasti
   - name: Acalypha rhomboidea
   - name: Achillea millefolium
-  - name: Acmispon americanus
+  - name: Acmispon americanus var. americanus
   - name: Acorus americanus
   - name: Actaea pachypoda
   - name: Actaea rubra
@@ -18,7 +18,7 @@ taxa:
   - name: Agastache foeniculum
   - name: Agastache nepetoides
   - name: Agastache scrophulariifolia
-  - name: Ageratina altissima
+  - name: Ageratina altissima var. altissima
   - name: Agrimonia gryposepala
   - name: Agrimonia striata
   - name: Alisma triviale
@@ -47,8 +47,8 @@ taxa:
   - name: Anemone canadensis
   - name: Anemone caroliniana
   - name: Anemone cylindrica
-  - name: Anemone patens
-  - name: Anemone quinquefolia
+  - name: Anemone patens var. multifida
+  - name: Anemone quinquefolia var. quinquefolia
   - name: Anemone virginiana
   - name: Angelica atropurpurea
   - name: Antennaria howellii
@@ -62,14 +62,14 @@ taxa:
   - name: Apocynum androsaemifolium
   - name: Apocynum cannabinum
   - name: Aquilegia canadensis
-  - name: Arabidopsis lyrata
-  - name: Arabis pycnocarpa
+  - name: Arabidopsis lyrata ssp. lyrata
+  - name: Arabis pycnocarpa var. pycnocarpa
   - name: Aralia nudicaulis
   - name: Aralia racemosa
   - name: Arctium minus
   - name: Arctium tomentosum
   - name: Arctostaphylos uva-ursi
-  - name: Arenaria serpyllifolia
+  - name: Arenaria serpyllifolia var. serpyllifolia
   - name: Arethusa bulbosa
   - name: Arisaema triphyllum
   - name: Armoracia rusticana
@@ -78,25 +78,25 @@ taxa:
   - name: Artemisia campestris
   - name: Artemisia dracunculus
   - name: Artemisia frigida
-  - name: Artemisia ludoviciana
+  - name: Artemisia ludoviciana ssp. ludoviciana
   - name: Artemisia serrata
   - name: Artemisia vulgaris
   - name: Asarum canadense
   - name: Asclepias exaltata
-  - name: Asclepias incarnata
+  - name: Asclepias incarnata ssp. incarnata
   - name: Asclepias lanuginosa
   - name: Asclepias ovalifolia
   - name: Asclepias speciosa
   - name: Asclepias syriaca
-  - name: Asclepias tuberosa
+  - name: Asclepias tuberosa ssp. interior
   - name: Asclepias verticillata
   - name: Asclepias viridiflora
   - name: Asparagus officinalis
-  - name: Astragalus canadensis
+  - name: Astragalus canadensis var. canadensis
   - name: Astragalus cicer
-  - name: Astragalus crassicarpus
+  - name: Astragalus crassicarpus var. crassicarpus
   - name: Aureolaria pedicularia
-  - name: Baptisia lactea
+  - name: Baptisia lactea var. lactea
   - name: Barbarea vulgaris
   - name: Bassia scoparia
   - name: Berteroa incana
@@ -120,10 +120,10 @@ taxa:
   - name: Brasenia schreberi
   - name: Brassica nigra
   - name: Brassica rapa
-  - name: Brickellia eupatorioides
+  - name: Brickellia eupatorioides var. corymbulosa
   - name: Butomus umbellatus
   - name: Calla palustris
-  - name: Calopogon tuberosus
+  - name: Calopogon tuberosus var. tuberosus
   - name: Caltha palustris
   - name: Calystegia sepium
   - name: Calystegia spithamaea
@@ -146,11 +146,11 @@ taxa:
   - name: Centaurea cyanus
   - name: Centaurea jacea
   - name: Centaurea montana
-  - name: Centaurea stoebe
+  - name: Centaurea stoebe ssp. micranthos
   - name: Centaurium pulchellum
   - name: Cerastium brachypodum
-  - name: Cerastium fontanum
-  - name: Cerastium nutans
+  - name: Cerastium fontanum ssp. vulgare
+  - name: Cerastium nutans var. nutans
   - name: Chaenorhinum minus
   - name: Chaiturus marrubiastrum
   - name: Chamaecrista fasciculata
@@ -160,7 +160,7 @@ taxa:
   - name: Chelone glabra
   - name: Chenopodium album
   - name: Chenopodium berlandieri
-  - name: Chenopodium capitatum
+  - name: Chenopodium capitatum var. capitatum
   - name: Chenopodium glaucum
   - name: Chenopodium pratericola
   - name: Chenopodium simplex
@@ -169,8 +169,8 @@ taxa:
   - name: Cichorium intybus
   - name: Cicuta bulbifera
   - name: Cicuta maculata
-  - name: Circaea alpina
-  - name: Circaea canadensis
+  - name: Circaea alpina ssp. alpina
+  - name: Circaea canadensis ssp. canadensis
   - name: Cirsium altissimum
   - name: Cirsium arvense
   - name: Cirsium discolor
@@ -182,21 +182,21 @@ taxa:
   - name: Clintonia borealis
   - name: Coeloglossum viride
   - name: Collomia linearis
-  - name: Comandra umbellata
+  - name: Comandra umbellata ssp. umbellata
   - name: Comarum palustre
   - name: Commelina communis
   - name: Conium maculatum
-  - name: Convallaria majalis
+  - name: Convallaria majalis var. majalis
   - name: Convolvulus arvensis
   - name: Conyza canadensis
   - name: Coptis trifolia
-  - name: Corallorhiza odontorhiza
+  - name: Corallorhiza odontorhiza var. odontorhiza
   - name: Corallorhiza trifida
   - name: Coreopsis palmata
   - name: Coreopsis tinctoria
   - name: Cornus canadensis
-  - name: Corydalis aurea
-  - name: Corydalis micrantha
+  - name: Corydalis aurea ssp. aurea
+  - name: Corydalis micrantha ssp. micrantha
   - name: Crepis tectorum
   - name: Crocanthemum bicknellii
   - name: Crotalaria sagittalis
@@ -207,7 +207,7 @@ taxa:
   - name: Cyclachaena xanthiifolia
   - name: Cycloloma atriplicifolium
   - name: Cynoglossum officinale
-  - name: Cynoglossum virginianum
+  - name: Cynoglossum virginianum var. boreale
   - name: Cypripedium acaule
   - name: Cypripedium arietinum
   - name: Cypripedium candidum
@@ -216,20 +216,20 @@ taxa:
   - name: Cypripedium reginae
   - name: Dalea candida
   - name: Dalea leporina
-  - name: Dalea purpurea
-  - name: Dalea villosa
+  - name: Dalea purpurea var. purpurea
+  - name: Dalea villosa var. villosa
   - name: Datura stramonium
   - name: Daucus carota
   - name: Decodon verticillatus
-  - name: Delphinium carolinianum
-  - name: Descurainia pinnata
+  - name: Delphinium carolinianum ssp. virescens
+  - name: Descurainia pinnata ssp. brachycarpa
   - name: Descurainia sophia
   - name: Desmodium canadense
   - name: Desmodium cuspidatum
   - name: Desmodium glutinosum
   - name: Dianthus armeria
-  - name: Dianthus barbatus
-  - name: Dianthus deltoides
+  - name: Dianthus barbatus ssp. barbatus
+  - name: Dianthus deltoides ssp. deltoides
   - name: Dicentra cucullaria
   - name: Digitalis lanata
   - name: Dioscorea villosa
@@ -255,16 +255,16 @@ taxa:
   - name: Epilobium densum
   - name: Epilobium leptophyllum
   - name: Epipactis helleborine
-  - name: Erechtites hieraciifolius
+  - name: Erechtites hieraciifolius var. hieraciifolius
   - name: Erigeron annuus
-  - name: Erigeron philadelphicus
+  - name: Erigeron philadelphicus var. philadelphicus
   - name: Erigeron pulchellus
   - name: Erigeron strigosus
   - name: Erucastrum gallicum
   - name: Erysimum cheiranthoides
   - name: Erysimum inconspicuum
   - name: Erythronium albidum
-  - name: Erythronium americanum
+  - name: Erythronium americanum ssp. americanum
   - name: Erythronium propullans
   - name: Eupatorium perfoliatum
   - name: Euphorbia corollata
@@ -275,7 +275,7 @@ taxa:
   - name: Euphorbia maculata
   - name: Euphorbia marginata
   - name: Euphorbia nutans
-  - name: Euphorbia serpyllifolia
+  - name: Euphorbia serpyllifolia var. serpyllifolia
   - name: Euphorbia virgata
   - name: Eurybia macrophylla
   - name: Euthamia graminifolia
@@ -286,12 +286,12 @@ taxa:
   - name: Fallopia convolvulus
   - name: Fallopia scandens
   - name: Ficaria verna
-  - name: Fragaria vesca
+  - name: Fragaria vesca ssp. americana
   - name: Fragaria virginiana
   - name: Froelichia floridana
   - name: Galearis spectabilis
   - name: Galeopsis tetrahit
-  - name: Galinsoga parviflora
+  - name: Galinsoga parviflora var. parviflora
   - name: Galinsoga quadriradiata
   - name: Galium aparine
   - name: Galium asprellum
@@ -299,9 +299,9 @@ taxa:
   - name: Galium concinnum
   - name: Galium labradoricum
   - name: Galium mollugo
-  - name: Galium obtusum
+  - name: Galium obtusum ssp. obtusum
   - name: Galium tinctorium
-  - name: Galium trifidum
+  - name: Galium trifidum ssp. trifidum
   - name: Galium triflorum
   - name: Galium verum
   - name: Gaultheria hispidula
@@ -315,15 +315,15 @@ taxa:
   - name: Geranium maculatum
   - name: Geum aleppicum
   - name: Geum canadense
-  - name: Geum macrophyllum
-  - name: Geum triflorum
+  - name: Geum macrophyllum var. perincisum
+  - name: Geum triflorum var. triflorum
   - name: Glechoma hederacea
   - name: Glycyrrhiza lepidota
   - name: Gnaphalium uliginosum
   - name: Goodyera repens
   - name: Grindelia squarrosa
   - name: Gypsophila muralis
-  - name: Hackelia deflexa
+  - name: Hackelia deflexa var. americana
   - name: Hackelia virginiana
   - name: Hedeoma hispida
   - name: Helenium autumnale
@@ -332,12 +332,12 @@ taxa:
   - name: Helianthus grosseserratus
   - name: Helianthus hirsutus
   - name: Helianthus maximiliani
-  - name: Helianthus occidentalis
+  - name: Helianthus occidentalis ssp. occidentalis
   - name: Helianthus pauciflorus
-  - name: Helianthus petiolaris
+  - name: Helianthus petiolaris ssp. petiolaris
   - name: Helianthus strumosus
   - name: Helianthus tuberosus
-  - name: Heliopsis helianthoides
+  - name: Heliopsis helianthoides var. scabra
   - name: Hemerocallis fulva
   - name: Heracleum maximum
   - name: Hesperis matronalis
@@ -353,9 +353,9 @@ taxa:
   - name: Houstonia longifolia
   - name: Humulus lupulus
   - name: Hydrocotyle ranunculoides
-  - name: Hydrophyllum virginianum
+  - name: Hydrophyllum virginianum var. virginianum
   - name: Hylotelephium telephium
-  - name: Hypericum ascyron
+  - name: Hypericum ascyron ssp. pyramidatum
   - name: Hypericum majus
   - name: Hypericum perforatum
   - name: Hypoxis hirsuta
@@ -366,10 +366,10 @@ taxa:
   - name: Iris pseudacorus
   - name: Iris versicolor
   - name: Iris virginica
-  - name: Juncus balticus
+  - name: Juncus balticus ssp. littoralis
   - name: Juncus bufonius
   - name: Juncus dudleyi
-  - name: Juncus effusus
+  - name: Juncus effusus ssp. solutus
   - name: Juncus pelocarpus
   - name: Juncus tenuis
   - name: Kalmia polifolia
@@ -382,26 +382,26 @@ taxa:
   - name: Lamiastrum galeobdolon
   - name: Lamium amplexicaule
   - name: Laportea canadensis
-  - name: Lappula occidentalis
+  - name: Lappula occidentalis var. occidentalis
   - name: Lappula squarrosa
   - name: Lapsana communis
   - name: Lathyrus ochroleucus
   - name: Lathyrus palustris
   - name: Lathyrus sylvestris
   - name: Lathyrus tuberosus
-  - name: Lathyrus venosus
+  - name: Lathyrus venosus var. intonsus
   - name: Lechea stricta
   - name: Leonurus cardiaca
   - name: Lepidium densiflorum
-  - name: Lepidium virginicum
+  - name: Lepidium virginicum ssp. virginicum
   - name: Lespedeza capitata
   - name: Leucanthemella serotina
   - name: Leucanthemum vulgare
   - name: Liatris aspera
   - name: Liatris cylindracea
   - name: Liatris ligulistylis
-  - name: Liatris punctata
-  - name: Liatris pycnostachya
+  - name: Liatris punctata var. punctata
+  - name: Liatris pycnostachya var. pycnostachya
   - name: Lilium lancifolium
   - name: Lilium michiganense
   - name: Lilium philadelphicum
@@ -413,7 +413,7 @@ taxa:
   - name: Liparis liliifolia
   - name: Liparis loeselii
   - name: Lithospermum canescens
-  - name: Lithospermum caroliniense
+  - name: Lithospermum caroliniense var. croceum
   - name: Lithospermum incisum
   - name: Lithospermum latifolium
   - name: Lobelia inflata
@@ -425,7 +425,7 @@ taxa:
   - name: Ludwigia polycarpa
   - name: Lupinus perennis
   - name: Lupinus polyphyllus
-  - name: Luzula multiflora
+  - name: Luzula multiflora ssp. multiflora
   - name: Lycopus americanus
   - name: Lycopus uniflorus
   - name: Lycopus virginicus
@@ -438,10 +438,10 @@ taxa:
   - name: Lysimachia terrestris
   - name: Lysimachia thyrsiflora
   - name: Lysimachia vulgaris
-  - name: Lythrum alatum
+  - name: Lythrum alatum var. alatum
   - name: Lythrum salicaria
   - name: Maianthemum canadense
-  - name: Maianthemum racemosum
+  - name: Maianthemum racemosum ssp. racemosum
   - name: Maianthemum stellatum
   - name: Maianthemum trifolium
   - name: Malaxis unifolia
@@ -458,8 +458,8 @@ taxa:
   - name: Menyanthes trifoliata
   - name: Mertensia virginica
   - name: Micranthes pensylvanica
-  - name: Mimulus glabratus
-  - name: Mimulus ringens
+  - name: Mimulus glabratus var. jamesii
+  - name: Mimulus ringens var. ringens
   - name: Mirabilis albida
   - name: Mirabilis nyctaginea
   - name: Mitella diphylla
@@ -502,11 +502,11 @@ taxa:
   - name: Oxalis stricta
   - name: Oxalis violacea
   - name: Oxypolis rigidior
-  - name: Oxytropis lambertii
+  - name: Oxytropis lambertii var. lambertii
   - name: Packera aurea
   - name: Packera paupercula
   - name: Packera plattensis
-  - name: Packera pseudaurea
+  - name: Packera pseudaurea var. semicordata
   - name: Panax quinquefolius
   - name: Parietaria pensylvanica
   - name: Parnassia glauca
@@ -533,18 +533,18 @@ taxa:
   - name: Persicaria punctata
   - name: Persicaria sagittata
   - name: Persicaria virginiana
-  - name: Phlox divaricata
+  - name: Phlox divaricata ssp. laphamii
   - name: Phlox maculata
-  - name: Phlox pilosa
-  - name: Phryma leptostachya
+  - name: Phlox pilosa ssp. fulgida
+  - name: Phryma leptostachya var. leptostachya
   - name: Phyla lanceolata
   - name: Physalis heterophylla
   - name: Physalis longifolia
   - name: Physalis virginiana
-  - name: Physostegia virginiana
+  - name: Physostegia virginiana ssp. virginiana
   - name: Pilea fontana
   - name: Pilea pumila
-  - name: Pimpinella saxifraga
+  - name: Pimpinella saxifraga ssp. saxifraga
   - name: Plantago aristata
   - name: Plantago lanceolata
   - name: Plantago major
@@ -552,7 +552,7 @@ taxa:
   - name: Plantago rugelii
   - name: Platanthera aquilonis
   - name: Platanthera clavellata
-  - name: Platanthera dilatata
+  - name: Platanthera dilatata var. dilatata
   - name: Platanthera flava var. herbiola
   - name: Platanthera huronensis
   - name: Platanthera lacera
@@ -560,7 +560,7 @@ taxa:
   - name: Platanthera psycodes
   - name: Pogonia ophioglossoides
   - name: Polanisia dodecandra
-  - name: Polemonium reptans
+  - name: Polemonium reptans var. reptans
   - name: Polygala cruciata
   - name: Polygala polygama
   - name: Polygala sanguinea
@@ -573,25 +573,25 @@ taxa:
   - name: Portulaca oleracea
   - name: Potentilla anserina
   - name: Potentilla argentea
-  - name: Duchesnea indica # - name: Potentilla indica
+  - name: Duchesnea indica var. indica # - name: Potentilla indica
   - name: Potentilla norvegica
   - name: Potentilla recta
   - name: Potentilla simplex
-  - name: Potentilla supina
+  - name: Potentilla supina ssp. paradoxa
   - name: Prunella vulgaris
   - name: Pseudognaphalium obtusifolium
   - name: Pycnanthemum virginianum
-  - name: Pyrola asarifolia
+  - name: Pyrola asarifolia ssp. asarifolia
   - name: Pyrola elliptica
   - name: Ranunculus abortivus
   - name: Ranunculus acris
-  - name: Ranunculus aquatilis
+  - name: Ranunculus aquatilis var. diffusus
   - name: Ranunculus cymbalaria
   - name: Ranunculus flabellaris
   - name: Ranunculus flammula
   - name: Ranunculus hispidus
   - name: Ranunculus pensylvanicus
-  - name: Ranunculus recurvatus
+  - name: Ranunculus recurvatus var. recurvatus
   - name: Ranunculus rhomboideus
   - name: Ranunculus sceleratus
   - name: Raphanus raphanistrum
@@ -606,10 +606,10 @@ taxa:
   - name: Rosa blanda
   - name: Rotala ramosior
   - name: Rubus pubescens
-  - name: Rudbeckia hirta
-  - name: Rudbeckia laciniata
+  - name: Rudbeckia hirta var. pulcherrima
+  - name: Rudbeckia laciniata var. laciniata
   - name: Rudbeckia subtomentosa
-  - name: Rudbeckia triloba
+  - name: Rudbeckia triloba var. triloba
   - name: Rumex acetosella
   - name: Rumex altissimus
   - name: Rumex britannica
@@ -631,7 +631,7 @@ taxa:
   - name: Sanicula marilandica
   - name: Sanicula odorata
   - name: Saponaria officinalis
-  - name: Sarracenia purpurea
+  - name: Sarracenia purpurea ssp. purpurea
   - name: Scheuchzeria palustris
   - name: Scilla siberica
   - name: Scrophularia lanceolata
@@ -647,13 +647,13 @@ taxa:
   - name: Silene noctiflora
   - name: Silene stellata
   - name: Silene vulgaris
-  - name: Silphium perfoliatum
+  - name: Silphium perfoliatum var. perfoliatum
   - name: Sinapis arvensis
   - name: Sisymbrium altissimum
   - name: Sisymbrium loeselii
   - name: Sisymbrium officinale
   - name: Sisyrinchium campestre
-  - name: Sisyrinchium montanum
+  - name: Sisyrinchium montanum var. montanum
   - name: Sium suave
   - name: Smilax ecirrhata
   - name: Smilax illinoensis
@@ -674,7 +674,7 @@ taxa:
   - name: Sonchus arvensis
   - name: Sonchus asper
   - name: Spergularia rubra
-  - name: Spiraea alba
+  - name: Spiraea alba var. alba
   - name: Spiraea tomentosa
   - name: Spiranthes cernua
   - name: Spiranthes lacera var. gracilis
@@ -689,7 +689,7 @@ taxa:
   - name: Symphyotrichum boreale
   - name: Symphyotrichum ciliolatum
   - name: Symphyotrichum cordifolium
-  - name: Symphyotrichum drummondii
+  - name: Symphyotrichum drummondii var. drummondii
   - name: Symphyotrichum ericoides
   - name: Symphyotrichum firmum
   - name: Symphyotrichum laeve
@@ -697,11 +697,11 @@ taxa:
   - name: Symphyotrichum lateriflorum
   - name: Symphyotrichum novae-angliae
   - name: Symphyotrichum oblongifolium
-  - name: Symphyotrichum ontarionis
+  - name: Symphyotrichum ontarionis var. ontarionis
   - name: Symphyotrichum oolentangiense
   - name: Symphyotrichum pilosum
   - name: Symphyotrichum prenanthoides
-  - name: Symphyotrichum puniceum
+  - name: Symphyotrichum puniceum var. puniceum
   - name: Symphyotrichum sericeum
   - name: Symphyotrichum urophyllum
   - name: Symphytum officinale
@@ -719,7 +719,7 @@ taxa:
   - name: Torilis japonica
   - name: Toxicodendron rydbergii
   - name: Tradescantia bracteata
-  - name: Tradescantia occidentalis
+  - name: Tradescantia occidentalis var. occidentalis
   - name: Tradescantia ohiensis
   - name: Tragopogon dubius
   - name: Tragopogon pratensis
@@ -742,7 +742,7 @@ taxa:
   - name: Typha angustifolia
   - name: Typha latifolia
   - name: Typha X glauca
-  - name: Urtica dioica
+  - name: Urtica dioica ssp. gracilis
   - name: Utricularia gibba
   - name: Utricularia intermedia
   - name: Utricularia minor
@@ -751,7 +751,7 @@ taxa:
   - name: Uvularia sessilifolia
   - name: Vaccinium angustifolium
   - name: Vaccinium macrocarpon
-  - name: Valeriana edulis
+  - name: Valeriana edulis var. ciliata
   - name: Valeriana officinalis
   - name: Verbascum blattaria
   - name: Verbascum thapsus
@@ -779,12 +779,12 @@ taxa:
   - name: Viola lanceolata
   - name: Viola macloskeyi # - name: Viola minuscula
   - name: Viola nephrophylla
-  - name: Viola pedata
+  - name: Viola pedata var. pedata
   - name: Viola pedatifida
-  - name: Viola primulifolia
+  - name: Viola primulifolia var. primulifolia
   - name: Viola renifolia
   - name: Viola rugulosa
-  - name: Viola sagittata
+  - name: Viola sagittata var. sagittata
   - name: Viola sororia
   - name: Vitis riparia
   - name: Xanthium strumarium
@@ -810,11 +810,11 @@ taxa:
   - name: Carex crawfordii
   - name: Carex cristatella
   - name: Carex cryptolepis
-  - name: Carex deweyana
+  - name: Carex deweyana var. deweyana
   - name: Carex diandra
   - name: Carex disperma
   - name: Carex eburnea
-  - name: Carex echinata
+  - name: Carex echinata ssp. echinata
   - name: Carex tenera var. echinodes #Carex echinodes
   - name: Carex formosa
   - name: Carex gracillima
@@ -826,7 +826,7 @@ taxa:
   - name: Carex hirtifolia
   - name: Carex houghtoniana
   - name: Carex hystericina
-  - name: Carex inops
+  - name: Carex inops ssp. heliophila
   - name: Carex interior
   - name: Carex intumescens
   - name: Carex lacustris
@@ -835,7 +835,7 @@ taxa:
   - name: Carex leptalea
   - name: Carex limosa
   - name: Carex lupulina
-  - name: Carex magellanica
+  - name: Carex magellanica ssp. irrigua
   - name: Carex meadii
   - name: Carex molesta
   - name: Carex oligocarpa
@@ -854,13 +854,13 @@ taxa:
   - name: Carex scoparia
   - name: Carex sparganioides
   - name: Carex sprengelii
-  - name: Carex stipata
+  - name: Carex stipata var. stipata
   - name: Carex stricta
   - name: Carex sychnocephala
   - name: Carex tenera var. tenera #Carex tenera
   - name: Carex tetanica
   - name: Carex torreyi
-  - name: Carex tribuloides
+  - name: Carex tribuloides var. tribuloides
   - name: Carex trisperma
   - name: Carex tuckermanii
   - name: Carex utriculata
@@ -870,16 +870,16 @@ taxa:
   - name: Agrostis gigantea
   - name: Agrostis perennans
   - name: Agrostis scabra
-  - name: Alopecurus aequalis
+  - name: Alopecurus aequalis var. aequalis
   - name: Alopecurus pratensis
   - name: Andropogon gerardii
   - name: Anthoxanthum hirtum
   - name: Aristida basiramea
-  - name: Aristida dichotoma
+  - name: Aristida dichotoma var. curtissii
   - name: Avena sativa
-  - name: Bouteloua curtipendula
+  - name: Bouteloua curtipendula var. curtipendula
   - name: Bouteloua gracilis
-  - name: Bouteloua hirsuta
+  - name: Bouteloua hirsuta var. hirsuta
   - name: Brachyelytrum erectum
   - name: Bromus ciliatus
   - name: Bromus inermis
@@ -890,7 +890,7 @@ taxa:
   - name: Bromus tectorum
   - name: Calamagrostis canadensis
   - name: Calamagrostis stricta
-  - name: Calamovilfa longifolia
+  - name: Calamovilfa longifolia var. longifolia
   - name: Cenchrus longispinus
   - name: Cinna arundinacea
   - name: Cinna latifolia
@@ -906,7 +906,7 @@ taxa:
   - name: Echinochloa crus-galli
   - name: Echinochloa muricata
   - name: Echinochloa walteri
-  - name: Elymus canadensis
+  - name: Elymus canadensis var. canadensis
   - name: Elymus curvatus
   - name: Elymus hystrix
   - name: Elymus repens
@@ -918,17 +918,17 @@ taxa:
   - name: Eragrostis cilianensis
   - name: Eragrostis frankii
   - name: Eragrostis hypnoides
-  - name: Eragrostis pectinacea
+  - name: Eragrostis pectinacea var. pectinacea
   - name: Eragrostis spectabilis
   - name: Eriochloa villosa
-  - name: Festuca saximontana
+  - name: Festuca saximontana var. saximontana
   - name: Festuca subverticillata
   - name: Glyceria borealis
-  - name: Glyceria canadensis
-  - name: Glyceria grandis
+  - name: Glyceria canadensis var. canadensis
+  - name: Glyceria grandis var. grandis
   - name: Glyceria striata
   - name: Hesperostipa spartea
-  - name: Hordeum jubatum
+  - name: Hordeum jubatum ssp. jubatum
   - name: Koeleria macrantha
   - name: Leersia oryzoides
   - name: Leersia virginica
@@ -943,12 +943,12 @@ taxa:
   - name: Nassella viridula
   - name: Oryzopsis asperifolia
   - name: Panicum capillare
-  - name: Panicum dichotomiflorum
+  - name: Panicum dichotomiflorum ssp. dichotomiflorum
   - name: Panicum virgatum
   - name: Piptatherum racemosum #Patis racemosa
   - name: Phalaris arundinacea
   - name: Phalaris canariensis
-  - name: Phleum pratense
+  - name: Phleum pratense ssp. pratense
   - name: Phragmites australis ssp. americanus
   - name: Phragmites australis ssp. australis
   - name: Poa annua
@@ -957,7 +957,7 @@ taxa:
   - name: Poa palustris
   - name: Poa pratensis
   - name: Schizachne purpurascens
-  - name: Schizachyrium scoparium
+  - name: Schizachyrium scoparium var. scoparium
   - name: Setaria faberi
   - name: Setaria pumila
   - name: Setaria verticillata
@@ -966,11 +966,11 @@ taxa:
   - name: Spartina pectinata
   - name: Sphenopholis intermedia
   - name: Sphenopholis obtusata
-  - name: Sporobolus compositus
+  - name: Sporobolus compositus var. compositus
   - name: Sporobolus cryptandrus
   - name: Sporobolus heterolepis
   - name: Sporobolus neglectus
-  - name: Sporobolus vaginiflorus
+  - name: Sporobolus vaginiflorus var. vaginiflorus
   - name: Vulpia octoflora
   - name: Zizania palustris
   - name: Rhus glabra
@@ -978,13 +978,13 @@ taxa:
   - name: Toxicodendron vernix
   - name: Betula alleghaniensis
   - name: Betula papyrifera
-  - name: Carpinus caroliniana
+  - name: Carpinus caroliniana ssp. virginiana
   - name: Ostrya virginiana
   - name: Catalpa speciosa
   - name: Celtis occidentalis
   - name: Lonicera maackii
   - name: Euonymus atropurpureus
-  - name: Juniperus virginiana
+  - name: Juniperus virginiana var. virginiana
   - name: Elaeagnus angustifolia
   - name: Caragana arborescens
   - name: Gymnocladus dioicus
@@ -995,7 +995,7 @@ taxa:
   - name: Quercus macrocarpa
   - name: Quercus rubra
   - name: Carya cordiformis
-  - name: Carya ovata
+  - name: Carya ovata var. ovata
   - name: Juglans cinerea
   - name: Juglans nigra
   - name: Tilia americana
@@ -1013,19 +1013,19 @@ taxa:
   - name: Crataegus macracantha
   - name: Crataegus mollis
   - name: Crataegus punctata
-  - name: Crataegus succulenta
+  - name: Crataegus succulenta var. succulenta
   - name: Malus ioensis
   - name: Prunus americana
   - name: Prunus pensylvanica
-  - name: Prunus serotina
-  - name: Prunus virginiana
+  - name: Prunus serotina var. serotina
+  - name: Prunus virginiana var. virginiana
   - name: Sorbus americana
   - name: Sorbus aucuparia
   - name: Cephalanthus occidentalis
   - name: Phellodendron amurense
   - name: Populus alba
   - name: Populus balsamifera
-  - name: Populus deltoides
+  - name: Populus deltoides ssp. monilifera
   - name: Populus grandidentata
   - name: Populus tremuloides
   - name: Salix amygdaloides
@@ -1035,7 +1035,7 @@ taxa:
   - name: Salix nigra
   - name: Salix fragilis #Salix X fragilis
   - name: Acer negundo
-  - name: Acer rubrum
+  - name: Acer rubrum var. rubrum
   - name: Acer saccharinum
   - name: Acer saccharum
   - name: Ulmus americana
@@ -1043,7 +1043,7 @@ taxa:
   - name: Ulmus rubra
   - name: Ulmus thomasii
   - name: Sambucus canadensis
-  - name: Sambucus racemosa
+  - name: Sambucus racemosa var. pubens
   - name: Viburnum lentago
   - name: Viburnum opulus var. americanum
   - name: Viburnum opulus var. opulus
@@ -1059,8 +1059,8 @@ taxa:
   - name: Berberis thunbergii
   - name: Betula pumila
   - name: Corylus americana
-  - name: Corylus cornuta
-  - name: Linnaea borealis
+  - name: Corylus cornuta ssp. cornuta
+  - name: Linnaea borealis var. longiflora
   - name: Lonicera dioica
   - name: Lonicera maackii
   - name: Lonicera morrowii
@@ -1073,17 +1073,17 @@ taxa:
   - name: Euonymus alatus
   - name: Euonymus atropurpureus
   - name: Cornus alternifolia
-  - name: Cornus amomum
+  - name: Cornus amomum ssp. obliqua
   - name: Cornus canadensis
   - name: Cornus racemosa
   - name: Cornus rugosa
   - name: Cornus sericea
-  - name: Juniperus communis
+  - name: Juniperus communis var. depressa
   - name: Juniperus horizontalis
   - name: Diervilla lonicera
   - name: Elaeagnus umbellata
   - name: Shepherdia argentea
-  - name: Andromeda polifolia
+  - name: Andromeda polifolia var. latifolia
   - name: Arctostaphylos uva-ursi
   - name: Chamaedaphne calyculata
   - name: Gaultheria hispidula
@@ -1097,11 +1097,11 @@ taxa:
   - name: Caragana arborescens
   - name: Robinia hispida
   - name: Ribes americanum
-  - name: Ribes aureum
+  - name: Ribes aureum var. villosum
   - name: Ribes cynosbati
   - name: Ribes hirtellum
   - name: Ribes missouriense
-  - name: Ribes oxyacanthoides
+  - name: Ribes oxyacanthoides var. oxyacanthoides
   - name: Ribes rubrum
   - name: Ribes triste
   - name: Menispermum canadense
