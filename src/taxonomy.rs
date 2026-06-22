@@ -1,5 +1,11 @@
 use toasty::Deferred;
 
+#[derive(Debug, Clone, Copy, clap::ValueEnum)]
+#[clap(rename_all = "kebab-case")]
+pub enum TaxonomicAuthority {
+    Itis,
+}
+
 use crate::{
     collecting::{CollectingData, HarvestEvent, TaxonCleaningProcedure},
     propagation::TaxonProtocol,

@@ -2,7 +2,7 @@ use propagation_notebook::{
     collecting::TaxonCleaningProcedure,
     propagation::TaxonProtocol,
     region::RegionalTaxonStatus,
-    taxonomy::{Synonym, Taxon, TaxonNote, VernacularName},
+    taxonomy::{Synonym, Taxon, TaxonNote, TaxonomicAuthority, VernacularName},
 };
 use toasty::Db;
 
@@ -14,12 +14,6 @@ pub mod event;
 mod import;
 pub mod note;
 pub mod propagation;
-
-#[derive(Debug, Clone, Copy, clap::ValueEnum)]
-#[clap(rename_all = "kebab-case")]
-pub enum TaxonomicAuthority {
-    Itis,
-}
 
 #[derive(Debug, clap::Subcommand)]
 pub enum TaxonCommands {
