@@ -2,90 +2,11 @@ use std::collections::HashMap;
 
 use indicatif::ProgressIterator;
 use itertools::Itertools;
-use propagation_notebook::taxonomy::Rank;
-use toasty::Deferred;
 
 use crate::cli::taxa::TaxonomicAuthority;
+use propagation_notebook::taxonomy::itis;
 
 const CHUNK_SIZE: usize = 500;
-#[derive(Debug, toasty::Model)]
-pub struct TaxonomicUnit {
-    #[key]
-    tsn: u64,
-    unit_ind1: Option<String>,
-    unit_name1: String,
-    unit_ind2: Option<String>,
-    unit_name2: Option<String>,
-    unit_ind3: Option<String>,
-    unit_name3: Option<String>,
-    unit_ind4: Option<String>,
-    unit_name4: Option<String>,
-    // unnamed_taxon_ind: char(1) DEFAULT NULL,
-    #[index]
-    name_usage: String,
-    unaccept_reason: Option<String>,
-    // credibility_rtng: varchar(40) NOT NULL,
-    // completeness_rtng: char(10) DEFAULT NULL,
-    // currency_rating: char(7) DEFAULT NULL,
-    phylo_sort_seq: u64,
-    // initial_time_stamp: datetime NOT NULL,
-    #[index]
-    parent_tsn: Option<u64>,
-    #[belongs_to(key=parent_tsn, references=tsn)]
-    parent: Deferred<TaxonomicUnit>,
-    // taxon_author_id: int(11) DEFAULT NULL,
-    // hybrid_author_id: int(11) DEFAULT NULL,
-    kingdom_id: u64,
-    rank_id: Rank,
-    // update_date: date NOT NULL,
-    // uncertain_prnt_ind: char(3) DEFAULT NULL,
-    // n_usage: text,
-    complete_name: String,
-
-    #[has_many(pair=parent)]
-    children: Deferred<Vec<TaxonomicUnit>>,
-    #[has_many(pair=taxon)]
-    vernaculars: Deferred<Vec<Vernacular>>,
-}
-
-#[derive(Debug, toasty::Model)]
-#[table = "hierarchy"]
-pub struct Hierarchy {
-    #[key]
-    hierarchy_string: String,
-    #[index]
-    tsn: u64,
-    level: u64,
-}
-
-#[derive(Debug, toasty::Model)]
-pub struct SynonymLink {
-    #[key]
-    tsn: u64,
-    #[key]
-    tsn_accepted: u64,
-}
-
-#[derive(Debug, toasty::Model)]
-pub struct Kingdom {
-    #[key]
-    kingdom_id: u64,
-    #[index]
-    kingdom_name: String,
-}
-
-#[derive(Debug, toasty::Model)]
-pub struct Vernacular {
-    #[key]
-    vern_id: u64,
-    #[index]
-    tsn: u64,
-    #[belongs_to(key=tsn, references= tsn)]
-    taxon: Deferred<TaxonomicUnit>,
-    language: String,
-    vernacular_name: String,
-}
-
 pub async fn import_taxa(
     db: &mut toasty::Db,
     taxonomy_db_uri: &str,
@@ -112,27 +33,30 @@ async fn import_taxa_itis(
     ourtxn: &mut toasty::Transaction<'_>,
 ) -> Result<(), anyhow::Error> {
     // find plant kingdom
-    let plant_kingdom = Kingdom::get_by_kingdom_name(&mut itisdb, "Plantae").await?;
+    let plant_kingdom = itis::Kingdom::get_by_kingdom_name(&mut itisdb, "Plantae").await?;
     let mut tsn_to_id: HashMap<u64, u64> = HashMap::default();
     println!("Building hierarchy sequence...");
     let mut tsn_to_seq: HashMap<u64, _> = HashMap::default();
-    let records = Hierarchy::all()
-        .order_by(Hierarchy::fields().hierarchy_string().asc())
+    let records = itis::Hierarchy::all()
+        .order_by(itis::Hierarchy::fields().hierarchy_string().asc())
         .exec(&mut itisdb)
         .await?;
     for (seq, record) in records.into_iter().enumerate().progress() {
         tsn_to_seq.insert(record.tsn, seq);
     }
     println!("Importing accepted taxa...");
-    let taxa = TaxonomicUnit::all()
+    let taxa = itis::TaxonomicUnit::all()
         .filter(
-            TaxonomicUnit::fields().name_usage().eq("accepted").and(
-                TaxonomicUnit::fields()
-                    .kingdom_id()
-                    .eq(plant_kingdom.kingdom_id),
-            ),
+            itis::TaxonomicUnit::fields()
+                .name_usage()
+                .eq("accepted")
+                .and(
+                    itis::TaxonomicUnit::fields()
+                        .kingdom_id()
+                        .eq(plant_kingdom.kingdom_id),
+                ),
         )
-        .order_by(TaxonomicUnit::fields().tsn().asc())
+        .order_by(itis::TaxonomicUnit::fields().tsn().asc())
         .exec(&mut itisdb)
         .await?;
     for chunk in &taxa
@@ -178,8 +102,8 @@ async fn import_taxa_itis(
         toasty::batch(chunk).exec(ourtxn).await?;
     }
     println!("Importing vernacular names...");
-    let records = Vernacular::all()
-        .order_by(Vernacular::fields().tsn().asc())
+    let records = itis::Vernacular::all()
+        .order_by(itis::Vernacular::fields().tsn().asc())
         .exec(&mut itisdb)
         .await?;
     for chunk in &records
@@ -199,7 +123,7 @@ async fn import_taxa_itis(
             .await?;
     }
     println!("Loading synonym links...");
-    let synonym_links: HashMap<u64, u64> = SynonymLink::all()
+    let synonym_links: HashMap<u64, u64> = itis::SynonymLink::all()
         .exec(&mut itisdb)
         .await?
         .into_iter()
@@ -207,14 +131,17 @@ async fn import_taxa_itis(
         .collect();
 
     println!("Importing synonyms...");
-    let records = TaxonomicUnit::filter(
-        TaxonomicUnit::fields().name_usage().eq("not accepted").and(
-            TaxonomicUnit::fields()
-                .kingdom_id()
-                .eq(plant_kingdom.kingdom_id),
-        ),
+    let records = itis::TaxonomicUnit::filter(
+        itis::TaxonomicUnit::fields()
+            .name_usage()
+            .eq("not accepted")
+            .and(
+                itis::TaxonomicUnit::fields()
+                    .kingdom_id()
+                    .eq(plant_kingdom.kingdom_id),
+            ),
     )
-    .order_by(TaxonomicUnit::fields().tsn().asc())
+    .order_by(itis::TaxonomicUnit::fields().tsn().asc())
     .exec(&mut itisdb)
     .await?;
 

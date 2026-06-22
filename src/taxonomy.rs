@@ -12,6 +12,8 @@ use crate::{
     region::RegionalTaxonStatus,
 };
 
+pub mod itis;
+
 #[derive(Debug, Clone, Copy, toasty::Embed, strum::Display)]
 pub enum Rank {
     #[column(variant = 0)]
