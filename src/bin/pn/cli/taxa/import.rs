@@ -88,12 +88,12 @@ pub struct Vernacular {
 
 pub async fn import_taxa(
     db: &mut toasty::Db,
-    itis_uri: &str,
+    taxonomy_db_uri: &str,
     authority: TaxonomicAuthority,
 ) -> anyhow::Result<()> {
     let itisdb = toasty::Db::builder()
         .models(toasty::models!(crate::*))
-        .connect(itis_uri)
+        .connect(taxonomy_db_uri)
         .await?;
 
     let mut txn = db.transaction().await?;
