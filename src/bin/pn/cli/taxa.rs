@@ -3,20 +3,17 @@ use propagation_notebook::{
     collecting::TaxonCleaningProcedure,
     propagation::TaxonProtocol,
     region::RegionalTaxonStatus,
-    taxonomy::{Synonym, Taxon, TaxonNote, TaxonomicAuthority, VernacularName},
+    taxonomy::{
+        ImportProgressReporter, Synonym, Taxon, TaxonNote, TaxonomicAuthority, VernacularName,
+    },
 };
 use toasty::Db;
 
-use crate::{
-    cli::{print_regional_taxa_table, taxa::import::ImportProgressReporter},
-    style,
-    util::join_or_default,
-};
+use crate::{cli::print_regional_taxa_table, style, util::join_or_default};
 
 pub mod cleaning;
 pub mod collecting;
 pub mod event;
-mod import;
 pub mod note;
 pub mod propagation;
 
@@ -421,7 +418,7 @@ impl TaxonCommands {
                     // FIXME: we should probably clear the database if the
                     // user confirms rather than re-import a taxonomy into an
                     // existing taxonomy
-                    import::import_taxa(
+                    propagation_notebook::taxonomy::import(
                         db,
                         db_uri,
                         *authority,
