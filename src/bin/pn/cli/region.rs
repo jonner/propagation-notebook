@@ -2,7 +2,7 @@ use std::f64::consts::PI;
 use std::fmt::Display;
 use std::path::PathBuf;
 
-use crate::{cli::list_regional_taxa, style};
+use crate::{cli::print_regional_taxa_table, style};
 use anyhow::anyhow;
 use geo::BoundingRect;
 use geo::ChamberlainDuquetteArea;
@@ -327,6 +327,8 @@ pub enum RegionTaxaCommands {
         )]
         date: Date,
     },
+    #[command(about = "Show species that do not have harvest dates for this region")]
+    MissingDates,
 }
 
 async fn regional_taxa_status_details_table(
@@ -433,7 +435,16 @@ impl RegionTaxaCommands {
                 query.exec(db).await?;
                 println!("Modified taxon {} in region {}", taxon_id, region_id);
             }
-            RegionTaxaCommands::List => list_regional_taxa(db, region_id).await?,
+            RegionTaxaCommands::List => {
+                let regional_statuses = RegionalTaxonStatus::filter(
+                    RegionalTaxonStatus::fields().region_id().eq(region_id),
+                )
+                // FIXME: We want to order by a taxon sequence, but
+                // toasty doesn't yet support ordering by data in a relation
+                .exec(db)
+                .await?;
+                print_regional_taxa_table(db, regional_statuses).await?;
+            }
             RegionTaxaCommands::Remove {
                 taxon_id,
                 assumeyes,
@@ -552,6 +563,27 @@ impl RegionTaxaCommands {
                     ])
                 }
                 println!("{}", tbuilder.build().with(style::ListTable));
+            }
+            Self::MissingDates => {
+                // FIXME: We want to order by a taxon sequence, but
+                // toasty doesn't yet support ordering by data in a relation
+                let taxa = RegionalTaxonStatus::filter(
+                    RegionalTaxonStatus::fields().region_id().eq(region_id).and(
+                        RegionalTaxonStatus::fields()
+                            .harvest_window()
+                            .start_doy()
+                            .is_none()
+                            .and(
+                                RegionalTaxonStatus::fields()
+                                    .harvest_window()
+                                    .end_doy()
+                                    .is_none(),
+                            ),
+                    ),
+                )
+                .exec(db)
+                .await?;
+                print_regional_taxa_table(db, taxa).await?;
             }
         }
         Ok(())

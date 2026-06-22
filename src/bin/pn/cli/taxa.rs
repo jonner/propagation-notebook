@@ -6,7 +6,7 @@ use propagation_notebook::{
 };
 use toasty::Db;
 
-use crate::{cli::list_regional_taxa, style, util::join_or_default};
+use crate::{cli::print_regional_taxa_table, style, util::join_or_default};
 
 pub mod cleaning;
 pub mod collecting;
@@ -315,7 +315,17 @@ impl TaxonCommands {
                 region_id,
                 has_data,
             } => match region_id {
-                Some(id) => list_regional_taxa(db, *id).await?,
+                Some(id) => {
+                    let region_id = *id;
+                    let regional_statuses = RegionalTaxonStatus::filter(
+                        RegionalTaxonStatus::fields().region_id().eq(region_id),
+                    )
+                    // FIXME: We want to order by a taxon sequence, but
+                    // toasty doesn't yet support ordering by data in a relation
+                    .exec(db)
+                    .await?;
+                    print_regional_taxa_table(db, regional_statuses).await?;
+                }
                 None => {
                     let taxa = if *has_data {
                         Taxon::filter(

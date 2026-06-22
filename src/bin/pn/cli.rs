@@ -52,35 +52,21 @@ pub mod propagation;
 pub mod region;
 pub mod taxa;
 
-/// Shared between `region` and `taxa` commands
-async fn list_regional_taxa(db: &mut toasty::Db, region_id: u64) -> anyhow::Result<()> {
-    let regional_statuses =
-        RegionalTaxonStatus::filter(RegionalTaxonStatus::fields().region_id().eq(region_id))
-            // FIXME: We want to order by a taxon sequence, but
-            // toasty doesn't yet support ordering by data in a relation
-            .exec(db)
-            .await?;
-
-    // FIXME: it's too slow to include all relations, so query the taxa separately
-    let taxa = Taxon::filter(
-        Taxon::fields().id().in_list(
-            regional_statuses
-                .iter()
-                .map(|s| s.taxon_id)
-                .collect::<Vec<_>>(),
-        ),
-    )
-    .order_by(Taxon::fields().sequence().asc())
-    .exec(db)
-    .await?;
-
-    // since we can't order the regional status list by taxon
-    // sequence, we need to iterate through the sorted taxon list, and then look up the
-    // regional status from a hash table
+// sorts by taxa sequence and then prints a table. Expects `regional_statuses`
+// to have unloaded taxon fields
+async fn print_regional_taxa_table(
+    db: &mut toasty::Db,
+    regional_statuses: Vec<RegionalTaxonStatus>,
+) -> Result<(), anyhow::Error> {
     let map = regional_statuses
         .into_iter()
         .map(|s| (s.taxon_id, s))
         .collect::<HashMap<_, _>>();
+
+    let taxa = Taxon::filter(Taxon::fields().id().in_list(map.keys().collect::<Vec<_>>()))
+        .order_by(Taxon::fields().sequence().asc())
+        .exec(db)
+        .await?;
 
     let mut tbuilder = tabled::builder::Builder::default();
     tbuilder.push_record([
@@ -91,6 +77,9 @@ async fn list_regional_taxa(db: &mut toasty::Db, region_id: u64) -> anyhow::Resu
         "C-value",
         "Wetland Indicator",
     ]);
+    // since we can't order the regional status list by taxon sequence, we need
+    // to iterate through the sorted taxon list, and then look up the regional
+    // status from a hash table
     for taxon in taxa {
         let status = map.get(&taxon.id).unwrap();
         tbuilder.push_record([
