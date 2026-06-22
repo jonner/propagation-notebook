@@ -1,3 +1,4 @@
+use indicatif::ProgressBar;
 use propagation_notebook::{
     collecting::TaxonCleaningProcedure,
     propagation::TaxonProtocol,
@@ -6,7 +7,11 @@ use propagation_notebook::{
 };
 use toasty::Db;
 
-use crate::{cli::print_regional_taxa_table, style, util::join_or_default};
+use crate::{
+    cli::{print_regional_taxa_table, taxa::import::ImportProgressReporter},
+    style,
+    util::join_or_default,
+};
 
 pub mod cleaning;
 pub mod collecting;
@@ -82,6 +87,30 @@ pub enum TaxonCommands {
         #[command(subcommand)]
         command: event::TaxonHarvestEventCommands,
     },
+}
+
+#[derive(Debug, Default)]
+pub struct IndicatifImportProgress {
+    pb: Option<ProgressBar>,
+}
+
+impl ImportProgressReporter for IndicatifImportProgress {
+    fn begin_step(&mut self, name: &str, total: usize) {
+        println!("{name}");
+        self.pb = Some(ProgressBar::new(total as u64));
+    }
+
+    fn increment(&mut self) {
+        if let Some(pb) = &self.pb {
+            pb.inc(1);
+        }
+    }
+
+    fn finish_step(&mut self) {
+        if let Some(pb) = self.pb.take() {
+            pb.finish_and_clear();
+        }
+    }
 }
 
 impl TaxonCommands {
@@ -392,7 +421,13 @@ impl TaxonCommands {
                     // FIXME: we should probably clear the database if the
                     // user confirms rather than re-import a taxonomy into an
                     // existing taxonomy
-                    import::import_taxa(db, db_uri, *authority).await?
+                    import::import_taxa(
+                        db,
+                        db_uri,
+                        *authority,
+                        &mut IndicatifImportProgress::default(),
+                    )
+                    .await?
                 }
             }
             TaxonCommands::Cleaning { taxon_id, command } => command.run(db, *taxon_id).await?,

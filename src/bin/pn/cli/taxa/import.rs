@@ -1,16 +1,21 @@
 use std::collections::HashMap;
 
-use indicatif::ProgressIterator;
 use itertools::Itertools;
 
-use crate::cli::taxa::TaxonomicAuthority;
-use propagation_notebook::taxonomy::itis;
+use propagation_notebook::taxonomy::{TaxonomicAuthority, itis};
+
+pub trait ImportProgressReporter {
+    fn begin_step(&mut self, name: &str, total: usize);
+    fn increment(&mut self);
+    fn finish_step(&mut self);
+}
 
 const CHUNK_SIZE: usize = 500;
 pub async fn import_taxa(
     db: &mut toasty::Db,
     taxonomy_db_uri: &str,
     authority: TaxonomicAuthority,
+    reporter: &mut dyn ImportProgressReporter,
 ) -> anyhow::Result<()> {
     let itisdb = toasty::Db::builder()
         .models(toasty::models!(crate::*))
@@ -20,7 +25,7 @@ pub async fn import_taxa(
     let mut txn = db.transaction().await?;
 
     match authority {
-        TaxonomicAuthority::Itis => import_taxa_itis(itisdb, &mut txn).await?,
+        TaxonomicAuthority::Itis => import_taxa_itis(itisdb, &mut txn, reporter).await?,
     }
 
     txn.commit().await?;
@@ -31,6 +36,7 @@ pub async fn import_taxa(
 async fn import_taxa_itis(
     mut itisdb: toasty::Db,
     ourtxn: &mut toasty::Transaction<'_>,
+    reporter: &mut dyn ImportProgressReporter,
 ) -> Result<(), anyhow::Error> {
     // find plant kingdom
     let plant_kingdom = itis::Kingdom::get_by_kingdom_name(&mut itisdb, "Plantae").await?;
@@ -41,10 +47,9 @@ async fn import_taxa_itis(
         .order_by(itis::Hierarchy::fields().hierarchy_string().asc())
         .exec(&mut itisdb)
         .await?;
-    for (seq, record) in records.into_iter().enumerate().progress() {
+    for (seq, record) in records.into_iter().enumerate() {
         tsn_to_seq.insert(record.tsn, seq);
     }
-    println!("Importing accepted taxa...");
     let taxa = itis::TaxonomicUnit::all()
         .filter(
             itis::TaxonomicUnit::fields()
@@ -59,10 +64,11 @@ async fn import_taxa_itis(
         .order_by(itis::TaxonomicUnit::fields().tsn().asc())
         .exec(&mut itisdb)
         .await?;
+    reporter.begin_step("Importing accepted taxa...", taxa.len());
     for chunk in &taxa
         .iter()
-        .progress()
         .map(|theirs| {
+            reporter.increment();
             let sequence = tsn_to_seq.get(&theirs.tsn).copied().unwrap();
             propagation_notebook::taxonomy::Taxon::create()
                 .itis_id(theirs.tsn)
@@ -79,11 +85,13 @@ async fn import_taxa_itis(
         let objs = toasty::batch(chunk).exec(ourtxn).await?;
         tsn_to_id.extend(objs.into_iter().map(|obj| (obj.itis_id, obj.id)));
     }
-    println!("Setting parent taxa...");
+    reporter.finish_step();
+
+    reporter.begin_step("Setting parent taxa...", taxa.len());
     for chunk in &taxa
         .into_iter()
-        .progress()
         .map(|theirs| {
+            reporter.increment();
             let errmsg = format!(
                 "Failed to find parent of {} (id={}, parent={:?})",
                 theirs.complete_name, theirs.tsn, theirs.parent_tsn
@@ -101,15 +109,17 @@ async fn import_taxa_itis(
         let chunk: Vec<_> = chunk.into_iter().collect();
         toasty::batch(chunk).exec(ourtxn).await?;
     }
-    println!("Importing vernacular names...");
+    reporter.finish_step();
+
     let records = itis::Vernacular::all()
         .order_by(itis::Vernacular::fields().tsn().asc())
         .exec(&mut itisdb)
         .await?;
+    reporter.begin_step("Importing vernacular names...", records.len());
     for chunk in &records
         .into_iter()
-        .progress()
         .filter_map(|record| {
+            reporter.increment();
             tsn_to_id.get(&record.tsn).map(|ourid| {
                 propagation_notebook::taxonomy::VernacularName::create()
                     .name(&record.vernacular_name)
@@ -122,7 +132,9 @@ async fn import_taxa_itis(
             .exec(ourtxn)
             .await?;
     }
-    println!("Loading synonym links...");
+    reporter.finish_step();
+
+    tracing::debug!("Loading synonym links...");
     let synonym_links: HashMap<u64, u64> = itis::SynonymLink::all()
         .exec(&mut itisdb)
         .await?
@@ -130,7 +142,6 @@ async fn import_taxa_itis(
         .map(|link| (link.tsn, link.tsn_accepted))
         .collect();
 
-    println!("Importing synonyms...");
     let records = itis::TaxonomicUnit::filter(
         itis::TaxonomicUnit::fields()
             .name_usage()
@@ -145,9 +156,11 @@ async fn import_taxa_itis(
     .exec(&mut itisdb)
     .await?;
 
-    for chunk in &records.into_iter().progress().chunks(CHUNK_SIZE) {
+    reporter.begin_step("Importing synonyms...", records.len());
+    for chunk in &records.into_iter().chunks(CHUNK_SIZE) {
         let creates: Vec<_> = chunk
             .filter_map(|theirs| {
+                reporter.increment();
                 let tsn_accepted = match synonym_links.get(&theirs.tsn) {
                     Some(id) => id,
                     None => {
@@ -169,5 +182,6 @@ async fn import_taxa_itis(
             toasty::batch(creates).exec(ourtxn).await?;
         }
     }
+    reporter.finish_step();
     Ok(())
 }
