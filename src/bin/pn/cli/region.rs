@@ -317,11 +317,12 @@ pub enum RegionTaxaCommands {
         )]
         min_samples: usize,
     },
+    #[command(about = "Show species ready to harvest on a certain date")]
     ReadyToHarvest {
         #[arg(
             short,
             long,
-            help = "Show species ready to harvest on this date",
+            help = "A date in YYYY-MM-DD format",
             default_value_t = jiff::Zoned::now().date()
         )]
         date: Date,
