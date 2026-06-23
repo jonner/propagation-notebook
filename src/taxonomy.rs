@@ -259,15 +259,18 @@ async fn import_taxa_itis(
     // find plant kingdom
     let plant_kingdom = itis::Kingdom::get_by_kingdom_name(&mut itisdb, "Plantae").await?;
     let mut tsn_to_id: HashMap<u64, u64> = HashMap::default();
-    println!("Building hierarchy sequence...");
     let mut tsn_to_seq: HashMap<u64, _> = HashMap::default();
     let records = itis::Hierarchy::all()
         .order_by(itis::Hierarchy::fields().hierarchy_string().asc())
         .exec(&mut itisdb)
         .await?;
+    reporter.begin_step("Building hierarchy sequence...", records.len());
     for (seq, record) in records.into_iter().enumerate() {
+        reporter.increment();
         tsn_to_seq.insert(record.tsn, seq);
     }
+    reporter.finish_step();
+
     let taxa = itis::TaxonomicUnit::all()
         .filter(
             itis::TaxonomicUnit::fields()
