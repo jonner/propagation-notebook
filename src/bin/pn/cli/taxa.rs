@@ -1,6 +1,4 @@
-use indicatif::ProgressBar;
 use propagation_notebook::{
-    ImportProgressReporter,
     collecting::TaxonCleaningProcedure,
     propagation::TaxonProtocol,
     region::RegionalTaxonStatus,
@@ -8,7 +6,11 @@ use propagation_notebook::{
 };
 use toasty::Db;
 
-use crate::{cli::print_regional_taxa_table, style, util::join_or_default};
+use crate::{
+    cli::print_regional_taxa_table,
+    style,
+    util::{IndicatifImportProgress, join_or_default},
+};
 
 pub mod cleaning;
 pub mod collecting;
@@ -83,30 +85,6 @@ pub enum TaxonCommands {
         #[command(subcommand)]
         command: event::TaxonHarvestEventCommands,
     },
-}
-
-#[derive(Debug, Default)]
-pub struct IndicatifImportProgress {
-    pb: Option<ProgressBar>,
-}
-
-impl ImportProgressReporter for IndicatifImportProgress {
-    fn begin_step(&mut self, name: &str, total: usize) {
-        println!("{name}");
-        self.pb = Some(ProgressBar::new(total as u64));
-    }
-
-    fn increment(&mut self) {
-        if let Some(pb) = &self.pb {
-            pb.inc(1);
-        }
-    }
-
-    fn finish_step(&mut self) {
-        if let Some(pb) = self.pb.take() {
-            pb.finish_and_clear();
-        }
-    }
 }
 
 impl TaxonCommands {
