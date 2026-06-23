@@ -18,7 +18,7 @@ pub enum Error {
 
 #[derive(Deserialize, Debug)]
 pub struct InaturalistTaxon {
-    pub id: u32,
+    pub id: u64,
     pub name: String,
     pub rank: String,
     pub is_active: bool,
@@ -90,7 +90,7 @@ pub async fn find_taxon(
 
 pub async fn fetch_seed_observations(
     client: &reqwest::Client,
-    taxon_id: u32,
+    taxon_id: u64,
     location: &SearchArea,
 ) -> Result<Vec<ObservationDate>, Error> {
     let mut observations: Vec<ObservationDate> = Vec::new();

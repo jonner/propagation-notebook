@@ -488,7 +488,7 @@ impl RegionTaxaCommands {
                     region.reference(),
                 );
                 let client = inaturalist::client()?;
-                let inat_taxon = inat_taxon_for_taxon(taxon, &client).await?;
+                let inat_id = inat_id_for_taxon(taxon, &client).await?;
                 let bounding_box = match &region.geometry {
                     Some(value) => {
                         let geom: geo::Geometry = value.value.clone().try_into()?;
@@ -515,13 +515,9 @@ impl RegionTaxaCommands {
                         SearchArea::Place(selected.id)
                     }
                 };
-                let observation_window = seed_observation_window_with_expansion(
-                    client,
-                    inat_taxon.id,
-                    loc,
-                    *min_samples,
-                )
-                .await?;
+                let observation_window =
+                    seed_observation_window_with_expansion(client, inat_id, loc, *min_samples)
+                        .await?;
                 let window = RegionalHarvestWindow {
                     start_doy: Some(observation_window.start_doy),
                     end_doy: Some(observation_window.end_doy),
@@ -595,12 +591,12 @@ impl RegionTaxaCommands {
     }
 }
 
-async fn inat_taxon_for_taxon(
+async fn inat_id_for_taxon(
     taxon: &propagation_notebook::taxonomy::Taxon,
     client: &reqwest::Client,
-) -> anyhow::Result<InaturalistTaxon> {
+) -> anyhow::Result<u64> {
     if let Ok(taxon) = inat_taxon_for_query(client, &taxon.names()).await {
-        Ok(taxon)
+        Ok(taxon.id)
     } else {
         println!(
             "Couldn't find a matching taxon for the scientific name '{}'",
@@ -615,7 +611,7 @@ async fn inat_taxon_for_taxon(
                         "Using inaturalist taxon '{} ({})'",
                         inat_taxon.name, inat_taxon.rank
                     );
-                    return Ok(inat_taxon);
+                    return Ok(inat_taxon.id);
                 }
                 println!(
                     "Couldn't find a matching taxon for the common name '{}'",
@@ -735,7 +731,7 @@ impl Display for MinimumObservationsAction {
 
 async fn seed_observation_window_with_expansion(
     client: reqwest::Client,
-    taxon_id: u32,
+    taxon_id: u64,
     mut loc: SearchArea,
     min_samples: usize,
 ) -> anyhow::Result<ObservationWindow> {
