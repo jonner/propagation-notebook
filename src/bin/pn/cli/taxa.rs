@@ -1,11 +1,10 @@
 use indicatif::ProgressBar;
 use propagation_notebook::{
+    ImportProgressReporter,
     collecting::TaxonCleaningProcedure,
     propagation::TaxonProtocol,
     region::RegionalTaxonStatus,
-    taxonomy::{
-        ImportProgressReporter, Synonym, Taxon, TaxonNote, TaxonomicAuthority, VernacularName,
-    },
+    taxonomy::{Synonym, Taxon, TaxonNote, TaxonomicAuthority, VernacularName},
 };
 use toasty::Db;
 

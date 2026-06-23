@@ -10,6 +10,7 @@ pub enum TaxonomicAuthority {
 }
 
 use crate::{
+    ImportProgressReporter,
     collecting::{CollectingData, HarvestEvent, TaxonCleaningProcedure},
     propagation::TaxonProtocol,
     region::RegionalTaxonStatus,
@@ -225,12 +226,6 @@ pub struct TaxonNote {
     pub created_at: jiff::Timestamp,
     #[auto]
     pub updated_at: jiff::Timestamp,
-}
-
-pub trait ImportProgressReporter {
-    fn begin_step(&mut self, name: &str, total: usize);
-    fn increment(&mut self);
-    fn finish_step(&mut self);
 }
 
 const CHUNK_SIZE: usize = 500;
