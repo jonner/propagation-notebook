@@ -78,8 +78,6 @@ impl Region {
     where
         P: AsRef<Path>,
     {
-        let mut txn = db.transaction().await?;
-
         let mut f = tokio::fs::OpenOptions::new().read(true).open(path).await?;
         let mut info_string = String::new();
         f.read_to_string(&mut info_string).await?;
@@ -94,7 +92,7 @@ impl Region {
         reporter.begin_step("Validating taxa...", info.taxa.len());
         for taxon_info in info.taxa.into_iter() {
             reporter.increment();
-            let t = find_taxon_for_name(&mut txn, &taxon_info.name).await?;
+            let t = find_taxon_for_name(db, &taxon_info.name).await?;
             lookups
                 .entry(t.id)
                 .and_modify(|existing| {
@@ -125,6 +123,8 @@ impl Region {
                     .c_value(taxon_info.c_value),
             );
         }
+
+        let mut txn = db.transaction().await?;
         let region = Self::create()
             .name(info.name)
             .geometry(info.geometry.map(|v| v.into()))
