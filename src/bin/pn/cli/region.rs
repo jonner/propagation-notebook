@@ -8,6 +8,7 @@ use anyhow::anyhow;
 use geo::BoundingRect;
 use geo::ChamberlainDuquetteArea;
 use jiff::civil::Date;
+use propagation_notebook::region;
 use propagation_notebook::{
     inaturalist::{self, InaturalistTaxon, ObservationDate, SearchArea},
     region::{
@@ -18,8 +19,6 @@ use propagation_notebook::{
 use toasty::Db;
 use tracing::debug;
 use tracing::trace;
-
-mod import;
 
 #[derive(clap::Args, Debug)]
 #[group(required = false, multiple = false)]
@@ -164,7 +163,7 @@ impl RegionCommands {
                 println!("Added new region {}", new_region.reference());
             }
             RegionCommands::Import { path } => {
-                import::import_region(db, path, &mut IndicatifImportProgress::default()).await?;
+                region::import(db, path, &mut IndicatifImportProgress::default()).await?;
             }
             RegionCommands::Remove { id, assumeyes } => {
                 if *assumeyes || {
