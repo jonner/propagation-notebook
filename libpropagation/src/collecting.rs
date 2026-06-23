@@ -1,6 +1,6 @@
 use toasty::Deferred;
 
-use crate::{location::Location, taxonomy::Taxon};
+use crate::taxonomy::Taxon;
 
 #[derive(Debug, Clone, toasty::Model)]
 pub struct CollectingData {
@@ -50,24 +50,4 @@ pub struct CleaningProcedure {
     pub instructions: String,
     #[has_many(pair=procedure)]
     pub taxon_links: Deferred<Vec<TaxonCleaningProcedure>>,
-}
-
-#[derive(Debug, Clone, toasty::Model)]
-pub struct HarvestEvent {
-    #[auto]
-    #[key]
-    pub id: u64,
-
-    #[index]
-    pub taxon_id: u64,
-    #[belongs_to(key=taxon_id, references=id)]
-    pub taxon: Deferred<Taxon>,
-
-    pub date: jiff::civil::Date,
-    pub notes: Option<String>,
-
-    #[index]
-    pub location_id: u64,
-    #[belongs_to(key=location_id, references=id)]
-    pub location: Deferred<Location>,
 }

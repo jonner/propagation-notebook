@@ -14,7 +14,6 @@ use crate::{
 
 pub mod cleaning;
 pub mod collecting;
-pub mod event;
 pub mod note;
 pub mod propagation;
 
@@ -71,13 +70,6 @@ pub enum TaxonCommands {
         taxon_id: u64,
         #[command(subcommand)]
         command: note::TaxonNoteCommands,
-    },
-    #[command(about = "Harvest events for a taxon")]
-    HarvestEvents {
-        #[arg(short, long, help = "A Taxon ID")]
-        taxon_id: u64,
-        #[command(subcommand)]
-        command: event::TaxonHarvestEventCommands,
     },
 }
 
@@ -147,7 +139,6 @@ impl TaxonCommands {
                     .include(Taxon::fields().collecting_data())
                     .include(Taxon::fields().cleaning_procedures().procedure())
                     .include(Taxon::fields().propagation_protocols().protocol())
-                    .include(Taxon::fields().harvest_events().location())
                     .include(Taxon::fields().notes())
                     .one()
                     .exec(db)
@@ -268,23 +259,6 @@ impl TaxonCommands {
                             inner_table.build().with(style::ListTable).to_string() + "\n"
                         }
                     }]);
-                    tbuilder.push_record(["Harvesting Events", &{
-                        let events = taxon.harvest_events.get();
-                        if events.is_empty() {
-                            "-".to_string()
-                        } else {
-                            let mut inner_table = tabled::builder::Builder::default();
-                            inner_table.push_record(["ID", "Date", "Location"]);
-                            for event in events.iter() {
-                                inner_table.push_record([
-                                    &event.id.to_string(),
-                                    &event.date.to_string(),
-                                    &event.location.get().reference(),
-                                ]);
-                            }
-                            inner_table.build().with(style::ListTable).to_string() + "\n"
-                        }
-                    }]);
                     tbuilder.push_record(["Notes", &{
                         let notes = taxon.notes.get();
                         if notes.is_empty() {
@@ -342,9 +316,6 @@ impl TaxonCommands {
                                     .any(TaxonProtocol::fields().taxon_id().gt(0)))
                                 .or(Taxon::fields()
                                     .notes()
-                                    .any(TaxonNote::fields().taxon_id().gt(0)))
-                                .or(Taxon::fields()
-                                    .harvest_events()
                                     .any(TaxonNote::fields().taxon_id().gt(0))),
                         )
                         .order_by(Taxon::fields().sequence().asc())
@@ -385,9 +356,6 @@ impl TaxonCommands {
             TaxonCommands::Collecting { taxon_id, command } => command.run(db, *taxon_id).await?,
             TaxonCommands::Propagation { taxon_id, command } => command.run(db, *taxon_id).await?,
             TaxonCommands::Notes { taxon_id, command } => command.run(db, *taxon_id).await?,
-            TaxonCommands::HarvestEvents { taxon_id, command } => {
-                command.run(db, *taxon_id).await?
-            }
         }
         Ok(())
     }
