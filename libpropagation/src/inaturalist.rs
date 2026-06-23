@@ -6,7 +6,7 @@ use serde::Deserialize;
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
-    #[error("Not enough observations found {0}")]
+    #[error("Not enough iNaturalist observations found ({0})")]
     InsufficientObservations(usize),
     #[error("Unable to fetch details for iNaturalist taxon {0}")]
     TaxonNotFound(u64),
