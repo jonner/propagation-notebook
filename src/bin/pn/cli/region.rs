@@ -2,6 +2,7 @@ use std::f64::consts::PI;
 use std::fmt::Display;
 use std::path::PathBuf;
 
+use crate::util::IndicatifImportProgress;
 use crate::{cli::print_regional_taxa_table, style};
 use anyhow::anyhow;
 use geo::BoundingRect;
@@ -163,7 +164,7 @@ impl RegionCommands {
                 println!("Added new region {}", new_region.reference());
             }
             RegionCommands::Import { path } => {
-                import::import_region(db, path).await?;
+                import::import_region(db, path, &mut IndicatifImportProgress::default()).await?;
             }
             RegionCommands::Remove { id, assumeyes } => {
                 if *assumeyes || {

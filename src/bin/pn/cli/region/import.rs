@@ -3,8 +3,8 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use indicatif::ProgressIterator;
 use propagation_notebook::{
+    ImportProgressReporter,
     region::{
         ConservationStatus, Region, RegionalHarvestWindow, RegionalTaxonStatus, WetlandIndicator,
     },
@@ -53,7 +53,11 @@ struct Args {
     region_file: PathBuf,
 }
 
-pub async fn import_region<P>(db: &mut toasty::Db, path: P) -> anyhow::Result<()>
+pub async fn import_region<P>(
+    db: &mut toasty::Db,
+    path: P,
+    reporter: &mut dyn ImportProgressReporter,
+) -> anyhow::Result<()>
 where
     P: AsRef<Path>,
 {
@@ -70,8 +74,9 @@ where
     // taxonomy, so we need to eliminate duplicates at the end. We do this by storing
     // the result in a hashmap by result taxon id
     let mut lookups: HashMap<u64, TaxonInfo> = HashMap::default();
-    println!("Validating taxa...");
-    for taxon_info in info.taxa.into_iter().progress() {
+    reporter.begin_step("Validating taxa...", info.taxa.len());
+    for taxon_info in info.taxa.into_iter() {
+        reporter.increment();
         let t = find_taxon_for_name(&mut txn, &taxon_info.name).await?;
         lookups
             .entry(t.id)
@@ -86,10 +91,13 @@ where
             })
             .or_insert(taxon_info);
     }
+    reporter.finish_step();
 
     // now insert all unique taxa into the region table
     let mut taxa_create = Vec::new();
+    reporter.begin_step("Importing taxa...", lookups.len());
     for (id, taxon_info) in lookups.into_iter() {
+        reporter.increment();
         taxa_create.push(
             RegionalTaxonStatus::create()
                 .taxon_id(id)
@@ -110,6 +118,7 @@ where
         .await?;
 
     txn.commit().await?;
+    reporter.finish_step();
 
     println!(
         "Created region '{}' with {} taxa",
