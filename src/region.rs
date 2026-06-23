@@ -65,6 +65,20 @@ pub struct Region {
     pub npcs: Deferred<Vec<NativePlantCommunity>>,
 }
 
+#[derive(Debug, thiserror::Error)]
+pub enum ImportError {
+    #[error("A region with the name '{0}' already exists")]
+    RegionExists(String),
+    #[error("Unable to find a taxon equivalent to '{0}' in the database")]
+    NoMatchingTaxon(String),
+    #[error(transparent)]
+    Database(#[from] toasty::Error),
+    #[error(transparent)]
+    Io(#[from] std::io::Error),
+    #[error(transparent)]
+    FileFormat(#[from] serde_yaml::Error),
+}
+
 impl Region {
     pub fn reference(&self) -> String {
         format!("{}: {}", self.id, self.name)
@@ -74,7 +88,7 @@ impl Region {
         db: &mut toasty::Db,
         path: P,
         reporter: &mut dyn ImportProgressReporter,
-    ) -> anyhow::Result<Self>
+    ) -> Result<Self, ImportError>
     where
         P: AsRef<Path>,
     {
@@ -83,6 +97,11 @@ impl Region {
         f.read_to_string(&mut info_string).await?;
 
         let info: file::RegionInfo = serde_yaml::from_str(&info_string)?;
+
+        let existing = Region::filter_by_name(&info.name).exec(db).await?;
+        if !existing.is_empty() {
+            return Err(ImportError::RegionExists(info.name));
+        }
 
         // loop through the input list and search for names from our taxonomy that
         // match the given name. Some of these input names may map to the same name in our
@@ -270,7 +289,10 @@ mod file {
     }
 }
 
-async fn find_taxon_for_name(db: &mut dyn toasty::Executor, name: &str) -> anyhow::Result<Taxon> {
+async fn find_taxon_for_name(
+    db: &mut dyn toasty::Executor,
+    name: &str,
+) -> Result<Taxon, ImportError> {
     Ok(match name.parse::<u64>() {
         Ok(val) => Taxon::get_by_id(db, val).await?,
         Err(_) => match Taxon::get_by_complete_name(db, name).await {
@@ -282,7 +304,7 @@ async fn find_taxon_for_name(db: &mut dyn toasty::Executor, name: &str) -> anyho
                     .one()
                     .exec(db)
                     .await
-                    .map_err(|_| anyhow::anyhow!("Couldn't find a taxon matching {name}"))
+                    .map_err(|_| ImportError::NoMatchingTaxon(name.to_string()))
                     .map(|synonym| synonym.taxon.get().clone())?
             }
         },
