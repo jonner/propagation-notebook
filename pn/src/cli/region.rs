@@ -10,7 +10,7 @@ use geo::ChamberlainDuquetteArea;
 use jiff::civil::Date;
 use libpropagation::taxonomy::Taxon;
 use libpropagation::{
-    inaturalist::{self, InaturalistTaxon, ObservationDate, SearchArea},
+    inaturalist::{self, InaturalistTaxon, SearchArea},
     region::{
         ConservationStatus, Origin, Region, RegionalHarvestWindow, RegionalTaxonStatus,
         WetlandIndicator,
@@ -636,22 +636,18 @@ async fn inat_id_for_taxon(taxon: &Taxon, client: &reqwest::Client) -> anyhow::R
 }
 
 async fn calculate_harvest_window(
-    observations: &[ObservationDate],
+    observations_doy: &[i16],
 ) -> Result<(i16, i16), inaturalist::Error> {
-    if observations.is_empty() {
+    if observations_doy.is_empty() {
         return Err(inaturalist::Error::InsufficientObservations(0));
     }
-    let observations_doy: Vec<i16> = observations
-        .iter()
-        .filter_map(|ob| ob.observed_on.map(|d| d.day_of_year()))
-        .collect();
 
     let total_count = observations_doy.len();
     // 2. CALCULATE CIRCULAR MEAN
     let mut sum_sin = 0.0;
     let mut sum_cos = 0.0;
 
-    for &day in &observations_doy {
+    for &day in observations_doy {
         let angle = (day as f64 / 365.25) * 2.0 * PI;
         sum_sin += angle.sin();
         sum_cos += angle.cos();
@@ -745,9 +741,14 @@ async fn seed_observation_window_with_expansion(
     min_samples: usize,
 ) -> anyhow::Result<ObservationWindow> {
     loop {
-        let observations = inaturalist::fetch_seed_observations(&client, taxon_id, &loc).await?;
-        if observations.len() < min_samples {
-            let (msg, options) = match observations.len() {
+        let observations_doy = inaturalist::fetch_seed_observations(&client, taxon_id, &loc)
+            .await?
+            .into_iter()
+            .filter_map(|ob| ob.observed_on.map(|d| d.day_of_year()))
+            .collect::<Vec<_>>();
+
+        if observations_doy.len() < min_samples {
+            let (msg, options) = match observations_doy.len() {
                 0 => (
                     "No observations with seeds found in the current search area.".to_string(),
                     vec![
@@ -811,7 +812,7 @@ async fn seed_observation_window_with_expansion(
                 }
             }
         }
-        let (start, end) = calculate_harvest_window(&observations).await?;
+        let (start, end) = calculate_harvest_window(&observations_doy).await?;
         debug!(
             "Harvest dates for {}: {} - {}",
             taxon_id,
@@ -829,7 +830,7 @@ async fn seed_observation_window_with_expansion(
         break Ok(ObservationWindow {
             start_doy: start,
             end_doy: end,
-            nsamples: observations.len(),
+            nsamples: observations_doy.len(),
         });
     }
 }
