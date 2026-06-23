@@ -8,6 +8,7 @@ use anyhow::anyhow;
 use geo::BoundingRect;
 use geo::ChamberlainDuquetteArea;
 use jiff::civil::Date;
+use libpropagation::taxonomy::Taxon;
 use libpropagation::{
     inaturalist::{self, InaturalistTaxon, ObservationDate, SearchArea},
     region::{
@@ -488,7 +489,16 @@ impl RegionTaxaCommands {
                     region.reference(),
                 );
                 let client = inaturalist::client()?;
-                let inat_id = inat_id_for_taxon(taxon, &client).await?;
+                let inat_id = if let Some(id) = taxon.inaturalist_id {
+                    id
+                } else {
+                    let id = inat_id_for_taxon(taxon, &client).await?;
+                    Taxon::update_by_id(taxon.id)
+                        .inaturalist_id(id)
+                        .exec(db)
+                        .await?;
+                    id
+                };
                 let bounding_box = match &region.geometry {
                     Some(value) => {
                         let geom: geo::Geometry = value.value.clone().try_into()?;
@@ -591,15 +601,9 @@ impl RegionTaxaCommands {
     }
 }
 
-async fn inat_id_for_taxon(
-    taxon: &libpropagation::taxonomy::Taxon,
-    client: &reqwest::Client,
-) -> anyhow::Result<u64> {
-    if let Some(inat_id) = taxon.inaturalist_id {
-        return Ok(inat_id);
-    }
-    if let Ok(taxon) = inat_taxon_for_query(client, &taxon.names()).await {
-        Ok(taxon.id)
+async fn inat_id_for_taxon(taxon: &Taxon, client: &reqwest::Client) -> anyhow::Result<u64> {
+    if let Ok(inat_taxon) = inat_taxon_for_query(client, &taxon.names()).await {
+        Ok(inat_taxon.id)
     } else {
         println!(
             "Couldn't find a matching taxon for the scientific name '{}'",
