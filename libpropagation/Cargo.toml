@@ -1,0 +1,34 @@
+[package]
+name = "libpropagation"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+anyhow = { workspace = true }
+clap = { workspace = true }
+directories = { workspace = true }
+futures = { workspace = true }
+geo = { workspace = true }
+geojson = { workspace = true }
+itertools = { workspace = true }
+jiff = { workspace = true }
+libitis = { workspace = true }
+reqwest = { workspace = true }
+serde = { workspace = true }
+serde_yaml = { workspace = true }
+strum = { workspace = true }
+thiserror = { workspace = true }
+toasty = { workspace = true }
+toasty-cli = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+url = { workspace = true }
+
+[dev-dependencies]
+divan = "0.1.21"
+
+
+[[bench]]
+name = "region-taxa"
+harness = false

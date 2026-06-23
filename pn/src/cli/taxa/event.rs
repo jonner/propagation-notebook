@@ -1,4 +1,4 @@
-use propagation_notebook::collecting::HarvestEvent;
+use libpropagation::collecting::HarvestEvent;
 use toasty::Db;
 
 use crate::style;

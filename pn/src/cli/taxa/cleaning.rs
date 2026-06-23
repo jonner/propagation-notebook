@@ -1,4 +1,4 @@
-use propagation_notebook::collecting::TaxonCleaningProcedure;
+use libpropagation::collecting::TaxonCleaningProcedure;
 
 use toasty::Db;
 

@@ -8,7 +8,7 @@ use anyhow::anyhow;
 use geo::BoundingRect;
 use geo::ChamberlainDuquetteArea;
 use jiff::civil::Date;
-use propagation_notebook::{
+use libpropagation::{
     inaturalist::{self, InaturalistTaxon, ObservationDate, SearchArea},
     region::{
         ConservationStatus, Origin, Region, RegionalHarvestWindow, RegionalTaxonStatus,
@@ -354,7 +354,7 @@ async fn regional_taxa_status_details_table(
         "Origin",
         &status
             .origin
-            .unwrap_or(propagation_notebook::region::Origin::Unknown)
+            .unwrap_or(libpropagation::region::Origin::Unknown)
             .to_string(),
     ]);
     tbuilder.push_record([
@@ -592,7 +592,7 @@ impl RegionTaxaCommands {
 }
 
 async fn inat_id_for_taxon(
-    taxon: &propagation_notebook::taxonomy::Taxon,
+    taxon: &libpropagation::taxonomy::Taxon,
     client: &reqwest::Client,
 ) -> anyhow::Result<u64> {
     if let Ok(taxon) = inat_taxon_for_query(client, &taxon.names()).await {

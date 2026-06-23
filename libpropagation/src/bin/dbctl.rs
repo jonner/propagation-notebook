@@ -22,7 +22,7 @@ async fn main() -> anyhow::Result<()> {
         e => e,
     }?;
     let db = toasty::Db::builder()
-        .models(propagation_notebook::models())
+        .models(libpropagation::models())
         .connect(&db_uri)
         .await?;
 

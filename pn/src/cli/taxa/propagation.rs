@@ -1,4 +1,4 @@
-use propagation_notebook::propagation::TaxonProtocol;
+use libpropagation::propagation::TaxonProtocol;
 
 use tabled::builder::Builder as TableBuilder;
 use toasty::Db;

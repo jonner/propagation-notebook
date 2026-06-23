@@ -1,4 +1,4 @@
-use propagation_notebook::{region::Region, taxonomy::Taxon};
+use libpropagation::{region::Region, taxonomy::Taxon};
 
 fn main() {
     divan::main();
@@ -14,7 +14,7 @@ fn bench_region_taxa_with_full_include(bencher: divan::Bencher) {
 async fn get_region_taxa_with_full_include() {
     const ID: u64 = 1;
     let mut db = toasty::Db::builder()
-        .models(propagation_notebook::models())
+        .models(libpropagation::models())
         .connect("sqlite:./propagation-notebook.sqlite")
         .await
         .unwrap();
@@ -42,7 +42,7 @@ fn bench_region_taxa_by_id_list(bencher: divan::Bencher) {
 async fn get_region_taxa_by_id_list() {
     const ID: u64 = 1;
     let mut db = toasty::Db::builder()
-        .models(propagation_notebook::models())
+        .models(libpropagation::models())
         .connect("sqlite:./propagation-notebook.sqlite")
         .await
         .unwrap();

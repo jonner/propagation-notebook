@@ -1,4 +1,4 @@
-use propagation_notebook::{
+use libpropagation::{
     collecting::TaxonCleaningProcedure,
     propagation::TaxonProtocol,
     region::RegionalTaxonStatus,
@@ -373,7 +373,7 @@ impl TaxonCommands {
                 }
             },
             TaxonCommands::Import { db_uri, authority } => {
-                propagation_notebook::taxonomy::import(
+                libpropagation::taxonomy::import(
                     db,
                     db_uri,
                     *authority,

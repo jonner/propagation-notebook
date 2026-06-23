@@ -1,4 +1,4 @@
-use propagation_notebook::location::Location;
+use libpropagation::location::Location;
 use toasty::Db;
 
 use crate::style;

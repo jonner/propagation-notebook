@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use propagation_notebook::{region::RegionalTaxonStatus, taxonomy::Taxon};
+use libpropagation::{region::RegionalTaxonStatus, taxonomy::Taxon};
 
 use crate::{
     cli::{

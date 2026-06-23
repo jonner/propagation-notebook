@@ -1,4 +1,4 @@
-use propagation_notebook::collecting::CollectingData;
+use libpropagation::collecting::CollectingData;
 
 use tabled::builder::Builder as TableBuilder;
 use toasty::Db;

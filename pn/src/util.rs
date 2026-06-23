@@ -1,5 +1,5 @@
 use indicatif::ProgressBar;
-use propagation_notebook::ImportProgressReporter;
+use libpropagation::ImportProgressReporter;
 
 pub(crate) fn join_or_default<T, F>(items: &[T], default: &str, extract: F) -> String
 where

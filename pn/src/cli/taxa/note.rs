@@ -1,4 +1,4 @@
-use propagation_notebook::taxonomy::TaxonNote;
+use libpropagation::taxonomy::TaxonNote;
 use toasty::Db;
 
 use crate::style;

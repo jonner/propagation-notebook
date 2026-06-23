@@ -37,7 +37,7 @@ async fn main() -> anyhow::Result<()> {
         e => e,
     }?;
     let mut db = Db::builder()
-        .models(propagation_notebook::models())
+        .models(libpropagation::models())
         .connect(&db_uri)
         .await?;
     match options.command {

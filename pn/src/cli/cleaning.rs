@@ -1,4 +1,4 @@
-use propagation_notebook::collecting::CleaningProcedure;
+use libpropagation::collecting::CleaningProcedure;
 use toasty::Db;
 
 use crate::{style, util::join_or_default};

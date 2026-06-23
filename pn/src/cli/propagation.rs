@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use propagation_notebook::propagation::{Protocol, ProtocolType};
+use libpropagation::propagation::{Protocol, ProtocolType};
 use serde::Deserialize;
 use toasty::Db;
 
