@@ -490,6 +490,8 @@ impl RegionTaxaCommands {
                 );
                 let client = inaturalist::client()?;
                 let inat_id = if let Some(id) = taxon.inaturalist_id {
+                    let taxon = inaturalist::taxon_info(&client, id).await?;
+                    println!("Using iNaturalist taxon '{} ({})'", taxon.name, taxon.rank);
                     id
                 } else {
                     let id = inat_id_for_taxon(taxon, &client).await?;

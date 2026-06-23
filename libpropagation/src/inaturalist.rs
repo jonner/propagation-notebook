@@ -8,6 +8,8 @@ use serde::Deserialize;
 pub enum Error {
     #[error("Not enough observations found {0}")]
     InsufficientObservations(usize),
+    #[error("Unable to fetch details for iNaturalist taxon {0}")]
+    TaxonNotFound(u64),
     #[error(transparent)]
     Reqwest(#[from] reqwest::Error),
     #[error(transparent)]
@@ -66,6 +68,24 @@ pub fn client() -> anyhow::Result<reqwest::Client> {
         .default_headers(default_headers)
         .build()
         .map_err(Into::into)
+}
+
+pub async fn taxon_info(
+    client: &reqwest::Client,
+    taxon_id: u64,
+) -> Result<InaturalistTaxon, Error> {
+    let taxa_endpoint = API_BASE_URL.join("taxa/")?.join(&taxon_id.to_string())?;
+    let mut res: TaxonSearchResponse = client
+        .get(taxa_endpoint)
+        .query(&[("fields", "id,name,rank,is_active")])
+        .send()
+        .await?
+        .json()
+        .await?;
+
+    res.results
+        .pop()
+        .ok_or_else(|| Error::TaxonNotFound(taxon_id))
 }
 
 pub async fn find_taxon(
