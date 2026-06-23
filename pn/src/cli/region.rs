@@ -595,6 +595,9 @@ async fn inat_id_for_taxon(
     taxon: &libpropagation::taxonomy::Taxon,
     client: &reqwest::Client,
 ) -> anyhow::Result<u64> {
+    if let Some(inat_id) = taxon.inaturalist_id {
+        return Ok(inat_id);
+    }
     if let Ok(taxon) = inat_taxon_for_query(client, &taxon.names()).await {
         Ok(taxon.id)
     } else {
