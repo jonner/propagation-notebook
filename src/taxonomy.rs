@@ -228,13 +228,25 @@ pub struct TaxonNote {
     pub updated_at: jiff::Timestamp,
 }
 
+#[derive(Debug, thiserror::Error)]
+pub enum ImportError {
+    #[error("Database already contains {0} taxa. Refusing to import.")]
+    DatabaseContainsTaxa(u64),
+    #[error(transparent)]
+    ToastyError(#[from] toasty::Error),
+}
+
 const CHUNK_SIZE: usize = 500;
 pub async fn import(
     db: &mut toasty::Db,
     taxonomy_db_uri: &str,
     authority: TaxonomicAuthority,
     reporter: &mut dyn ImportProgressReporter,
-) -> anyhow::Result<()> {
+) -> Result<(), ImportError> {
+    let ntaxon = Taxon::all().count().exec(db).await?;
+    if ntaxon > 0 {
+        return Err(ImportError::DatabaseContainsTaxa(ntaxon));
+    }
     let itisdb = toasty::Db::builder()
         .models(toasty::models!(crate::*))
         .connect(taxonomy_db_uri)
@@ -255,7 +267,7 @@ async fn import_taxa_itis(
     mut itisdb: toasty::Db,
     ourtxn: &mut toasty::Transaction<'_>,
     reporter: &mut dyn ImportProgressReporter,
-) -> Result<(), anyhow::Error> {
+) -> Result<(), ImportError> {
     // find plant kingdom
     let plant_kingdom = itis::Kingdom::get_by_kingdom_name(&mut itisdb, "Plantae").await?;
     let mut tsn_to_id: HashMap<u64, u64> = HashMap::default();

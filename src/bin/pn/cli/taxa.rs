@@ -43,12 +43,6 @@ pub enum TaxonCommands {
             default_value_t = TaxonomicAuthority::Itis
         )]
         authority: TaxonomicAuthority,
-        #[arg(
-            short = 'y',
-            long,
-            help = "Assume yes for all questions requiring confirmation"
-        )]
-        assumeyes: bool,
     },
     #[command(about = "Manage collecting information for a taxon")]
     Collecting {
@@ -378,31 +372,14 @@ impl TaxonCommands {
                     println!("{} taxa found", ntaxa);
                 }
             },
-            TaxonCommands::Import {
-                db_uri,
-                authority,
-                assumeyes,
-            } => {
-                let ntaxa = Taxon::all().count().exec(db).await?;
-                if *assumeyes
-                    || inquire::Confirm::new(
-                        "Are you sure you wish to import all taxa from the external database?",
-                    )
-                    .with_default(false)
-                    .with_help_message(&format!("The database currently contains {ntaxa} taxa"))
-                    .prompt()?
-                {
-                    // FIXME: we should probably clear the database if the
-                    // user confirms rather than re-import a taxonomy into an
-                    // existing taxonomy
-                    propagation_notebook::taxonomy::import(
-                        db,
-                        db_uri,
-                        *authority,
-                        &mut IndicatifImportProgress::default(),
-                    )
-                    .await?
-                }
+            TaxonCommands::Import { db_uri, authority } => {
+                propagation_notebook::taxonomy::import(
+                    db,
+                    db_uri,
+                    *authority,
+                    &mut IndicatifImportProgress::default(),
+                )
+                .await?
             }
             TaxonCommands::Cleaning { taxon_id, command } => command.run(db, *taxon_id).await?,
             TaxonCommands::Collecting { taxon_id, command } => command.run(db, *taxon_id).await?,
