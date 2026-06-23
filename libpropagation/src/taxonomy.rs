@@ -75,38 +75,38 @@ pub enum Rank {
     Subform,
 }
 
-impl From<libitis::Rank> for Rank {
-    fn from(value: libitis::Rank) -> Self {
+impl From<itis::Rank> for Rank {
+    fn from(value: itis::Rank) -> Self {
         match value {
-            libitis::Rank::Unknown => Rank::Unknown,
-            libitis::Rank::Kingdom => Rank::Kingdom,
-            libitis::Rank::Subkingdom => Rank::Subkingdom,
-            libitis::Rank::Infrakingdom => Rank::Infrakingdom,
-            libitis::Rank::Superdivision => Rank::Superdivision,
-            libitis::Rank::Division => Rank::Division,
-            libitis::Rank::Subdivision => Rank::Subdivision,
-            libitis::Rank::Infradivision => Rank::Infradivision,
-            libitis::Rank::Superclass => Rank::Superclass,
-            libitis::Rank::Class => Rank::Class,
-            libitis::Rank::Subclass => Rank::Subclass,
-            libitis::Rank::Infraclass => Rank::Infraclass,
-            libitis::Rank::Superorder => Rank::Superorder,
-            libitis::Rank::Order => Rank::Order,
-            libitis::Rank::Suborder => Rank::Suborder,
-            libitis::Rank::Family => Rank::Family,
-            libitis::Rank::Subfamily => Rank::Subfamily,
-            libitis::Rank::Tribe => Rank::Tribe,
-            libitis::Rank::Subtribe => Rank::Subtribe,
-            libitis::Rank::Genus => Rank::Genus,
-            libitis::Rank::Subgenus => Rank::Subgenus,
-            libitis::Rank::Section => Rank::Section,
-            libitis::Rank::Subsection => Rank::Subsection,
-            libitis::Rank::Species => Rank::Species,
-            libitis::Rank::Subspecies => Rank::Subspecies,
-            libitis::Rank::Variety => Rank::Variety,
-            libitis::Rank::Subvariety => Rank::Subvariety,
-            libitis::Rank::Form => Rank::Form,
-            libitis::Rank::Subform => Rank::Subform,
+            itis::Rank::Unknown => Rank::Unknown,
+            itis::Rank::Kingdom => Rank::Kingdom,
+            itis::Rank::Subkingdom => Rank::Subkingdom,
+            itis::Rank::Infrakingdom => Rank::Infrakingdom,
+            itis::Rank::Superdivision => Rank::Superdivision,
+            itis::Rank::Division => Rank::Division,
+            itis::Rank::Subdivision => Rank::Subdivision,
+            itis::Rank::Infradivision => Rank::Infradivision,
+            itis::Rank::Superclass => Rank::Superclass,
+            itis::Rank::Class => Rank::Class,
+            itis::Rank::Subclass => Rank::Subclass,
+            itis::Rank::Infraclass => Rank::Infraclass,
+            itis::Rank::Superorder => Rank::Superorder,
+            itis::Rank::Order => Rank::Order,
+            itis::Rank::Suborder => Rank::Suborder,
+            itis::Rank::Family => Rank::Family,
+            itis::Rank::Subfamily => Rank::Subfamily,
+            itis::Rank::Tribe => Rank::Tribe,
+            itis::Rank::Subtribe => Rank::Subtribe,
+            itis::Rank::Genus => Rank::Genus,
+            itis::Rank::Subgenus => Rank::Subgenus,
+            itis::Rank::Section => Rank::Section,
+            itis::Rank::Subsection => Rank::Subsection,
+            itis::Rank::Species => Rank::Species,
+            itis::Rank::Subspecies => Rank::Subspecies,
+            itis::Rank::Variety => Rank::Variety,
+            itis::Rank::Subvariety => Rank::Subvariety,
+            itis::Rank::Form => Rank::Form,
+            itis::Rank::Subform => Rank::Subform,
         }
     }
 }
@@ -304,7 +304,7 @@ pub async fn import(
     let mut txn = db.transaction().await?;
 
     match authority {
-        TaxonomicAuthority::Itis => itis::import(itisdb, &mut txn, reporter).await?,
+        TaxonomicAuthority::Itis => itisdb::import(itisdb, &mut txn, reporter).await?,
     }
 
     txn.commit().await?;
@@ -312,7 +312,7 @@ pub async fn import(
     Ok(())
 }
 
-mod itis {
+mod itisdb {
     use std::collections::HashMap;
 
     use itertools::Itertools;
@@ -327,11 +327,11 @@ mod itis {
         reporter: &mut dyn ImportProgressReporter,
     ) -> Result<(), ImportError> {
         // find plant kingdom
-        let plant_kingdom = libitis::Kingdom::get_by_kingdom_name(&mut itisdb, "Plantae").await?;
+        let plant_kingdom = itis::Kingdom::get_by_kingdom_name(&mut itisdb, "Plantae").await?;
         let mut tsn_to_id: HashMap<u64, u64> = HashMap::default();
         let mut tsn_to_seq: HashMap<u64, _> = HashMap::default();
-        let records = libitis::Hierarchy::all()
-            .order_by(libitis::Hierarchy::fields().hierarchy_string().asc())
+        let records = itis::Hierarchy::all()
+            .order_by(itis::Hierarchy::fields().hierarchy_string().asc())
             .exec(&mut itisdb)
             .await?;
         reporter.begin_step("Building hierarchy sequence...", records.len());
@@ -341,18 +341,18 @@ mod itis {
         }
         reporter.finish_step();
 
-        let taxa = libitis::TaxonomicUnit::all()
+        let taxa = itis::TaxonomicUnit::all()
             .filter(
-                libitis::TaxonomicUnit::fields()
+                itis::TaxonomicUnit::fields()
                     .name_usage()
                     .eq("accepted")
                     .and(
-                        libitis::TaxonomicUnit::fields()
+                        itis::TaxonomicUnit::fields()
                             .kingdom_id()
                             .eq(plant_kingdom.kingdom_id),
                     ),
             )
-            .order_by(libitis::TaxonomicUnit::fields().tsn().asc())
+            .order_by(itis::TaxonomicUnit::fields().tsn().asc())
             .exec(&mut itisdb)
             .await?;
         reporter.begin_step("Importing accepted taxa...", taxa.len());
@@ -403,8 +403,8 @@ mod itis {
         }
         reporter.finish_step();
 
-        let records = libitis::Vernacular::all()
-            .order_by(libitis::Vernacular::fields().tsn().asc())
+        let records = itis::Vernacular::all()
+            .order_by(itis::Vernacular::fields().tsn().asc())
             .exec(&mut itisdb)
             .await?;
         reporter.begin_step("Importing vernacular names...", records.len());
@@ -427,24 +427,24 @@ mod itis {
         reporter.finish_step();
 
         tracing::debug!("Loading synonym links...");
-        let synonym_links: HashMap<u64, u64> = libitis::SynonymLink::all()
+        let synonym_links: HashMap<u64, u64> = itis::SynonymLink::all()
             .exec(&mut itisdb)
             .await?
             .into_iter()
             .map(|link| (link.tsn, link.tsn_accepted))
             .collect();
 
-        let records = libitis::TaxonomicUnit::filter(
-            libitis::TaxonomicUnit::fields()
+        let records = itis::TaxonomicUnit::filter(
+            itis::TaxonomicUnit::fields()
                 .name_usage()
                 .eq("not accepted")
                 .and(
-                    libitis::TaxonomicUnit::fields()
+                    itis::TaxonomicUnit::fields()
                         .kingdom_id()
                         .eq(plant_kingdom.kingdom_id),
                 ),
         )
-        .order_by(libitis::TaxonomicUnit::fields().tsn().asc())
+        .order_by(itis::TaxonomicUnit::fields().tsn().asc())
         .exec(&mut itisdb)
         .await?;
 

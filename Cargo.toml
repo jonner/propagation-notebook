@@ -1,6 +1,6 @@
 [workspace]
 members = [
-  "libitis",
+  "itis",
   "libpropagation",
   "pn"
 ]
@@ -22,7 +22,7 @@ indicatif = "0.18.4"
 inquire = "0.9.4"
 itertools = "0.14.0"
 jiff = { version = "0.2.24", features = ["serde"] }
-libitis = { path = "./libitis" }
+itis = { path = "./itis" }
 libpropagation = { path = "./libpropagation" }
 reqwest = { version = "0.13.4", features = ["json", "query"] }
 serde = { version = "1.0.228", features = ["derive"] }

@@ -11,7 +11,7 @@ geo = { workspace = true }
 geojson = { workspace = true }
 itertools = { workspace = true }
 jiff = { workspace = true }
-libitis = { workspace = true }
+itis = { workspace = true }
 reqwest = { workspace = true }
 serde = { workspace = true }
 serde_yaml = { workspace = true }
