@@ -171,6 +171,25 @@ impl Taxon {
             .collect::<Vec<_>>()
             .join(" ")
     }
+
+    pub async fn find_by_name_or_synonym(
+        db: &mut dyn toasty::Executor,
+        name: &str,
+    ) -> Result<Taxon, toasty::Error> {
+        match Taxon::get_by_complete_name(db, name).await {
+            Ok(taxon) => Ok(taxon),
+            Err(_e) => {
+                Taxon::filter(
+                    Taxon::fields()
+                        .synonyms()
+                        .any(Synonym::fields().complete_name().like(name)),
+                )
+                .one()
+                .exec(db)
+                .await
+            }
+        }
+    }
 }
 
 #[derive(Debug, Clone, toasty::Model)]

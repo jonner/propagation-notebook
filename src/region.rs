@@ -4,10 +4,7 @@ use serde::{Deserialize, Serialize};
 use toasty::Deferred;
 use tokio::io::AsyncReadExt;
 
-use crate::{
-    ImportProgressReporter,
-    taxonomy::{Synonym, Taxon},
-};
+use crate::{ImportProgressReporter, taxonomy::Taxon};
 
 #[derive(
     Debug, Clone, Copy, toasty::Embed, strum::Display, clap::ValueEnum, Serialize, Deserialize,
@@ -111,7 +108,12 @@ impl Region {
         reporter.begin_step("Validating taxa...", info.taxa.len());
         for taxon_info in info.taxa.into_iter() {
             reporter.increment();
-            let t = find_taxon_for_name(db, &taxon_info.name).await?;
+            let t = match taxon_info.name.parse::<u64>() {
+                Ok(val) => Taxon::get_by_id(db, val).await?,
+                Err(_) => Taxon::find_by_name_or_synonym(db, &taxon_info.name)
+                    .await
+                    .map_err(|_e| ImportError::NoMatchingTaxon(taxon_info.name.clone()))?,
+            };
             lookups
                 .entry(t.id)
                 .and_modify(|existing| {
@@ -287,26 +289,4 @@ mod file {
         pub(crate) notes: Option<String>,
         // npcs: Vec<NativePlantCommunityInfo>,
     }
-}
-
-async fn find_taxon_for_name(
-    db: &mut dyn toasty::Executor,
-    name: &str,
-) -> Result<Taxon, ImportError> {
-    Ok(match name.parse::<u64>() {
-        Ok(val) => Taxon::get_by_id(db, val).await?,
-        Err(_) => match Taxon::get_by_complete_name(db, name).await {
-            Ok(taxon) => taxon,
-            Err(_e) => {
-                // tracing::warn!(?e);
-                Synonym::filter_by_complete_name(name)
-                    .include(Synonym::fields().taxon())
-                    .one()
-                    .exec(db)
-                    .await
-                    .map_err(|_| ImportError::NoMatchingTaxon(name.to_string()))
-                    .map(|synonym| synonym.taxon.get().clone())?
-            }
-        },
-    })
 }
