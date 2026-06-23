@@ -1,7 +1,4 @@
-use std::{
-    collections::HashMap,
-    path::{Path, PathBuf},
-};
+use std::{collections::HashMap, path::Path};
 
 use propagation_notebook::{
     ImportProgressReporter,
@@ -46,11 +43,6 @@ struct RegionInfo {
     taxa: Vec<TaxonInfo>,
     notes: Option<String>,
     // npcs: Vec<NativePlantCommunityInfo>,
-}
-
-#[derive(Debug, clap::Parser)]
-struct Args {
-    region_file: PathBuf,
 }
 
 pub async fn import_region<P>(
