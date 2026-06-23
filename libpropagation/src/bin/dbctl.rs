@@ -1,13 +1,12 @@
-use anyhow::anyhow;
 use directories::ProjectDirs;
 use toasty_cli::{Config, ToastyCli};
 
 #[tokio::main]
-async fn main() -> anyhow::Result<()> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let config = Config::load()?;
 
     let project_dir = ProjectDirs::from("org", "quotidian", "propagation-notebook")
-        .ok_or_else(|| anyhow!("Unable to determine project data directory"))?
+        .ok_or("Unable to determine project data directory")?
         .data_dir()
         .to_path_buf();
     let db_uri = match std::env::var("PN_DB_URI") {

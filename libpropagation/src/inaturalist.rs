@@ -57,7 +57,7 @@ static API_BASE_URL: LazyLock<reqwest::Url> = LazyLock::new(|| {
     reqwest::Url::parse("https://api.inaturalist.org/v2/").expect("Valid static base URL")
 });
 
-pub fn client() -> anyhow::Result<reqwest::Client> {
+pub fn client() -> Result<reqwest::Client, reqwest::Error> {
     let mut default_headers = HeaderMap::new();
     default_headers.insert(
         "User-Agent",
@@ -67,7 +67,6 @@ pub fn client() -> anyhow::Result<reqwest::Client> {
         .connection_verbose(true)
         .default_headers(default_headers)
         .build()
-        .map_err(Into::into)
 }
 
 pub async fn taxon_info(
@@ -203,7 +202,7 @@ struct PlacesSearchResults {
 pub async fn places_search(
     client: &reqwest::Client,
     q: &str,
-) -> anyhow::Result<Vec<InaturalistPlace>> {
+) -> Result<Vec<InaturalistPlace>, Error> {
     let taxa_endpoint = API_BASE_URL.join("places")?;
     let res: PlacesSearchResults = client
         .get(taxa_endpoint)
