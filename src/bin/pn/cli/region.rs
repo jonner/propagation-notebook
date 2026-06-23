@@ -8,7 +8,6 @@ use anyhow::anyhow;
 use geo::BoundingRect;
 use geo::ChamberlainDuquetteArea;
 use jiff::civil::Date;
-use propagation_notebook::region;
 use propagation_notebook::{
     inaturalist::{self, InaturalistTaxon, ObservationDate, SearchArea},
     region::{
@@ -163,7 +162,13 @@ impl RegionCommands {
                 println!("Added new region {}", new_region.reference());
             }
             RegionCommands::Import { path } => {
-                region::import(db, path, &mut IndicatifImportProgress::default()).await?;
+                let region =
+                    Region::import(db, path, &mut IndicatifImportProgress::default()).await?;
+                println!(
+                    "Created region '{}' with {} taxa",
+                    region.reference(),
+                    region.taxon_statuses.get().len()
+                );
             }
             RegionCommands::Remove { id, assumeyes } => {
                 if *assumeyes || {
