@@ -283,26 +283,26 @@ pub enum RegionTaxaCommands {
     List,
     #[command(about = "Show regional information about a taxon")]
     Show {
-        #[arg(short, long, help = "A taxon ID")]
+        #[arg(help = "A taxon ID")]
         taxon_id: u64,
     },
     #[command(about = "Add a taxon to a region")]
     Add {
-        #[arg(short, long, help = "A taxon ID")]
+        #[arg(help = "A taxon ID")]
         taxon_id: u64,
         #[command(flatten)]
         props: RegionalTaxonProperties,
     },
     #[command(about = "Modify information about a taxon within a region", group(clap::ArgGroup::new("modify_taxon_fields").args(["origin", "c_value", "conservation_status", "wetland_indicator", "harvest_start", "harvest_end"]).required(true).multiple(false)))]
     Modify {
-        #[arg(short, long, help = "A taxon ID")]
+        #[arg(help = "A taxon ID")]
         taxon_id: u64,
         #[command(flatten)]
         props: RegionalTaxonProperties,
     },
     #[command(about = "Remove a taxon from a region")]
     Remove {
-        #[arg(short, long, help = "A taxon ID")]
+        #[arg(help = "A taxon ID")]
         taxon_id: u64,
         #[arg(
             short = 'y',
@@ -313,7 +313,7 @@ pub enum RegionTaxaCommands {
     },
     #[command(about = "Look up harvest dates from iNaturalist")]
     LookupHarvestDates {
-        #[arg(short, long, help = "A taxon ID")]
+        #[arg(help = "A taxon ID")]
         taxon_id: u64,
         #[arg(
             short,
