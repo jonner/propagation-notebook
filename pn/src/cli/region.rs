@@ -489,17 +489,17 @@ impl RegionTaxaCommands {
                     region.reference(),
                 );
                 let client = inaturalist::client()?;
-                let inat_id = if let Some(id) = taxon.inaturalist_id {
+                let inat_taxon = if let Some(id) = taxon.inaturalist_id {
                     let taxon = inaturalist::taxon_info(&client, id).await?;
                     println!("Using iNaturalist taxon '{} ({})'", taxon.name, taxon.rank);
-                    id
+                    taxon
                 } else {
-                    let id = inat_id_for_taxon(taxon, &client).await?;
+                    let inat_taxon = inat_taxon_for_taxon(taxon, &client).await?;
                     Taxon::update_by_id(taxon.id)
-                        .inaturalist_id(id)
+                        .inaturalist_id(inat_taxon.id)
                         .exec(db)
                         .await?;
-                    id
+                    inat_taxon
                 };
                 let bounding_box = match &region.geometry {
                     Some(value) => {
@@ -528,7 +528,7 @@ impl RegionTaxaCommands {
                     }
                 };
                 let observation_window =
-                    seed_observation_window_with_expansion(client, inat_id, loc, *min_samples)
+                    seed_observation_window_with_expansion(client, inat_taxon, loc, *min_samples)
                         .await?;
                 let window = RegionalHarvestWindow {
                     start_doy: Some(observation_window.start_doy),
@@ -603,9 +603,16 @@ impl RegionTaxaCommands {
     }
 }
 
-async fn inat_id_for_taxon(taxon: &Taxon, client: &reqwest::Client) -> anyhow::Result<u64> {
+async fn inat_taxon_for_taxon(
+    taxon: &Taxon,
+    client: &reqwest::Client,
+) -> anyhow::Result<InaturalistTaxon> {
     if let Ok(inat_taxon) = inat_taxon_for_query(client, &taxon.names()).await {
-        Ok(inat_taxon.id)
+        println!(
+            "Using inaturalist taxon '{} ({})'",
+            inat_taxon.name, inat_taxon.rank
+        );
+        Ok(inat_taxon)
     } else {
         println!(
             "Couldn't find a matching taxon for the scientific name '{}'",
@@ -620,7 +627,7 @@ async fn inat_id_for_taxon(taxon: &Taxon, client: &reqwest::Client) -> anyhow::R
                         "Using inaturalist taxon '{} ({})'",
                         inat_taxon.name, inat_taxon.rank
                     );
-                    return Ok(inat_taxon.id);
+                    return Ok(inat_taxon);
                 }
                 println!(
                     "Couldn't find a matching taxon for the common name '{}'",
@@ -717,6 +724,7 @@ struct ObservationWindow {
 
 enum MinimumObservationsAction {
     ExpandSearch,
+    UseParentTaxon,
     Calculate,
     Abort,
 }
@@ -725,6 +733,7 @@ impl Display for MinimumObservationsAction {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let msg = match self {
             MinimumObservationsAction::ExpandSearch => "Expand search area",
+            MinimumObservationsAction::UseParentTaxon => "Use parent taxon",
             MinimumObservationsAction::Calculate => {
                 "Calculate harvest window with the existing observations"
             }
@@ -736,12 +745,13 @@ impl Display for MinimumObservationsAction {
 
 async fn seed_observation_window_with_expansion(
     client: reqwest::Client,
-    taxon_id: u64,
+    taxon: InaturalistTaxon,
     mut loc: SearchArea,
     min_samples: usize,
 ) -> anyhow::Result<ObservationWindow> {
+    let mut taxon = taxon;
     loop {
-        let observations_doy = inaturalist::fetch_seed_observations(&client, taxon_id, &loc)
+        let observations_doy = inaturalist::fetch_seed_observations(&client, taxon.id, &loc)
             .await?
             .into_iter()
             .filter_map(|ob| ob.observed_on.map(|d| d.day_of_year()))
@@ -751,10 +761,18 @@ async fn seed_observation_window_with_expansion(
             let (msg, options) = match observations_doy.len() {
                 0 => (
                     "No observations with seeds found in the current search area.".to_string(),
-                    vec![
-                        MinimumObservationsAction::ExpandSearch,
-                        MinimumObservationsAction::Abort,
-                    ],
+                    if taxon.parent_id.is_some() {
+                        vec![
+                            MinimumObservationsAction::ExpandSearch,
+                            MinimumObservationsAction::UseParentTaxon,
+                            MinimumObservationsAction::Abort,
+                        ]
+                    } else {
+                        vec![
+                            MinimumObservationsAction::ExpandSearch,
+                            MinimumObservationsAction::Abort,
+                        ]
+                    },
                 ),
                 n => (
                     format!(
@@ -766,11 +784,20 @@ async fn seed_observation_window_with_expansion(
                             MinimumObservationsAction::Abort,
                         ]
                     } else {
-                        vec![
-                            MinimumObservationsAction::ExpandSearch,
-                            MinimumObservationsAction::Calculate,
-                            MinimumObservationsAction::Abort,
-                        ]
+                        if taxon.parent_id.is_some() {
+                            vec![
+                                MinimumObservationsAction::ExpandSearch,
+                                MinimumObservationsAction::UseParentTaxon,
+                                MinimumObservationsAction::Calculate,
+                                MinimumObservationsAction::Abort,
+                            ]
+                        } else {
+                            vec![
+                                MinimumObservationsAction::ExpandSearch,
+                                MinimumObservationsAction::Calculate,
+                                MinimumObservationsAction::Abort,
+                            ]
+                        }
                     },
                 ),
             };
@@ -804,6 +831,15 @@ async fn seed_observation_window_with_expansion(
                     loc = newloc;
                     continue;
                 }
+                MinimumObservationsAction::UseParentTaxon => {
+                    if let Some(parent_id) = taxon.parent_id {
+                        taxon = inaturalist::taxon_info(&client, parent_id).await?;
+                        println!("Using inaturalist taxon '{} ({})'", taxon.name, taxon.rank);
+                        continue;
+                    } else {
+                        return Err(anyhow!("Unable to find parent taxon"));
+                    }
+                }
                 MinimumObservationsAction::Calculate => (),
                 MinimumObservationsAction::Abort => {
                     return Err(anyhow!(
@@ -815,7 +851,7 @@ async fn seed_observation_window_with_expansion(
         let (start, end) = calculate_harvest_window(&observations_doy).await?;
         debug!(
             "Harvest dates for {}: {} - {}",
-            taxon_id,
+            taxon.id,
             Date::default()
                 .with()
                 .day_of_year(start)

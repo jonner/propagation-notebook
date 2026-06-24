@@ -21,6 +21,7 @@ pub enum Error {
 #[derive(Deserialize, Debug)]
 pub struct InaturalistTaxon {
     pub id: u64,
+    pub parent_id: Option<u64>,
     pub name: String,
     pub rank: String,
     pub is_active: bool,
@@ -76,7 +77,7 @@ pub async fn taxon_info(
     let taxa_endpoint = API_BASE_URL.join("taxa/")?.join(&taxon_id.to_string())?;
     let mut res: TaxonSearchResponse = client
         .get(taxa_endpoint)
-        .query(&[("fields", "id,name,rank,is_active")])
+        .query(&[("fields", "id,name,rank,is_active,parent_id")])
         .send()
         .await?
         .json()
