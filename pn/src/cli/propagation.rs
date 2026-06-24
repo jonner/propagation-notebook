@@ -164,12 +164,30 @@ async fn propagation_protocol_details_table(
     db: &mut Db,
     id: &u64,
 ) -> Result<tabled::Table, anyhow::Error> {
-    let p = Protocol::filter_by_id(id).one().exec(db).await?;
+    let p = Protocol::filter_by_id(id)
+        .include(Protocol::fields().taxon_protocols().taxon())
+        .one()
+        .exec(db)
+        .await?;
     let mut tbuilder = tabled::builder::Builder::default();
     tbuilder.push_record(["ID", &p.id.to_string()]);
     tbuilder.push_record(["Name", &p.name]);
     tbuilder.push_record(["Type", &p.r#type.to_string()]);
     tbuilder.push_record(["Notes", &p.notes.unwrap_or_else(|| "-".into())]);
     tbuilder.push_record(["Instructions", &p.instructions]);
+    let mut inner_table = tabled::builder::Builder::default();
+    let tps = p.taxon_protocols.get();
+    if !tps.is_empty() {
+        inner_table.push_record(["ID", "Name"]);
+        for tp in tps {
+            let taxon = tp.taxon.get();
+            inner_table.push_record([&taxon.id.to_string(), &taxon.complete_name]);
+        }
+    }
+
+    tbuilder.push_record([
+        "Taxa",
+        &(inner_table.build().with(style::ListTable).to_string() + "\n"),
+    ]);
     Ok(tbuilder.build())
 }
