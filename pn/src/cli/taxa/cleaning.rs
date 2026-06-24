@@ -10,26 +10,26 @@ pub enum TaxonCleaningCommands {
     List,
     #[command(about = "Show all seed cleaning procedures for a taxon")]
     Show {
-        #[arg(short, long, help = "A cleaning procedure ID")]
+        #[arg(help = "A cleaning procedure ID")]
         procedure_id: u64,
     },
     #[command(about = "Associate a taxon with a seed cleaning procedure")]
     Add {
-        #[arg(short, long, help = "A cleaning procedure ID")]
+        #[arg(help = "A cleaning procedure ID")]
         procedure_id: u64,
         #[arg(short, long, help = "Taxon-specific notes for this procedure")]
         notes: Option<String>,
     },
     #[command(about = "Modify taxon-specific information seed cleaning information")]
     Modify {
-        #[arg(short, long, help = "A cleaning procedure ID")]
+        #[arg(help = "A cleaning procedure ID")]
         procedure_id: u64,
         #[arg(short, long, help = "Taxon-specific notes for this procedure")]
         notes: Option<String>,
     },
     #[command(about = "Remove a cleaning procedure from the specified taxon")]
     Remove {
-        #[arg(short, long, help = "A cleaning procedure ID")]
+        #[arg(help = "A cleaning procedure ID")]
         procedure_id: u64,
         #[arg(
             short = 'y',

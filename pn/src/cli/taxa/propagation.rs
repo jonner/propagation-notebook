@@ -11,16 +11,12 @@ pub enum TaxonPropagationCommands {
     List,
     #[command(about = "Show seed propagation information for the taxon")]
     Show {
-        #[arg(
-            short,
-            long,
-            help = "An ID of a propagation protocol ID assigned to this taxon"
-        )]
+        #[arg(help = "An ID of a propagation protocol ID assigned to this taxon")]
         protocol_id: u64,
     },
     #[command(about = "Assign a new seed propagation protocol to a taxon")]
     Add {
-        #[arg(short, long, help = "An ID of a propagation protocol ID")]
+        #[arg(help = "An ID of a propagation protocol ID")]
         protocol_id: u64,
         #[arg(
             short,
@@ -38,7 +34,7 @@ pub enum TaxonPropagationCommands {
     },
     #[command(about = "Modify propagation information for a taxon", group(clap::ArgGroup::new("modify_props").args(["confidence", "notes"]).required(true).multiple(false)))]
     Modify {
-        #[arg(short, long, help = "A propagation protocol ID assigned to this taxon")]
+        #[arg(help = "A propagation protocol ID assigned to this taxon")]
         protocol_id: u64,
         #[arg(
             short,
@@ -56,7 +52,7 @@ pub enum TaxonPropagationCommands {
     },
     #[command(about = "Remove propagation information from the taxon")]
     Remove {
-        #[arg(short, long, help = "A propagation protocol ID assigned to this taxon")]
+        #[arg(help = "A propagation protocol ID assigned to this taxon")]
         protocol_id: u64,
         #[arg(
             short = 'y',
