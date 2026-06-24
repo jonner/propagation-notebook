@@ -1,7 +1,7 @@
 use libpropagation::collecting::CleaningProcedure;
 use toasty::Db;
 
-use crate::{style, util::join_or_default};
+use crate::style;
 
 #[derive(Debug, clap::Subcommand)]
 pub enum CleaningCommands {
@@ -142,12 +142,20 @@ async fn cleaning_procedure_details_table(
     tbuilder.push_record(["ID", &procedure.id.to_string()]);
     tbuilder.push_record(["Name", &procedure.name]);
     tbuilder.push_record(["Notes", &procedure.notes.unwrap_or_else(|| "-".into())]);
+    tbuilder.push_record(["Instructions", &procedure.instructions]);
+
+    let mut inner_table = tabled::builder::Builder::default();
+    let links = procedure.taxon_links.get();
+    if !links.is_empty() {
+        inner_table.push_record(["ID", "Name"]);
+        for link in links {
+            let taxon = link.taxon.get();
+            inner_table.push_record([&taxon.id.to_string(), &taxon.complete_name])
+        }
+    }
     tbuilder.push_record([
         "Taxa",
-        &join_or_default(procedure.taxon_links.get(), "-", |v| {
-            v.taxon.get().reference()
-        }),
+        &inner_table.build().with(style::ListTable).to_string(),
     ]);
-    tbuilder.push_record(["Instructions", &procedure.instructions]);
     Ok(tbuilder.build())
 }
