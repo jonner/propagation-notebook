@@ -27,6 +27,12 @@ pub struct InaturalistTaxon {
     pub is_active: bool,
 }
 
+impl InaturalistTaxon {
+    fn fields() -> &'static str {
+        "id,name,rank,is_active,parent_id"
+    }
+}
+
 impl Display for InaturalistTaxon {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{} ({}){}", self.name, self.rank, {
@@ -44,6 +50,12 @@ struct TaxonSearchResponse {
 pub struct ObservationDate {
     pub id: u64,
     pub observed_on: Option<Date>,
+}
+
+impl ObservationDate {
+    fn fields() -> &'static str {
+        "id,observed_on"
+    }
 }
 
 #[derive(Deserialize, Debug)]
@@ -77,7 +89,7 @@ pub async fn taxon_info(
     let taxa_endpoint = API_BASE_URL.join("taxa/")?.join(&taxon_id.to_string())?;
     let mut res: TaxonSearchResponse = client
         .get(taxa_endpoint)
-        .query(&[("fields", "id,name,rank,is_active,parent_id")])
+        .query(&[("fields", InaturalistTaxon::fields())])
         .send()
         .await?
         .json()
@@ -98,7 +110,7 @@ pub async fn find_taxon(
         .query(&[
             ("q", taxon_name),
             ("per_page", "5"),
-            ("fields", "id,name,rank,is_active"),
+            ("fields", InaturalistTaxon::fields()),
         ])
         .send()
         .await?
@@ -125,7 +137,7 @@ pub async fn fetch_seed_observations(
             // ("identifications", "most_agree"),
             ("page", &page.to_string()),
             ("per_page", &per_page.to_string()),
-            ("fields", "id,observed_on"),
+            ("fields", ObservationDate::fields()),
         ]);
 
         match location {
@@ -175,6 +187,12 @@ pub struct InaturalistPlace {
     pub bounding_box_geojson: Option<geojson::Geometry>,
 }
 
+impl InaturalistPlace {
+    fn fields() -> &'static str {
+        "id,admin_level,display_name,bounding_box_geojson"
+    }
+}
+
 impl Display for InaturalistPlace {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
@@ -210,7 +228,7 @@ pub async fn places_search(
         .query(&[
             ("q", q),
             ("per_page", "10"),
-            ("fields", "id,admin_level,display_name,bounding_box_geojson"),
+            ("fields", InaturalistPlace::fields()),
         ])
         .send()
         .await?
