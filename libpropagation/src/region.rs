@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use toasty::Deferred;
 use tokio::io::AsyncReadExt;
 
-use crate::{ImportProgressReporter, taxonomy::Taxon};
+use crate::{ImportProgressReporter, region::file::RegionInfo, taxonomy::Taxon};
 
 #[derive(
     Debug, Clone, Copy, toasty::Embed, strum::Display, clap::ValueEnum, Serialize, Deserialize,
@@ -63,7 +63,7 @@ pub struct Region {
 }
 
 #[derive(Debug, thiserror::Error)]
-pub enum ImportError {
+pub enum ImportExportError {
     #[error("A region with the name '{0}' already exists")]
     RegionExists(String),
     #[error("Unable to find a taxon equivalent to '{0}' in the database")]
@@ -81,11 +81,21 @@ impl Region {
         format!("{}: {}", self.id, self.name)
     }
 
+    /// NOTE: assumes that `self` has all taxa loaded from the database
+    pub async fn export<W>(&self, writer: W) -> Result<(), ImportExportError>
+    where
+        W: std::io::Write,
+    {
+        let regioninfo: RegionInfo = self.into();
+        serde_yaml::to_writer(writer, &regioninfo)?;
+        Ok(())
+    }
+
     pub async fn import<P>(
         db: &mut toasty::Db,
         path: P,
         reporter: &mut dyn ImportProgressReporter,
-    ) -> Result<Self, ImportError>
+    ) -> Result<Self, ImportExportError>
     where
         P: AsRef<Path>,
     {
@@ -97,7 +107,7 @@ impl Region {
 
         let existing = Region::filter_by_name(&info.name).exec(db).await?;
         if !existing.is_empty() {
-            return Err(ImportError::RegionExists(info.name));
+            return Err(ImportExportError::RegionExists(info.name));
         }
 
         // loop through the input list and search for names from our taxonomy that
@@ -112,7 +122,7 @@ impl Region {
                 Ok(val) => Taxon::get_by_id(db, val).await?,
                 Err(_) => Taxon::find_by_name_or_synonym(db, &taxon_info.name)
                     .await
-                    .map_err(|_e| ImportError::NoMatchingTaxon(taxon_info.name.clone()))?,
+                    .map_err(|_e| ImportExportError::NoMatchingTaxon(taxon_info.name.clone()))?,
             };
             lookups
                 .entry(t.id)
@@ -270,23 +280,58 @@ pub struct NativePlantCommunity {
 }
 
 mod file {
-    use crate::region::{ConservationStatus, Origin, WetlandIndicator};
+    use crate::region::{
+        ConservationStatus, Origin, Region, RegionalTaxonStatus, WetlandIndicator,
+    };
 
     #[derive(Debug, serde::Serialize, serde::Deserialize)]
     pub(crate) struct TaxonInfo {
         pub(crate) name: String,
+        #[serde(skip_serializing_if = "Option::is_none")]
         pub(crate) c_value: Option<u64>,
+        #[serde(skip_serializing_if = "Option::is_none")]
         pub(crate) origin: Option<Origin>,
+        #[serde(skip_serializing_if = "Option::is_none")]
         pub(crate) status: Option<ConservationStatus>,
+        #[serde(skip_serializing_if = "Option::is_none")]
         pub(crate) wetland_indicator: Option<WetlandIndicator>,
+    }
+
+    impl From<&RegionalTaxonStatus> for TaxonInfo {
+        fn from(value: &RegionalTaxonStatus) -> Self {
+            tracing::debug!("Converting {}", value.taxon.get().complete_name);
+            Self {
+                name: value.taxon.get().complete_name.clone(),
+                c_value: value.c_value,
+                origin: value.origin,
+                status: value.conservation_status,
+                wetland_indicator: value.wetland_indicator,
+            }
+        }
     }
 
     #[derive(Debug, serde::Serialize, serde::Deserialize)]
     pub(crate) struct RegionInfo {
         pub(crate) name: String,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub(crate) notes: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
         pub(crate) geometry: Option<geojson::Geometry>,
         pub(crate) taxa: Vec<TaxonInfo>,
-        pub(crate) notes: Option<String>,
         // npcs: Vec<NativePlantCommunityInfo>,
+    }
+
+    impl From<&Region> for RegionInfo {
+        fn from(value: &Region) -> Self {
+            let mut taxa = value.taxon_statuses.get().clone();
+            taxa.sort_by_key(|t| t.taxon.get().sequence);
+            let taxa: Vec<TaxonInfo> = taxa.into_iter().map(|ts| (&ts).into()).collect();
+            Self {
+                name: value.name.clone(),
+                geometry: value.geometry.as_ref().map(|val| val.0.clone()),
+                taxa,
+                notes: value.notes.clone(),
+            }
+        }
     }
 }

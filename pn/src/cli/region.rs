@@ -73,6 +73,13 @@ pub enum RegionCommands {
         #[arg(help = "A path to a yaml file describing a region")]
         path: PathBuf,
     },
+    #[command(about = "Export a region from the database")]
+    Export {
+        #[arg(help = "A region ID")]
+        id: u64,
+        #[arg(short, long, help = "A path to save the file describing the region")]
+        output_file: Option<PathBuf>,
+    },
     #[command(about = "Modify information about a region", group(clap::ArgGroup::new("modify_fields").args(["name", "geometry_string", "geometry_file", "notes"]).required(true).multiple(true)))]
     Modify {
         id: u64,
@@ -170,6 +177,33 @@ impl RegionCommands {
                     region.reference(),
                     region.taxon_statuses.get().len()
                 );
+            }
+            RegionCommands::Export { id, output_file } => {
+                let region = Region::filter_by_id(id)
+                    .include(Region::fields().taxon_statuses().taxon())
+                    .one()
+                    .exec(db)
+                    .await?;
+                tracing::debug!("Got region");
+
+                match output_file {
+                    Some(path) => {
+                        region
+                            .export(
+                                std::fs::OpenOptions::new()
+                                    .write(true)
+                                    .create_new(true)
+                                    .open(path)?,
+                            )
+                            .await?;
+                        println!(
+                            "Exported region '{}' to '{}'",
+                            region.reference(),
+                            path.display()
+                        );
+                    }
+                    None => region.export(std::io::stdout()).await?,
+                };
             }
             RegionCommands::Remove { id, assumeyes } => {
                 if *assumeyes || {
