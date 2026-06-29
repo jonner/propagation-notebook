@@ -1,8 +1,7 @@
-use std::{collections::HashMap, fmt::Display, path::Path};
+use std::{collections::HashMap, fmt::Display};
 
 use serde::{Deserialize, Serialize};
 use toasty::Deferred;
-use tokio::io::AsyncReadExt;
 
 use crate::{ImportProgressReporter, region::file::RegionInfo, taxonomy::Taxon};
 
@@ -91,19 +90,15 @@ impl Region {
         Ok(())
     }
 
-    pub async fn import<P>(
+    pub async fn import<R>(
         db: &mut toasty::Db,
-        path: P,
+        reader: R,
         reporter: &mut dyn ImportProgressReporter,
     ) -> Result<Self, ImportExportError>
     where
-        P: AsRef<Path>,
+        R: std::io::Read,
     {
-        let mut f = tokio::fs::OpenOptions::new().read(true).open(path).await?;
-        let mut info_string = String::new();
-        f.read_to_string(&mut info_string).await?;
-
-        let info: file::RegionInfo = serde_yaml::from_str(&info_string)?;
+        let info: file::RegionInfo = serde_yaml::from_reader(reader)?;
 
         let existing = Region::filter_by_name(&info.name).exec(db).await?;
         if !existing.is_empty() {

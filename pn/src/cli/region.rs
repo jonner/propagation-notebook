@@ -170,8 +170,10 @@ impl RegionCommands {
                 println!("Added new region {}", new_region.reference());
             }
             RegionCommands::Import { path } => {
+                let file_reader = std::fs::OpenOptions::new().read(true).open(path)?;
                 let region =
-                    Region::import(db, path, &mut IndicatifImportProgress::default()).await?;
+                    Region::import(db, file_reader, &mut IndicatifImportProgress::default())
+                        .await?;
                 println!(
                     "Created region '{}' with {} taxa",
                     region.reference(),
