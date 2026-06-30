@@ -7,16 +7,15 @@ use crate::{cli::print_regional_taxa_table, style};
 use anyhow::anyhow;
 use geo::BoundingRect;
 use geo::ChamberlainDuquetteArea;
+use inaturalist::{InaturalistClient, InaturalistTaxon, SearchArea};
 use indicatif::ProgressIterator;
 use jiff::civil::Date;
-use libpropagation::inaturalist::InaturalistClient;
-use libpropagation::taxonomy::{Rank, Taxon};
 use libpropagation::{
-    inaturalist::{self, InaturalistTaxon, SearchArea},
     region::{
         ConservationStatus, Origin, Region, RegionalHarvestWindow, RegionalTaxonStatus,
         WetlandIndicator,
     },
+    taxonomy::{Rank, Taxon},
 };
 use toasty::Db;
 use tracing::debug;

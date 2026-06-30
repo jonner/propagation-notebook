@@ -297,7 +297,7 @@ impl Display for InaturalistPlace {
 
 #[cfg(test)]
 mod test {
-    use crate::inaturalist::{InaturalistTaxon, Response};
+    use crate::{InaturalistTaxon, Response};
 
     #[test]
     fn test_deserialization() {

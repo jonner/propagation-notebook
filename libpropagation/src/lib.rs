@@ -1,7 +1,6 @@
 use toasty::ModelSet;
 
 pub mod collecting;
-pub mod inaturalist;
 pub mod propagation;
 pub mod region;
 pub mod taxonomy;

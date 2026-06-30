@@ -11,10 +11,8 @@ geo = { workspace = true }
 geojson = { workspace = true }
 itertools = { workspace = true }
 jiff = { workspace = true }
+inaturalist = { workspace = true }
 itis = { workspace = true }
-reqwest = { workspace = true }
-reqwest-middleware = { workspace = true }
-reqwest-retry = "0.9.1"
 serde = { workspace = true }
 serde_yaml = { workspace = true }
 strum = { workspace = true }
@@ -28,7 +26,6 @@ url = { workspace = true }
 
 [dev-dependencies]
 divan = "0.1.21"
-serde_json = "1.0.150"
 
 
 [[bench]]

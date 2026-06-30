@@ -1,0 +1,19 @@
+[package]
+name = "inaturalist"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+geojson.workspace = true
+geo.workspace = true
+jiff.workspace = true
+reqwest-middleware.workspace = true
+reqwest-retry = "0.9.1"
+reqwest.workspace = true
+serde.workspace = true
+thiserror.workspace = true
+url.workspace = true
+
+[dev-dependencies]
+serde_json = "1.0.150"
+
