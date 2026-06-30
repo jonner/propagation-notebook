@@ -3,7 +3,7 @@ use std::{collections::HashMap, fmt::Display};
 use serde::{Deserialize, Serialize};
 use toasty::Deferred;
 
-use crate::{ImportProgressReporter, region::file::RegionInfo, taxonomy::Taxon};
+use crate::{ImportExportError, ImportProgressReporter, region::file::RegionInfo, taxonomy::Taxon};
 
 #[derive(
     Debug, Clone, Copy, toasty::Embed, strum::Display, clap::ValueEnum, Serialize, Deserialize,
@@ -59,20 +59,6 @@ pub struct Region {
     pub taxon_statuses: Deferred<Vec<RegionalTaxonStatus>>,
     #[has_many]
     pub npcs: Deferred<Vec<NativePlantCommunity>>,
-}
-
-#[derive(Debug, thiserror::Error)]
-pub enum ImportExportError {
-    #[error("A region with the name '{0}' already exists")]
-    RegionExists(String),
-    #[error("Unable to find a taxon equivalent to '{0}' in the database")]
-    NoMatchingTaxon(String),
-    #[error(transparent)]
-    Database(#[from] toasty::Error),
-    #[error(transparent)]
-    Io(#[from] std::io::Error),
-    #[error(transparent)]
-    FileFormat(#[from] serde_yaml::Error),
 }
 
 impl Region {
