@@ -9,8 +9,9 @@ pub enum TaxonomicAuthority {
 }
 
 use crate::{
-    ImportExportError, ImportProgressReporter,
+    ImportProgressReporter,
     collecting::{CollectingData, TaxonCleaningProcedure},
+    error::ImportExportError,
     propagation::TaxonProtocol,
     region::RegionalTaxonStatus,
 };

@@ -3,7 +3,9 @@ use std::{collections::HashMap, fmt::Display};
 use serde::{Deserialize, Serialize};
 use toasty::Deferred;
 
-use crate::{ImportExportError, ImportProgressReporter, region::file::RegionInfo, taxonomy::Taxon};
+use crate::{
+    ImportProgressReporter, error::ImportExportError, region::file::RegionInfo, taxonomy::Taxon,
+};
 
 #[derive(
     Debug, Clone, Copy, toasty::Embed, strum::Display, clap::ValueEnum, Serialize, Deserialize,

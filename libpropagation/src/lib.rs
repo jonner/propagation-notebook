@@ -1,7 +1,10 @@
 use directories::ProjectDirs;
 use toasty::ModelSet;
 
+use crate::error::Error;
+
 pub mod collecting;
+pub mod error;
 pub mod propagation;
 pub mod region;
 pub mod taxonomy;
@@ -10,37 +13,9 @@ pub fn models() -> ModelSet {
     toasty::models!(crate::*)
 }
 
-#[derive(Debug, thiserror::Error)]
-pub enum ImportExportError {
-    #[error("Database already contains {0} taxa. Refusing to import.")]
-    TaxonomyPresent(u64),
-    #[error("A region with the name '{0}' already exists")]
-    RegionExists(String),
-    #[error("Unable to find a taxon equivalent to '{0}' in the database")]
-    NoMatchingTaxon(String),
-    #[error(transparent)]
-    Database(#[from] toasty::Error),
-    #[error(transparent)]
-    Io(#[from] std::io::Error),
-    #[error(transparent)]
-    FileFormat(#[from] serde_yaml::Error),
-}
-
-#[derive(Debug, thiserror::Error)]
-pub enum Error {
-    #[error(transparent)]
-    Db(#[from] toasty::Error),
-    #[error(transparent)]
-    Io(#[from] std::io::Error),
-    #[error(transparent)]
-    EnvVar(#[from] std::env::VarError),
-    #[error("Runtime Error: {0}")]
-    Runtime(String),
-}
-
 pub async fn db() -> Result<toasty::Db, Error> {
     let project_dir = ProjectDirs::from("org", "quotidian", "propagation-notebook")
-        .ok_or_else(|| Error::Runtime("Unable to determine project data directory".to_string()))?
+        .ok_or_else(|| Error::Runtime(error::Runtime::ProjectDirNotFound))?
         .data_dir()
         .to_path_buf();
     std::fs::create_dir_all(&project_dir)?;
@@ -53,7 +28,7 @@ pub async fn db() -> Result<toasty::Db, Error> {
                 .to_str()
                 .unwrap()
         )),
-        e => e,
+        Err(e) => Err(Error::Runtime(error::Runtime::InvalidEnvVar(e.to_string()))),
     }?;
     Ok(toasty::Db::builder()
         .models(models())
