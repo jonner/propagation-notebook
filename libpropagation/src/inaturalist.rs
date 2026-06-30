@@ -16,6 +16,54 @@ pub enum Error {
     Url(#[from] url::ParseError),
     #[error(transparent)]
     Date(#[from] jiff::Error),
+    #[error("Got an error response from iNaturalist: {0}")]
+    Response(ErrorResponse),
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(untagged)]
+pub enum Response<T> {
+    Success(ResultsResponse<T>),
+    Failure(ErrorResponse),
+}
+#[derive(Debug, Deserialize)]
+pub struct ResultsResponse<T> {
+    total_results: u64,
+    results: Vec<T>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct ErrorResponse {
+    status: String,
+    errors: Vec<ErrorObj>,
+}
+
+impl Display for ErrorResponse {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "Error {}:\n{}",
+            self.status,
+            self.errors
+                .iter()
+                .map(|e| e.to_string())
+                .collect::<Vec<_>>()
+                .join("\n")
+        )
+    }
+}
+
+#[derive(Debug, Deserialize)]
+pub struct ErrorObj {
+    #[serde(rename = "errorCode")]
+    error_code: String,
+    message: String,
+}
+
+impl Display for ErrorObj {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}: {}", self.error_code, self.message)
+    }
 }
 
 #[derive(Deserialize, Debug)]
@@ -42,11 +90,6 @@ impl Display for InaturalistTaxon {
 }
 
 #[derive(Deserialize, Debug)]
-struct TaxonSearchResponse {
-    results: Vec<InaturalistTaxon>,
-}
-
-#[derive(Deserialize, Debug)]
 pub struct ObservationDate {
     pub id: u64,
     pub observed_on: Option<Date>,
@@ -56,12 +99,6 @@ impl ObservationDate {
     fn fields() -> &'static str {
         "id,observed_on"
     }
-}
-
-#[derive(Deserialize, Debug)]
-struct ObservationDateResponse {
-    total_results: u32,
-    results: Vec<ObservationDate>,
 }
 
 const PLANT_PHENOLOGY: &str = "12";
@@ -87,7 +124,7 @@ pub async fn taxon_info(
     taxon_id: u64,
 ) -> Result<InaturalistTaxon, Error> {
     let taxa_endpoint = API_BASE_URL.join("taxa/")?.join(&taxon_id.to_string())?;
-    let mut res: TaxonSearchResponse = client
+    let res: Response<InaturalistTaxon> = client
         .get(taxa_endpoint)
         .query(&[("fields", InaturalistTaxon::fields())])
         .send()
@@ -95,9 +132,13 @@ pub async fn taxon_info(
         .json()
         .await?;
 
-    res.results
-        .pop()
-        .ok_or_else(|| Error::TaxonNotFound(taxon_id))
+    match res {
+        Response::Success(mut results_response) => results_response
+            .results
+            .pop()
+            .ok_or_else(|| Error::TaxonNotFound(taxon_id)),
+        Response::Failure(error_response) => Err(Error::Response(error_response)),
+    }
 }
 
 pub async fn find_taxon(
@@ -105,7 +146,7 @@ pub async fn find_taxon(
     taxon_name: &str,
 ) -> Result<Vec<InaturalistTaxon>, Error> {
     let taxa_endpoint = API_BASE_URL.join("taxa")?;
-    let res: TaxonSearchResponse = client
+    let res: Response<InaturalistTaxon> = client
         .get(taxa_endpoint)
         .query(&[
             ("q", taxon_name),
@@ -117,7 +158,10 @@ pub async fn find_taxon(
         .json()
         .await?;
 
-    Ok(res.results)
+    match res {
+        Response::Success(res) => Ok(res.results),
+        Response::Failure(res) => Err(Error::Response(res)),
+    }
 }
 
 pub async fn fetch_seed_observations(
@@ -154,20 +198,25 @@ pub async fn fetch_seed_observations(
             }
         }
 
-        let res: ObservationDateResponse = builder.send().await?.json().await?;
+        let res: Response<ObservationDate> = builder.send().await?.json().await?;
 
-        if res.results.is_empty() {
-            break;
+        match res {
+            Response::Success(res) => {
+                if res.results.is_empty() {
+                    break;
+                }
+
+                observations.extend(res.results);
+
+                if page * per_page >= res.total_results as usize {
+                    break;
+                }
+                page += 1;
+                // short pause to avoid triggering API limits
+                std::thread::sleep(Duration::from_millis(200));
+            }
+            Response::Failure(error_response) => println!("{error_response}"),
         }
-
-        observations.extend(res.results);
-
-        if page * per_page >= res.total_results as usize {
-            break;
-        }
-        page += 1;
-        // short pause to avoid triggering API limits
-        std::thread::sleep(Duration::from_millis(200));
     }
 
     Ok(observations)
@@ -213,17 +262,12 @@ impl Display for InaturalistPlace {
     }
 }
 
-#[derive(Debug, Deserialize)]
-struct PlacesSearchResults {
-    results: Vec<InaturalistPlace>,
-}
-
 pub async fn places_search(
     client: &reqwest::Client,
     q: &str,
 ) -> Result<Vec<InaturalistPlace>, Error> {
     let taxa_endpoint = API_BASE_URL.join("places")?;
-    let res: PlacesSearchResults = client
+    let res: Response<InaturalistPlace> = client
         .get(taxa_endpoint)
         .query(&[
             ("q", q),
@@ -235,5 +279,24 @@ pub async fn places_search(
         .json()
         .await?;
 
-    Ok(res.results)
+    match res {
+        Response::Success(results_response) => Ok(results_response.results),
+        Response::Failure(error_response) => Err(Error::Response(error_response)),
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::inaturalist::{InaturalistTaxon, Response};
+
+    #[test]
+    fn test_deserialization() {
+        const GOOD: &str = "{\"total_results\":1,\"page\":1,\"per_page\":30,\"results\":[{\"id\":79317,\"name\":\"Taraxacum erythrospermum\",\"rank\":\"species\",\"is_active\":true,\"parent_id\":967521}]}";
+        const BAD: &str = "{\"status\":\"12345\",\"errors\":[{\"errorCode\":\"my-error-code\",\"message\":\"this is a message\",\"from\":\"some text here\",\"stack\":\"some text here also\"}]}";
+
+        let _good_response: Response<InaturalistTaxon> =
+            serde_json::from_str(GOOD).expect("Failed to parse GOOD");
+        let _bad_response: Response<InaturalistTaxon> =
+            serde_json::from_str(BAD).expect("Failed to parse BAD");
+    }
 }
