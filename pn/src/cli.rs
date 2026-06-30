@@ -7,10 +7,19 @@ use crate::{
     style,
 };
 
+#[derive(Debug, Clone, Copy, clap::ValueEnum)]
+pub enum OutputFormat {
+    Table,
+    Json,
+    Yaml,
+}
+
 #[derive(Debug, clap::Parser)]
 pub struct Options {
     #[command(subcommand)]
     pub command: MainCommand,
+    #[arg(short, long, global = true, value_enum, default_value_t = OutputFormat::Table, help = "Choose output format")]
+    pub output: OutputFormat,
 }
 
 #[derive(Debug, clap::Subcommand)]

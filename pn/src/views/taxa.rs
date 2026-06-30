@@ -11,7 +11,7 @@ impl<'a> TaxonView<'a> {
         Self { taxon }
     }
 
-    pub fn render_table(&self) -> anyhow::Result<String> {
+    pub fn render(&self) -> anyhow::Result<String> {
         let mut tbuilder = tabled::builder::Builder::default();
         tbuilder.push_record(["ID", &self.taxon.id.to_string()]);
         tbuilder.push_record(["Name", &self.taxon.complete_name]);

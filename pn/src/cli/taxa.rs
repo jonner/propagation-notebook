@@ -7,7 +7,10 @@ use libpropagation::{
 use toasty::Db;
 
 use crate::{
-    cli::print_regional_taxa_table, style, util::IndicatifImportProgress, views::taxa::TaxonView,
+    cli::{OutputFormat, print_regional_taxa_table},
+    style,
+    util::IndicatifImportProgress,
+    views::{JsonView, YamlView, taxa::TaxonView},
 };
 
 pub mod cleaning;
@@ -72,7 +75,7 @@ pub enum TaxonCommands {
 }
 
 impl TaxonCommands {
-    pub async fn run(&self, db: &mut Db) -> anyhow::Result<()> {
+    pub async fn run(&self, db: &mut Db, format: OutputFormat) -> anyhow::Result<()> {
         match self {
             TaxonCommands::Search { search_string } => {
                 let wildcard = format!("%{search_string}%");
@@ -142,8 +145,12 @@ impl TaxonCommands {
                     .exec(db)
                     .await?;
 
-                let view = TaxonView::new(&taxon);
-                println!("{}", view.render_table()?);
+                let output = match format {
+                    OutputFormat::Table => TaxonView::new(&taxon).render()?,
+                    OutputFormat::Json => JsonView::new(&taxon).render()?,
+                    OutputFormat::Yaml => YamlView::new(&taxon).render()?,
+                };
+                println!("{output}");
                 println!();
             }
             TaxonCommands::List {
