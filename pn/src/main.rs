@@ -7,6 +7,7 @@ use crate::cli::{MainCommand, Options};
 mod cli;
 mod style;
 mod util;
+mod views;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
