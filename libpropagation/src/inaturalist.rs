@@ -2,6 +2,7 @@ use std::{fmt::Display, sync::LazyLock, time::Duration};
 
 use jiff::civil::Date;
 use reqwest::header::{HeaderMap, HeaderValue};
+use reqwest_retry::{RetryTransientMiddleware, policies::ExponentialBackoff};
 use serde::Deserialize;
 
 #[derive(thiserror::Error, Debug)]
@@ -12,6 +13,8 @@ pub enum Error {
     TaxonNotFound(u64),
     #[error(transparent)]
     Reqwest(#[from] reqwest::Error),
+    #[error(transparent)]
+    ReqwestMiddleware(#[from] reqwest_middleware::Error),
     #[error(transparent)]
     Url(#[from] url::ParseError),
     #[error(transparent)]
@@ -107,18 +110,28 @@ static API_BASE_URL: LazyLock<reqwest::Url> = LazyLock::new(|| {
     reqwest::Url::parse("https://api.inaturalist.org/v2/").expect("Valid static base URL")
 });
 
-pub struct InaturalistClient(reqwest::Client);
+pub struct InaturalistClient(reqwest_middleware::ClientWithMiddleware);
 pub fn client() -> Result<InaturalistClient, reqwest::Error> {
     let mut default_headers = HeaderMap::new();
     default_headers.insert(
         "User-Agent",
         HeaderValue::from_static("propagation-notebook/1.0 (jonathon@quotidian.org)"),
     );
-    reqwest::ClientBuilder::new()
-        .connection_verbose(true)
-        .default_headers(default_headers)
-        .build()
-        .map(InaturalistClient)
+    Ok(InaturalistClient(
+        reqwest_middleware::ClientBuilder::new(
+            reqwest::ClientBuilder::new()
+                .connection_verbose(true)
+                .default_headers(default_headers)
+                .build()?,
+        )
+        .with(RetryTransientMiddleware::new_with_policy(
+            ExponentialBackoff::builder()
+                .retry_bounds(Duration::from_secs(1), Duration::from_secs(30))
+                .jitter(reqwest_retry::Jitter::Bounded)
+                .build_with_max_retries(5),
+        ))
+        .build(),
+    ))
 }
 
 impl InaturalistClient {

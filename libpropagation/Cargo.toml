@@ -13,6 +13,8 @@ itertools = { workspace = true }
 jiff = { workspace = true }
 itis = { workspace = true }
 reqwest = { workspace = true }
+reqwest-middleware = { workspace = true }
+reqwest-retry = "0.9.1"
 serde = { workspace = true }
 serde_yaml = { workspace = true }
 strum = { workspace = true }
