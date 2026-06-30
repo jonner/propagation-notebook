@@ -525,7 +525,7 @@ impl RegionTaxaCommands {
                     taxon.reference(),
                     region.reference(),
                 );
-                let client = inaturalist::client()?;
+                let client = InaturalistClient::new()?;
                 let inat_taxon = if let Some(id) = taxon.inaturalist_id {
                     let taxon = client.taxon_info(id).await?;
                     println!("Using iNaturalist taxon '{} ({})'", taxon.name, taxon.rank);

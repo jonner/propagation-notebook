@@ -111,30 +111,31 @@ static API_BASE_URL: LazyLock<reqwest::Url> = LazyLock::new(|| {
 });
 
 pub struct InaturalistClient(reqwest_middleware::ClientWithMiddleware);
-pub fn client() -> Result<InaturalistClient, reqwest::Error> {
-    let mut default_headers = HeaderMap::new();
-    default_headers.insert(
-        "User-Agent",
-        HeaderValue::from_static("propagation-notebook/1.0 (jonathon@quotidian.org)"),
-    );
-    Ok(InaturalistClient(
-        reqwest_middleware::ClientBuilder::new(
-            reqwest::ClientBuilder::new()
-                .connection_verbose(true)
-                .default_headers(default_headers)
-                .build()?,
-        )
-        .with(RetryTransientMiddleware::new_with_policy(
-            ExponentialBackoff::builder()
-                .retry_bounds(Duration::from_secs(1), Duration::from_secs(30))
-                .jitter(reqwest_retry::Jitter::Bounded)
-                .build_with_max_retries(5),
-        ))
-        .build(),
-    ))
-}
 
 impl InaturalistClient {
+    pub fn new() -> Result<Self, reqwest::Error> {
+        let mut default_headers = HeaderMap::new();
+        default_headers.insert(
+            "User-Agent",
+            HeaderValue::from_static("propagation-notebook/1.0 (jonathon@quotidian.org)"),
+        );
+        Ok(Self(
+            reqwest_middleware::ClientBuilder::new(
+                reqwest::ClientBuilder::new()
+                    .connection_verbose(true)
+                    .default_headers(default_headers)
+                    .build()?,
+            )
+            .with(RetryTransientMiddleware::new_with_policy(
+                ExponentialBackoff::builder()
+                    .retry_bounds(Duration::from_secs(1), Duration::from_secs(30))
+                    .jitter(reqwest_retry::Jitter::Bounded)
+                    .build_with_max_retries(5),
+            ))
+            .build(),
+        ))
+    }
+
     pub async fn taxon_info(&self, taxon_id: u64) -> Result<InaturalistTaxon, Error> {
         let taxa_endpoint = API_BASE_URL.join("taxa/")?.join(&taxon_id.to_string())?;
         let res: Response<InaturalistTaxon> = self
