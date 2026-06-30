@@ -4,15 +4,15 @@ use libpropagation::{
     region::RegionalTaxonStatus,
     taxonomy::{Synonym, Taxon, TaxonNote, TaxonomicAuthority, VernacularName},
 };
+use serde::Serialize;
 use toasty::Db;
 
 use crate::{
     cli::OutputFormat,
-    style,
     util::IndicatifImportProgress,
     views::{
         JsonView, YamlView,
-        taxa::{RegionalTaxaListView, TaxaListView, TaxonView},
+        taxa::{RegionalTaxaListView, TaxaListView, TaxaSearchResultsView, TaxonView},
     },
 };
 
@@ -77,13 +77,21 @@ pub enum TaxonCommands {
     },
 }
 
+#[derive(Debug, Serialize)]
+pub struct TaxonSearchResult {
+    pub id: u64,
+    pub name: String,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub common_names: Vec<String>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub synonyms: Vec<String>,
+}
+
 impl TaxonCommands {
     pub async fn run(&self, db: &mut Db, format: OutputFormat) -> anyhow::Result<()> {
         match self {
             TaxonCommands::Search { search_string } => {
                 let wildcard = format!("%{search_string}%");
-                let mut tbuilder = tabled::builder::Builder::default();
-                tbuilder.push_record(["ID", "Name", "Common Names", "Synonym"]);
 
                 if let Ok(found) = Taxon::filter(
                     Taxon::fields()
@@ -102,17 +110,19 @@ impl TaxonCommands {
                 .exec(db)
                 .await
                 {
-                    for t in found {
-                        tbuilder.push_record([
-                            t.id.to_string(),
-                            t.complete_name,
-                            t.vernaculars
+                    let results = found
+                        .into_iter()
+                        .map(|t| TaxonSearchResult {
+                            id: t.id,
+                            name: t.complete_name,
+                            common_names: t
+                                .vernaculars
                                 .get()
                                 .iter()
-                                .map(|v| v.name.as_str())
-                                .collect::<Vec<_>>()
-                                .join("\n"),
-                            t.synonyms
+                                .map(|v| v.name.clone())
+                                .collect::<Vec<_>>(),
+                            synonyms: t
+                                .synonyms
                                 .get()
                                 .iter()
                                 .filter_map(|s| {
@@ -121,17 +131,21 @@ impl TaxonCommands {
                                         .to_lowercase()
                                         .contains(&search_string.to_lowercase())
                                     {
-                                        true => Some(s.complete_name.as_str()),
+                                        true => Some(s.complete_name.clone()),
                                         false => None,
                                     }
                                 })
-                                .collect::<Vec<_>>()
-                                .join("\n"),
-                        ]);
-                    }
-                }
+                                .collect::<Vec<_>>(),
+                        })
+                        .collect::<Vec<_>>();
+                    let output = match format {
+                        OutputFormat::Table => TaxaSearchResultsView::new(&results).render()?,
+                        OutputFormat::Json => JsonView::new(&results).render()?,
+                        OutputFormat::Yaml => YamlView::new(&results).render()?,
+                    };
 
-                println!("{}", tbuilder.build().with(style::ListTable));
+                    println!("{output}");
+                }
             }
             TaxonCommands::Show { id } => {
                 let taxon = Taxon::filter_by_id(id)

@@ -1,6 +1,6 @@
 use libpropagation::taxonomy::Taxon;
 
-use crate::{style, util::join_or_default};
+use crate::{cli::taxa::TaxonSearchResult, style, util::join_or_default};
 
 pub struct TaxonView<'a> {
     taxon: &'a Taxon,
@@ -213,6 +213,34 @@ impl<'a> TaxaListView<'a> {
             tbuilder.push_record([taxon.id.to_string(), taxon.complete_name.clone()]);
         }
         let ntaxa = self.taxa.len();
+        Ok(format!(
+            "{}\n{ntaxa} taxa found",
+            tbuilder.build().with(style::ListTable)
+        ))
+    }
+}
+
+pub struct TaxaSearchResultsView<'a> {
+    results: &'a Vec<TaxonSearchResult>,
+}
+
+impl<'a> TaxaSearchResultsView<'a> {
+    pub fn new(results: &'a Vec<TaxonSearchResult>) -> Self {
+        Self { results }
+    }
+
+    pub fn render(&self) -> Result<String, anyhow::Error> {
+        let mut tbuilder = tabled::builder::Builder::default();
+        tbuilder.push_record(["ID", "Name", "Common Names", "Synonym"]);
+        for result in self.results {
+            tbuilder.push_record([
+                &result.id.to_string(),
+                &result.name,
+                &result.common_names.join("\n"),
+                &result.synonyms.join("\n"),
+            ]);
+        }
+        let ntaxa = self.results.len();
         Ok(format!(
             "{}\n{ntaxa} taxa found",
             tbuilder.build().with(style::ListTable)
