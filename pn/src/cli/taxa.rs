@@ -7,10 +7,13 @@ use libpropagation::{
 use toasty::Db;
 
 use crate::{
-    cli::{OutputFormat, print_regional_taxa_table},
+    cli::OutputFormat,
     style,
     util::IndicatifImportProgress,
-    views::{JsonView, YamlView, taxa::TaxonView},
+    views::{
+        JsonView, YamlView,
+        taxa::{RegionalTaxaListView, TaxaListView, TaxonView},
+    },
 };
 
 pub mod cleaning;
@@ -159,14 +162,23 @@ impl TaxonCommands {
             } => match region_id {
                 Some(id) => {
                     let region_id = *id;
-                    let regional_statuses = RegionalTaxonStatus::filter(
-                        RegionalTaxonStatus::fields().region_id().eq(region_id),
+                    let taxa = Taxon::filter(
+                        Taxon::fields()
+                            .regional_statuses()
+                            .any(RegionalTaxonStatus::fields().region_id().eq(region_id)),
                     )
-                    // FIXME: We want to order by a taxon sequence, but
-                    // toasty doesn't yet support ordering by data in a relation
+                    .include(Taxon::fields().regional_statuses())
+                    .order_by(Taxon::fields().sequence().asc())
                     .exec(db)
                     .await?;
-                    print_regional_taxa_table(db, regional_statuses).await?;
+                    let output = match format {
+                        OutputFormat::Table => {
+                            RegionalTaxaListView::new(&taxa, region_id).render()?
+                        }
+                        OutputFormat::Json => JsonView::new(&taxa).render()?,
+                        OutputFormat::Yaml => YamlView::new(&taxa).render()?,
+                    };
+                    println!("{output}");
                 }
                 None => {
                     let taxa = if *has_data {
@@ -210,14 +222,12 @@ impl TaxonCommands {
                         }
                         taxa
                     };
-                    let ntaxa = taxa.len();
-                    let mut tbuilder = tabled::builder::Builder::default();
-                    tbuilder.push_record(["ID", "Name"]);
-                    for taxon in taxa {
-                        tbuilder.push_record([taxon.id.to_string(), taxon.complete_name]);
-                    }
-                    println!("{}", tbuilder.build().with(style::ListTable));
-                    println!("{} taxa found", ntaxa);
+                    let output = match format {
+                        OutputFormat::Table => TaxaListView::new(&taxa).render()?,
+                        OutputFormat::Json => JsonView::new(&taxa).render()?,
+                        OutputFormat::Yaml => YamlView::new(&taxa).render()?,
+                    };
+                    println!("{output}",);
                 }
             },
             TaxonCommands::Import { db_uri, authority } => {

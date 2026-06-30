@@ -144,3 +144,78 @@ impl<'a> TaxonView<'a> {
         Ok(tbuilder.build().with(style::DetailTable).to_string())
     }
 }
+
+pub struct RegionalTaxaListView<'a> {
+    taxa: &'a Vec<Taxon>,
+    region_id: u64,
+}
+
+impl<'a> RegionalTaxaListView<'a> {
+    pub fn new(taxa: &'a Vec<Taxon>, region_id: u64) -> Self {
+        Self { taxa, region_id }
+    }
+
+    pub fn render(&self) -> Result<String, anyhow::Error> {
+        let mut tbuilder = tabled::builder::Builder::default();
+        tbuilder.push_record([
+            "ID",
+            "Taxon",
+            "Origin",
+            "Status",
+            "C-value",
+            "Wetland Indicator",
+        ]);
+        for taxon in self.taxa {
+            let status = taxon
+                .regional_statuses
+                .get()
+                .iter()
+                .find(|n| n.region_id == self.region_id)
+                .unwrap();
+            tbuilder.push_record([
+                taxon.id.to_string(),
+                taxon.complete_name.clone(),
+                status
+                    .origin
+                    .map(|s| s.to_string())
+                    .unwrap_or_else(|| "-".into()),
+                status
+                    .conservation_status
+                    .map(|s| s.to_string())
+                    .unwrap_or_else(|| "-".into()),
+                status
+                    .c_value
+                    .map(|s| s.to_string())
+                    .unwrap_or_else(|| "-".into()),
+                status
+                    .wetland_indicator
+                    .map(|s| s.to_string())
+                    .unwrap_or_else(|| "-".into()),
+            ]);
+        }
+        Ok(tbuilder.build().with(style::ListTable).to_string())
+    }
+}
+
+pub struct TaxaListView<'a> {
+    taxa: &'a Vec<Taxon>,
+}
+
+impl<'a> TaxaListView<'a> {
+    pub fn new(taxa: &'a Vec<Taxon>) -> Self {
+        Self { taxa }
+    }
+
+    pub fn render(&self) -> Result<String, anyhow::Error> {
+        let mut tbuilder = tabled::builder::Builder::default();
+        tbuilder.push_record(["ID", "Taxon"]);
+        for taxon in self.taxa {
+            tbuilder.push_record([taxon.id.to_string(), taxon.complete_name.clone()]);
+        }
+        let ntaxa = self.taxa.len();
+        Ok(format!(
+            "{}\n{ntaxa} taxa found",
+            tbuilder.build().with(style::ListTable)
+        ))
+    }
+}
