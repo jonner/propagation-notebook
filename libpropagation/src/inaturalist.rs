@@ -129,7 +129,7 @@ impl InaturalistClient {
             .with(RetryTransientMiddleware::new_with_policy(
                 ExponentialBackoff::builder()
                     .retry_bounds(Duration::from_secs(1), Duration::from_secs(30))
-                    .jitter(reqwest_retry::Jitter::Bounded)
+                    .jitter(reqwest_retry::Jitter::None)
                     .build_with_max_retries(5),
             ))
             .build(),

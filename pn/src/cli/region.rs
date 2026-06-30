@@ -7,9 +7,10 @@ use crate::{cli::print_regional_taxa_table, style};
 use anyhow::anyhow;
 use geo::BoundingRect;
 use geo::ChamberlainDuquetteArea;
+use indicatif::ProgressIterator;
 use jiff::civil::Date;
 use libpropagation::inaturalist::InaturalistClient;
-use libpropagation::taxonomy::Taxon;
+use libpropagation::taxonomy::{Rank, Taxon};
 use libpropagation::{
     inaturalist::{self, InaturalistTaxon, SearchArea},
     region::{
@@ -101,6 +102,17 @@ pub enum RegionCommands {
         )]
         assumeyes: bool,
     },
+    #[command(about = "Look up harvest dates from iNaturalist")]
+    LookupHarvestDates {
+        id: u64,
+        #[arg(
+            short,
+            long,
+            help = "Minimum number of observations to use for calculating the harvest window",
+            default_value_t = 10
+        )]
+        min_samples: usize,
+    },
     #[command(about = "Manage taxa for a region")]
     Taxa {
         #[arg(short, long, help = "ID of a region")]
@@ -187,7 +199,7 @@ impl RegionCommands {
                     .one()
                     .exec(db)
                     .await?;
-                tracing::debug!("Got region");
+                debug!("Got region");
 
                 match output_file {
                     Some(path) => {
@@ -222,6 +234,89 @@ impl RegionCommands {
                     Region::delete_by_id(db, id).await?;
                     println!("Deleted region {id} from the database");
                 }
+            }
+            RegionCommands::LookupHarvestDates { id, min_samples } => {
+                let region = Region::filter_by_id(id)
+                    .include(Region::fields().taxon_statuses())
+                    .one()
+                    .exec(db)
+                    .await?;
+                let mut n_updates = 0;
+                for rts in region.taxon_statuses.get().iter().progress() {
+                    if rts.harvest_window.start_doy.is_none()
+                        && rts.harvest_window.end_doy.is_none()
+                    {
+                        let taxon = Taxon::filter_by_id(rts.taxon_id)
+                            .include(Taxon::fields().vernaculars())
+                            .one()
+                            .exec(db)
+                            .await?;
+                        let inat = InaturalistClient::new()?;
+                        let inat_taxon = if let Some(id) = taxon.inaturalist_id {
+                            let taxon = inat.taxon_info(id).await?;
+                            Some(taxon)
+                        } else {
+                            let mut found = None;
+                            let possible_taxa = inat
+                                .find_taxon(&taxon.names())
+                                .await?
+                                .into_iter()
+                                .filter(|t| t.is_active)
+                                .collect::<Vec<_>>();
+                            if !possible_taxa.is_empty() {
+                                for possibility in possible_taxa {
+                                    let rank: Rank = possibility.rank.parse().unwrap();
+                                    if taxon.complete_name == possibility.name && taxon.rank == rank
+                                    {
+                                        debug!(
+                                            "Using {} for {}",
+                                            possibility.name,
+                                            taxon.reference()
+                                        );
+                                        found = Some(possibility);
+                                        break;
+                                    }
+                                }
+                            }
+                            found
+                        };
+                        let Some(inat_taxon) = inat_taxon else {
+                            continue;
+                        };
+
+                        match calculate_harvest_window_for_taxon(
+                            min_samples,
+                            inat_taxon,
+                            &region,
+                            false,
+                        )
+                        .await
+                        {
+                            Ok(obs_window) => {
+                                let harvest_window = RegionalHarvestWindow {
+                                    start_doy: Some(obs_window.start_doy),
+                                    end_doy: Some(obs_window.end_doy),
+                                };
+                                RegionalTaxonStatus::update_by_id(rts.id)
+                                    .harvest_window(&harvest_window)
+                                    .exec(db)
+                                    .await?;
+                                n_updates += 1;
+                                debug!("Updated {} to {}", taxon.reference(), harvest_window)
+                            }
+                            Err(e) => debug!(
+                                "Failed to calculate a harvest window for {}: {e}",
+                                rts.taxon_id
+                            ),
+                        };
+                    } else {
+                        debug!(
+                            "Skipping taxon {} as it already has harvest data",
+                            rts.taxon_id,
+                        )
+                    };
+                }
+                println!("Updated {n_updates} taxa");
             }
             RegionCommands::Taxa { region_id, command } => command.run(db, *region_id).await?,
         }
@@ -525,46 +620,21 @@ impl RegionTaxaCommands {
                     taxon.reference(),
                     region.reference(),
                 );
-                let client = InaturalistClient::new()?;
+                let inat = InaturalistClient::new()?;
                 let inat_taxon = if let Some(id) = taxon.inaturalist_id {
-                    let taxon = client.taxon_info(id).await?;
+                    let taxon = inat.taxon_info(id).await?;
                     println!("Using iNaturalist taxon '{} ({})'", taxon.name, taxon.rank);
                     taxon
                 } else {
-                    let inat_taxon = inat_taxon_for_taxon(taxon, &client).await?;
+                    let inat_taxon = inat_taxon_for_taxon(taxon, &inat).await?;
                     Taxon::update_by_id(taxon.id)
                         .inaturalist_id(inat_taxon.id)
                         .exec(db)
                         .await?;
                     inat_taxon
                 };
-                let bounding_box = match &region.geometry {
-                    Some(value) => {
-                        let geom: geo::Geometry = value.value.clone().try_into()?;
-                        geom.bounding_rect()
-                    }
-                    None => None,
-                };
-                let loc = match bounding_box {
-                    Some(rect) => SearchArea::BoundingBox(rect),
-                    None => {
-                        let options = client.places_search(
-                            &inquire::Text::new(
-                                "Search for a place on inaturalist that represents this region:",
-                            )
-                            .prompt()?,
-                        )
-                        .await?;
-                        let selected = inquire::Select::new(
-                            "Please select one of the following iNaturalist places:",
-                            options,
-                        )
-                        .prompt()?;
-                        SearchArea::Place(selected.id)
-                    }
-                };
                 let observation_window =
-                    seed_observation_window_with_expansion(&client, inat_taxon, loc, *min_samples)
+                    calculate_harvest_window_for_taxon(min_samples, inat_taxon, region, true)
                         .await?;
                 let window = RegionalHarvestWindow {
                     start_doy: Some(observation_window.start_doy),
@@ -639,6 +709,64 @@ impl RegionTaxaCommands {
     }
 }
 
+async fn calculate_harvest_window_for_taxon(
+    min_samples: &usize,
+    inat_taxon: InaturalistTaxon,
+    region: &Region,
+    allow_expansion: bool,
+) -> Result<ObservationWindow, anyhow::Error> {
+    let inat = InaturalistClient::new()?;
+    let bounding_box = match &region.geometry {
+        Some(value) => {
+            let geom: geo::Geometry = value.value.clone().try_into()?;
+            geom.bounding_rect()
+        }
+        None => None,
+    };
+    let loc = match bounding_box {
+        Some(rect) => SearchArea::BoundingBox(rect),
+        None => {
+            let options = inat
+                .places_search(
+                    &inquire::Text::new(
+                        "Search for a place on inaturalist that represents this region:",
+                    )
+                    .prompt()?,
+                )
+                .await?;
+            let selected = inquire::Select::new(
+                "Please select one of the following iNaturalist places:",
+                options,
+            )
+            .prompt()?;
+            SearchArea::Place(selected.id)
+        }
+    };
+    let observation_window = if allow_expansion {
+        seed_observation_window_with_expansion(&inat, inat_taxon, loc, *min_samples).await?
+    } else {
+        let observations_doy = inat
+            .fetch_seed_observations(inat_taxon.id, &loc)
+            .await?
+            .into_iter()
+            .filter_map(|ob| ob.observed_on.map(|d| d.day_of_year()))
+            .collect::<Vec<_>>();
+        if observations_doy.len() < *min_samples {
+            return Err(anyhow!(
+                "Not enough observations to calculate a harvest window"
+            ));
+        }
+        let (start, end) = calculate_harvest_window(&observations_doy).await?;
+        ObservationWindow {
+            start_doy: start,
+            end_doy: end,
+            nsamples: observations_doy.len(),
+        }
+    };
+    Ok(observation_window)
+}
+
+// assumes loaded vernacular names
 async fn inat_taxon_for_taxon(
     taxon: &Taxon,
     client: &InaturalistClient,

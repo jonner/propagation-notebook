@@ -1,3 +1,5 @@
+use std::convert::Infallible;
+
 use toasty::Deferred;
 
 #[derive(Debug, Clone, Copy, clap::ValueEnum)]
@@ -13,7 +15,7 @@ use crate::{
     region::RegionalTaxonStatus,
 };
 
-#[derive(Debug, Clone, Copy, toasty::Embed, strum::Display)]
+#[derive(Debug, Clone, Copy, toasty::Embed, strum::Display, PartialEq)]
 pub enum Rank {
     #[column(variant = 0)]
     Unknown,
@@ -73,6 +75,21 @@ pub enum Rank {
     Form,
     #[column(variant = 270)]
     Subform,
+}
+
+impl std::str::FromStr for Rank {
+    type Err = Infallible;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(match s.to_ascii_lowercase().trim() {
+            "subspecies" | "ssp" => Rank::Subspecies,
+            "variety" | "var" => Rank::Variety,
+            "species" => Rank::Species,
+            "genus" => Rank::Genus,
+            "family" => Rank::Family,
+            _ => Rank::Unknown,
+        })
+    }
 }
 
 impl From<itis::Rank> for Rank {
