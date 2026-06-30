@@ -1,6 +1,7 @@
 use std::{collections::HashMap, fmt::Display};
 
 use serde::{Deserialize, Serialize};
+use serde_with::skip_serializing_none;
 use toasty::Deferred;
 
 use crate::{
@@ -45,7 +46,9 @@ pub enum ConservationStatus {
     SpecialConcern,
 }
 
-#[derive(Debug, Clone, toasty::Model)]
+#[skip_serializing_none]
+#[serde_with::apply( Deferred => #[serde(skip_serializing_if = "Deferred::is_unloaded")])]
+#[derive(Debug, Clone, toasty::Model, Serialize)]
 pub struct Region {
     #[auto]
     #[key]
@@ -54,6 +57,7 @@ pub struct Region {
     #[index]
     pub name: String,
     // FIXME: geojson??
+    #[serde(skip)]
     pub geometry: Option<toasty::Json<geojson::Geometry>>,
     pub notes: Option<String>,
 
@@ -176,10 +180,17 @@ pub enum Origin {
     Unknown,
 }
 
-#[derive(Debug, Clone, Default, toasty::Embed)]
+#[skip_serializing_none]
+#[derive(Debug, Clone, Default, toasty::Embed, Serialize)]
 pub struct RegionalHarvestWindow {
     pub start_doy: Option<i16>,
     pub end_doy: Option<i16>,
+}
+
+impl RegionalHarvestWindow {
+    pub fn is_empty(&self) -> bool {
+        self.start_doy.is_none() && self.end_doy.is_none()
+    }
 }
 
 impl Display for RegionalHarvestWindow {
@@ -215,7 +226,9 @@ impl Display for RegionalHarvestWindow {
     }
 }
 
-#[derive(Debug, Clone, toasty::Model)]
+#[skip_serializing_none]
+#[serde_with::apply( Deferred => #[serde(skip_serializing_if = "Deferred::is_unloaded")])]
+#[derive(Debug, Clone, toasty::Model, Serialize)]
 #[index(taxon_id, region_id)]
 pub struct RegionalTaxonStatus {
     #[auto]
@@ -237,6 +250,7 @@ pub struct RegionalTaxonStatus {
     pub c_value: Option<u64>,
     pub conservation_status: Option<ConservationStatus>,
     pub wetland_indicator: Option<WetlandIndicator>,
+    #[serde(skip_serializing_if = "RegionalHarvestWindow::is_empty")]
     pub harvest_window: RegionalHarvestWindow,
     #[index]
     pub native_plant_community_id: Option<u64>,
@@ -244,7 +258,9 @@ pub struct RegionalTaxonStatus {
     pub native_plant_community: Deferred<NativePlantCommunity>,
 }
 
-#[derive(Debug, Clone, toasty::Model)]
+#[skip_serializing_none]
+#[serde_with::apply( Deferred => #[serde(skip_serializing_if = "Deferred::is_unloaded")])]
+#[derive(Debug, Clone, toasty::Model, Serialize)]
 pub struct NativePlantCommunity {
     #[auto]
     #[key]
@@ -263,20 +279,20 @@ pub struct NativePlantCommunity {
 }
 
 mod file {
+    use serde::{Deserialize, Serialize};
+    use serde_with::skip_serializing_none;
+
     use crate::region::{
         ConservationStatus, Origin, Region, RegionalTaxonStatus, WetlandIndicator,
     };
 
-    #[derive(Debug, serde::Serialize, serde::Deserialize)]
+    #[skip_serializing_none]
+    #[derive(Debug, Serialize, Deserialize)]
     pub(crate) struct TaxonInfo {
         pub(crate) name: String,
-        #[serde(skip_serializing_if = "Option::is_none")]
         pub(crate) c_value: Option<u64>,
-        #[serde(skip_serializing_if = "Option::is_none")]
         pub(crate) origin: Option<Origin>,
-        #[serde(skip_serializing_if = "Option::is_none")]
         pub(crate) status: Option<ConservationStatus>,
-        #[serde(skip_serializing_if = "Option::is_none")]
         pub(crate) wetland_indicator: Option<WetlandIndicator>,
     }
 
@@ -293,7 +309,7 @@ mod file {
         }
     }
 
-    #[derive(Debug, serde::Serialize, serde::Deserialize)]
+    #[derive(Debug, Serialize, Deserialize)]
     pub(crate) struct RegionInfo {
         pub(crate) name: String,
         #[serde(skip_serializing_if = "Option::is_none")]

@@ -1,5 +1,7 @@
 use std::convert::Infallible;
 
+use serde::Serialize;
+use serde_with::skip_serializing_none;
 use toasty::Deferred;
 
 #[derive(Debug, Clone, Copy, clap::ValueEnum)]
@@ -16,7 +18,7 @@ use crate::{
     region::RegionalTaxonStatus,
 };
 
-#[derive(Debug, Clone, Copy, toasty::Embed, strum::Display, PartialEq)]
+#[derive(Debug, Clone, Copy, toasty::Embed, strum::Display, PartialEq, Serialize)]
 pub enum Rank {
     #[column(variant = 0)]
     Unknown,
@@ -129,7 +131,7 @@ impl From<itis::Rank> for Rank {
     }
 }
 
-#[derive(Debug, Clone, Copy, toasty::Embed)]
+#[derive(Debug, Clone, Copy, toasty::Embed, Serialize)]
 pub enum LifeForm {
     #[column(variant = 1)]
     Tree,
@@ -145,7 +147,7 @@ pub enum LifeForm {
     Other,
 }
 
-#[derive(Debug, Clone, Copy, toasty::Embed)]
+#[derive(Debug, Clone, Copy, toasty::Embed, Serialize)]
 pub enum LifeCycle {
     #[column(variant = 1)]
     Annual,
@@ -157,7 +159,9 @@ pub enum LifeCycle {
     Other,
 }
 
-#[derive(Debug, Clone, toasty::Model)]
+#[skip_serializing_none]
+#[serde_with::apply( Deferred => #[serde(skip_serializing_if = "Deferred::is_unloaded")])]
+#[derive(Debug, Clone, toasty::Model, Serialize)]
 #[table = "taxa"]
 pub struct Taxon {
     #[auto]
@@ -241,7 +245,9 @@ impl Taxon {
     }
 }
 
-#[derive(Debug, Clone, toasty::Model)]
+#[skip_serializing_none]
+#[serde_with::apply( Deferred => #[serde(skip_serializing_if = "Deferred::is_unloaded")])]
+#[derive(Debug, Clone, toasty::Model, Serialize)]
 pub struct VernacularName {
     #[auto]
     #[key]
@@ -255,7 +261,9 @@ pub struct VernacularName {
     pub name: String,
 }
 
-#[derive(Debug, Clone, toasty::Model)]
+#[skip_serializing_none]
+#[serde_with::apply( Deferred => #[serde(skip_serializing_if = "Deferred::is_unloaded")])]
+#[derive(Debug, Clone, toasty::Model, Serialize)]
 pub struct Synonym {
     #[auto]
     #[key]
@@ -277,7 +285,9 @@ pub struct Synonym {
     // is_accepted: bool,
 }
 
-#[derive(Debug, Clone, toasty::Model)]
+#[skip_serializing_none]
+#[serde_with::apply( Deferred => #[serde(skip_serializing_if = "Deferred::is_unloaded")])]
+#[derive(Debug, Clone, toasty::Model, Serialize)]
 pub struct TaxonNote {
     #[auto]
     #[key]
