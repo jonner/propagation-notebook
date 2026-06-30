@@ -314,7 +314,7 @@ pub async fn import(
         return Err(ImportError::DatabaseContainsTaxa(ntaxon));
     }
     let itisdb = toasty::Db::builder()
-        .models(toasty::models!(crate::*))
+        .models(toasty::models!(itis::*))
         .connect(taxonomy_db_uri)
         .await?;
 
