@@ -107,119 +107,138 @@ static API_BASE_URL: LazyLock<reqwest::Url> = LazyLock::new(|| {
     reqwest::Url::parse("https://api.inaturalist.org/v2/").expect("Valid static base URL")
 });
 
-pub fn client() -> Result<reqwest::Client, reqwest::Error> {
+pub struct InaturalistClient(reqwest::Client);
+pub fn client() -> Result<InaturalistClient, reqwest::Error> {
     let mut default_headers = HeaderMap::new();
     default_headers.insert(
         "User-Agent",
         HeaderValue::from_static("propagation-notebook/1.0 (jonathon@quotidian.org)"),
     );
-    reqwest::Client::builder()
+    reqwest::ClientBuilder::new()
         .connection_verbose(true)
         .default_headers(default_headers)
         .build()
+        .map(InaturalistClient)
 }
 
-pub async fn taxon_info(
-    client: &reqwest::Client,
-    taxon_id: u64,
-) -> Result<InaturalistTaxon, Error> {
-    let taxa_endpoint = API_BASE_URL.join("taxa/")?.join(&taxon_id.to_string())?;
-    let res: Response<InaturalistTaxon> = client
-        .get(taxa_endpoint)
-        .query(&[("fields", InaturalistTaxon::fields())])
-        .send()
-        .await?
-        .json()
-        .await?;
-
-    match res {
-        Response::Success(mut results_response) => results_response
-            .results
-            .pop()
-            .ok_or_else(|| Error::TaxonNotFound(taxon_id)),
-        Response::Failure(error_response) => Err(Error::Response(error_response)),
-    }
-}
-
-pub async fn find_taxon(
-    client: &reqwest::Client,
-    taxon_name: &str,
-) -> Result<Vec<InaturalistTaxon>, Error> {
-    let taxa_endpoint = API_BASE_URL.join("taxa")?;
-    let res: Response<InaturalistTaxon> = client
-        .get(taxa_endpoint)
-        .query(&[
-            ("q", taxon_name),
-            ("per_page", "5"),
-            ("fields", InaturalistTaxon::fields()),
-        ])
-        .send()
-        .await?
-        .json()
-        .await?;
-
-    match res {
-        Response::Success(res) => Ok(res.results),
-        Response::Failure(res) => Err(Error::Response(res)),
-    }
-}
-
-pub async fn fetch_seed_observations(
-    client: &reqwest::Client,
-    taxon_id: u64,
-    location: &SearchArea,
-) -> Result<Vec<ObservationDate>, Error> {
-    let mut observations: Vec<ObservationDate> = Vec::new();
-    let (mut page, per_page) = (1, 200);
-    let obs_endpoint = API_BASE_URL.join("observations")?;
-
-    loop {
-        let mut builder = client.get(obs_endpoint.clone()).query(&[
-            ("taxon_id", taxon_id.to_string().as_str()),
-            ("term_id", PLANT_PHENOLOGY),
-            ("term_value_id", FRUITING),
-            // ("identifications", "most_agree"),
-            ("page", &page.to_string()),
-            ("per_page", &per_page.to_string()),
-            ("fields", ObservationDate::fields()),
-        ]);
-
-        match location {
-            SearchArea::Place(place_id) => {
-                builder = builder.query(&[("place_id", &place_id.to_string())])
-            }
-            SearchArea::BoundingBox(rect) => {
-                builder = builder.query(&[
-                    ("swlat", rect.min().y),
-                    ("swlng", rect.min().x),
-                    ("nelat", rect.max().y),
-                    ("nelng", rect.max().x),
-                ])
-            }
-        }
-
-        let res: Response<ObservationDate> = builder.send().await?.json().await?;
+impl InaturalistClient {
+    pub async fn taxon_info(&self, taxon_id: u64) -> Result<InaturalistTaxon, Error> {
+        let taxa_endpoint = API_BASE_URL.join("taxa/")?.join(&taxon_id.to_string())?;
+        let res: Response<InaturalistTaxon> = self
+            .0
+            .get(taxa_endpoint)
+            .query(&[("fields", InaturalistTaxon::fields())])
+            .send()
+            .await?
+            .json()
+            .await?;
 
         match res {
-            Response::Success(res) => {
-                if res.results.is_empty() {
-                    break;
-                }
-
-                observations.extend(res.results);
-
-                if page * per_page >= res.total_results as usize {
-                    break;
-                }
-                page += 1;
-                // short pause to avoid triggering API limits
-                std::thread::sleep(Duration::from_millis(200));
-            }
-            Response::Failure(error_response) => println!("{error_response}"),
+            Response::Success(mut results_response) => results_response
+                .results
+                .pop()
+                .ok_or_else(|| Error::TaxonNotFound(taxon_id)),
+            Response::Failure(error_response) => Err(Error::Response(error_response)),
         }
     }
 
-    Ok(observations)
+    pub async fn find_taxon(&self, taxon_name: &str) -> Result<Vec<InaturalistTaxon>, Error> {
+        let taxa_endpoint = API_BASE_URL.join("taxa")?;
+        let res: Response<InaturalistTaxon> = self
+            .0
+            .get(taxa_endpoint)
+            .query(&[
+                ("q", taxon_name),
+                ("per_page", "5"),
+                ("fields", InaturalistTaxon::fields()),
+            ])
+            .send()
+            .await?
+            .json()
+            .await?;
+
+        match res {
+            Response::Success(res) => Ok(res.results),
+            Response::Failure(res) => Err(Error::Response(res)),
+        }
+    }
+
+    pub async fn fetch_seed_observations(
+        &self,
+        taxon_id: u64,
+        location: &SearchArea,
+    ) -> Result<Vec<ObservationDate>, Error> {
+        let mut observations: Vec<ObservationDate> = Vec::new();
+        let (mut page, per_page) = (1, 200);
+        let obs_endpoint = API_BASE_URL.join("observations")?;
+
+        loop {
+            let mut builder = self.0.get(obs_endpoint.clone()).query(&[
+                ("taxon_id", taxon_id.to_string().as_str()),
+                ("term_id", PLANT_PHENOLOGY),
+                ("term_value_id", FRUITING),
+                // ("identifications", "most_agree"),
+                ("page", &page.to_string()),
+                ("per_page", &per_page.to_string()),
+                ("fields", ObservationDate::fields()),
+            ]);
+
+            match location {
+                SearchArea::Place(place_id) => {
+                    builder = builder.query(&[("place_id", &place_id.to_string())])
+                }
+                SearchArea::BoundingBox(rect) => {
+                    builder = builder.query(&[
+                        ("swlat", rect.min().y),
+                        ("swlng", rect.min().x),
+                        ("nelat", rect.max().y),
+                        ("nelng", rect.max().x),
+                    ])
+                }
+            }
+
+            let res: Response<ObservationDate> = builder.send().await?.json().await?;
+
+            match res {
+                Response::Success(res) => {
+                    if res.results.is_empty() {
+                        break;
+                    }
+
+                    observations.extend(res.results);
+
+                    if page * per_page >= res.total_results as usize {
+                        break;
+                    }
+                    page += 1;
+                }
+                Response::Failure(error_response) => println!("{error_response}"),
+            }
+        }
+
+        Ok(observations)
+    }
+
+    pub async fn places_search(&self, q: &str) -> Result<Vec<InaturalistPlace>, Error> {
+        let taxa_endpoint = API_BASE_URL.join("places")?;
+        let res: Response<InaturalistPlace> = self
+            .0
+            .get(taxa_endpoint)
+            .query(&[
+                ("q", q),
+                ("per_page", "10"),
+                ("fields", InaturalistPlace::fields()),
+            ])
+            .send()
+            .await?
+            .json()
+            .await?;
+
+        match res {
+            Response::Success(results_response) => Ok(results_response.results),
+            Response::Failure(error_response) => Err(Error::Response(error_response)),
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -259,29 +278,6 @@ impl Display for InaturalistPlace {
                 _ => "",
             }
         )
-    }
-}
-
-pub async fn places_search(
-    client: &reqwest::Client,
-    q: &str,
-) -> Result<Vec<InaturalistPlace>, Error> {
-    let taxa_endpoint = API_BASE_URL.join("places")?;
-    let res: Response<InaturalistPlace> = client
-        .get(taxa_endpoint)
-        .query(&[
-            ("q", q),
-            ("per_page", "10"),
-            ("fields", InaturalistPlace::fields()),
-        ])
-        .send()
-        .await?
-        .json()
-        .await?;
-
-    match res {
-        Response::Success(results_response) => Ok(results_response.results),
-        Response::Failure(error_response) => Err(Error::Response(error_response)),
     }
 }
 

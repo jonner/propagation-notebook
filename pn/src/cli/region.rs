@@ -8,6 +8,7 @@ use anyhow::anyhow;
 use geo::BoundingRect;
 use geo::ChamberlainDuquetteArea;
 use jiff::civil::Date;
+use libpropagation::inaturalist::InaturalistClient;
 use libpropagation::taxonomy::Taxon;
 use libpropagation::{
     inaturalist::{self, InaturalistTaxon, SearchArea},
@@ -641,7 +642,7 @@ impl RegionTaxaCommands {
 
 async fn inat_taxon_for_taxon(
     taxon: &Taxon,
-    client: &reqwest::Client,
+    client: &InaturalistClient,
 ) -> anyhow::Result<InaturalistTaxon> {
     if let Ok(inat_taxon) = inat_taxon_for_query(client, &taxon.names()).await {
         println!(
@@ -780,14 +781,15 @@ impl Display for MinimumObservationsAction {
 }
 
 async fn seed_observation_window_with_expansion(
-    client: reqwest::Client,
+    client: &InaturalistClient,
     taxon: InaturalistTaxon,
     mut loc: SearchArea,
     min_samples: usize,
 ) -> anyhow::Result<ObservationWindow> {
     let mut taxon = taxon;
     loop {
-        let observations_doy = inaturalist::fetch_seed_observations(&client, taxon.id, &loc)
+        let observations_doy = client
+            .fetch_seed_observations(taxon.id, &loc)
             .await?
             .into_iter()
             .filter_map(|ob| ob.observed_on.map(|d| d.day_of_year()))
@@ -869,7 +871,7 @@ async fn seed_observation_window_with_expansion(
                 }
                 MinimumObservationsAction::UseParentTaxon => {
                     if let Some(parent_id) = taxon.parent_id {
-                        taxon = inaturalist::taxon_info(&client, parent_id).await?;
+                        taxon = client.taxon_info(parent_id).await?;
                         println!("Using inaturalist taxon '{} ({})'", taxon.name, taxon.rank);
                         continue;
                     } else {
@@ -908,10 +910,11 @@ async fn seed_observation_window_with_expansion(
 }
 
 async fn inat_taxon_for_query(
-    client: &reqwest::Client,
+    client: &InaturalistClient,
     query: &str,
 ) -> anyhow::Result<InaturalistTaxon> {
-    let mut possible_taxa = inaturalist::find_taxon(client, query)
+    let mut possible_taxa = client
+        .find_taxon(query)
         .await?
         .into_iter()
         .filter(|t| t.is_active)
