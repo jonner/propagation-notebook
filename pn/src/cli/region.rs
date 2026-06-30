@@ -258,7 +258,7 @@ impl RegionCommands {
                         } else {
                             let mut found = None;
                             let possible_taxa = inat
-                                .find_taxon(&taxon.names())
+                                .taxon_search(&taxon.names())
                                 .await?
                                 .into_iter()
                                 .filter(|t| t.is_active)
@@ -727,7 +727,7 @@ async fn calculate_harvest_window_for_taxon(
         Some(rect) => SearchArea::BoundingBox(rect),
         None => {
             let options = inat
-                .places_search(
+                .place_search(
                     &inquire::Text::new(
                         "Search for a place on inaturalist that represents this region:",
                     )
@@ -746,7 +746,7 @@ async fn calculate_harvest_window_for_taxon(
         seed_observation_window_with_expansion(&inat, inat_taxon, loc, *min_samples).await?
     } else {
         let observations_doy = inat
-            .fetch_seed_observations(inat_taxon.id, &loc)
+            .seed_observations(inat_taxon.id, &loc)
             .await?
             .into_iter()
             .filter_map(|ob| ob.observed_on.map(|d| d.day_of_year()))
@@ -916,7 +916,7 @@ async fn seed_observation_window_with_expansion(
     let mut taxon = taxon;
     loop {
         let observations_doy = client
-            .fetch_seed_observations(taxon.id, &loc)
+            .seed_observations(taxon.id, &loc)
             .await?
             .into_iter()
             .filter_map(|ob| ob.observed_on.map(|d| d.day_of_year()))
@@ -1041,7 +1041,7 @@ async fn inat_taxon_for_query(
     query: &str,
 ) -> anyhow::Result<InaturalistTaxon> {
     let mut possible_taxa = client
-        .find_taxon(query)
+        .taxon_search(query)
         .await?
         .into_iter()
         .filter(|t| t.is_active)

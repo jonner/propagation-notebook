@@ -93,12 +93,12 @@ impl Display for InaturalistTaxon {
 }
 
 #[derive(Deserialize, Debug)]
-pub struct ObservationDate {
+pub struct Observation {
     pub id: u64,
     pub observed_on: Option<Date>,
 }
 
-impl ObservationDate {
+impl Observation {
     fn fields() -> &'static str {
         "id,observed_on"
     }
@@ -156,7 +156,7 @@ impl InaturalistClient {
         }
     }
 
-    pub async fn find_taxon(&self, taxon_name: &str) -> Result<Vec<InaturalistTaxon>, Error> {
+    pub async fn taxon_search(&self, taxon_name: &str) -> Result<Vec<InaturalistTaxon>, Error> {
         let taxa_endpoint = API_BASE_URL.join("taxa")?;
         let res: Response<InaturalistTaxon> = self
             .0
@@ -177,12 +177,12 @@ impl InaturalistClient {
         }
     }
 
-    pub async fn fetch_seed_observations(
+    pub async fn seed_observations(
         &self,
         taxon_id: u64,
         location: &SearchArea,
-    ) -> Result<Vec<ObservationDate>, Error> {
-        let mut observations: Vec<ObservationDate> = Vec::new();
+    ) -> Result<Vec<Observation>, Error> {
+        let mut observations: Vec<Observation> = Vec::new();
         let (mut page, per_page) = (1, 200);
         let obs_endpoint = API_BASE_URL.join("observations")?;
 
@@ -194,7 +194,7 @@ impl InaturalistClient {
                 // ("identifications", "most_agree"),
                 ("page", &page.to_string()),
                 ("per_page", &per_page.to_string()),
-                ("fields", ObservationDate::fields()),
+                ("fields", Observation::fields()),
             ]);
 
             match location {
@@ -211,7 +211,7 @@ impl InaturalistClient {
                 }
             }
 
-            let res: Response<ObservationDate> = builder.send().await?.json().await?;
+            let res: Response<Observation> = builder.send().await?.json().await?;
 
             match res {
                 Response::Success(res) => {
@@ -233,7 +233,7 @@ impl InaturalistClient {
         Ok(observations)
     }
 
-    pub async fn places_search(&self, q: &str) -> Result<Vec<InaturalistPlace>, Error> {
+    pub async fn place_search(&self, q: &str) -> Result<Vec<InaturalistPlace>, Error> {
         let taxa_endpoint = API_BASE_URL.join("places")?;
         let res: Response<InaturalistPlace> = self
             .0
