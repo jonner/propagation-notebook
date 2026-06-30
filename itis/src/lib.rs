@@ -63,6 +63,7 @@ pub enum Rank {
 }
 
 #[derive(Debug, toasty::Model)]
+#[table = "taxonomic_units"]
 pub struct TaxonomicUnit {
     #[key]
     pub tsn: u64,
@@ -113,6 +114,7 @@ pub struct Hierarchy {
 }
 
 #[derive(Debug, toasty::Model)]
+#[table = "synonym_links"]
 pub struct SynonymLink {
     #[key]
     pub tsn: u64,
@@ -121,6 +123,7 @@ pub struct SynonymLink {
 }
 
 #[derive(Debug, toasty::Model)]
+#[table = "kingdoms"]
 pub struct Kingdom {
     #[key]
     pub kingdom_id: u64,
@@ -129,6 +132,7 @@ pub struct Kingdom {
 }
 
 #[derive(Debug, toasty::Model)]
+#[table = "vernaculars"]
 pub struct Vernacular {
     #[key]
     pub vern_id: u64,
