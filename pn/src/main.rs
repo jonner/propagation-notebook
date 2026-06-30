@@ -2,7 +2,6 @@ use anyhow::anyhow;
 use clap::Parser;
 use directories::ProjectDirs;
 use toasty::Db;
-use tracing::level_filters::LevelFilter;
 use tracing_subscriber::{EnvFilter, layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::cli::{MainCommand, Options};
@@ -13,8 +12,7 @@ mod util;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let filter = EnvFilter::try_from_default_env()
-        .unwrap_or_else(|_| EnvFilter::default().add_directive(LevelFilter::WARN.into()));
+    let filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::default());
     tracing_subscriber::registry()
         .with(tracing_subscriber::fmt::layer())
         .with(filter)
