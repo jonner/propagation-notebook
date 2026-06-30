@@ -70,7 +70,7 @@ impl Display for ErrorObj {
 }
 
 #[derive(Deserialize, Debug)]
-pub struct InaturalistTaxon {
+pub struct Taxon {
     pub id: u64,
     pub parent_id: Option<u64>,
     pub name: String,
@@ -78,13 +78,13 @@ pub struct InaturalistTaxon {
     pub is_active: bool,
 }
 
-impl InaturalistTaxon {
+impl Taxon {
     fn fields() -> &'static str {
         "id,name,rank,is_active,parent_id"
     }
 }
 
-impl Display for InaturalistTaxon {
+impl Display for Taxon {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{} ({}){}", self.name, self.rank, {
             if self.is_active { "" } else { " (inactive)" }
@@ -110,9 +110,9 @@ static API_BASE_URL: LazyLock<reqwest::Url> = LazyLock::new(|| {
     reqwest::Url::parse("https://api.inaturalist.org/v2/").expect("Valid static base URL")
 });
 
-pub struct InaturalistClient(reqwest_middleware::ClientWithMiddleware);
+pub struct Client(reqwest_middleware::ClientWithMiddleware);
 
-impl InaturalistClient {
+impl Client {
     pub fn new() -> Result<Self, reqwest::Error> {
         let mut default_headers = HeaderMap::new();
         default_headers.insert(
@@ -136,12 +136,12 @@ impl InaturalistClient {
         ))
     }
 
-    pub async fn taxon_info(&self, taxon_id: u64) -> Result<InaturalistTaxon, Error> {
+    pub async fn taxon_info(&self, taxon_id: u64) -> Result<Taxon, Error> {
         let taxa_endpoint = API_BASE_URL.join("taxa/")?.join(&taxon_id.to_string())?;
-        let res: Response<InaturalistTaxon> = self
+        let res: Response<Taxon> = self
             .0
             .get(taxa_endpoint)
-            .query(&[("fields", InaturalistTaxon::fields())])
+            .query(&[("fields", Taxon::fields())])
             .send()
             .await?
             .json()
@@ -156,15 +156,15 @@ impl InaturalistClient {
         }
     }
 
-    pub async fn taxon_search(&self, taxon_name: &str) -> Result<Vec<InaturalistTaxon>, Error> {
+    pub async fn taxon_search(&self, taxon_name: &str) -> Result<Vec<Taxon>, Error> {
         let taxa_endpoint = API_BASE_URL.join("taxa")?;
-        let res: Response<InaturalistTaxon> = self
+        let res: Response<Taxon> = self
             .0
             .get(taxa_endpoint)
             .query(&[
                 ("q", taxon_name),
                 ("per_page", "5"),
-                ("fields", InaturalistTaxon::fields()),
+                ("fields", Taxon::fields()),
             ])
             .send()
             .await?
@@ -233,16 +233,12 @@ impl InaturalistClient {
         Ok(observations)
     }
 
-    pub async fn place_search(&self, q: &str) -> Result<Vec<InaturalistPlace>, Error> {
+    pub async fn place_search(&self, q: &str) -> Result<Vec<Place>, Error> {
         let taxa_endpoint = API_BASE_URL.join("places")?;
-        let res: Response<InaturalistPlace> = self
+        let res: Response<Place> = self
             .0
             .get(taxa_endpoint)
-            .query(&[
-                ("q", q),
-                ("per_page", "10"),
-                ("fields", InaturalistPlace::fields()),
-            ])
+            .query(&[("q", q), ("per_page", "10"), ("fields", Place::fields())])
             .send()
             .await?
             .json()
@@ -262,20 +258,20 @@ pub enum SearchArea {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct InaturalistPlace {
+pub struct Place {
     pub id: u32,
     pub admin_level: Option<i32>,
     pub display_name: Option<String>,
     pub bounding_box_geojson: Option<geojson::Geometry>,
 }
 
-impl InaturalistPlace {
+impl Place {
     fn fields() -> &'static str {
         "id,admin_level,display_name,bounding_box_geojson"
     }
 }
 
-impl Display for InaturalistPlace {
+impl Display for Place {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
@@ -297,16 +293,16 @@ impl Display for InaturalistPlace {
 
 #[cfg(test)]
 mod test {
-    use crate::{InaturalistTaxon, Response};
+    use crate::{Response, Taxon};
 
     #[test]
     fn test_deserialization() {
         const GOOD: &str = "{\"total_results\":1,\"page\":1,\"per_page\":30,\"results\":[{\"id\":79317,\"name\":\"Taraxacum erythrospermum\",\"rank\":\"species\",\"is_active\":true,\"parent_id\":967521}]}";
         const BAD: &str = "{\"status\":\"12345\",\"errors\":[{\"errorCode\":\"my-error-code\",\"message\":\"this is a message\",\"from\":\"some text here\",\"stack\":\"some text here also\"}]}";
 
-        let _good_response: Response<InaturalistTaxon> =
+        let _good_response: Response<Taxon> =
             serde_json::from_str(GOOD).expect("Failed to parse GOOD");
-        let _bad_response: Response<InaturalistTaxon> =
+        let _bad_response: Response<Taxon> =
             serde_json::from_str(BAD).expect("Failed to parse BAD");
     }
 }

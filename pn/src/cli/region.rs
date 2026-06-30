@@ -7,7 +7,6 @@ use crate::{cli::print_regional_taxa_table, style};
 use anyhow::anyhow;
 use geo::BoundingRect;
 use geo::ChamberlainDuquetteArea;
-use inaturalist::{InaturalistClient, InaturalistTaxon, SearchArea};
 use indicatif::ProgressIterator;
 use jiff::civil::Date;
 use libpropagation::{
@@ -250,7 +249,7 @@ impl RegionCommands {
                             .one()
                             .exec(db)
                             .await?;
-                        let inat = InaturalistClient::new()?;
+                        let inat = inaturalist::Client::new()?;
                         let inat_taxon = if let Some(id) = taxon.inaturalist_id {
                             let taxon = inat.taxon_info(id).await?;
                             Some(taxon)
@@ -619,7 +618,7 @@ impl RegionTaxaCommands {
                     taxon.reference(),
                     region.reference(),
                 );
-                let inat = InaturalistClient::new()?;
+                let inat = inaturalist::Client::new()?;
                 let inat_taxon = if let Some(id) = taxon.inaturalist_id {
                     let taxon = inat.taxon_info(id).await?;
                     println!("Using iNaturalist taxon '{} ({})'", taxon.name, taxon.rank);
@@ -710,11 +709,11 @@ impl RegionTaxaCommands {
 
 async fn calculate_harvest_window_for_taxon(
     min_samples: &usize,
-    inat_taxon: InaturalistTaxon,
+    inat_taxon: inaturalist::Taxon,
     region: &Region,
     allow_expansion: bool,
 ) -> Result<ObservationWindow, anyhow::Error> {
-    let inat = InaturalistClient::new()?;
+    let inat = inaturalist::Client::new()?;
     let bounding_box = match &region.geometry {
         Some(value) => {
             let geom: geo::Geometry = value.value.clone().try_into()?;
@@ -723,7 +722,7 @@ async fn calculate_harvest_window_for_taxon(
         None => None,
     };
     let loc = match bounding_box {
-        Some(rect) => SearchArea::BoundingBox(rect),
+        Some(rect) => inaturalist::SearchArea::BoundingBox(rect),
         None => {
             let options = inat
                 .place_search(
@@ -738,7 +737,7 @@ async fn calculate_harvest_window_for_taxon(
                 options,
             )
             .prompt()?;
-            SearchArea::Place(selected.id)
+            inaturalist::SearchArea::Place(selected.id)
         }
     };
     let observation_window = if allow_expansion {
@@ -768,8 +767,8 @@ async fn calculate_harvest_window_for_taxon(
 // assumes loaded vernacular names
 async fn inat_taxon_for_taxon(
     taxon: &Taxon,
-    client: &InaturalistClient,
-) -> anyhow::Result<InaturalistTaxon> {
+    client: &inaturalist::Client,
+) -> anyhow::Result<inaturalist::Taxon> {
     if let Ok(inat_taxon) = inat_taxon_for_query(client, &taxon.names()).await {
         println!(
             "Using inaturalist taxon '{} ({})'",
@@ -907,9 +906,9 @@ impl Display for MinimumObservationsAction {
 }
 
 async fn seed_observation_window_with_expansion(
-    client: &InaturalistClient,
-    taxon: InaturalistTaxon,
-    mut loc: SearchArea,
+    client: &inaturalist::Client,
+    taxon: inaturalist::Taxon,
+    mut loc: inaturalist::SearchArea,
     min_samples: usize,
 ) -> anyhow::Result<ObservationWindow> {
     let mut taxon = taxon;
@@ -969,8 +968,8 @@ async fn seed_observation_window_with_expansion(
             match action {
                 MinimumObservationsAction::ExpandSearch => {
                     let newloc = match &loc {
-                        SearchArea::Place(_) => todo!(),
-                        SearchArea::BoundingBox(rect) => {
+                        inaturalist::SearchArea::Place(_) => todo!(),
+                        inaturalist::SearchArea::BoundingBox(rect) => {
                             let mut newrect = *rect;
                             newrect.set_min(geo::Coord {
                                 x: rect.min().x - rect.width() / 10.0,
@@ -989,7 +988,7 @@ async fn seed_observation_window_with_expansion(
                             println!(
                                 "Expanding search area from {old_area:.1} km^2 to {new_area:.2} km^2",
                             );
-                            SearchArea::BoundingBox(newrect)
+                            inaturalist::SearchArea::BoundingBox(newrect)
                         }
                     };
                     loc = newloc;
@@ -1036,9 +1035,9 @@ async fn seed_observation_window_with_expansion(
 }
 
 async fn inat_taxon_for_query(
-    client: &InaturalistClient,
+    client: &inaturalist::Client,
     query: &str,
-) -> anyhow::Result<InaturalistTaxon> {
+) -> anyhow::Result<inaturalist::Taxon> {
     let mut possible_taxa = client
         .taxon_search(query)
         .await?
