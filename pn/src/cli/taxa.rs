@@ -139,7 +139,7 @@ impl TaxonCommands {
                         })
                         .collect::<Vec<_>>();
                     let output = match format {
-                        OutputFormat::Table => TaxaSearchResultsView::new(&results).render()?,
+                        OutputFormat::Text => TaxaSearchResultsView::new(&results).render()?,
                         OutputFormat::Json => JsonView::new(&results).render()?,
                         OutputFormat::Yaml => YamlView::new(&results).render()?,
                     };
@@ -163,7 +163,7 @@ impl TaxonCommands {
                     .await?;
 
                 let output = match format {
-                    OutputFormat::Table => TaxonView::new(&taxon).render()?,
+                    OutputFormat::Text => TaxonView::new(&taxon).render()?,
                     OutputFormat::Json => JsonView::new(&taxon).render()?,
                     OutputFormat::Yaml => YamlView::new(&taxon).render()?,
                 };
@@ -186,7 +186,7 @@ impl TaxonCommands {
                     .exec(db)
                     .await?;
                     let output = match format {
-                        OutputFormat::Table => {
+                        OutputFormat::Text => {
                             RegionalTaxaListView::new(&taxa, region_id).render()?
                         }
                         OutputFormat::Json => JsonView::new(&taxa).render()?,
@@ -237,7 +237,7 @@ impl TaxonCommands {
                         taxa
                     };
                     let output = match format {
-                        OutputFormat::Table => TaxaListView::new(&taxa).render()?,
+                        OutputFormat::Text => TaxaListView::new(&taxa).render()?,
                         OutputFormat::Json => JsonView::new(&taxa).render()?,
                         OutputFormat::Yaml => YamlView::new(&taxa).render()?,
                     };

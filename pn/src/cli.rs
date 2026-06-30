@@ -9,7 +9,7 @@ use crate::{
 
 #[derive(Debug, Clone, Copy, clap::ValueEnum)]
 pub enum OutputFormat {
-    Table,
+    Text,
     Json,
     Yaml,
 }
@@ -18,7 +18,7 @@ pub enum OutputFormat {
 pub struct Options {
     #[command(subcommand)]
     pub command: MainCommand,
-    #[arg(short, long, global = true, value_enum, default_value_t = OutputFormat::Table, help = "Choose output format")]
+    #[arg(short, long, global = true, value_enum, default_value_t = OutputFormat::Text, help = "Choose output format")]
     pub output: OutputFormat,
 }
 
