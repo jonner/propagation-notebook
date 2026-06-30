@@ -527,7 +527,7 @@ impl RegionTaxaCommands {
                 );
                 let client = inaturalist::client()?;
                 let inat_taxon = if let Some(id) = taxon.inaturalist_id {
-                    let taxon = inaturalist::taxon_info(&client, id).await?;
+                    let taxon = client.taxon_info(id).await?;
                     println!("Using iNaturalist taxon '{} ({})'", taxon.name, taxon.rank);
                     taxon
                 } else {
@@ -548,8 +548,7 @@ impl RegionTaxaCommands {
                 let loc = match bounding_box {
                     Some(rect) => SearchArea::BoundingBox(rect),
                     None => {
-                        let options = inaturalist::places_search(
-                            &client,
+                        let options = client.places_search(
                             &inquire::Text::new(
                                 "Search for a place on inaturalist that represents this region:",
                             )
@@ -565,7 +564,7 @@ impl RegionTaxaCommands {
                     }
                 };
                 let observation_window =
-                    seed_observation_window_with_expansion(client, inat_taxon, loc, *min_samples)
+                    seed_observation_window_with_expansion(&client, inat_taxon, loc, *min_samples)
                         .await?;
                 let window = RegionalHarvestWindow {
                     start_doy: Some(observation_window.start_doy),
