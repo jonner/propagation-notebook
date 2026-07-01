@@ -2,7 +2,13 @@ use libpropagation::collecting::TaxonCleaningProcedure;
 
 use toasty::Db;
 
-use crate::style;
+use crate::{
+    cli::OutputFormat,
+    views::{
+        JsonView, YamlView,
+        cleaning::{TaxonCleaningProcedureDetailView, TaxonCleaningProcedureListView},
+    },
+};
 
 #[derive(Debug, clap::Subcommand)]
 pub enum TaxonCleaningCommands {
@@ -41,23 +47,26 @@ pub enum TaxonCleaningCommands {
 }
 
 impl TaxonCleaningCommands {
-    pub async fn run(&self, db: &mut Db, taxon_id: u64) -> anyhow::Result<()> {
+    pub async fn run(
+        &self,
+        db: &mut Db,
+        taxon_id: u64,
+        format: OutputFormat,
+    ) -> anyhow::Result<()> {
         match self {
             TaxonCleaningCommands::List => {
                 let procedures = TaxonCleaningProcedure::filter_by_taxon_id(taxon_id)
                     .exec(db)
                     .await?;
 
-                let mut tbuilder = tabled::builder::Builder::default();
-                tbuilder.push_record(["Taxon ID", "Procedure ID", "Notes"]);
-                for proc in procedures {
-                    tbuilder.push_record([
-                        proc.taxon_id.to_string(),
-                        proc.procedure_id.to_string(),
-                        proc.notes.unwrap_or_else(|| "-".into()),
-                    ]);
-                }
-                println!("{}", tbuilder.build().with(style::ListTable));
+                let output = match format {
+                    OutputFormat::Text => {
+                        TaxonCleaningProcedureListView::new(&procedures).render()?
+                    }
+                    OutputFormat::Json => JsonView::new(&procedures).render()?,
+                    OutputFormat::Yaml => YamlView::new(&procedures).render()?,
+                };
+                println!("{output}");
             }
             TaxonCleaningCommands::Show { procedure_id } => {
                 let tcp = TaxonCleaningProcedure::filter_by_taxon_id_and_procedure_id(
@@ -70,26 +79,29 @@ impl TaxonCleaningCommands {
                 .exec(db)
                 .await?;
 
-                let mut tbuilder = tabled::builder::Builder::default();
-                tbuilder.push_record([
-                    "Taxon",
-                    &format!("{}: {}", tcp.taxon_id, tcp.taxon.get().complete_name),
-                ]);
-                tbuilder.push_record(["Procedure", &tcp.procedure_id.to_string()]);
-                tbuilder.push_record(["Notes", &tcp.notes.unwrap_or_else(|| "-".into())]);
-                println!("{}", tbuilder.build().with(style::DetailTable));
+                let output = match format {
+                    OutputFormat::Text => TaxonCleaningProcedureDetailView::new(&tcp).render()?,
+                    OutputFormat::Json => JsonView::new(&tcp).render()?,
+                    OutputFormat::Yaml => YamlView::new(&tcp).render()?,
+                };
+                println!("{output}");
             }
             TaxonCleaningCommands::Add {
                 procedure_id,
                 notes,
             } => {
-                TaxonCleaningProcedure::create()
+                let tcp = TaxonCleaningProcedure::create()
                     .taxon_id(taxon_id)
                     .procedure_id(procedure_id)
                     .notes(notes)
                     .exec(db)
                     .await?;
-                println!("Procedure {} assigned to taxon {}", taxon_id, procedure_id);
+                let output = match format {
+                    OutputFormat::Text => TaxonCleaningProcedureDetailView::new(&tcp).render()?,
+                    OutputFormat::Json => JsonView::new(&tcp).render()?,
+                    OutputFormat::Yaml => YamlView::new(&tcp).render()?,
+                };
+                println!("{output}");
             }
             TaxonCleaningCommands::Modify {
                 procedure_id,

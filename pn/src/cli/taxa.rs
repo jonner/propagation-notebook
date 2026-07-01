@@ -253,7 +253,9 @@ impl TaxonCommands {
                 )
                 .await?
             }
-            TaxonCommands::Cleaning { taxon_id, command } => command.run(db, *taxon_id).await?,
+            TaxonCommands::Cleaning { taxon_id, command } => {
+                command.run(db, *taxon_id, format).await?
+            }
             TaxonCommands::Collecting { taxon_id, command } => command.run(db, *taxon_id).await?,
             TaxonCommands::Propagation { taxon_id, command } => command.run(db, *taxon_id).await?,
             TaxonCommands::Notes { taxon_id, command } => command.run(db, *taxon_id).await?,

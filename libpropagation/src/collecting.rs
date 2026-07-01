@@ -59,3 +59,9 @@ pub struct CleaningProcedure {
     #[has_many(pair=procedure)]
     pub taxon_links: Deferred<Vec<TaxonCleaningProcedure>>,
 }
+
+impl CleaningProcedure {
+    pub fn reference(&self) -> String {
+        format!("{}: {}", self.id, self.name)
+    }
+}
