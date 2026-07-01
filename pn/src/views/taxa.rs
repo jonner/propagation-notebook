@@ -1,4 +1,7 @@
-use libpropagation::taxonomy::{Taxon, TaxonNote};
+use libpropagation::{
+    dto::ObjectReference,
+    taxonomy::{Taxon, TaxonNote},
+};
 
 use crate::{cli::taxa::TaxonSearchResult, style, util::join_or_default};
 
@@ -203,11 +206,11 @@ impl<'a> RegionalTaxaListView<'a> {
 }
 
 pub struct TaxaListView<'a> {
-    taxa: &'a Vec<Taxon>,
+    taxa: &'a Vec<ObjectReference>,
 }
 
 impl<'a> TaxaListView<'a> {
-    pub fn new(taxa: &'a Vec<Taxon>) -> Self {
+    pub fn new(taxa: &'a Vec<ObjectReference>) -> Self {
         Self { taxa }
     }
 
@@ -215,7 +218,7 @@ impl<'a> TaxaListView<'a> {
         let mut tbuilder = tabled::builder::Builder::default();
         tbuilder.push_record(["ID", "Taxon"]);
         for taxon in self.taxa {
-            tbuilder.push_record([taxon.id.to_string(), taxon.complete_name.clone()]);
+            tbuilder.push_record([&taxon.id.to_string(), &taxon.name]);
         }
         let ntaxa = self.taxa.len();
         Ok(format!(

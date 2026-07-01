@@ -1,5 +1,6 @@
 use libpropagation::{
     collecting::TaxonCleaningProcedure,
+    dto::ObjectReference,
     propagation::TaxonProtocol,
     region::RegionalTaxonStatus,
     taxonomy::{Synonym, Taxon, TaxonNote, TaxonomicAuthority, VernacularName},
@@ -195,7 +196,7 @@ impl TaxonCommands {
                     println!("{output}");
                 }
                 None => {
-                    let taxa = if *has_data {
+                    let taxa: Vec<ObjectReference> = if *has_data {
                         Taxon::filter(
                             Taxon::fields()
                                 .collecting_data()
@@ -235,7 +236,7 @@ impl TaxonCommands {
                             )
                         }
                         taxa
-                    };
+                    }.into_iter().map(Into::into).collect();
                     let output = match format {
                         OutputFormat::Text => TaxaListView::new(&taxa).render()?,
                         OutputFormat::Json => JsonView::new(&taxa).render()?,

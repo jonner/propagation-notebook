@@ -161,9 +161,15 @@ pub enum LifeCycle {
 
 impl From<&Taxon> for crate::dto::ObjectReference {
     fn from(taxon: &Taxon) -> Self {
+        taxon.clone().into()
+    }
+}
+
+impl From<Taxon> for crate::dto::ObjectReference {
+    fn from(taxon: Taxon) -> Self {
         Self {
             id: taxon.id,
-            name: taxon.complete_name.clone(),
+            name: taxon.complete_name,
         }
     }
 }
