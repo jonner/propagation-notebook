@@ -15,7 +15,8 @@ use geo::ChamberlainDuquetteArea;
 use indicatif::ProgressIterator;
 use jiff::civil::Date;
 use libpropagation::region::dto::{
-    CompactRegion, FullRegion, RegionalTaxonHarvestInfo, RegionalTaxonStatusDetailsNoRegion,
+    CompactRegion, FullRegion, RegionalTaxonHarvestInfo, RegionalTaxonStatusDetails,
+    RegionalTaxonStatusDetailsNoRegion,
 };
 use libpropagation::{
     region::{
@@ -481,7 +482,7 @@ impl RegionTaxaCommands {
             RegionTaxaCommands::Add { taxon_id, props } => {
                 // make sure region exists
                 let _r = Region::get_by_id(db, region_id).await?;
-                let status = RegionalTaxonStatus::create()
+                let status: RegionalTaxonStatusDetails = RegionalTaxonStatus::create()
                     .region_id(region_id)
                     .taxon_id(taxon_id)
                     .origin(props.origin)
@@ -493,7 +494,8 @@ impl RegionTaxaCommands {
                         end_doy: props.harvest_end.map(|d| d.day_of_year()),
                     })
                     .exec(db)
-                    .await?;
+                    .await?
+                    .into();
                 let output = match format {
                     OutputFormat::Text => RegionalTaxonStatusDetailsView::new(&status).render()?,
                     OutputFormat::Json => JsonView::new(&status).render()?,
@@ -714,12 +716,14 @@ async fn load_and_show_regional_taxon_details(
     taxon_id: &u64,
     format: OutputFormat,
 ) -> Result<(), anyhow::Error> {
-    let status = RegionalTaxonStatus::filter_by_taxon_id_and_region_id(taxon_id, region_id)
-        .include(RegionalTaxonStatus::fields().region())
-        .include(RegionalTaxonStatus::fields().taxon())
-        .one()
-        .exec(db)
-        .await?;
+    let status: RegionalTaxonStatusDetails =
+        RegionalTaxonStatus::filter_by_taxon_id_and_region_id(taxon_id, region_id)
+            .include(RegionalTaxonStatus::fields().region())
+            .include(RegionalTaxonStatus::fields().taxon())
+            .one()
+            .exec(db)
+            .await?
+            .into();
     let output = match format {
         OutputFormat::Text => RegionalTaxonStatusDetailsView::new(&status).render()?,
         OutputFormat::Json => JsonView::new(&status).render()?,

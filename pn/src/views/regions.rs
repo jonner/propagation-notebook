@@ -1,6 +1,5 @@
-use libpropagation::region::{
-    RegionalTaxonStatus,
-    dto::{CompactRegion, FullRegion, RegionalTaxonHarvestInfo},
+use libpropagation::region::dto::{
+    CompactRegion, FullRegion, RegionalTaxonHarvestInfo, RegionalTaxonStatusDetails,
 };
 
 use crate::style;
@@ -93,34 +92,23 @@ impl<'a> RegionDetailsView<'a> {
 }
 
 pub struct RegionalTaxonStatusDetailsView<'a> {
-    status: &'a RegionalTaxonStatus,
+    status: &'a RegionalTaxonStatusDetails,
 }
 
 impl<'a> RegionalTaxonStatusDetailsView<'a> {
-    pub fn new(status: &'a RegionalTaxonStatus) -> Self {
+    pub fn new(status: &'a RegionalTaxonStatusDetails) -> Self {
         Self { status }
     }
 
     pub fn render(&self) -> anyhow::Result<String> {
         let mut tbuilder = tabled::builder::Builder::default();
-        tbuilder.push_record([
-            "Taxon",
-            &match self.status.taxon.is_unloaded() {
-                true => self.status.taxon_id.to_string(),
-                false => self.status.taxon.get().reference(),
-            },
-        ]);
-        tbuilder.push_record([
-            "Region",
-            &match self.status.region.is_unloaded() {
-                true => self.status.region_id.to_string(),
-                false => self.status.region.get().reference(),
-            },
-        ]);
+        tbuilder.push_record(["Taxon", &self.status.taxon.to_string()]);
+        tbuilder.push_record(["Region", &self.status.region.to_string()]);
         tbuilder.push_record([
             "Origin",
             &self
                 .status
+                .core
                 .origin
                 .unwrap_or(libpropagation::region::Origin::Unknown)
                 .to_string(),
@@ -129,6 +117,7 @@ impl<'a> RegionalTaxonStatusDetailsView<'a> {
             "C-value",
             &self
                 .status
+                .core
                 .c_value
                 .map(|v| v.to_string())
                 .unwrap_or_else(|| "-".into()),
@@ -137,6 +126,7 @@ impl<'a> RegionalTaxonStatusDetailsView<'a> {
             "Conservation Status",
             &self
                 .status
+                .core
                 .conservation_status
                 .map(|v| v.to_string())
                 .unwrap_or_else(|| "-".into()),
@@ -145,11 +135,15 @@ impl<'a> RegionalTaxonStatusDetailsView<'a> {
             "Wetland Indicator",
             &self
                 .status
+                .core
                 .wetland_indicator
                 .map(|v| v.to_string())
                 .unwrap_or_else(|| "-".into()),
         ]);
-        tbuilder.push_record(["Harvest Window", &self.status.harvest_window.to_string()]);
+        tbuilder.push_record([
+            "Harvest Window",
+            &self.status.core.harvest_window.to_string(),
+        ]);
         Ok(tbuilder.build().with(style::DetailTable).to_string())
     }
 }
