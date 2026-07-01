@@ -18,6 +18,164 @@ use crate::{
     region::RegionalTaxonStatus,
 };
 
+pub mod dto {
+    use std::fmt::Display;
+
+    use serde::Serialize;
+    use serde_with::skip_serializing_none;
+
+    use crate::{dto::ObjectReference, region::dto::RegionalTaxonStatusDetailsNoTaxon};
+
+    #[skip_serializing_none]
+    #[derive(Debug, Clone, Serialize)]
+    pub struct TaxonNameRank {
+        pub id: u64,
+        pub name: String,
+        pub rank: super::Rank,
+    }
+
+    impl From<&super::Taxon> for TaxonNameRank {
+        fn from(taxon: &super::Taxon) -> Self {
+            taxon.clone().into()
+        }
+    }
+
+    impl From<super::Taxon> for TaxonNameRank {
+        fn from(taxon: super::Taxon) -> Self {
+            Self {
+                id: taxon.id,
+                name: taxon.complete_name,
+                rank: taxon.rank,
+            }
+        }
+    }
+
+    impl Display for TaxonNameRank {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            write!(f, "{}: {} ({})", self.id, self.name, self.rank)
+        }
+    }
+
+    #[skip_serializing_none]
+    #[serde_with::apply( Vec => #[serde(skip_serializing_if = "Vec::is_empty")])]
+    #[derive(Debug, Clone, Serialize)]
+    pub struct TaxonDetails {
+        pub id: u64,
+        pub name: String,
+        pub rank: super::Rank,
+        pub parent: Option<ObjectReference>,
+        pub children: Vec<TaxonNameRank>,
+        pub common_names: Vec<String>,
+        pub synonyms: Vec<String>,
+        pub regions: Vec<RegionalTaxonStatusDetailsNoTaxon>,
+        pub collecting_data: Option<CollectingData>,
+        // pub cleaning_procedures: Vec<TaxonCleaningProcedure>,
+        // pub propagation_protocols: Vec<TaxonProtocol>,
+        pub notes: Vec<TaxonNote>,
+    }
+
+    impl From<super::Taxon> for TaxonDetails {
+        fn from(value: super::Taxon) -> Self {
+            Self {
+                id: value.id,
+                name: value.complete_name,
+                rank: value.rank,
+                parent: ObjectReference::from_deferred_option(value.parent, value.parent_id),
+                children: match value.children.is_unloaded() {
+                    true => Vec::default(),
+                    false => value.children.get().iter().map(|t| t.into()).collect(),
+                },
+                common_names: match value.vernaculars.is_unloaded() {
+                    true => Vec::default(),
+                    false => value
+                        .vernaculars
+                        .get()
+                        .iter()
+                        .map(|v| v.name.clone())
+                        .collect(),
+                },
+                synonyms: match value.synonyms.is_unloaded() {
+                    true => Vec::default(),
+                    false => value
+                        .synonyms
+                        .get()
+                        .iter()
+                        .map(|v| v.complete_name.clone())
+                        .collect(),
+                },
+                regions: match value.regional_statuses.is_unloaded() {
+                    true => Vec::default(),
+                    false => value
+                        .regional_statuses
+                        .get()
+                        .iter()
+                        .map(|rs| rs.into())
+                        .collect(),
+                },
+                collecting_data: match value.collecting_data.is_unloaded() {
+                    true => None,
+                    false => value.collecting_data.get().as_ref().map(|d| d.into()),
+                },
+                notes: match value.notes.is_unloaded() {
+                    true => Vec::default(),
+                    false => value.notes.get().iter().map(|n| n.into()).collect(),
+                },
+            }
+        }
+    }
+
+    #[skip_serializing_none]
+    #[derive(Debug, Clone, Serialize)]
+    pub struct TaxonNote {
+        pub id: u64,
+        pub text: String,
+        pub created_at: jiff::Timestamp,
+        pub updated_at: jiff::Timestamp,
+    }
+
+    impl From<super::TaxonNote> for TaxonNote {
+        fn from(value: super::TaxonNote) -> Self {
+            Self {
+                id: value.id,
+                text: value.text,
+                created_at: value.created_at,
+                updated_at: value.updated_at,
+            }
+        }
+    }
+
+    impl From<&super::TaxonNote> for TaxonNote {
+        fn from(value: &super::TaxonNote) -> Self {
+            value.clone().into()
+        }
+    }
+
+    #[skip_serializing_none]
+    #[derive(Debug, Clone, Serialize)]
+    pub struct CollectingData {
+        pub ripening_indicators: Option<String>,
+        pub harvesting_notes: Option<String>,
+        pub storage: Option<String>,
+        pub storage_life: Option<String>,
+    }
+
+    impl From<&super::CollectingData> for CollectingData {
+        fn from(value: &super::CollectingData) -> Self {
+            value.clone().into()
+        }
+    }
+    impl From<super::CollectingData> for CollectingData {
+        fn from(value: super::CollectingData) -> Self {
+            Self {
+                ripening_indicators: value.ripening_indicators,
+                harvesting_notes: value.harvesting_notes,
+                storage: value.storage,
+                storage_life: value.storage_life,
+            }
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, toasty::Embed, strum::Display, PartialEq, Serialize)]
 pub enum Rank {
     #[column(variant = 0)]

@@ -3,7 +3,7 @@ use libpropagation::{
     dto::ObjectReference,
     propagation::TaxonProtocol,
     region::{RegionalTaxonStatus, dto::RegionalTaxonStatusDetailsNoRegion},
-    taxonomy::{Synonym, Taxon, TaxonNote, TaxonomicAuthority, VernacularName},
+    taxonomy::{Synonym, Taxon, TaxonNote, TaxonomicAuthority, VernacularName, dto::TaxonDetails},
 };
 use serde::Serialize;
 use toasty::Db;
@@ -149,7 +149,7 @@ impl TaxonCommands {
                 }
             }
             TaxonCommands::Show { id } => {
-                let taxon = Taxon::filter_by_id(id)
+                let taxon: TaxonDetails = Taxon::filter_by_id(id)
                     .include(Taxon::fields().parent())
                     .include(Taxon::fields().children())
                     .include(Taxon::fields().vernaculars())
@@ -161,7 +161,8 @@ impl TaxonCommands {
                     .include(Taxon::fields().notes())
                     .one()
                     .exec(db)
-                    .await?;
+                    .await?
+                    .into();
 
                 let output = match format {
                     OutputFormat::Text => TaxonView::new(&taxon).render()?,

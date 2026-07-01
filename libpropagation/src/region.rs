@@ -130,6 +130,27 @@ pub mod dto {
         pub core: RegionalTaxonStatusDetailsCore,
     }
 
+    impl From<&super::RegionalTaxonStatus> for RegionalTaxonStatusDetailsNoTaxon {
+        fn from(value: &super::RegionalTaxonStatus) -> Self {
+            value.clone().into()
+        }
+    }
+
+    impl From<super::RegionalTaxonStatus> for RegionalTaxonStatusDetailsNoTaxon {
+        fn from(value: super::RegionalTaxonStatus) -> Self {
+            Self {
+                region: ObjectReference::from_deferred(value.region, value.region_id),
+                core: RegionalTaxonStatusDetailsCore {
+                    origin: value.origin,
+                    c_value: value.c_value,
+                    conservation_status: value.conservation_status,
+                    wetland_indicator: value.wetland_indicator,
+                    harvest_window: value.harvest_window.clone(),
+                },
+            }
+        }
+    }
+
     #[skip_serializing_none]
     #[derive(Debug, Clone, Serialize)]
     pub struct RegionalTaxonStatusDetailsCore {

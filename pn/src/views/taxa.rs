@@ -1,119 +1,101 @@
 use libpropagation::{
     dto::ObjectReference,
     region::dto::RegionalTaxonStatusDetailsNoRegion,
-    taxonomy::{Taxon, TaxonNote},
+    taxonomy::{TaxonNote, dto::TaxonDetails},
 };
 
 use crate::{cli::taxa::TaxonSearchResult, style, util::join_or_default};
 
 pub struct TaxonView<'a> {
-    taxon: &'a Taxon,
+    taxon: &'a TaxonDetails,
 }
 
 impl<'a> TaxonView<'a> {
-    pub fn new(taxon: &'a Taxon) -> Self {
+    pub fn new(taxon: &'a TaxonDetails) -> Self {
         Self { taxon }
     }
 
     pub fn render(&self) -> anyhow::Result<String> {
         let mut tbuilder = tabled::builder::Builder::default();
         tbuilder.push_record(["ID", &self.taxon.id.to_string()]);
-        tbuilder.push_record(["Name", &self.taxon.complete_name]);
+        tbuilder.push_record(["Name", &self.taxon.name]);
         tbuilder.push_record(["Rank", &self.taxon.rank.to_string()]);
         tbuilder.push_record([
             "Parent",
-            &self
-                .taxon
+            self.taxon
                 .parent
-                .get()
                 .as_ref()
-                .map(|p| format!("{} ({})", p.reference(), p.rank))
-                .unwrap_or_else(|| "-".into()),
+                .map(|x| x.to_string())
+                .as_deref()
+                .unwrap_or("-"),
         ]);
         tbuilder.push_record([
             "Synonyms",
-            &join_or_default(self.taxon.synonyms.get(), "-", |v| v.complete_name.clone()),
+            &join_or_default(&self.taxon.synonyms, "-", |v| v.clone()),
         ]);
         tbuilder.push_record([
             "Common Name(s)",
-            &join_or_default(self.taxon.vernaculars.get(), "-", |v| v.name.clone()),
+            &join_or_default(&self.taxon.common_names, "-", |v| v.clone()),
         ]);
         tbuilder.push_record([
             "Child taxa",
-            &join_or_default(self.taxon.children.get(), "-", |t| {
-                format!("{} ({})", t.reference(), t.rank)
-            }),
+            &join_or_default(&self.taxon.children, "-", |t| t.to_string()),
         ]);
-        tbuilder.push_record([
-            "Ripening",
-            self.taxon
-                .collecting_data
-                .get()
-                .as_ref()
-                .and_then(|d| d.ripening_indicators.as_deref())
-                .unwrap_or("-"),
-        ]);
-        tbuilder.push_record([
-            "Harvesting Notes",
-            self.taxon
-                .collecting_data
-                .get()
-                .as_ref()
-                .and_then(|d| d.harvesting_notes.as_deref())
-                .unwrap_or("-"),
-        ]);
-        tbuilder.push_record([
-            "Storage Conditions",
-            self.taxon
-                .collecting_data
-                .get()
-                .as_ref()
-                .and_then(|d| d.storage.as_deref())
-                .unwrap_or("-"),
-        ]);
-        tbuilder.push_record([
-            "Storage Life",
-            self.taxon
-                .collecting_data
-                .get()
-                .as_ref()
-                .and_then(|d| d.storage_life.as_deref())
-                .unwrap_or("-"),
-        ]);
-        tbuilder.push_record(["Seed Cleaning", &{
-            match self.taxon.cleaning_procedures.get() {
-                procedures if procedures.is_empty() => "-".to_string(),
-                procedures => {
-                    let mut inner_table = tabled::builder::Builder::default();
-                    inner_table.push_record(["ID", "Name"]);
-                    procedures.iter().for_each(|tcp| {
-                        let proc = tcp.procedure.get();
-                        inner_table.push_record([&proc.id.to_string(), &proc.name]);
-                    });
-                    inner_table.build().with(style::DetailTable).to_string() + "\n"
-                }
-            }
-        }]);
-        tbuilder.push_record(["Propagation Protocols", &{
-            match self.taxon.propagation_protocols.get() {
-                tp if tp.is_empty() => "-".to_string(),
-                tps => {
-                    let mut inner_table = tabled::builder::Builder::default();
-                    inner_table.push_record(["ID", "Name", "Type"]);
-                    tps.iter().for_each(|tp| {
-                        let protocol = tp.protocol.get();
-                        inner_table.push_record([
-                            &protocol.id.to_string(),
-                            &protocol.name,
-                            &protocol.r#type.to_string(),
-                        ]);
-                    });
-                    inner_table.build().with(style::ListTable).to_string() + "\n"
-                }
-            }
-        }]);
+        if let Some(collecting_data) = self.taxon.collecting_data.as_ref() {
+            tbuilder.push_record([
+                "Ripening",
+                collecting_data
+                    .ripening_indicators
+                    .as_deref()
+                    .unwrap_or("-"),
+            ]);
+            tbuilder.push_record([
+                "Harvesting Notes",
+                collecting_data.harvesting_notes.as_deref().unwrap_or("-"),
+            ]);
+            tbuilder.push_record([
+                "Storage Conditions",
+                collecting_data.storage.as_deref().unwrap_or("-"),
+            ]);
+            tbuilder.push_record([
+                "Storage Life",
+                collecting_data.storage_life.as_deref().unwrap_or("-"),
+            ]);
+        }
+        // tbuilder.push_record(["Seed Cleaning", &{
+        //     match self.taxon.cleaning_procedures.get() {
+        //         procedures if procedures.is_empty() => "-".to_string(),
+        //         procedures => {
+        //             let mut inner_table = tabled::builder::Builder::default();
+        //             inner_table.push_record(["ID", "Name"]);
+        //             procedures.iter().for_each(|tcp| {
+        //                 let proc = tcp.procedure.get();
+        //                 inner_table.push_record([&proc.id.to_string(), &proc.name]);
+        //             });
+        //             inner_table.build().with(style::DetailTable).to_string() + "\n"
+        //         }
+        //     }
+        // }]);
+        // tbuilder.push_record(["Propagation Protocols", &{
+        //     match self.taxon.propagation_protocols.get() {
+        //         tp if tp.is_empty() => "-".to_string(),
+        //         tps => {
+        //             let mut inner_table = tabled::builder::Builder::default();
+        //             inner_table.push_record(["ID", "Name", "Type"]);
+        //             tps.iter().for_each(|tp| {
+        //                 let protocol = tp.protocol.get();
+        //                 inner_table.push_record([
+        //                     &protocol.id.to_string(),
+        //                     &protocol.name,
+        //                     &protocol.r#type.to_string(),
+        //                 ]);
+        //             });
+        //             inner_table.build().with(style::ListTable).to_string() + "\n"
+        //         }
+        //     }
+        // }]);
         tbuilder.push_record(["Regions", &{
-            let regions = self.taxon.regional_statuses.get();
+            let regions = &self.taxon.regions;
             if regions.is_empty() {
                 "-".to_string()
             } else {
@@ -121,19 +103,21 @@ impl<'a> TaxonView<'a> {
                 inner_table.push_record(["ID", "Name", "Origin", "Harvest Window"]);
                 for rs in regions.iter() {
                     inner_table.push_record([
-                        rs.region.get().id.to_string(),
-                        rs.region.get().name.clone(),
-                        rs.origin
+                        &rs.region.id.to_string(),
+                        rs.region.name.as_deref().unwrap_or("-"),
+                        rs.core
+                            .origin
                             .map(|val| val.to_string())
-                            .unwrap_or_else(|| "-".into()),
-                        rs.harvest_window.to_string(),
+                            .as_deref()
+                            .unwrap_or("-"),
+                        &rs.core.harvest_window.to_string(),
                     ]);
                 }
                 inner_table.build().with(style::ListTable).to_string() + "\n"
             }
         }]);
         tbuilder.push_record(["Notes", &{
-            let notes = self.taxon.notes.get();
+            let notes = &self.taxon.notes;
             if notes.is_empty() {
                 "-".to_string()
             } else {
