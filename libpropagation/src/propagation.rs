@@ -1,4 +1,4 @@
-use crate::{dto::ObjectReference, taxonomy::Taxon};
+use crate::{dto::ObjectReference, taxonomy::TaxonProtocol};
 use serde::{Deserialize, Serialize};
 use toasty::Deferred;
 
@@ -58,24 +58,4 @@ impl Protocol {
     pub fn reference(&self) -> String {
         format!("{}: {}", self.id, self.name)
     }
-}
-
-// TODO: if protocols become parametrized, we'd need to add the parameters to
-// this model...
-#[derive(Debug, Clone, toasty::Model)]
-pub struct TaxonProtocol {
-    #[key]
-    #[index]
-    pub taxon_id: u64,
-    #[belongs_to(key=taxon_id, references=id)]
-    pub taxon: Deferred<Taxon>,
-
-    #[key]
-    #[index]
-    pub protocol_id: u64,
-    #[belongs_to(key=protocol_id, references=id)]
-    pub protocol: Deferred<Protocol>,
-
-    pub confidence: Option<u8>,
-    pub notes: Option<String>,
 }

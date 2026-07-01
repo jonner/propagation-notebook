@@ -1,6 +1,6 @@
-use libpropagation::{
-    propagation::TaxonProtocol,
-    taxonomy::dto::{TaxonProtocolDetails, TaxonProtocolNoTaxon},
+use libpropagation::taxonomy::{
+    TaxonProtocol,
+    dto::{TaxonProtocolDetails, TaxonProtocolNoTaxon},
 };
 
 use toasty::Db;

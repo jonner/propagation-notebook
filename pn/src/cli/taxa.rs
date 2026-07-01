@@ -1,9 +1,11 @@
 use libpropagation::{
     collecting::TaxonCleaningProcedure,
     dto::ObjectReference,
-    propagation::TaxonProtocol,
     region::{RegionalTaxonStatus, dto::RegionalTaxonStatusDetailsNoRegion},
-    taxonomy::{Synonym, Taxon, TaxonNote, TaxonomicAuthority, VernacularName, dto::TaxonDetails},
+    taxonomy::{
+        Synonym, Taxon, TaxonNote, TaxonProtocol, TaxonomicAuthority, VernacularName,
+        dto::TaxonDetails,
+    },
 };
 use serde::Serialize;
 use toasty::Db;
