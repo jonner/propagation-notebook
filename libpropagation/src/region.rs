@@ -5,7 +5,8 @@ use serde_with::skip_serializing_none;
 use toasty::Deferred;
 
 use crate::{
-    ImportProgressReporter, error::ImportExportError, region::file::RegionInfo, taxonomy::Taxon,
+    ImportProgressReporter, dto::ObjectReference, error::ImportExportError,
+    region::file::RegionInfo, taxonomy::Taxon,
 };
 
 pub mod dto;
@@ -76,8 +77,8 @@ pub struct Region {
 }
 
 impl Region {
-    pub fn reference(&self) -> String {
-        format!("{}: {}", self.id, self.name)
+    pub fn reference(&self) -> ObjectReference {
+        self.into()
     }
 
     /// NOTE: assumes that `self` has all taxa loaded from the database

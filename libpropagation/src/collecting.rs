@@ -63,12 +63,15 @@ impl From<CleaningProcedure> for ObjectReference {
 
 impl From<&CleaningProcedure> for ObjectReference {
     fn from(value: &CleaningProcedure) -> Self {
-        value.clone().into()
+        Self {
+            id: value.id,
+            name: Some(value.name.clone()),
+        }
     }
 }
 
 impl CleaningProcedure {
-    pub fn reference(&self) -> String {
-        format!("{}: {}", self.id, self.name)
+    pub fn reference(&self) -> ObjectReference {
+        self.into()
     }
 }

@@ -49,13 +49,15 @@ impl From<Protocol> for ObjectReference {
 
 impl From<&Protocol> for ObjectReference {
     fn from(value: &Protocol) -> Self {
-        value.clone().into()
+        Self {
+            id: value.id,
+            name: Some(value.name.clone()),
+        }
     }
 }
 
-// FIXME: implement Display instead?
 impl Protocol {
-    pub fn reference(&self) -> String {
-        format!("{}: {}", self.id, self.name)
+    pub fn reference(&self) -> ObjectReference {
+        self.into()
     }
 }

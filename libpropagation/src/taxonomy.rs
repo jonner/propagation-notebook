@@ -14,6 +14,7 @@ pub enum TaxonomicAuthority {
 use crate::{
     ImportProgressReporter,
     collecting::{CollectingData, TaxonCleaningProcedure},
+    dto::ObjectReference,
     error::ImportExportError,
     propagation::Protocol,
     region::RegionalTaxonStatus,
@@ -162,7 +163,10 @@ pub enum LifeCycle {
 
 impl From<&Taxon> for crate::dto::ObjectReference {
     fn from(taxon: &Taxon) -> Self {
-        taxon.clone().into()
+        Self {
+            id: taxon.id,
+            name: Some(taxon.complete_name.clone()),
+        }
     }
 }
 
@@ -227,8 +231,8 @@ pub struct Taxon {
 }
 
 impl Taxon {
-    pub fn reference(&self) -> String {
-        format!("{}: {}", self.id, self.complete_name)
+    pub fn reference(&self) -> ObjectReference {
+        self.into()
     }
 
     pub fn names(&self) -> String {
