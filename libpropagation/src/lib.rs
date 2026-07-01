@@ -44,15 +44,20 @@ pub trait ImportProgressReporter {
 pub mod dto {
     use serde::Serialize;
 
-    #[derive(Serialize)]
+    #[derive(Serialize, Debug, Clone)]
     pub struct ObjectReference {
         pub id: u64,
-        pub name: String,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub name: Option<String>,
     }
 
     impl std::fmt::Display for ObjectReference {
         fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-            write!(f, "{}: {}", self.id, self.name)
+            if let Some(name) = &self.name {
+                write!(f, "{}: {}", self.id, name)
+            } else {
+                write!(f, "{}", self.id)
+            }
         }
     }
 }

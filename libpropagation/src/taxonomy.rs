@@ -169,7 +169,7 @@ impl From<Taxon> for crate::dto::ObjectReference {
     fn from(taxon: Taxon) -> Self {
         Self {
             id: taxon.id,
-            name: taxon.complete_name,
+            name: Some(taxon.complete_name),
         }
     }
 }

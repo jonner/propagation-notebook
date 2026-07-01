@@ -1,5 +1,6 @@
 use libpropagation::{
     dto::ObjectReference,
+    region::dto::RegionalTaxonStatusDetails,
     taxonomy::{Taxon, TaxonNote},
 };
 
@@ -149,13 +150,12 @@ impl<'a> TaxonView<'a> {
 }
 
 pub struct RegionalTaxaListView<'a> {
-    taxa: &'a Vec<Taxon>,
-    region_id: u64,
+    statuses: &'a Vec<RegionalTaxonStatusDetails>,
 }
 
 impl<'a> RegionalTaxaListView<'a> {
-    pub fn new(taxa: &'a Vec<Taxon>, region_id: u64) -> Self {
-        Self { taxa, region_id }
+    pub fn new(statuses: &'a Vec<RegionalTaxonStatusDetails>) -> Self {
+        Self { statuses }
     }
 
     pub fn render(&self) -> Result<String, anyhow::Error> {
@@ -168,39 +168,36 @@ impl<'a> RegionalTaxaListView<'a> {
             "C-value",
             "Wetland Indicator",
         ]);
-        for taxon in self.taxa {
-            if let Some(status) = taxon
-                .regional_statuses
-                .get()
-                .iter()
-                .find(|n| n.region_id == self.region_id)
-            {
-                tbuilder.push_record([
-                    taxon.id.to_string(),
-                    taxon.complete_name.clone(),
-                    status
-                        .origin
-                        .map(|s| s.to_string())
-                        .unwrap_or_else(|| "-".into()),
-                    status
-                        .conservation_status
-                        .map(|s| s.to_string())
-                        .unwrap_or_else(|| "-".into()),
-                    status
-                        .c_value
-                        .map(|s| s.to_string())
-                        .unwrap_or_else(|| "-".into()),
-                    status
-                        .wetland_indicator
-                        .map(|s| s.to_string())
-                        .unwrap_or_else(|| "-".into()),
-                ]);
-            }
+        for status in self.statuses {
+            tbuilder.push_record([
+                &status.taxon.id.to_string(),
+                status.taxon.name.as_deref().unwrap_or("-"),
+                status
+                    .origin
+                    .map(|s| s.to_string())
+                    .as_deref()
+                    .unwrap_or("-"),
+                status
+                    .conservation_status
+                    .map(|s| s.to_string())
+                    .as_deref()
+                    .unwrap_or("-"),
+                status
+                    .c_value
+                    .map(|s| s.to_string())
+                    .as_deref()
+                    .unwrap_or("-"),
+                status
+                    .wetland_indicator
+                    .map(|s| s.to_string())
+                    .as_deref()
+                    .unwrap_or("-"),
+            ]);
         }
         Ok(format!(
             "{}\n{} taxa",
             tbuilder.build().with(style::ListTable),
-            self.taxa.len()
+            self.statuses.len()
         ))
     }
 }
@@ -218,7 +215,10 @@ impl<'a> TaxaListView<'a> {
         let mut tbuilder = tabled::builder::Builder::default();
         tbuilder.push_record(["ID", "Taxon"]);
         for taxon in self.taxa {
-            tbuilder.push_record([&taxon.id.to_string(), &taxon.name]);
+            tbuilder.push_record([
+                &taxon.id.to_string(),
+                taxon.name.as_deref().unwrap_or_default(),
+            ]);
         }
         let ntaxa = self.taxa.len();
         Ok(format!(

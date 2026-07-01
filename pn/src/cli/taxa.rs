@@ -2,7 +2,7 @@ use libpropagation::{
     collecting::TaxonCleaningProcedure,
     dto::ObjectReference,
     propagation::TaxonProtocol,
-    region::RegionalTaxonStatus,
+    region::{RegionalTaxonStatus, dto::RegionalTaxonStatusDetails},
     taxonomy::{Synonym, Taxon, TaxonNote, TaxonomicAuthority, VernacularName},
 };
 use serde::Serialize;
@@ -186,12 +186,11 @@ impl TaxonCommands {
                     .order_by(Taxon::fields().sequence().asc())
                     .exec(db)
                     .await?;
+                    let statuses = RegionalTaxonStatusDetails::from_taxa(taxa, region_id);
                     let output = match format {
-                        OutputFormat::Text => {
-                            RegionalTaxaListView::new(&taxa, region_id).render()?
-                        }
-                        OutputFormat::Json => JsonView::new(&taxa).render()?,
-                        OutputFormat::Yaml => YamlView::new(&taxa).render()?,
+                        OutputFormat::Text => RegionalTaxaListView::new(&statuses).render()?,
+                        OutputFormat::Json => JsonView::new(&statuses).render()?,
+                        OutputFormat::Yaml => YamlView::new(&statuses).render()?,
                     };
                     println!("{output}");
                 }
