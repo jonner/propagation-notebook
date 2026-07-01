@@ -1,6 +1,6 @@
 use libpropagation::{
     dto::ObjectReference,
-    region::dto::RegionalTaxonStatusDetails,
+    region::dto::RegionalTaxonStatusDetailsNoRegion,
     taxonomy::{Taxon, TaxonNote},
 };
 
@@ -150,11 +150,11 @@ impl<'a> TaxonView<'a> {
 }
 
 pub struct RegionalTaxaListView<'a> {
-    statuses: &'a Vec<RegionalTaxonStatusDetails>,
+    statuses: &'a Vec<RegionalTaxonStatusDetailsNoRegion>,
 }
 
 impl<'a> RegionalTaxaListView<'a> {
-    pub fn new(statuses: &'a Vec<RegionalTaxonStatusDetails>) -> Self {
+    pub fn new(statuses: &'a Vec<RegionalTaxonStatusDetailsNoRegion>) -> Self {
         Self { statuses }
     }
 
@@ -173,21 +173,25 @@ impl<'a> RegionalTaxaListView<'a> {
                 &status.taxon.id.to_string(),
                 status.taxon.name.as_deref().unwrap_or("-"),
                 status
+                    .core
                     .origin
                     .map(|s| s.to_string())
                     .as_deref()
                     .unwrap_or("-"),
                 status
+                    .core
                     .conservation_status
                     .map(|s| s.to_string())
                     .as_deref()
                     .unwrap_or("-"),
                 status
+                    .core
                     .c_value
                     .map(|s| s.to_string())
                     .as_deref()
                     .unwrap_or("-"),
                 status
+                    .core
                     .wetland_indicator
                     .map(|s| s.to_string())
                     .as_deref()

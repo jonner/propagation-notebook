@@ -15,7 +15,7 @@ use geo::ChamberlainDuquetteArea;
 use indicatif::ProgressIterator;
 use jiff::civil::Date;
 use libpropagation::region::dto::{
-    CompactRegion, FullRegion, RegionalTaxonHarvestInfo, RegionalTaxonStatusDetails,
+    CompactRegion, FullRegion, RegionalTaxonHarvestInfo, RegionalTaxonStatusDetailsNoRegion,
 };
 use libpropagation::{
     region::{
@@ -590,7 +590,7 @@ impl RegionTaxaCommands {
                 .order_by(Taxon::fields().sequence().asc())
                 .exec(db)
                 .await?;
-                let statuses = RegionalTaxonStatusDetails::from_taxa(taxa, region_id);
+                let statuses = RegionalTaxonStatusDetailsNoRegion::from_taxa(taxa, region_id);
                 let output = match format {
                     OutputFormat::Text => RegionalTaxaListView::new(&statuses).render()?,
                     OutputFormat::Json => JsonView::new(&statuses).render()?,

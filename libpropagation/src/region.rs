@@ -108,9 +108,31 @@ pub mod dto {
     #[skip_serializing_none]
     #[derive(Debug, Clone, Serialize)]
     pub struct RegionalTaxonStatusDetails {
-        pub id: u64,
         pub taxon: ObjectReference,
         pub region: ObjectReference,
+        #[serde(flatten)]
+        pub core: RegionalTaxonStatusDetailsCore,
+    }
+
+    #[skip_serializing_none]
+    #[derive(Debug, Clone, Serialize)]
+    pub struct RegionalTaxonStatusDetailsNoRegion {
+        pub taxon: ObjectReference,
+        #[serde(flatten)]
+        pub core: RegionalTaxonStatusDetailsCore,
+    }
+
+    #[skip_serializing_none]
+    #[derive(Debug, Clone, Serialize)]
+    pub struct RegionalTaxonStatusDetailsNoTaxon {
+        pub region: ObjectReference,
+        #[serde(flatten)]
+        pub core: RegionalTaxonStatusDetailsCore,
+    }
+
+    #[skip_serializing_none]
+    #[derive(Debug, Clone, Serialize)]
+    pub struct RegionalTaxonStatusDetailsCore {
         pub origin: Option<super::Origin>,
         pub c_value: Option<u64>,
         pub conservation_status: Option<super::ConservationStatus>,
@@ -119,7 +141,7 @@ pub mod dto {
         pub harvest_window: super::RegionalHarvestWindow,
     }
 
-    impl RegionalTaxonStatusDetails {
+    impl RegionalTaxonStatusDetailsNoRegion {
         pub fn from_taxa(taxa: Vec<super::Taxon>, region_id: u64) -> Vec<Self> {
             taxa.into_iter()
                 .filter_map(|taxon| {
@@ -128,21 +150,15 @@ pub mod dto {
                         .get()
                         .iter()
                         .find(|rts| rts.region_id == region_id)
-                        .map(|rts| RegionalTaxonStatusDetails {
-                            id: rts.id,
+                        .map(|rts| Self {
                             taxon: taxon.clone().into(),
-                            region: match rts.region.is_unloaded() {
-                                true => ObjectReference {
-                                    id: rts.region_id,
-                                    name: None,
-                                },
-                                false => rts.region.get().into(),
+                            core: RegionalTaxonStatusDetailsCore {
+                                origin: rts.origin,
+                                c_value: rts.c_value,
+                                conservation_status: rts.conservation_status,
+                                wetland_indicator: rts.wetland_indicator,
+                                harvest_window: rts.harvest_window.clone(),
                             },
-                            origin: rts.origin,
-                            c_value: rts.c_value,
-                            conservation_status: rts.conservation_status,
-                            wetland_indicator: rts.wetland_indicator,
-                            harvest_window: rts.harvest_window.clone(),
                         })
                 })
                 .collect()
@@ -152,14 +168,15 @@ pub mod dto {
     impl From<super::RegionalTaxonStatus> for RegionalTaxonStatusDetails {
         fn from(value: super::RegionalTaxonStatus) -> Self {
             Self {
-                id: value.id,
                 taxon: value.taxon.get().into(),
                 region: value.region.get().into(),
-                origin: value.origin,
-                c_value: value.c_value,
-                conservation_status: value.conservation_status,
-                wetland_indicator: value.wetland_indicator,
-                harvest_window: value.harvest_window,
+                core: RegionalTaxonStatusDetailsCore {
+                    origin: value.origin,
+                    c_value: value.c_value,
+                    conservation_status: value.conservation_status,
+                    wetland_indicator: value.wetland_indicator,
+                    harvest_window: value.harvest_window,
+                },
             }
         }
     }
