@@ -1,7 +1,13 @@
 use libpropagation::taxonomy::TaxonNote;
 use toasty::Db;
 
-use crate::style;
+use crate::{
+    cli::OutputFormat,
+    views::{
+        JsonView, YamlView,
+        taxa::{TaxonNoteDetailsView, TaxonNotesListView},
+    },
+};
 
 #[derive(Debug, clap::Subcommand)]
 pub enum TaxonNoteCommands {
@@ -38,25 +44,34 @@ pub enum TaxonNoteCommands {
 }
 
 impl TaxonNoteCommands {
-    pub async fn run(&self, db: &mut Db, taxon_id: u64) -> anyhow::Result<()> {
+    pub async fn run(
+        &self,
+        db: &mut Db,
+        taxon_id: u64,
+        format: OutputFormat,
+    ) -> anyhow::Result<()> {
         match self {
             TaxonNoteCommands::List => {
                 let notes = TaxonNote::filter_by_taxon_id(taxon_id).exec(db).await?;
-                let mut tbuilder = tabled::builder::Builder::default();
-                tbuilder.push_record(["ID", "Note"]);
-                for note in notes {
-                    tbuilder.push_record([note.id.to_string(), note.text]);
-                }
-                println!("{}", tbuilder.build().with(style::ListTable));
+                let output = match format {
+                    OutputFormat::Text => TaxonNotesListView::new(&notes).render()?,
+                    OutputFormat::Json => JsonView::new(&notes).render()?,
+                    OutputFormat::Yaml => YamlView::new(&notes).render()?,
+                };
+                println!("{output}");
             }
             TaxonNoteCommands::Show { note_id } => {
-                let note = TaxonNote::get_by_id(db, note_id).await?;
-                let mut tbuilder = tabled::builder::Builder::default();
-                tbuilder.push_record(["ID", &note.id.to_string()]);
-                tbuilder.push_record(["Text", &note.text]);
-                tbuilder.push_record(["Created", &note.created_at.to_string()]);
-                tbuilder.push_record(["Updated", &note.updated_at.to_string()]);
-                println!("{}", tbuilder.build().with(style::DetailTable));
+                let note = TaxonNote::filter_by_id(note_id)
+                    .include(TaxonNote::fields().taxon())
+                    .one()
+                    .exec(db)
+                    .await?;
+                let output = match format {
+                    OutputFormat::Text => TaxonNoteDetailsView::new(&note).render()?,
+                    OutputFormat::Json => JsonView::new(&note).render()?,
+                    OutputFormat::Yaml => YamlView::new(&note).render()?,
+                };
+                println!("{output}");
             }
             TaxonNoteCommands::Add { text } => {
                 let note = TaxonNote::create()
@@ -64,18 +79,27 @@ impl TaxonNoteCommands {
                     .text(text)
                     .exec(db)
                     .await?;
-                println!("added note {} to taxon {}", note.id, taxon_id);
+                let output = match format {
+                    OutputFormat::Text => TaxonNoteDetailsView::new(&note).render()?,
+                    OutputFormat::Json => JsonView::new(&note).render()?,
+                    OutputFormat::Yaml => YamlView::new(&note).render()?,
+                };
+                println!("{output}");
             }
             TaxonNoteCommands::Modify { note_id, text } => {
                 TaxonNote::update_by_id(note_id).text(text).exec(db).await?;
                 println!("Updated note {note_id}")
             }
             TaxonNoteCommands::Remove { note_id, assumeyes } => {
-                if *assumeyes
-                    || inquire::Confirm::new("Are you sure you wish to remove this note?")
-                        .with_default(false)
-                        .prompt()?
-                {
+                let note = TaxonNote::get_by_id(db, note_id).await?;
+                if *assumeyes || {
+                    println!("{}", TaxonNoteDetailsView::new(&note).render()?);
+                    inquire::Confirm::new(&format!(
+                        "Are you sure you wish to remove note {note_id}?"
+                    ))
+                    .with_default(false)
+                    .prompt()?
+                } {
                     {
                         TaxonNote::delete_by_id(db, note_id).await?;
                         println!("Removed note {note_id}");

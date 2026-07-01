@@ -262,7 +262,9 @@ impl TaxonCommands {
             TaxonCommands::Propagation { taxon_id, command } => {
                 command.run(db, *taxon_id, format).await?
             }
-            TaxonCommands::Notes { taxon_id, command } => command.run(db, *taxon_id).await?,
+            TaxonCommands::Notes { taxon_id, command } => {
+                command.run(db, *taxon_id, format).await?
+            }
         }
         Ok(())
     }

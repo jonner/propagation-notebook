@@ -1,4 +1,4 @@
-use libpropagation::taxonomy::Taxon;
+use libpropagation::taxonomy::{Taxon, TaxonNote};
 
 use crate::{cli::taxa::TaxonSearchResult, style, util::join_or_default};
 
@@ -245,5 +245,50 @@ impl<'a> TaxaSearchResultsView<'a> {
             "{}\n{ntaxa} taxa found",
             tbuilder.build().with(style::ListTable)
         ))
+    }
+}
+
+pub struct TaxonNotesListView<'a> {
+    notes: &'a Vec<TaxonNote>,
+}
+
+impl<'a> TaxonNotesListView<'a> {
+    pub fn new(notes: &'a Vec<TaxonNote>) -> Self {
+        Self { notes }
+    }
+
+    pub fn render(&self) -> anyhow::Result<String> {
+        let mut tbuilder = tabled::builder::Builder::default();
+        tbuilder.push_record(["ID", "Note"]);
+        for note in self.notes {
+            tbuilder.push_record([&note.id.to_string(), &note.text]);
+        }
+        Ok(tbuilder.build().with(style::ListTable).to_string())
+    }
+}
+
+pub struct TaxonNoteDetailsView<'a> {
+    note: &'a TaxonNote,
+}
+
+impl<'a> TaxonNoteDetailsView<'a> {
+    pub fn new(note: &'a TaxonNote) -> Self {
+        Self { note }
+    }
+
+    pub fn render(&self) -> anyhow::Result<String> {
+        let mut tbuilder = tabled::builder::Builder::default();
+        tbuilder.push_record(["ID", &self.note.id.to_string()]);
+        tbuilder.push_record(["Text", &self.note.text]);
+        tbuilder.push_record([
+            "Taxon",
+            &match self.note.taxon.is_unloaded() {
+                true => self.note.taxon_id.to_string(),
+                false => self.note.taxon.get().reference(),
+            },
+        ]);
+        tbuilder.push_record(["Created", &self.note.created_at.to_string()]);
+        tbuilder.push_record(["Updated", &self.note.updated_at.to_string()]);
+        Ok(tbuilder.build().with(style::DetailTable).to_string())
     }
 }
