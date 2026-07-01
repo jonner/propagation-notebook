@@ -1,6 +1,7 @@
 use serde::Serialize;
 
 pub mod cleaning;
+pub mod collecting;
 pub mod taxa;
 
 pub struct JsonView<'a, T: Serialize> {

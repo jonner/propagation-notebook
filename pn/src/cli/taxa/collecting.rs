@@ -1,7 +1,11 @@
 use libpropagation::collecting::CollectingData;
 
-use tabled::builder::Builder as TableBuilder;
 use toasty::Db;
+
+use crate::{
+    cli::OutputFormat,
+    views::{JsonView, YamlView, collecting::CollectingDataView},
+};
 
 #[derive(Debug, clap::Subcommand)]
 pub enum TaxonCollectingCommands {
@@ -38,7 +42,12 @@ pub enum TaxonCollectingCommands {
 }
 
 impl TaxonCollectingCommands {
-    pub async fn run(&self, db: &mut Db, taxon_id: u64) -> anyhow::Result<()> {
+    pub async fn run(
+        &self,
+        db: &mut Db,
+        taxon_id: u64,
+        format: OutputFormat,
+    ) -> anyhow::Result<()> {
         match self {
             TaxonCollectingCommands::Show => {
                 match CollectingData::filter_by_taxon_id(taxon_id)
@@ -48,25 +57,12 @@ impl TaxonCollectingCommands {
                     .await
                 {
                     Ok(data) => {
-                        let mut tbuilder = TableBuilder::default();
-                        tbuilder.push_record(["Taxon", &data.taxon.get().reference()]);
-                        tbuilder.push_record([
-                            "Ripening",
-                            data.ripening_indicators.as_deref().unwrap_or("-"),
-                        ]);
-                        tbuilder.push_record([
-                            "Harvesting",
-                            data.harvesting_notes.as_deref().unwrap_or("-"),
-                        ]);
-                        tbuilder.push_record([
-                            "Storage Conditions",
-                            data.storage.as_deref().unwrap_or("-"),
-                        ]);
-                        tbuilder.push_record([
-                            "Storage Life",
-                            data.storage_life.as_deref().unwrap_or("-"),
-                        ]);
-                        println!("{}", tbuilder.build().with(crate::style::DetailTable))
+                        let output = match format {
+                            OutputFormat::Text => CollectingDataView::new(&data).render()?,
+                            OutputFormat::Json => JsonView::new(&data).render()?,
+                            OutputFormat::Yaml => YamlView::new(&data).render()?,
+                        };
+                        println!("{output}");
                     }
                     Err(e) if e.is_record_not_found() => println!(
                         "Taxon {taxon_id} does not current have any collecting information defined"
