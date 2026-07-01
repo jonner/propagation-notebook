@@ -1,9 +1,14 @@
 use libpropagation::propagation::TaxonProtocol;
 
-use tabled::builder::Builder as TableBuilder;
 use toasty::Db;
 
-use crate::style;
+use crate::{
+    cli::OutputFormat,
+    views::{
+        JsonView, YamlView,
+        propagation::{TaxonPropagationProtocolDetailView, TaxonPropagationProtocolListView},
+    },
+};
 
 #[derive(Debug, clap::Subcommand)]
 pub enum TaxonPropagationCommands {
@@ -64,7 +69,12 @@ pub enum TaxonPropagationCommands {
 }
 
 impl TaxonPropagationCommands {
-    pub async fn run(&self, db: &mut Db, taxon_id: u64) -> anyhow::Result<()> {
+    pub async fn run(
+        &self,
+        db: &mut Db,
+        taxon_id: u64,
+        format: OutputFormat,
+    ) -> anyhow::Result<()> {
         match self {
         TaxonPropagationCommands::List => {
             let tps = TaxonProtocol::filter_by_taxon_id(taxon_id)
@@ -72,20 +82,12 @@ impl TaxonPropagationCommands {
                 .include(TaxonProtocol::fields().protocol())
                 .exec(db)
                 .await?;
-            let mut tbuilder = TableBuilder::default();
-            tbuilder.push_record(["Taxon", "Protocol", "Confidence", "Notes"]);
-            for tp in tps {
-                tbuilder.push_record([
-                    &tp.taxon.get().reference(),
-                    &tp.protocol.get().reference(),
-                    tp.confidence
-                        .map(|v| v.to_string())
-                        .as_deref()
-                        .unwrap_or("-"),
-                    tp.notes.as_deref().unwrap_or("-"),
-                ])
-            }
-            println!("{}", tbuilder.build().with(style::ListTable));
+            let output = match format {
+                OutputFormat::Text => TaxonPropagationProtocolListView::new(&tps).render()?,
+                OutputFormat::Json => JsonView::new(&tps).render()?,
+                OutputFormat::Yaml => YamlView::new(&tps).render()?,
+            };
+            println!("{output}");
         }
         TaxonPropagationCommands::Show { protocol_id } => {
             let tp = TaxonProtocol::filter_by_taxon_id_and_protocol_id(taxon_id, protocol_id)
@@ -94,32 +96,31 @@ impl TaxonPropagationCommands {
                 .one()
                 .exec(db)
                 .await?;
-            let mut tbuilder = TableBuilder::default();
-            tbuilder.push_record(["Taxon", &tp.taxon.get().reference()]);
-            tbuilder.push_record([
-                "Confidence",
-                tp.confidence
-                    .map(|v| v.to_string())
-                    .as_deref()
-                    .unwrap_or("-"),
-            ]);
-            tbuilder.push_record(["Taxon-specific notes", tp.notes.as_deref().unwrap_or("-")]);
-            tbuilder.push_record(["Protocol", &tp.protocol.get().id.to_string()]);
-            println!("{}", tbuilder.build().with(style::DetailTable));
+            let output = match format {
+                OutputFormat::Text => TaxonPropagationProtocolDetailView::new(&tp).render()?,
+                OutputFormat::Json => JsonView::new(&tp).render()?,
+                OutputFormat::Yaml => YamlView::new(&tp).render()?,
+            };
+            println!("{output}");
         }
         TaxonPropagationCommands::Add {
             protocol_id,
             confidence,
             notes,
         } => {
-            TaxonProtocol::create()
+            let tp = TaxonProtocol::create()
                 .protocol_id(protocol_id)
                 .taxon_id(taxon_id)
                 .confidence(confidence)
                 .notes(notes)
                 .exec(db)
                 .await?;
-            println!("Added propagation protocol {protocol_id} to taxon {taxon_id}");
+            let output = match format {
+                OutputFormat::Text => TaxonPropagationProtocolDetailView::new(&tp).render()?,
+                OutputFormat::Json => JsonView::new(&tp).render()?,
+                OutputFormat::Yaml => YamlView::new(&tp).render()?,
+            };
+            println!("{output}");
         }
         TaxonPropagationCommands::Modify {
             protocol_id,
@@ -142,7 +143,7 @@ impl TaxonPropagationCommands {
         } => {
             if *assumeyes
                         || inquire::Confirm::new(
-                            "Are you sure you wish to remove this propagation protocol from taxon {taxon_id}?",
+                            &format!("Are you sure you wish to remove this propagation protocol from taxon {taxon_id}?"),
                         )
                         .with_default(false)
                         .prompt()?
