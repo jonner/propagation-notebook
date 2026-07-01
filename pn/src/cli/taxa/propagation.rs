@@ -1,4 +1,7 @@
-use libpropagation::propagation::TaxonProtocol;
+use libpropagation::{
+    propagation::TaxonProtocol,
+    taxonomy::dto::{TaxonProtocolDetails, TaxonProtocolNoTaxon},
+};
 
 use toasty::Db;
 
@@ -77,11 +80,11 @@ impl TaxonPropagationCommands {
     ) -> anyhow::Result<()> {
         match self {
         TaxonPropagationCommands::List => {
-            let tps = TaxonProtocol::filter_by_taxon_id(taxon_id)
+            let tps: Vec<TaxonProtocolNoTaxon> = TaxonProtocol::filter_by_taxon_id(taxon_id)
                 .include(TaxonProtocol::fields().taxon())
                 .include(TaxonProtocol::fields().protocol())
                 .exec(db)
-                .await?;
+                .await?.into_iter().map(Into::into).collect();
             let output = match format {
                 OutputFormat::Text => TaxonPropagationProtocolListView::new(&tps).render()?,
                 OutputFormat::Json => JsonView::new(&tps).render()?,
@@ -90,12 +93,12 @@ impl TaxonPropagationCommands {
             println!("{output}");
         }
         TaxonPropagationCommands::Show { protocol_id } => {
-            let tp = TaxonProtocol::filter_by_taxon_id_and_protocol_id(taxon_id, protocol_id)
+            let tp: TaxonProtocolDetails = TaxonProtocol::filter_by_taxon_id_and_protocol_id(taxon_id, protocol_id)
                 .include(TaxonProtocol::fields().taxon())
                 .include(TaxonProtocol::fields().protocol())
                 .one()
                 .exec(db)
-                .await?;
+                .await?.into();
             let output = match format {
                 OutputFormat::Text => TaxonPropagationProtocolDetailView::new(&tp).render()?,
                 OutputFormat::Json => JsonView::new(&tp).render()?,
@@ -108,13 +111,13 @@ impl TaxonPropagationCommands {
             confidence,
             notes,
         } => {
-            let tp = TaxonProtocol::create()
+            let tp: TaxonProtocolDetails = TaxonProtocol::create()
                 .protocol_id(protocol_id)
                 .taxon_id(taxon_id)
                 .confidence(confidence)
                 .notes(notes)
                 .exec(db)
-                .await?;
+                .await?.into();
             let output = match format {
                 OutputFormat::Text => TaxonPropagationProtocolDetailView::new(&tp).render()?,
                 OutputFormat::Json => JsonView::new(&tp).render()?,

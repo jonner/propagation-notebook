@@ -1,4 +1,7 @@
-use libpropagation::taxonomy::TaxonNote;
+use libpropagation::taxonomy::{
+    TaxonNote,
+    dto::{TaxonNoteDetails, TaxonNoteNoTaxon},
+};
 use toasty::Db;
 
 use crate::{
@@ -52,7 +55,12 @@ impl TaxonNoteCommands {
     ) -> anyhow::Result<()> {
         match self {
             TaxonNoteCommands::List => {
-                let notes = TaxonNote::filter_by_taxon_id(taxon_id).exec(db).await?;
+                let notes: Vec<TaxonNoteNoTaxon> = TaxonNote::filter_by_taxon_id(taxon_id)
+                    .exec(db)
+                    .await?
+                    .into_iter()
+                    .map(Into::into)
+                    .collect();
                 let output = match format {
                     OutputFormat::Text => TaxonNotesListView::new(&notes).render()?,
                     OutputFormat::Json => JsonView::new(&notes).render()?,
@@ -61,11 +69,12 @@ impl TaxonNoteCommands {
                 println!("{output}");
             }
             TaxonNoteCommands::Show { note_id } => {
-                let note = TaxonNote::filter_by_id(note_id)
+                let note: TaxonNoteDetails = TaxonNote::filter_by_id(note_id)
                     .include(TaxonNote::fields().taxon())
                     .one()
                     .exec(db)
-                    .await?;
+                    .await?
+                    .into();
                 let output = match format {
                     OutputFormat::Text => TaxonNoteDetailsView::new(&note).render()?,
                     OutputFormat::Json => JsonView::new(&note).render()?,
@@ -74,11 +83,12 @@ impl TaxonNoteCommands {
                 println!("{output}");
             }
             TaxonNoteCommands::Add { text } => {
-                let note = TaxonNote::create()
+                let note: TaxonNoteDetails = TaxonNote::create()
                     .taxon_id(taxon_id)
                     .text(text)
                     .exec(db)
-                    .await?;
+                    .await?
+                    .into();
                 let output = match format {
                     OutputFormat::Text => TaxonNoteDetailsView::new(&note).render()?,
                     OutputFormat::Json => JsonView::new(&note).render()?,
@@ -91,7 +101,7 @@ impl TaxonNoteCommands {
                 println!("Updated note {note_id}")
             }
             TaxonNoteCommands::Remove { note_id, assumeyes } => {
-                let note = TaxonNote::get_by_id(db, note_id).await?;
+                let note: TaxonNoteDetails = TaxonNote::get_by_id(db, note_id).await?.into();
                 if *assumeyes || {
                     println!("{}", TaxonNoteDetailsView::new(&note).render()?);
                     inquire::Confirm::new(&format!(

@@ -1,22 +1,21 @@
-use libpropagation::propagation::TaxonProtocol;
+use libpropagation::taxonomy::dto::{TaxonProtocolDetails, TaxonProtocolNoTaxon};
 
 use crate::style;
 
 pub struct TaxonPropagationProtocolListView<'a> {
-    tps: &'a Vec<TaxonProtocol>,
+    tps: &'a Vec<TaxonProtocolNoTaxon>,
 }
 
 impl<'a> TaxonPropagationProtocolListView<'a> {
-    pub fn new(tps: &'a Vec<TaxonProtocol>) -> Self {
+    pub fn new(tps: &'a Vec<TaxonProtocolNoTaxon>) -> Self {
         Self { tps }
     }
     pub fn render(&self) -> anyhow::Result<String> {
         let mut tbuilder = tabled::builder::Builder::default();
-        tbuilder.push_record(["Taxon", "Protocol", "Confidence", "Notes"]);
+        tbuilder.push_record(["Protocol", "Confidence", "Notes"]);
         for tp in self.tps {
             tbuilder.push_record([
-                &tp.taxon.get().reference(),
-                &tp.protocol.get().reference(),
+                &tp.protocol.to_string(),
                 tp.confidence
                     .map(|v| v.to_string())
                     .as_deref()
@@ -29,26 +28,21 @@ impl<'a> TaxonPropagationProtocolListView<'a> {
 }
 
 pub struct TaxonPropagationProtocolDetailView<'a> {
-    tp: &'a TaxonProtocol,
+    tp: &'a TaxonProtocolDetails,
 }
 
 impl<'a> TaxonPropagationProtocolDetailView<'a> {
-    pub fn new(tp: &'a TaxonProtocol) -> Self {
+    pub fn new(tp: &'a TaxonProtocolDetails) -> Self {
         Self { tp }
     }
 
     pub fn render(&self) -> anyhow::Result<String> {
         let mut tbuilder = tabled::builder::Builder::default();
-        tbuilder.push_record([
-            "Taxon",
-            &match self.tp.taxon.is_unloaded() {
-                true => self.tp.taxon_id.to_string(),
-                false => self.tp.taxon.get().reference(),
-            },
-        ]);
+        tbuilder.push_record(["Taxon", &self.tp.taxon.to_string()]);
         tbuilder.push_record([
             "Confidence",
             self.tp
+                .core
                 .confidence
                 .map(|v| v.to_string())
                 .as_deref()
@@ -56,15 +50,9 @@ impl<'a> TaxonPropagationProtocolDetailView<'a> {
         ]);
         tbuilder.push_record([
             "Taxon-specific notes",
-            self.tp.notes.as_deref().unwrap_or("-"),
+            self.tp.core.notes.as_deref().unwrap_or("-"),
         ]);
-        tbuilder.push_record([
-            "Protocol",
-            &match self.tp.protocol.is_unloaded() {
-                true => self.tp.protocol_id.to_string(),
-                false => self.tp.protocol.get().reference(),
-            },
-        ]);
+        tbuilder.push_record(["Protocol", &self.tp.core.protocol.to_string()]);
         Ok(tbuilder.build().with(style::DetailTable).to_string())
     }
 }

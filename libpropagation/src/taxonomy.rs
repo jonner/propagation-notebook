@@ -1,7 +1,6 @@
 use std::convert::Infallible;
 
 use serde::Serialize;
-use serde_with::skip_serializing_none;
 use toasty::Deferred;
 
 #[derive(Debug, Clone, Copy, clap::ValueEnum)]
@@ -68,10 +67,10 @@ pub mod dto {
         pub common_names: Vec<String>,
         pub synonyms: Vec<String>,
         pub regions: Vec<RegionalTaxonStatusDetailsNoTaxon>,
-        pub collecting_data: Option<CollectingData>,
-        pub seed_cleaning: Vec<TaxonCleaningProcedure>,
-        pub propagation_protocols: Vec<TaxonProtocol>,
-        pub notes: Vec<TaxonNote>,
+        pub collecting_data: Option<CollectingDataNoTaxon>,
+        pub seed_cleaning: Vec<TaxonCleaningProcedureNoTaxon>,
+        pub propagation_protocols: Vec<TaxonProtocolNoTaxon>,
+        pub notes: Vec<TaxonNoteNoTaxon>,
     }
 
     impl From<super::Taxon> for TaxonDetails {
@@ -144,14 +143,42 @@ pub mod dto {
 
     #[skip_serializing_none]
     #[derive(Debug, Clone, Serialize)]
-    pub struct TaxonNote {
+    pub struct TaxonNoteDetails {
+        pub taxon: ObjectReference,
+        #[serde(flatten)]
+        pub core: TaxonNoteNoTaxon,
+    }
+
+    impl From<super::TaxonNote> for TaxonNoteDetails {
+        fn from(value: super::TaxonNote) -> Self {
+            Self {
+                taxon: ObjectReference::from_deferred(value.taxon, value.taxon_id),
+                core: TaxonNoteNoTaxon {
+                    id: value.id,
+                    text: value.text,
+                    created_at: value.created_at,
+                    updated_at: value.updated_at,
+                },
+            }
+        }
+    }
+
+    impl From<&super::TaxonNote> for TaxonNoteDetails {
+        fn from(value: &super::TaxonNote) -> Self {
+            value.clone().into()
+        }
+    }
+
+    #[skip_serializing_none]
+    #[derive(Debug, Clone, Serialize)]
+    pub struct TaxonNoteNoTaxon {
         pub id: u64,
         pub text: String,
         pub created_at: jiff::Timestamp,
         pub updated_at: jiff::Timestamp,
     }
 
-    impl From<super::TaxonNote> for TaxonNote {
+    impl From<super::TaxonNote> for TaxonNoteNoTaxon {
         fn from(value: super::TaxonNote) -> Self {
             Self {
                 id: value.id,
@@ -162,7 +189,7 @@ pub mod dto {
         }
     }
 
-    impl From<&super::TaxonNote> for TaxonNote {
+    impl From<&super::TaxonNote> for TaxonNoteNoTaxon {
         fn from(value: &super::TaxonNote) -> Self {
             value.clone().into()
         }
@@ -170,19 +197,45 @@ pub mod dto {
 
     #[skip_serializing_none]
     #[derive(Debug, Clone, Serialize)]
-    pub struct CollectingData {
+    pub struct CollectingDataDetails {
+        pub taxon: ObjectReference,
         pub ripening_indicators: Option<String>,
         pub harvesting_notes: Option<String>,
         pub storage: Option<String>,
         pub storage_life: Option<String>,
     }
 
-    impl From<&super::CollectingData> for CollectingData {
+    impl From<&super::CollectingData> for CollectingDataDetails {
         fn from(value: &super::CollectingData) -> Self {
             value.clone().into()
         }
     }
-    impl From<super::CollectingData> for CollectingData {
+    impl From<super::CollectingData> for CollectingDataDetails {
+        fn from(value: super::CollectingData) -> Self {
+            Self {
+                taxon: ObjectReference::from_deferred(value.taxon, value.taxon_id),
+                ripening_indicators: value.ripening_indicators,
+                harvesting_notes: value.harvesting_notes,
+                storage: value.storage,
+                storage_life: value.storage_life,
+            }
+        }
+    }
+    #[skip_serializing_none]
+    #[derive(Debug, Clone, Serialize)]
+    pub struct CollectingDataNoTaxon {
+        pub ripening_indicators: Option<String>,
+        pub harvesting_notes: Option<String>,
+        pub storage: Option<String>,
+        pub storage_life: Option<String>,
+    }
+
+    impl From<&super::CollectingData> for CollectingDataNoTaxon {
+        fn from(value: &super::CollectingData) -> Self {
+            value.clone().into()
+        }
+    }
+    impl From<super::CollectingData> for CollectingDataNoTaxon {
         fn from(value: super::CollectingData) -> Self {
             Self {
                 ripening_indicators: value.ripening_indicators,
@@ -195,12 +248,35 @@ pub mod dto {
 
     #[skip_serializing_none]
     #[derive(Debug, Clone, Serialize)]
-    pub struct TaxonCleaningProcedure {
+    pub struct TaxonCleaningProcedureDetails {
+        pub taxon: ObjectReference,
+        pub procedure: ObjectReference,
+        pub notes: Option<String>,
+    }
+    impl From<super::TaxonCleaningProcedure> for TaxonCleaningProcedureDetails {
+        fn from(value: super::TaxonCleaningProcedure) -> Self {
+            Self {
+                taxon: ObjectReference::from_deferred(value.taxon, value.taxon_id),
+                procedure: ObjectReference::from_deferred(value.procedure, value.procedure_id),
+                notes: value.notes,
+            }
+        }
+    }
+
+    impl From<&super::TaxonCleaningProcedure> for TaxonCleaningProcedureDetails {
+        fn from(value: &super::TaxonCleaningProcedure) -> Self {
+            value.clone().into()
+        }
+    }
+
+    #[skip_serializing_none]
+    #[derive(Debug, Clone, Serialize)]
+    pub struct TaxonCleaningProcedureNoTaxon {
         pub procedure: ObjectReference,
         pub notes: Option<String>,
     }
 
-    impl From<super::TaxonCleaningProcedure> for TaxonCleaningProcedure {
+    impl From<super::TaxonCleaningProcedure> for TaxonCleaningProcedureNoTaxon {
         fn from(value: super::TaxonCleaningProcedure) -> Self {
             Self {
                 procedure: ObjectReference::from_deferred(value.procedure, value.procedure_id),
@@ -209,7 +285,7 @@ pub mod dto {
         }
     }
 
-    impl From<&super::TaxonCleaningProcedure> for TaxonCleaningProcedure {
+    impl From<&super::TaxonCleaningProcedure> for TaxonCleaningProcedureNoTaxon {
         fn from(value: &super::TaxonCleaningProcedure) -> Self {
             value.clone().into()
         }
@@ -217,12 +293,38 @@ pub mod dto {
 
     #[skip_serializing_none]
     #[derive(Debug, Clone, Serialize)]
-    pub struct TaxonProtocol {
+    pub struct TaxonProtocolDetails {
+        pub taxon: ObjectReference,
+        pub core: TaxonProtocolNoTaxon,
+    }
+
+    impl From<super::TaxonProtocol> for TaxonProtocolDetails {
+        fn from(value: super::TaxonProtocol) -> Self {
+            Self {
+                taxon: ObjectReference::from_deferred(value.taxon, value.taxon_id),
+                core: TaxonProtocolNoTaxon {
+                    protocol: ObjectReference::from_deferred(value.protocol, value.protocol_id),
+                    confidence: value.confidence,
+                    notes: value.notes,
+                },
+            }
+        }
+    }
+
+    impl From<&super::TaxonProtocol> for TaxonProtocolDetails {
+        fn from(value: &super::TaxonProtocol) -> Self {
+            value.clone().into()
+        }
+    }
+
+    #[skip_serializing_none]
+    #[derive(Debug, Clone, Serialize)]
+    pub struct TaxonProtocolNoTaxon {
         pub protocol: ObjectReference,
         pub confidence: Option<u8>,
         pub notes: Option<String>,
     }
-    impl From<super::TaxonProtocol> for TaxonProtocol {
+    impl From<super::TaxonProtocol> for TaxonProtocolNoTaxon {
         fn from(value: super::TaxonProtocol) -> Self {
             Self {
                 protocol: ObjectReference::from_deferred(value.protocol, value.protocol_id),
@@ -232,7 +334,7 @@ pub mod dto {
         }
     }
 
-    impl From<&super::TaxonProtocol> for TaxonProtocol {
+    impl From<&super::TaxonProtocol> for TaxonProtocolNoTaxon {
         fn from(value: &super::TaxonProtocol) -> Self {
             value.clone().into()
         }
@@ -395,9 +497,7 @@ impl From<Taxon> for crate::dto::ObjectReference {
     }
 }
 
-#[skip_serializing_none]
-#[serde_with::apply( Deferred => #[serde(skip_serializing_if = "Deferred::is_unloaded")])]
-#[derive(Debug, Clone, toasty::Model, Serialize)]
+#[derive(Debug, Clone, toasty::Model)]
 #[table = "taxa"]
 pub struct Taxon {
     #[auto]
@@ -481,9 +581,7 @@ impl Taxon {
     }
 }
 
-#[skip_serializing_none]
-#[serde_with::apply( Deferred => #[serde(skip_serializing_if = "Deferred::is_unloaded")])]
-#[derive(Debug, Clone, toasty::Model, Serialize)]
+#[derive(Debug, Clone, toasty::Model)]
 pub struct VernacularName {
     #[auto]
     #[key]
@@ -497,9 +595,7 @@ pub struct VernacularName {
     pub name: String,
 }
 
-#[skip_serializing_none]
-#[serde_with::apply( Deferred => #[serde(skip_serializing_if = "Deferred::is_unloaded")])]
-#[derive(Debug, Clone, toasty::Model, Serialize)]
+#[derive(Debug, Clone, toasty::Model)]
 pub struct Synonym {
     #[auto]
     #[key]
@@ -521,9 +617,7 @@ pub struct Synonym {
     // is_accepted: bool,
 }
 
-#[skip_serializing_none]
-#[serde_with::apply( Deferred => #[serde(skip_serializing_if = "Deferred::is_unloaded")])]
-#[derive(Debug, Clone, toasty::Model, Serialize)]
+#[derive(Debug, Clone, toasty::Model)]
 pub struct TaxonNote {
     #[auto]
     #[key]

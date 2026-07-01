@@ -1,7 +1,7 @@
 use libpropagation::{
     dto::ObjectReference,
     region::dto::RegionalTaxonStatusDetailsNoRegion,
-    taxonomy::{TaxonNote, dto::TaxonDetails},
+    taxonomy::dto::{TaxonDetails, TaxonNoteDetails, TaxonNoteNoTaxon},
 };
 
 use crate::{cli::taxa::TaxonSearchResult, style, util::join_or_default};
@@ -245,11 +245,11 @@ impl<'a> TaxaSearchResultsView<'a> {
 }
 
 pub struct TaxonNotesListView<'a> {
-    notes: &'a Vec<TaxonNote>,
+    notes: &'a Vec<TaxonNoteNoTaxon>,
 }
 
 impl<'a> TaxonNotesListView<'a> {
-    pub fn new(notes: &'a Vec<TaxonNote>) -> Self {
+    pub fn new(notes: &'a Vec<TaxonNoteNoTaxon>) -> Self {
         Self { notes }
     }
 
@@ -264,27 +264,21 @@ impl<'a> TaxonNotesListView<'a> {
 }
 
 pub struct TaxonNoteDetailsView<'a> {
-    note: &'a TaxonNote,
+    note: &'a TaxonNoteDetails,
 }
 
 impl<'a> TaxonNoteDetailsView<'a> {
-    pub fn new(note: &'a TaxonNote) -> Self {
+    pub fn new(note: &'a TaxonNoteDetails) -> Self {
         Self { note }
     }
 
     pub fn render(&self) -> anyhow::Result<String> {
         let mut tbuilder = tabled::builder::Builder::default();
-        tbuilder.push_record(["ID", &self.note.id.to_string()]);
-        tbuilder.push_record(["Text", &self.note.text]);
-        tbuilder.push_record([
-            "Taxon",
-            &match self.note.taxon.is_unloaded() {
-                true => self.note.taxon_id.to_string(),
-                false => self.note.taxon.get().reference(),
-            },
-        ]);
-        tbuilder.push_record(["Created", &self.note.created_at.to_string()]);
-        tbuilder.push_record(["Updated", &self.note.updated_at.to_string()]);
+        tbuilder.push_record(["ID", &self.note.core.id.to_string()]);
+        tbuilder.push_record(["Text", &self.note.core.text]);
+        tbuilder.push_record(["Taxon", &self.note.taxon.to_string()]);
+        tbuilder.push_record(["Created", &self.note.core.created_at.to_string()]);
+        tbuilder.push_record(["Updated", &self.note.core.updated_at.to_string()]);
         Ok(tbuilder.build().with(style::DetailTable).to_string())
     }
 }

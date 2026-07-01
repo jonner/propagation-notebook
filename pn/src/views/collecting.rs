@@ -1,18 +1,18 @@
-use libpropagation::collecting::CollectingData;
+use libpropagation::taxonomy::dto::CollectingDataDetails;
 use tabled::builder::Builder;
 
 pub struct CollectingDataView<'a> {
-    data: &'a CollectingData,
+    data: &'a CollectingDataDetails,
 }
 
 impl<'a> CollectingDataView<'a> {
-    pub fn new(data: &'a CollectingData) -> Self {
+    pub fn new(data: &'a CollectingDataDetails) -> Self {
         Self { data }
     }
 
     pub fn render(&self) -> anyhow::Result<String> {
         let mut tbuilder = Builder::default();
-        tbuilder.push_record(["Taxon", &self.data.taxon.get().reference()]);
+        tbuilder.push_record(["Taxon", &self.data.taxon.to_string()]);
         tbuilder.push_record([
             "Ripening",
             self.data.ripening_indicators.as_deref().unwrap_or("-"),

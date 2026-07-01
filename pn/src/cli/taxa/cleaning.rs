@@ -1,4 +1,6 @@
-use libpropagation::collecting::TaxonCleaningProcedure;
+use libpropagation::{
+    collecting::TaxonCleaningProcedure, taxonomy::dto::TaxonCleaningProcedureDetails,
+};
 
 use toasty::Db;
 
@@ -55,9 +57,13 @@ impl TaxonCleaningCommands {
     ) -> anyhow::Result<()> {
         match self {
             TaxonCleaningCommands::List => {
-                let procedures = TaxonCleaningProcedure::filter_by_taxon_id(taxon_id)
-                    .exec(db)
-                    .await?;
+                let procedures: Vec<libpropagation::taxonomy::dto::TaxonCleaningProcedureNoTaxon> =
+                    TaxonCleaningProcedure::filter_by_taxon_id(taxon_id)
+                        .exec(db)
+                        .await?
+                        .into_iter()
+                        .map(Into::into)
+                        .collect();
 
                 let output = match format {
                     OutputFormat::Text => {
@@ -69,15 +75,17 @@ impl TaxonCleaningCommands {
                 println!("{output}");
             }
             TaxonCleaningCommands::Show { procedure_id } => {
-                let tcp = TaxonCleaningProcedure::filter_by_taxon_id_and_procedure_id(
-                    taxon_id,
-                    procedure_id,
-                )
-                .include(TaxonCleaningProcedure::fields().taxon())
-                .include(TaxonCleaningProcedure::fields().procedure())
-                .one()
-                .exec(db)
-                .await?;
+                let tcp: TaxonCleaningProcedureDetails =
+                    TaxonCleaningProcedure::filter_by_taxon_id_and_procedure_id(
+                        taxon_id,
+                        procedure_id,
+                    )
+                    .include(TaxonCleaningProcedure::fields().taxon())
+                    .include(TaxonCleaningProcedure::fields().procedure())
+                    .one()
+                    .exec(db)
+                    .await?
+                    .into();
 
                 let output = match format {
                     OutputFormat::Text => TaxonCleaningProcedureDetailView::new(&tcp).render()?,
@@ -90,12 +98,13 @@ impl TaxonCleaningCommands {
                 procedure_id,
                 notes,
             } => {
-                let tcp = TaxonCleaningProcedure::create()
+                let tcp: TaxonCleaningProcedureDetails = TaxonCleaningProcedure::create()
                     .taxon_id(taxon_id)
                     .procedure_id(procedure_id)
                     .notes(notes)
                     .exec(db)
-                    .await?;
+                    .await?
+                    .into();
                 let output = match format {
                     OutputFormat::Text => TaxonCleaningProcedureDetailView::new(&tcp).render()?,
                     OutputFormat::Json => JsonView::new(&tcp).render()?,

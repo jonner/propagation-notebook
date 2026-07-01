@@ -1,6 +1,5 @@
 use crate::{dto::ObjectReference, taxonomy::Taxon};
 use serde::{Deserialize, Serialize};
-use serde_with::skip_serializing_none;
 use toasty::Deferred;
 
 #[derive(
@@ -22,10 +21,7 @@ pub enum ProtocolType {
 }
 
 // TODO: offer customizable parameters (e.g. 'days' for cold moist stratification)?
-#[skip_serializing_none]
-#[serde_with::apply( Deferred => #[serde(skip_serializing_if = "Deferred::is_unloaded")])]
-#[derive(Debug, Clone, toasty::Model, Deserialize, Serialize)]
-#[serde(rename_all = "kebab-case", deny_unknown_fields)]
+#[derive(Debug, Clone, toasty::Model)]
 pub struct Protocol {
     #[key]
     #[auto]
@@ -38,7 +34,6 @@ pub struct Protocol {
     pub notes: Option<String>,
     pub r#type: ProtocolType,
 
-    #[serde(skip)]
     #[has_many]
     pub taxon_protocols: Deferred<Vec<TaxonProtocol>>,
 }
@@ -67,9 +62,7 @@ impl Protocol {
 
 // TODO: if protocols become parametrized, we'd need to add the parameters to
 // this model...
-#[skip_serializing_none]
-#[serde_with::apply( Deferred => #[serde(skip_serializing_if = "Deferred::is_unloaded")])]
-#[derive(Debug, Clone, toasty::Model, Serialize)]
+#[derive(Debug, Clone, toasty::Model)]
 pub struct TaxonProtocol {
     #[key]
     #[index]

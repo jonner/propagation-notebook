@@ -1,12 +1,8 @@
-use serde::Serialize;
-use serde_with::skip_serializing_none;
 use toasty::Deferred;
 
 use crate::{dto::ObjectReference, taxonomy::Taxon};
 
-#[skip_serializing_none]
-#[serde_with::apply( Deferred => #[serde(skip_serializing_if = "Deferred::is_unloaded")])]
-#[derive(Debug, Clone, toasty::Model, Serialize)]
+#[derive(Debug, Clone, toasty::Model)]
 pub struct CollectingData {
     #[auto]
     #[key]
@@ -25,9 +21,7 @@ pub struct CollectingData {
 }
 
 // pivot table for associating a cleaning procedure with a taxon
-#[skip_serializing_none]
-#[serde_with::apply( Deferred => #[serde(skip_serializing_if = "Deferred::is_unloaded")])]
-#[derive(Debug, Clone, toasty::Model, Serialize)]
+#[derive(Debug, Clone, toasty::Model)]
 pub struct TaxonCleaningProcedure {
     #[key]
     #[index]
@@ -45,9 +39,7 @@ pub struct TaxonCleaningProcedure {
     pub procedure: Deferred<CleaningProcedure>,
 }
 
-#[skip_serializing_none]
-#[serde_with::apply( Deferred => #[serde(skip_serializing_if = "Deferred::is_unloaded")])]
-#[derive(Debug, Clone, toasty::Model, Serialize)]
+#[derive(Debug, Clone, toasty::Model)]
 pub struct CleaningProcedure {
     #[auto]
     #[key]

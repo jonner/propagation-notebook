@@ -220,9 +220,7 @@ pub mod dto {
     }
 }
 
-#[skip_serializing_none]
-#[serde_with::apply( Deferred => #[serde(skip_serializing_if = "Deferred::is_unloaded")])]
-#[derive(Debug, Clone, toasty::Model, Serialize)]
+#[derive(Debug, Clone, toasty::Model)]
 pub struct Region {
     #[auto]
     #[key]
@@ -231,7 +229,6 @@ pub struct Region {
     #[index]
     pub name: String,
     // FIXME: geojson??
-    #[serde(skip)]
     pub geometry: Option<toasty::Json<geojson::Geometry>>,
     pub notes: Option<String>,
 
@@ -400,9 +397,7 @@ impl Display for RegionalHarvestWindow {
     }
 }
 
-#[skip_serializing_none]
-#[serde_with::apply( Deferred => #[serde(skip_serializing_if = "Deferred::is_unloaded")])]
-#[derive(Debug, Clone, toasty::Model, Serialize)]
+#[derive(Debug, Clone, toasty::Model)]
 #[index(taxon_id, region_id)]
 pub struct RegionalTaxonStatus {
     #[auto]
@@ -424,7 +419,6 @@ pub struct RegionalTaxonStatus {
     pub c_value: Option<u64>,
     pub conservation_status: Option<ConservationStatus>,
     pub wetland_indicator: Option<WetlandIndicator>,
-    #[serde(skip_serializing_if = "RegionalHarvestWindow::is_empty")]
     pub harvest_window: RegionalHarvestWindow,
     #[index]
     pub native_plant_community_id: Option<u64>,
@@ -432,9 +426,7 @@ pub struct RegionalTaxonStatus {
     pub native_plant_community: Deferred<NativePlantCommunity>,
 }
 
-#[skip_serializing_none]
-#[serde_with::apply( Deferred => #[serde(skip_serializing_if = "Deferred::is_unloaded")])]
-#[derive(Debug, Clone, toasty::Model, Serialize)]
+#[derive(Debug, Clone, toasty::Model)]
 pub struct NativePlantCommunity {
     #[auto]
     #[key]

@@ -1,4 +1,4 @@
-use libpropagation::collecting::CollectingData;
+use libpropagation::{collecting::CollectingData, taxonomy::dto::CollectingDataDetails};
 
 use toasty::Db;
 
@@ -57,6 +57,7 @@ impl TaxonCollectingCommands {
                     .await
                 {
                     Ok(data) => {
+                        let data: CollectingDataDetails = data.into();
                         let output = match format {
                             OutputFormat::Text => CollectingDataView::new(&data).render()?,
                             OutputFormat::Json => JsonView::new(&data).render()?,
