@@ -3,6 +3,7 @@ use serde::Serialize;
 pub mod cleaning;
 pub mod collecting;
 pub mod propagation;
+pub mod regions;
 pub mod taxa;
 
 pub struct JsonView<'a, T: Serialize> {

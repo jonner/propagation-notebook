@@ -2,13 +2,17 @@ use std::f64::consts::PI;
 use std::fmt::Display;
 use std::path::PathBuf;
 
+use crate::cli::OutputFormat;
 use crate::util::IndicatifImportProgress;
+use crate::views::regions::{RegionDetailsView, RegionsListView};
+use crate::views::{JsonView, YamlView};
 use crate::{cli::print_regional_taxa_table, style};
 use anyhow::anyhow;
 use geo::BoundingRect;
 use geo::ChamberlainDuquetteArea;
 use indicatif::ProgressIterator;
 use jiff::civil::Date;
+use libpropagation::region::dto::{CompactRegion, FullRegion};
 use libpropagation::{
     region::{
         ConservationStatus, Origin, Region, RegionalHarvestWindow, RegionalTaxonStatus,
@@ -121,31 +125,36 @@ pub enum RegionCommands {
 }
 
 impl RegionCommands {
-    pub async fn run(&self, db: &mut Db) -> anyhow::Result<()> {
+    pub async fn run(&self, db: &mut Db, format: OutputFormat) -> anyhow::Result<()> {
         match self {
             RegionCommands::List => {
-                let regions = Region::all()
+                let regions: Vec<CompactRegion> = Region::all()
                     .include(Region::fields().taxon_statuses())
                     .exec(db)
-                    .await?;
-                if regions.is_empty() {
-                    println!("No Regions found");
-                } else {
-                    let mut tbuilder = tabled::builder::Builder::default();
-                    tbuilder.push_record(["ID", "Name", "Taxa"]);
-                    for region in regions {
-                        tbuilder.push_record([
-                            region.id.to_string(),
-                            region.name,
-                            region.taxon_statuses.get().len().to_string(),
-                        ])
-                    }
-                    println!("{}", tbuilder.build().with(style::ListTable));
-                }
+                    .await?
+                    .into_iter()
+                    .map(|region| region.into())
+                    .collect();
+                let output = match format {
+                    OutputFormat::Text => RegionsListView::new(&regions).render()?,
+                    OutputFormat::Json => JsonView::new(&regions).render()?,
+                    OutputFormat::Yaml => YamlView::new(&regions).render()?,
+                };
+                println!("{output}");
             }
             RegionCommands::Show { id } => {
-                let mut table = region_details_table(db, id).await?;
-                println!("{}", table.with(style::DetailTable))
+                let region: FullRegion = Region::filter_by_id(id)
+                    .include(Region::fields().taxon_statuses())
+                    .one()
+                    .exec(db)
+                    .await?
+                    .into();
+                let output = match format {
+                    OutputFormat::Text => RegionDetailsView::new(&region).render()?,
+                    OutputFormat::Json => JsonView::new(&region).render()?,
+                    OutputFormat::Yaml => YamlView::new(&region).render()?,
+                };
+                println!("{output}")
             }
             RegionCommands::Modify {
                 id,
@@ -165,31 +174,50 @@ impl RegionCommands {
                     update_query = update_query.notes(notes);
                 }
                 update_query.exec(db).await?;
-                println!("Region {id} updated");
+                let region: FullRegion = Region::filter_by_id(id)
+                    .include(Region::fields().taxon_statuses())
+                    .one()
+                    .exec(db)
+                    .await?
+                    .into();
+                let output = match format {
+                    OutputFormat::Text => RegionDetailsView::new(&region).render()?,
+                    OutputFormat::Json => JsonView::new(&region).render()?,
+                    OutputFormat::Yaml => YamlView::new(&region).render()?,
+                };
+                println!("{output}")
             }
             RegionCommands::Add {
                 region_name,
                 geometry,
                 notes,
             } => {
-                let new_region = Region::create()
+                let new_region: FullRegion = Region::create()
                     .name(region_name)
                     .geometry(geometry.resolve().await?.map(|v| v.into()))
                     .notes(notes)
                     .exec(db)
-                    .await?;
-                println!("Added new region {}", new_region.reference());
+                    .await?
+                    .into();
+                let output = match format {
+                    OutputFormat::Text => RegionDetailsView::new(&new_region).render()?,
+                    OutputFormat::Json => JsonView::new(&new_region).render()?,
+                    OutputFormat::Yaml => YamlView::new(&new_region).render()?,
+                };
+                println!("{output}")
             }
             RegionCommands::Import { path } => {
                 let file_reader = std::fs::OpenOptions::new().read(true).open(path)?;
-                let region =
+                let region: FullRegion =
                     Region::import(db, file_reader, &mut IndicatifImportProgress::default())
-                        .await?;
-                println!(
-                    "Created region '{}' with {} taxa",
-                    region.reference(),
-                    region.taxon_statuses.get().len()
-                );
+                        .await?
+                        .into();
+                let output = match format {
+                    OutputFormat::Text => RegionDetailsView::new(&region).render()?,
+                    OutputFormat::Json => JsonView::new(&region).render()?,
+                    OutputFormat::Yaml => YamlView::new(&region).render()?,
+                };
+                println!("{output}")
             }
             RegionCommands::Export { id, output_file } => {
                 let region = Region::filter_by_id(id)
@@ -220,10 +248,13 @@ impl RegionCommands {
             }
             RegionCommands::Remove { id, assumeyes } => {
                 if *assumeyes || {
-                    println!(
-                        "{}",
-                        region_details_table(db, id).await?.with(style::DetailTable)
-                    );
+                    let region: FullRegion = Region::filter_by_id(id)
+                        .include(Region::fields().taxon_statuses())
+                        .one()
+                        .exec(db)
+                        .await?
+                        .into();
+                    println!("{}", RegionDetailsView::new(&region).render()?);
                     inquire::Confirm::new("Are you sure you wish to delete this region?")
                         .with_default(false)
                         .with_help_message("All associated data will be deleted")
@@ -322,49 +353,6 @@ impl RegionCommands {
     }
 }
 
-async fn region_details_table(db: &mut Db, id: &u64) -> Result<tabled::Table, anyhow::Error> {
-    let region = Region::filter_by_id(id)
-        .include(Region::fields().taxon_statuses())
-        .one()
-        .exec(db)
-        .await?;
-    let mut tbuilder = tabled::builder::Builder::default();
-    tbuilder.push_record(["ID", &region.id.to_string()]);
-    tbuilder.push_record(["Name", &region.name]);
-    tbuilder.push_record(["Notes", &region.notes.unwrap_or_else(|| "-".to_string())]);
-    tbuilder.push_record(["Taxa", &region.taxon_statuses.get().len().to_string()]);
-    tbuilder.push_record([
-        "Geometry",
-        {
-            region.geometry.map(|v| match &v.value {
-                geojson::GeometryValue::Point { coordinates } => {
-                    format!("Point: ({}, {})", coordinates[0], coordinates[1])
-                }
-                geojson::GeometryValue::LineString { coordinates } => {
-                    format!("LineString: {} coordinates", coordinates.len())
-                }
-                geojson::GeometryValue::Polygon { coordinates } => {
-                    format!("Polygon: {} linear rings", coordinates.len())
-                }
-                geojson::GeometryValue::MultiPoint { coordinates } => {
-                    format!("MultiPoint: {} points", coordinates.len())
-                }
-                geojson::GeometryValue::MultiLineString { coordinates } => {
-                    format!("MultiLineString: {} lines", coordinates.len())
-                }
-                geojson::GeometryValue::MultiPolygon { coordinates } => {
-                    format!("MultiPolygon: {} polygons", coordinates.len())
-                }
-                geojson::GeometryValue::GeometryCollection { geometries } => {
-                    format!("GeometryCollection: {} sub-geometries", geometries.len())
-                }
-            })
-        }
-        .as_deref()
-        .unwrap_or("-"),
-    ]);
-    Ok(tbuilder.build())
-}
 fn parse_month_day(input: &str) -> anyhow::Result<jiff::civil::Date> {
     let mut parsed = jiff::fmt::strtime::parse("%m-%d", input)?;
     parsed.set_year(Some(2000))?;

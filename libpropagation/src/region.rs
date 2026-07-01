@@ -46,6 +46,54 @@ pub enum ConservationStatus {
     SpecialConcern,
 }
 
+pub mod dto {
+    use serde::Serialize;
+
+    #[derive(Debug, Serialize)]
+    pub struct CompactRegion {
+        pub id: u64,
+        pub name: String,
+        pub n_taxa: Option<usize>,
+    }
+
+    impl From<super::Region> for CompactRegion {
+        fn from(region: super::Region) -> Self {
+            Self {
+                id: region.id,
+                name: region.name,
+                n_taxa: match region.taxon_statuses.is_unloaded() {
+                    true => None,
+                    false => Some(region.taxon_statuses.get().len()),
+                },
+            }
+        }
+    }
+
+    #[derive(Debug, Serialize)]
+    pub struct FullRegion {
+        pub id: u64,
+        pub name: String,
+        pub notes: Option<String>,
+        pub n_taxa: Option<usize>,
+        pub geometry: Option<geojson::Geometry>,
+    }
+
+    impl From<super::Region> for FullRegion {
+        fn from(region: super::Region) -> Self {
+            Self {
+                id: region.id,
+                name: region.name,
+                notes: region.notes,
+                geometry: region.geometry.map(|inner| inner.0),
+                n_taxa: match region.taxon_statuses.is_unloaded() {
+                    true => None,
+                    false => Some(region.taxon_statuses.get().len()),
+                },
+            }
+        }
+    }
+}
+
 #[skip_serializing_none]
 #[serde_with::apply( Deferred => #[serde(skip_serializing_if = "Deferred::is_unloaded")])]
 #[derive(Debug, Clone, toasty::Model, Serialize)]
