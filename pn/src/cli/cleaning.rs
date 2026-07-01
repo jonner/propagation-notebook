@@ -1,7 +1,13 @@
-use libpropagation::collecting::CleaningProcedure;
+use libpropagation::collecting::{
+    CleaningProcedure,
+    dto::{CleaningProcedureCompact, CleaningProcedureDetails},
+};
 use toasty::Db;
 
-use crate::style;
+use crate::{
+    cli::OutputFormat,
+    views::cleaning::{CleaningProcedureDetailsView, CleaningProcedureListView},
+};
 
 #[derive(Debug, clap::Subcommand)]
 pub enum CleaningCommands {
@@ -41,64 +47,70 @@ pub enum CleaningCommands {
 }
 
 impl CleaningCommands {
-    pub async fn run(&self, db: &mut Db) -> anyhow::Result<()> {
+    pub async fn run(&self, db: &mut Db, format: OutputFormat) -> anyhow::Result<()> {
         match self {
             CleaningCommands::List => {
-                let items = CleaningProcedure::all()
+                let items: Vec<CleaningProcedureCompact> = CleaningProcedure::all()
                     .include(CleaningProcedure::fields().taxon_links().taxon())
                     .exec(db)
-                    .await?;
-                let nitems = items.len();
-                let mut tbuilder = tabled::builder::Builder::default();
-                tbuilder.push_record(["ID", "Name", "Taxa"]);
-                for item in items {
-                    tbuilder.push_record([
-                        item.id.to_string(),
-                        item.name,
-                        item.taxon_links.get().len().to_string(),
-                    ])
-                }
-                println!("{}", tbuilder.build().with(style::ListTable));
-                println!("\n{nitems} found");
+                    .await?
+                    .into_iter()
+                    .map(Into::into)
+                    .collect();
+                let output = match format {
+                    OutputFormat::Text => CleaningProcedureListView::new(&items).render()?,
+                    OutputFormat::Json => todo!(),
+                    OutputFormat::Yaml => todo!(),
+                };
+                println!("{output}");
             }
             CleaningCommands::Show { id } => {
-                let mut table = cleaning_procedure_details_table(db, id).await?;
-                println!("{}", table.with(style::ListTable));
+                let procedure: CleaningProcedureDetails = CleaningProcedure::filter_by_id(id)
+                    .include(CleaningProcedure::fields().taxon_links().taxon())
+                    .one()
+                    .exec(db)
+                    .await?
+                    .into();
+                let output = match format {
+                    OutputFormat::Text => CleaningProcedureDetailsView::new(&procedure).render()?,
+                    OutputFormat::Json => todo!(),
+                    OutputFormat::Yaml => todo!(),
+                };
+                println!("{output}");
             }
             CleaningCommands::Add {
                 name,
                 instructions,
                 notes,
             } => {
-                let item = CleaningProcedure::create()
+                let item: CleaningProcedureDetails = CleaningProcedure::create()
                     .name(name)
                     .instructions(instructions)
                     .notes(notes)
                     .exec(db)
-                    .await?;
-                println!("Added new procedure {}", item.id);
+                    .await?
+                    .into();
+                let output = match format {
+                    OutputFormat::Text => CleaningProcedureDetailsView::new(&item).render()?,
+                    OutputFormat::Json => todo!(),
+                    OutputFormat::Yaml => todo!(),
+                };
+                println!("{output}");
             }
             CleaningCommands::Remove { id, assumeyes } => {
-                let item = CleaningProcedure::filter_by_id(id)
-                    .include(CleaningProcedure::fields().taxon_links())
-                    .one()
-                    .exec(db)
-                    .await?;
                 if *assumeyes || {
-                    println!(
-                        "{}",
-                        cleaning_procedure_details_table(db, id)
-                            .await?
-                            .with(style::ListTable)
-                    );
+                    let item: CleaningProcedureDetails = CleaningProcedure::filter_by_id(id)
+                        .include(CleaningProcedure::fields().taxon_links().taxon())
+                        .one()
+                        .exec(db)
+                        .await?
+                        .into();
+                    println!("{}", CleaningProcedureDetailsView::new(&item).render()?);
                     inquire::Confirm::new(&format!(
                         "Are you sure you wish to remove cleaning procedure {id}?"
                     ))
                     .with_default(false)
-                    .with_help_message(&format!(
-                        "It is used by {} taxa",
-                        item.taxon_links.get().len()
-                    ))
+                    .with_help_message(&format!("It is used by {} taxa", item.taxa.len()))
                     .prompt()?
                 } {
                     CleaningProcedure::delete_by_id(db, id).await?;
@@ -122,40 +134,15 @@ impl CleaningCommands {
                     query = query.notes(notes);
                 }
                 query.exec(db).await?;
-                println!("Modified cleaning procedure {id}");
+                let item: CleaningProcedureDetails = CleaningProcedure::filter_by_id(id)
+                    .include(CleaningProcedure::fields().taxon_links().taxon())
+                    .one()
+                    .exec(db)
+                    .await?
+                    .into();
+                println!("{}", CleaningProcedureDetailsView::new(&item).render()?);
             }
         }
         Ok(())
     }
-}
-
-async fn cleaning_procedure_details_table(
-    db: &mut Db,
-    id: &u64,
-) -> Result<tabled::Table, anyhow::Error> {
-    let procedure = CleaningProcedure::filter_by_id(id)
-        .include(CleaningProcedure::fields().taxon_links().taxon())
-        .one()
-        .exec(db)
-        .await?;
-    let mut tbuilder = tabled::builder::Builder::default();
-    tbuilder.push_record(["ID", &procedure.id.to_string()]);
-    tbuilder.push_record(["Name", &procedure.name]);
-    tbuilder.push_record(["Notes", &procedure.notes.unwrap_or_else(|| "-".into())]);
-    tbuilder.push_record(["Instructions", &procedure.instructions]);
-
-    let mut inner_table = tabled::builder::Builder::default();
-    let links = procedure.taxon_links.get();
-    if !links.is_empty() {
-        inner_table.push_record(["ID", "Name"]);
-        for link in links {
-            let taxon = link.taxon.get();
-            inner_table.push_record([&taxon.id.to_string(), &taxon.complete_name])
-        }
-    }
-    tbuilder.push_record([
-        "Taxa",
-        &inner_table.build().with(style::ListTable).to_string(),
-    ]);
-    Ok(tbuilder.build())
 }

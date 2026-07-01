@@ -1,4 +1,7 @@
-use libpropagation::taxonomy::dto::{TaxonCleaningProcedureDetails, TaxonCleaningProcedureNoTaxon};
+use libpropagation::{
+    collecting::dto::{CleaningProcedureCompact, CleaningProcedureDetails},
+    taxonomy::dto::{TaxonCleaningProcedureDetails, TaxonCleaningProcedureNoTaxon},
+};
 
 use crate::style;
 
@@ -38,6 +41,66 @@ impl<'a> TaxonCleaningProcedureDetailView<'a> {
         tbuilder.push_record(["Taxon", &self.tcp.taxon.to_string()]);
         tbuilder.push_record(["Procedure", &self.tcp.procedure.to_string()]);
         tbuilder.push_record(["Notes", self.tcp.notes.as_deref().unwrap_or("-")]);
+        Ok(tbuilder.build().with(style::DetailTable).to_string())
+    }
+}
+
+pub struct CleaningProcedureListView<'a> {
+    procedures: &'a Vec<CleaningProcedureCompact>,
+}
+
+impl<'a> CleaningProcedureListView<'a> {
+    pub fn new(procedures: &'a Vec<CleaningProcedureCompact>) -> Self {
+        Self { procedures }
+    }
+    pub fn render(&self) -> anyhow::Result<String> {
+        let nitems = self.procedures.len();
+        let mut tbuilder = tabled::builder::Builder::default();
+        tbuilder.push_record(["ID", "Name", "Taxa"]);
+        for item in self.procedures {
+            tbuilder.push_record([
+                &item.id.to_string(),
+                &item.name,
+                item.n_taxa.map(|n| n.to_string()).as_deref().unwrap_or("-"),
+            ])
+        }
+        Ok(format!(
+            "{}\n{nitems} found",
+            tbuilder.build().with(style::ListTable)
+        ))
+    }
+}
+
+pub struct CleaningProcedureDetailsView<'a> {
+    procedure: &'a CleaningProcedureDetails,
+}
+
+impl<'a> CleaningProcedureDetailsView<'a> {
+    pub fn new(procedure: &'a CleaningProcedureDetails) -> Self {
+        Self { procedure }
+    }
+
+    pub fn render(&self) -> anyhow::Result<String> {
+        let mut tbuilder = tabled::builder::Builder::default();
+        tbuilder.push_record(["ID", &self.procedure.id.to_string()]);
+        tbuilder.push_record(["Name", &self.procedure.name]);
+        tbuilder.push_record(["Notes", self.procedure.notes.as_deref().unwrap_or("-")]);
+        tbuilder.push_record(["Instructions", &self.procedure.instructions]);
+
+        let mut inner_table = tabled::builder::Builder::default();
+        if !self.procedure.taxa.is_empty() {
+            inner_table.push_record(["ID", "Name"]);
+            for link in &self.procedure.taxa {
+                inner_table.push_record([
+                    &link.id.to_string(),
+                    link.name.as_deref().unwrap_or_default(),
+                ])
+            }
+        }
+        tbuilder.push_record([
+            "Taxa",
+            &inner_table.build().with(style::ListTable).to_string(),
+        ]);
         Ok(tbuilder.build().with(style::DetailTable).to_string())
     }
 }

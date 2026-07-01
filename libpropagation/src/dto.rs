@@ -11,7 +11,7 @@ pub struct ObjectReference {
 }
 
 impl ObjectReference {
-    pub fn from_deferred<T>(deferred: Deferred<T>, default_id: u64) -> Self
+    pub fn from_deferred<T>(deferred: &Deferred<T>, default_id: u64) -> Self
     where
         Self: for<'a> From<&'a T>,
     {
@@ -21,6 +21,16 @@ impl ObjectReference {
                 name: None,
             },
             false => deferred.get().into(),
+        }
+    }
+
+    pub fn from_deferred_vec<T>(deferred: Deferred<Vec<T>>) -> Vec<Self>
+    where
+        Self: for<'a> From<&'a T>,
+    {
+        match deferred.is_unloaded() {
+            true => Vec::default(),
+            false => deferred.get().iter().map(Into::into).collect(),
         }
     }
 

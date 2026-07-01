@@ -132,7 +132,7 @@ pub struct TaxonNoteDetails {
 impl From<super::TaxonNote> for TaxonNoteDetails {
     fn from(value: super::TaxonNote) -> Self {
         Self {
-            taxon: ObjectReference::from_deferred(value.taxon, value.taxon_id),
+            taxon: ObjectReference::from_deferred(&value.taxon, value.taxon_id),
             core: TaxonNoteNoTaxon {
                 id: value.id,
                 text: value.text,
@@ -193,7 +193,7 @@ impl From<&super::CollectingData> for CollectingDataDetails {
 impl From<super::CollectingData> for CollectingDataDetails {
     fn from(value: super::CollectingData) -> Self {
         Self {
-            taxon: ObjectReference::from_deferred(value.taxon, value.taxon_id),
+            taxon: ObjectReference::from_deferred(&value.taxon, value.taxon_id),
             ripening_indicators: value.ripening_indicators,
             harvesting_notes: value.harvesting_notes,
             storage: value.storage,
@@ -236,8 +236,8 @@ pub struct TaxonCleaningProcedureDetails {
 impl From<super::TaxonCleaningProcedure> for TaxonCleaningProcedureDetails {
     fn from(value: super::TaxonCleaningProcedure) -> Self {
         Self {
-            taxon: ObjectReference::from_deferred(value.taxon, value.taxon_id),
-            procedure: ObjectReference::from_deferred(value.procedure, value.procedure_id),
+            taxon: ObjectReference::from_deferred(&value.taxon, value.taxon_id),
+            procedure: ObjectReference::from_deferred(&value.procedure, value.procedure_id),
             notes: value.notes,
         }
     }
@@ -259,7 +259,7 @@ pub struct TaxonCleaningProcedureNoTaxon {
 impl From<super::TaxonCleaningProcedure> for TaxonCleaningProcedureNoTaxon {
     fn from(value: super::TaxonCleaningProcedure) -> Self {
         Self {
-            procedure: ObjectReference::from_deferred(value.procedure, value.procedure_id),
+            procedure: ObjectReference::from_deferred(&value.procedure, value.procedure_id),
             notes: value.notes,
         }
     }
@@ -281,9 +281,9 @@ pub struct TaxonProtocolDetails {
 impl From<super::TaxonProtocol> for TaxonProtocolDetails {
     fn from(value: super::TaxonProtocol) -> Self {
         Self {
-            taxon: ObjectReference::from_deferred(value.taxon, value.taxon_id),
+            taxon: ObjectReference::from_deferred(&value.taxon, value.taxon_id),
             core: TaxonProtocolNoTaxon {
-                protocol: ObjectReference::from_deferred(value.protocol, value.protocol_id),
+                protocol: ObjectReference::from_deferred(&value.protocol, value.protocol_id),
                 confidence: value.confidence,
                 notes: value.notes,
             },
@@ -307,7 +307,7 @@ pub struct TaxonProtocolNoTaxon {
 impl From<super::TaxonProtocol> for TaxonProtocolNoTaxon {
     fn from(value: super::TaxonProtocol) -> Self {
         Self {
-            protocol: ObjectReference::from_deferred(value.protocol, value.protocol_id),
+            protocol: ObjectReference::from_deferred(&value.protocol, value.protocol_id),
             confidence: value.confidence,
             notes: value.notes,
         }

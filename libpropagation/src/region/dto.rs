@@ -81,7 +81,7 @@ impl From<&super::RegionalTaxonStatus> for RegionalTaxonStatusDetailsNoTaxon {
 impl From<super::RegionalTaxonStatus> for RegionalTaxonStatusDetailsNoTaxon {
     fn from(value: super::RegionalTaxonStatus) -> Self {
         Self {
-            region: ObjectReference::from_deferred(value.region, value.region_id),
+            region: ObjectReference::from_deferred(&value.region, value.region_id),
             core: RegionalTaxonStatusDetailsCore {
                 origin: value.origin,
                 c_value: value.c_value,
