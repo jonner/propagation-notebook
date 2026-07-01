@@ -1,4 +1,7 @@
-use libpropagation::region::dto::{CompactRegion, FullRegion};
+use libpropagation::region::{
+    RegionalTaxonStatus,
+    dto::{CompactRegion, FullRegion, RegionalTaxonHarvestInfo},
+};
 
 use crate::style;
 
@@ -86,5 +89,90 @@ impl<'a> RegionDetailsView<'a> {
             .unwrap_or("-"),
         ]);
         Ok(tbuilder.build().with(style::DetailTable).to_string())
+    }
+}
+
+pub struct RegionalTaxonStatusDetailsView<'a> {
+    status: &'a RegionalTaxonStatus,
+}
+
+impl<'a> RegionalTaxonStatusDetailsView<'a> {
+    pub fn new(status: &'a RegionalTaxonStatus) -> Self {
+        Self { status }
+    }
+
+    pub fn render(&self) -> anyhow::Result<String> {
+        let mut tbuilder = tabled::builder::Builder::default();
+        tbuilder.push_record([
+            "Taxon",
+            &match self.status.taxon.is_unloaded() {
+                true => self.status.taxon_id.to_string(),
+                false => self.status.taxon.get().reference(),
+            },
+        ]);
+        tbuilder.push_record([
+            "Region",
+            &match self.status.region.is_unloaded() {
+                true => self.status.region_id.to_string(),
+                false => self.status.region.get().reference(),
+            },
+        ]);
+        tbuilder.push_record([
+            "Origin",
+            &self
+                .status
+                .origin
+                .unwrap_or(libpropagation::region::Origin::Unknown)
+                .to_string(),
+        ]);
+        tbuilder.push_record([
+            "C-value",
+            &self
+                .status
+                .c_value
+                .map(|v| v.to_string())
+                .unwrap_or_else(|| "-".into()),
+        ]);
+        tbuilder.push_record([
+            "Conservation Status",
+            &self
+                .status
+                .conservation_status
+                .map(|v| v.to_string())
+                .unwrap_or_else(|| "-".into()),
+        ]);
+        tbuilder.push_record([
+            "Wetland Indicator",
+            &self
+                .status
+                .wetland_indicator
+                .map(|v| v.to_string())
+                .unwrap_or_else(|| "-".into()),
+        ]);
+        tbuilder.push_record(["Harvest Window", &self.status.harvest_window.to_string()]);
+        Ok(tbuilder.build().with(style::DetailTable).to_string())
+    }
+}
+
+pub struct RegionalHarvestDateListView<'a> {
+    regional_taxa: &'a Vec<RegionalTaxonHarvestInfo>,
+}
+
+impl<'a> RegionalHarvestDateListView<'a> {
+    pub fn new(regional_taxa: &'a Vec<RegionalTaxonHarvestInfo>) -> Self {
+        Self { regional_taxa }
+    }
+
+    pub fn render(&self) -> anyhow::Result<String> {
+        let mut tbuilder = tabled::builder::Builder::default();
+        tbuilder.push_record(["Region", "Taxon", "Harvest Dates"]);
+        for regional_taxon in self.regional_taxa {
+            tbuilder.push_record([
+                regional_taxon.region.to_string(),
+                regional_taxon.taxon.to_string(),
+                regional_taxon.harvest_window.to_string(),
+            ])
+        }
+        Ok(tbuilder.build().with(style::ListTable).to_string())
     }
 }

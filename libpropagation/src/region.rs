@@ -46,8 +46,19 @@ pub enum ConservationStatus {
     SpecialConcern,
 }
 
+impl From<&Region> for crate::dto::ObjectReference {
+    fn from(region: &Region) -> Self {
+        Self {
+            id: region.id,
+            name: region.name.clone(),
+        }
+    }
+}
+
 pub mod dto {
     use serde::Serialize;
+
+    use crate::dto::ObjectReference;
 
     #[derive(Debug, Serialize)]
     pub struct CompactRegion {
@@ -89,6 +100,23 @@ pub mod dto {
                     true => None,
                     false => Some(region.taxon_statuses.get().len()),
                 },
+            }
+        }
+    }
+
+    #[derive(Serialize)]
+    pub struct RegionalTaxonHarvestInfo {
+        pub taxon: ObjectReference,
+        pub region: ObjectReference,
+        pub harvest_window: super::RegionalHarvestWindow,
+    }
+
+    impl From<super::RegionalTaxonStatus> for RegionalTaxonHarvestInfo {
+        fn from(rts: super::RegionalTaxonStatus) -> Self {
+            Self {
+                taxon: rts.taxon.get().into(),
+                region: rts.region.get().into(),
+                harvest_window: rts.harvest_window,
             }
         }
     }

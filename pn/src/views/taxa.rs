@@ -166,34 +166,39 @@ impl<'a> RegionalTaxaListView<'a> {
             "Wetland Indicator",
         ]);
         for taxon in self.taxa {
-            let status = taxon
+            if let Some(status) = taxon
                 .regional_statuses
                 .get()
                 .iter()
                 .find(|n| n.region_id == self.region_id)
-                .unwrap();
-            tbuilder.push_record([
-                taxon.id.to_string(),
-                taxon.complete_name.clone(),
-                status
-                    .origin
-                    .map(|s| s.to_string())
-                    .unwrap_or_else(|| "-".into()),
-                status
-                    .conservation_status
-                    .map(|s| s.to_string())
-                    .unwrap_or_else(|| "-".into()),
-                status
-                    .c_value
-                    .map(|s| s.to_string())
-                    .unwrap_or_else(|| "-".into()),
-                status
-                    .wetland_indicator
-                    .map(|s| s.to_string())
-                    .unwrap_or_else(|| "-".into()),
-            ]);
+            {
+                tbuilder.push_record([
+                    taxon.id.to_string(),
+                    taxon.complete_name.clone(),
+                    status
+                        .origin
+                        .map(|s| s.to_string())
+                        .unwrap_or_else(|| "-".into()),
+                    status
+                        .conservation_status
+                        .map(|s| s.to_string())
+                        .unwrap_or_else(|| "-".into()),
+                    status
+                        .c_value
+                        .map(|s| s.to_string())
+                        .unwrap_or_else(|| "-".into()),
+                    status
+                        .wetland_indicator
+                        .map(|s| s.to_string())
+                        .unwrap_or_else(|| "-".into()),
+                ]);
+            }
         }
-        Ok(tbuilder.build().with(style::ListTable).to_string())
+        Ok(format!(
+            "{}\n{} taxa",
+            tbuilder.build().with(style::ListTable),
+            self.taxa.len()
+        ))
     }
 }
 

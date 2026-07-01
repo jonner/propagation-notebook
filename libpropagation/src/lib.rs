@@ -41,3 +41,18 @@ pub trait ImportProgressReporter {
     fn increment(&mut self);
     fn finish_step(&mut self);
 }
+pub mod dto {
+    use serde::Serialize;
+
+    #[derive(Serialize)]
+    pub struct ObjectReference {
+        pub id: u64,
+        pub name: String,
+    }
+
+    impl std::fmt::Display for ObjectReference {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            write!(f, "{}: {}", self.id, self.name)
+        }
+    }
+}

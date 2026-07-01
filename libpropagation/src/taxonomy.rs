@@ -159,6 +159,15 @@ pub enum LifeCycle {
     Other,
 }
 
+impl From<&Taxon> for crate::dto::ObjectReference {
+    fn from(taxon: &Taxon) -> Self {
+        Self {
+            id: taxon.id,
+            name: taxon.complete_name.clone(),
+        }
+    }
+}
+
 #[skip_serializing_none]
 #[serde_with::apply( Deferred => #[serde(skip_serializing_if = "Deferred::is_unloaded")])]
 #[derive(Debug, Clone, toasty::Model, Serialize)]

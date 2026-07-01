@@ -4,15 +4,17 @@ use std::path::PathBuf;
 
 use crate::cli::OutputFormat;
 use crate::util::IndicatifImportProgress;
-use crate::views::regions::{RegionDetailsView, RegionsListView};
+use crate::views::regions::{
+    RegionDetailsView, RegionalHarvestDateListView, RegionalTaxonStatusDetailsView, RegionsListView,
+};
+use crate::views::taxa::RegionalTaxaListView;
 use crate::views::{JsonView, YamlView};
-use crate::{cli::print_regional_taxa_table, style};
 use anyhow::anyhow;
 use geo::BoundingRect;
 use geo::ChamberlainDuquetteArea;
 use indicatif::ProgressIterator;
 use jiff::civil::Date;
-use libpropagation::region::dto::{CompactRegion, FullRegion};
+use libpropagation::region::dto::{CompactRegion, FullRegion, RegionalTaxonHarvestInfo};
 use libpropagation::{
     region::{
         ConservationStatus, Origin, Region, RegionalHarvestWindow, RegionalTaxonStatus,
@@ -347,7 +349,9 @@ impl RegionCommands {
                 }
                 println!("Updated {n_updates} taxa");
             }
-            RegionCommands::Taxa { region_id, command } => command.run(db, *region_id).await?,
+            RegionCommands::Taxa { region_id, command } => {
+                command.run(db, *region_id, format).await?
+            }
         }
         Ok(())
     }
@@ -361,7 +365,7 @@ fn parse_month_day(input: &str) -> anyhow::Result<jiff::civil::Date> {
 
 #[derive(clap::Args, Debug)]
 pub struct RegionalTaxonProperties {
-    #[arg(short, long, help = "Origin of the taxon vis-a-vis this region")]
+    #[arg(long, help = "Origin of the taxon vis-a-vis this region")]
     pub origin: Option<Origin>,
     #[arg(
         long,
@@ -397,8 +401,16 @@ pub struct RegionalTaxonProperties {
 
 #[derive(Debug, clap::Subcommand)]
 pub enum RegionTaxaCommands {
-    #[command(about = "Print a list of taxa for a region")]
-    List,
+    #[command(about = "Print a list of taxa for a region", group(clap::ArgGroup::new("list_taxa_fields").args(["missing_dates", "ready_to_harvest"]).required(false).multiple(false)))]
+    List {
+        #[arg(
+            long,
+            help = "Show only species that are missing harvest date information"
+        )]
+        missing_dates: bool,
+        #[arg(long, help = "Show only species that are ready to harvest today")]
+        ready_to_harvest: bool,
+    },
     #[command(about = "Show regional information about a taxon")]
     Show {
         #[arg(help = "A taxon ID")]
@@ -451,68 +463,23 @@ pub enum RegionTaxaCommands {
         )]
         date: Date,
     },
-    #[command(about = "Show species that do not have harvest dates for this region")]
-    MissingDates,
-}
-
-async fn regional_taxa_status_details_table(
-    db: &mut Db,
-    region_id: u64,
-    taxon_id: u64,
-) -> Result<tabled::Table, anyhow::Error> {
-    let status = RegionalTaxonStatus::filter_by_taxon_id_and_region_id(taxon_id, region_id)
-        .include(RegionalTaxonStatus::fields().region())
-        .include(RegionalTaxonStatus::fields().taxon())
-        .one()
-        .exec(db)
-        .await?;
-    let mut tbuilder = tabled::builder::Builder::default();
-    tbuilder.push_record(["Taxon", &status.taxon.get().reference()]);
-    tbuilder.push_record(["Region", &status.region.get().reference()]);
-    tbuilder.push_record([
-        "Origin",
-        &status
-            .origin
-            .unwrap_or(libpropagation::region::Origin::Unknown)
-            .to_string(),
-    ]);
-    tbuilder.push_record([
-        "C-value",
-        &status
-            .c_value
-            .map(|v| v.to_string())
-            .unwrap_or_else(|| "-".into()),
-    ]);
-    tbuilder.push_record([
-        "Conservation Status",
-        &status
-            .conservation_status
-            .map(|v| v.to_string())
-            .unwrap_or_else(|| "-".into()),
-    ]);
-    tbuilder.push_record([
-        "Wetland Indicator",
-        &status
-            .wetland_indicator
-            .map(|v| v.to_string())
-            .unwrap_or_else(|| "-".into()),
-    ]);
-    tbuilder.push_record(["Harvest Window", &status.harvest_window.to_string()]);
-    Ok(tbuilder.build())
 }
 
 impl RegionTaxaCommands {
-    pub async fn run(&self, db: &mut Db, region_id: u64) -> anyhow::Result<()> {
+    pub async fn run(
+        &self,
+        db: &mut Db,
+        region_id: u64,
+        format: OutputFormat,
+    ) -> anyhow::Result<()> {
         match self {
             RegionTaxaCommands::Show { taxon_id } => {
-                let mut table =
-                    regional_taxa_status_details_table(db, region_id, *taxon_id).await?;
-                println!("{}", table.with(style::DetailTable));
+                load_and_show_regional_taxon_details(db, region_id, taxon_id, format).await?;
             }
             RegionTaxaCommands::Add { taxon_id, props } => {
                 // make sure region exists
                 let _r = Region::get_by_id(db, region_id).await?;
-                let s = RegionalTaxonStatus::create()
+                let status = RegionalTaxonStatus::create()
                     .region_id(region_id)
                     .taxon_id(taxon_id)
                     .origin(props.origin)
@@ -525,7 +492,12 @@ impl RegionTaxaCommands {
                     })
                     .exec(db)
                     .await?;
-                println!("Added regional taxon {}", s.id);
+                let output = match format {
+                    OutputFormat::Text => RegionalTaxonStatusDetailsView::new(&status).render()?,
+                    OutputFormat::Json => JsonView::new(&status).render()?,
+                    OutputFormat::Yaml => YamlView::new(&status).render()?,
+                };
+                println!("{output}");
             }
             RegionTaxaCommands::Modify { taxon_id, props } => {
                 // make sure region exists
@@ -557,26 +529,84 @@ impl RegionTaxaCommands {
                     ));
                 }
                 query.exec(db).await?;
-                println!("Modified taxon {} in region {}", taxon_id, region_id);
+                load_and_show_regional_taxon_details(db, region_id, taxon_id, format).await?;
             }
-            RegionTaxaCommands::List => {
-                let regional_statuses = RegionalTaxonStatus::filter(
-                    RegionalTaxonStatus::fields().region_id().eq(region_id),
-                )
-                // FIXME: We want to order by a taxon sequence, but
-                // toasty doesn't yet support ordering by data in a relation
+            RegionTaxaCommands::List {
+                missing_dates,
+                ready_to_harvest,
+            } => {
+                let region_filter = RegionalTaxonStatus::fields().region_id().eq(region_id);
+                let filter = if *missing_dates {
+                    Some(
+                        RegionalTaxonStatus::fields()
+                            .harvest_window()
+                            .start_doy()
+                            .is_none()
+                            .and(
+                                RegionalTaxonStatus::fields()
+                                    .harvest_window()
+                                    .end_doy()
+                                    .is_none(),
+                            ),
+                    )
+                } else if *ready_to_harvest {
+                    let day = jiff::Zoned::now().date().day_of_year();
+                    Some(
+                        RegionalTaxonStatus::fields()
+                            .harvest_window()
+                            .start_doy()
+                            .le(day)
+                            .and(
+                                RegionalTaxonStatus::fields()
+                                    .harvest_window()
+                                    .end_doy()
+                                    .ge(day),
+                            )
+                            .or(RegionalTaxonStatus::fields()
+                                .harvest_window()
+                                .start_doy()
+                                .gt(RegionalTaxonStatus::fields().harvest_window().end_doy())
+                                .and(
+                                    RegionalTaxonStatus::fields()
+                                        .harvest_window()
+                                        .start_doy()
+                                        .le(day)
+                                        .or(RegionalTaxonStatus::fields()
+                                            .harvest_window()
+                                            .end_doy()
+                                            .ge(day)),
+                                )),
+                    )
+                } else {
+                    None
+                };
+                let taxa = Taxon::filter(Taxon::fields().regional_statuses().any(match filter {
+                    Some(f) => region_filter.and(f),
+                    None => region_filter,
+                }))
+                .include(Taxon::fields().regional_statuses())
+                .order_by(Taxon::fields().sequence().asc())
                 .exec(db)
                 .await?;
-                print_regional_taxa_table(db, regional_statuses).await?;
+                let output = match format {
+                    OutputFormat::Text => RegionalTaxaListView::new(&taxa, region_id).render()?,
+                    OutputFormat::Json => JsonView::new(&taxa).render()?,
+                    OutputFormat::Yaml => YamlView::new(&taxa).render()?,
+                };
+                println!("{output}");
             }
             RegionTaxaCommands::Remove {
                 taxon_id,
                 assumeyes,
             } => {
                 if *assumeyes || {
-                    let mut table =
-                        regional_taxa_status_details_table(db, region_id, *taxon_id).await?;
-                    println!("{}", table.with(style::DetailTable));
+                    load_and_show_regional_taxon_details(
+                        db,
+                        region_id,
+                        taxon_id,
+                        OutputFormat::Text,
+                    )
+                    .await?;
                     inquire::Confirm::new(
                         "Are you sure you wish to remove this taxon from the region? ",
                     )
@@ -652,47 +682,48 @@ impl RegionTaxaCommands {
                         .start_doy()
                         .gt(window.end_doy())
                         .and(window.start_doy().le(day).or(window.end_doy().ge(day))));
-                let regional_taxa = RegionalTaxonStatus::filter(expr)
-                    .include(RegionalTaxonStatus::fields().taxon())
-                    .include(RegionalTaxonStatus::fields().region())
-                    .exec(db)
-                    .await?;
-
-                let mut tbuilder = tabled::builder::Builder::default();
-                tbuilder.push_record(["Region", "Taxon", "Harvest Dates"]);
-                for regional_taxon in regional_taxa {
-                    tbuilder.push_record([
-                        regional_taxon.region.get().reference(),
-                        regional_taxon.taxon.get().reference(),
-                        regional_taxon.harvest_window.to_string(),
-                    ])
-                }
-                println!("{}", tbuilder.build().with(style::ListTable));
-            }
-            Self::MissingDates => {
-                // FIXME: We want to order by a taxon sequence, but
-                // toasty doesn't yet support ordering by data in a relation
-                let taxa = RegionalTaxonStatus::filter(
-                    RegionalTaxonStatus::fields().region_id().eq(region_id).and(
-                        RegionalTaxonStatus::fields()
-                            .harvest_window()
-                            .start_doy()
-                            .is_none()
-                            .and(
-                                RegionalTaxonStatus::fields()
-                                    .harvest_window()
-                                    .end_doy()
-                                    .is_none(),
-                            ),
-                    ),
-                )
-                .exec(db)
-                .await?;
-                print_regional_taxa_table(db, taxa).await?;
+                let regional_taxa: Vec<RegionalTaxonHarvestInfo> =
+                    RegionalTaxonStatus::filter(expr)
+                        .include(RegionalTaxonStatus::fields().taxon())
+                        .include(RegionalTaxonStatus::fields().region())
+                        .exec(db)
+                        .await?
+                        .into_iter()
+                        .map(|v| v.into())
+                        .collect();
+                let output = match format {
+                    OutputFormat::Text => {
+                        RegionalHarvestDateListView::new(&regional_taxa).render()?
+                    }
+                    OutputFormat::Json => JsonView::new(&regional_taxa).render()?,
+                    OutputFormat::Yaml => YamlView::new(&regional_taxa).render()?,
+                };
+                println!("{output}");
             }
         }
         Ok(())
     }
+}
+
+async fn load_and_show_regional_taxon_details(
+    db: &mut Db,
+    region_id: u64,
+    taxon_id: &u64,
+    format: OutputFormat,
+) -> Result<(), anyhow::Error> {
+    let status = RegionalTaxonStatus::filter_by_taxon_id_and_region_id(taxon_id, region_id)
+        .include(RegionalTaxonStatus::fields().region())
+        .include(RegionalTaxonStatus::fields().taxon())
+        .one()
+        .exec(db)
+        .await?;
+    let output = match format {
+        OutputFormat::Text => RegionalTaxonStatusDetailsView::new(&status).render()?,
+        OutputFormat::Json => JsonView::new(&status).render()?,
+        OutputFormat::Yaml => YamlView::new(&status).render()?,
+    };
+    println!("{output}");
+    Ok(())
 }
 
 async fn calculate_harvest_window_for_taxon(
