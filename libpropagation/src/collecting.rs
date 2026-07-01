@@ -2,7 +2,7 @@ use serde::Serialize;
 use serde_with::skip_serializing_none;
 use toasty::Deferred;
 
-use crate::taxonomy::Taxon;
+use crate::{dto::ObjectReference, taxonomy::Taxon};
 
 #[skip_serializing_none]
 #[serde_with::apply( Deferred => #[serde(skip_serializing_if = "Deferred::is_unloaded")])]
@@ -58,6 +58,21 @@ pub struct CleaningProcedure {
     pub instructions: String,
     #[has_many(pair=procedure)]
     pub taxon_links: Deferred<Vec<TaxonCleaningProcedure>>,
+}
+
+impl From<CleaningProcedure> for ObjectReference {
+    fn from(value: CleaningProcedure) -> Self {
+        Self {
+            id: value.id,
+            name: Some(value.name),
+        }
+    }
+}
+
+impl From<&CleaningProcedure> for ObjectReference {
+    fn from(value: &CleaningProcedure) -> Self {
+        value.clone().into()
+    }
 }
 
 impl CleaningProcedure {

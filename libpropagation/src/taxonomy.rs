@@ -69,8 +69,8 @@ pub mod dto {
         pub synonyms: Vec<String>,
         pub regions: Vec<RegionalTaxonStatusDetailsNoTaxon>,
         pub collecting_data: Option<CollectingData>,
-        // pub cleaning_procedures: Vec<TaxonCleaningProcedure>,
-        // pub propagation_protocols: Vec<TaxonProtocol>,
+        pub seed_cleaning: Vec<TaxonCleaningProcedure>,
+        pub propagation_protocols: Vec<TaxonProtocol>,
         pub notes: Vec<TaxonNote>,
     }
 
@@ -115,6 +115,24 @@ pub mod dto {
                 collecting_data: match value.collecting_data.is_unloaded() {
                     true => None,
                     false => value.collecting_data.get().as_ref().map(|d| d.into()),
+                },
+                seed_cleaning: match value.cleaning_procedures.is_unloaded() {
+                    true => Vec::default(),
+                    false => value
+                        .cleaning_procedures
+                        .get()
+                        .iter()
+                        .map(Into::into)
+                        .collect(),
+                },
+                propagation_protocols: match value.propagation_protocols.is_unloaded() {
+                    true => Vec::default(),
+                    false => value
+                        .propagation_protocols
+                        .get()
+                        .iter()
+                        .map(Into::into)
+                        .collect(),
                 },
                 notes: match value.notes.is_unloaded() {
                     true => Vec::default(),
@@ -172,6 +190,51 @@ pub mod dto {
                 storage: value.storage,
                 storage_life: value.storage_life,
             }
+        }
+    }
+
+    #[skip_serializing_none]
+    #[derive(Debug, Clone, Serialize)]
+    pub struct TaxonCleaningProcedure {
+        pub procedure: ObjectReference,
+        pub notes: Option<String>,
+    }
+
+    impl From<super::TaxonCleaningProcedure> for TaxonCleaningProcedure {
+        fn from(value: super::TaxonCleaningProcedure) -> Self {
+            Self {
+                procedure: ObjectReference::from_deferred(value.procedure, value.procedure_id),
+                notes: value.notes,
+            }
+        }
+    }
+
+    impl From<&super::TaxonCleaningProcedure> for TaxonCleaningProcedure {
+        fn from(value: &super::TaxonCleaningProcedure) -> Self {
+            value.clone().into()
+        }
+    }
+
+    #[skip_serializing_none]
+    #[derive(Debug, Clone, Serialize)]
+    pub struct TaxonProtocol {
+        pub protocol: ObjectReference,
+        pub confidence: Option<u8>,
+        pub notes: Option<String>,
+    }
+    impl From<super::TaxonProtocol> for TaxonProtocol {
+        fn from(value: super::TaxonProtocol) -> Self {
+            Self {
+                protocol: ObjectReference::from_deferred(value.protocol, value.protocol_id),
+                confidence: value.confidence,
+                notes: value.notes,
+            }
+        }
+    }
+
+    impl From<&super::TaxonProtocol> for TaxonProtocol {
+        fn from(value: &super::TaxonProtocol) -> Self {
+            value.clone().into()
         }
     }
 }

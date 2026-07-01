@@ -62,38 +62,38 @@ impl<'a> TaxonView<'a> {
                 collecting_data.storage_life.as_deref().unwrap_or("-"),
             ]);
         }
-        // tbuilder.push_record(["Seed Cleaning", &{
-        //     match self.taxon.cleaning_procedures.get() {
-        //         procedures if procedures.is_empty() => "-".to_string(),
-        //         procedures => {
-        //             let mut inner_table = tabled::builder::Builder::default();
-        //             inner_table.push_record(["ID", "Name"]);
-        //             procedures.iter().for_each(|tcp| {
-        //                 let proc = tcp.procedure.get();
-        //                 inner_table.push_record([&proc.id.to_string(), &proc.name]);
-        //             });
-        //             inner_table.build().with(style::DetailTable).to_string() + "\n"
-        //         }
-        //     }
-        // }]);
-        // tbuilder.push_record(["Propagation Protocols", &{
-        //     match self.taxon.propagation_protocols.get() {
-        //         tp if tp.is_empty() => "-".to_string(),
-        //         tps => {
-        //             let mut inner_table = tabled::builder::Builder::default();
-        //             inner_table.push_record(["ID", "Name", "Type"]);
-        //             tps.iter().for_each(|tp| {
-        //                 let protocol = tp.protocol.get();
-        //                 inner_table.push_record([
-        //                     &protocol.id.to_string(),
-        //                     &protocol.name,
-        //                     &protocol.r#type.to_string(),
-        //                 ]);
-        //             });
-        //             inner_table.build().with(style::ListTable).to_string() + "\n"
-        //         }
-        //     }
-        // }]);
+        tbuilder.push_record(["Seed Cleaning", &{
+            match &self.taxon.seed_cleaning {
+                procedures if procedures.is_empty() => "-".to_string(),
+                procedures => {
+                    let mut inner_table = tabled::builder::Builder::default();
+                    inner_table.push_record(["ID", "Name"]);
+                    procedures.iter().for_each(|tcp| {
+                        inner_table.push_record([
+                            &tcp.procedure.id.to_string(),
+                            tcp.procedure.name.as_deref().unwrap_or_default(),
+                        ]);
+                    });
+                    inner_table.build().with(style::DetailTable).to_string() + "\n"
+                }
+            }
+        }]);
+        tbuilder.push_record(["Propagation Protocols", &{
+            match &self.taxon.propagation_protocols {
+                tp if tp.is_empty() => "-".to_string(),
+                tps => {
+                    let mut inner_table = tabled::builder::Builder::default();
+                    inner_table.push_record(["ID", "Name"]);
+                    tps.iter().for_each(|tp| {
+                        inner_table.push_record([
+                            &tp.protocol.id.to_string(),
+                            tp.protocol.name.as_deref().unwrap_or_default(),
+                        ]);
+                    });
+                    inner_table.build().with(style::ListTable).to_string() + "\n"
+                }
+            }
+        }]);
         tbuilder.push_record(["Regions", &{
             let regions = &self.taxon.regions;
             if regions.is_empty() {

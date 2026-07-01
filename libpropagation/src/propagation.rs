@@ -1,4 +1,4 @@
-use crate::taxonomy::Taxon;
+use crate::{dto::ObjectReference, taxonomy::Taxon};
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 use toasty::Deferred;
@@ -43,6 +43,22 @@ pub struct Protocol {
     pub taxon_protocols: Deferred<Vec<TaxonProtocol>>,
 }
 
+impl From<Protocol> for ObjectReference {
+    fn from(value: Protocol) -> Self {
+        Self {
+            id: value.id,
+            name: Some(value.name),
+        }
+    }
+}
+
+impl From<&Protocol> for ObjectReference {
+    fn from(value: &Protocol) -> Self {
+        value.clone().into()
+    }
+}
+
+// FIXME: implement Display instead?
 impl Protocol {
     pub fn reference(&self) -> String {
         format!("{}: {}", self.id, self.name)
