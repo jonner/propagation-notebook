@@ -8,6 +8,7 @@ pub enum OutputFormat {
 }
 
 #[derive(Debug, clap::Parser)]
+#[command(version)]
 pub struct Options {
     #[command(subcommand)]
     pub command: MainCommand,
