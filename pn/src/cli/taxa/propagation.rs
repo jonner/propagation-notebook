@@ -46,7 +46,7 @@ pub enum TaxonPropagationCommands {
         )]
         citation: Option<String>,
     },
-    #[command(about = "Modify propagation information for a taxon", group(clap::ArgGroup::new("modify_props").args(["confidence", "notes", "citation"]).required(true).multiple(false)))]
+    #[command(about = "Modify propagation information for a taxon", group(clap::ArgGroup::new("modify_props").args(["confidence", "notes", "citation"]).required(true).multiple(true)))]
     Modify {
         #[arg(help = "A propagation protocol ID assigned to this taxon")]
         protocol_id: u64,
@@ -149,9 +149,11 @@ impl TaxonPropagationCommands {
                 TaxonProtocol::update_by_taxon_id_and_protocol_id(taxon_id, protocol_id);
             if let Some(confidence) = confidence {
                 query = query.confidence(confidence);
-            } else if let Some(notes) = notes {
+            }
+            if let Some(notes) = notes {
                 query = query.notes(notes);
-            } else if let Some(citation) = citation {
+            }
+            if let Some(citation) = citation {
                 query = query.citation(citation);
             }
             query.exec(db).await?;
