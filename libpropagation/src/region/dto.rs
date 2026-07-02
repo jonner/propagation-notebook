@@ -3,6 +3,7 @@ use serde_with::skip_serializing_none;
 
 use crate::dto::ObjectReference;
 
+#[skip_serializing_none]
 #[derive(Debug, Serialize)]
 pub struct CompactRegion {
     pub id: u64,
@@ -23,6 +24,7 @@ impl From<super::Region> for CompactRegion {
     }
 }
 
+#[skip_serializing_none]
 #[derive(Debug, Serialize)]
 pub struct FullRegion {
     pub id: u64,
