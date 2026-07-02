@@ -39,8 +39,10 @@ pub enum PropagationCommands {
         instructions: String,
         #[arg(long, help = "Additional notes for this protocol")]
         notes: Option<String>,
+        #[arg(long, help = "A citation for this protocol")]
+        citation: Option<String>,
     },
-    #[command(about = "Add a seed propagation protocol", group(clap::ArgGroup::new("modify_fields").args(["name", "type", "notes", "instructions"]).required(true).multiple(true)))]
+    #[command(about = "Add a seed propagation protocol", group(clap::ArgGroup::new("modify_fields").args(["name", "type", "notes", "instructions", "citation"]).required(true).multiple(true)))]
     Modify {
         #[arg(help = "A protocol ID")]
         id: u64,
@@ -52,6 +54,8 @@ pub enum PropagationCommands {
         instructions: Option<String>,
         #[arg(long, help = "Additional notes for this protocol")]
         notes: Option<String>,
+        #[arg(long, help = "A citation for this protocol")]
+        citation: Option<String>,
     },
     #[command(about = "Remove a seed propagation protocol")]
     Remove {
@@ -103,12 +107,14 @@ impl PropagationCommands {
                 r#type,
                 instructions,
                 notes,
+                citation,
             } => {
                 let item = Protocol::create()
                     .name(name)
                     .r#type(r#type)
                     .instructions(instructions)
                     .notes(notes)
+                    .citation(citation)
                     .exec(db)
                     .await?;
                 println!("Added protocol {}", item.id);
@@ -119,6 +125,7 @@ impl PropagationCommands {
                 r#type,
                 instructions,
                 notes,
+                citation,
             } => {
                 let mut query = Protocol::update_by_id(id);
                 if let Some(name) = name {
@@ -132,6 +139,9 @@ impl PropagationCommands {
                 }
                 if let Some(notes) = notes {
                     query = query.notes(notes);
+                }
+                if let Some(citation) = citation {
+                    query = query.citation(citation);
                 }
                 query.exec(db).await?;
                 println!("Updated protocol {id}");

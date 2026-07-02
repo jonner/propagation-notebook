@@ -39,8 +39,14 @@ pub enum TaxonPropagationCommands {
             help = "Taxon-specific notes for this propagation protocol"
         )]
         notes: Option<String>,
+        #[arg(
+            short,
+            long,
+            help = "Taxon-specific citation for this propagation protocol"
+        )]
+        citation: Option<String>,
     },
-    #[command(about = "Modify propagation information for a taxon", group(clap::ArgGroup::new("modify_props").args(["confidence", "notes"]).required(true).multiple(false)))]
+    #[command(about = "Modify propagation information for a taxon", group(clap::ArgGroup::new("modify_props").args(["confidence", "notes", "citation"]).required(true).multiple(false)))]
     Modify {
         #[arg(help = "A propagation protocol ID assigned to this taxon")]
         protocol_id: u64,
@@ -57,6 +63,12 @@ pub enum TaxonPropagationCommands {
             help = "Taxon-specific notes for this propagation protocol"
         )]
         notes: Option<String>,
+        #[arg(
+            short,
+            long,
+            help = "Taxon-specific citation for this propagation protocol"
+        )]
+        citation: Option<String>,
     },
     #[command(about = "Remove propagation information from the taxon")]
     Remove {
@@ -110,12 +122,14 @@ impl TaxonPropagationCommands {
             protocol_id,
             confidence,
             notes,
+            citation
         } => {
             let tp: TaxonProtocolDetails = TaxonProtocol::create()
                 .protocol_id(protocol_id)
                 .taxon_id(taxon_id)
                 .confidence(confidence)
                 .notes(notes)
+                .citation(citation)
                 .exec(db)
                 .await?.into();
             let output = match format {
@@ -129,6 +143,7 @@ impl TaxonPropagationCommands {
             protocol_id,
             confidence,
             notes,
+            citation
         } => {
             let mut query =
                 TaxonProtocol::update_by_taxon_id_and_protocol_id(taxon_id, protocol_id);
@@ -136,6 +151,8 @@ impl TaxonPropagationCommands {
                 query = query.confidence(confidence);
             } else if let Some(notes) = notes {
                 query = query.notes(notes);
+            } else if let Some(citation) = citation {
+                query = query.citation(citation);
             }
             query.exec(db).await?;
             println!("Updated propagation info");

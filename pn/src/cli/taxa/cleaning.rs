@@ -27,6 +27,8 @@ pub enum TaxonCleaningCommands {
         procedure_id: u64,
         #[arg(short, long, help = "Taxon-specific notes for this procedure")]
         notes: Option<String>,
+        #[arg(short, long, help = "Taxon-specific citation for this procedure")]
+        citation: Option<String>,
     },
     #[command(about = "Modify taxon-specific information seed cleaning information")]
     Modify {
@@ -34,6 +36,8 @@ pub enum TaxonCleaningCommands {
         procedure_id: u64,
         #[arg(short, long, help = "Taxon-specific notes for this procedure")]
         notes: Option<String>,
+        #[arg(short, long, help = "Taxon-specific citation for this procedure")]
+        citation: Option<String>,
     },
     #[command(about = "Remove a cleaning procedure from the specified taxon")]
     Remove {
@@ -97,11 +101,13 @@ impl TaxonCleaningCommands {
             TaxonCleaningCommands::Add {
                 procedure_id,
                 notes,
+                citation,
             } => {
                 let tcp: TaxonCleaningProcedureDetails = TaxonCleaningProcedure::create()
                     .taxon_id(taxon_id)
                     .procedure_id(procedure_id)
                     .notes(notes)
+                    .citation(citation)
                     .exec(db)
                     .await?
                     .into();
@@ -115,11 +121,19 @@ impl TaxonCleaningCommands {
             TaxonCleaningCommands::Modify {
                 procedure_id,
                 notes,
+                citation,
             } => {
-                TaxonCleaningProcedure::update_by_taxon_id_and_procedure_id(taxon_id, procedure_id)
-                    .notes(notes)
-                    .exec(db)
-                    .await?;
+                let mut query = TaxonCleaningProcedure::update_by_taxon_id_and_procedure_id(
+                    taxon_id,
+                    procedure_id,
+                );
+                if let Some(notes) = notes {
+                    query = query.notes(notes)
+                }
+                if let Some(citation) = citation {
+                    query = query.citation(citation)
+                }
+                query.exec(db).await?;
                 println!("Procedure {} updated for taxon {}", procedure_id, taxon_id);
             }
             TaxonCleaningCommands::Remove {
