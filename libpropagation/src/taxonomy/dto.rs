@@ -231,11 +231,13 @@ impl From<super::CollectingData> for CollectingDataNoTaxon {
 pub struct TaxonCleaningProcedureDetails {
     pub taxon: ObjectReference,
     pub core: TaxonCleaningProcedureCompact,
+    pub citation: Option<String>,
 }
 impl From<super::TaxonCleaningProcedure> for TaxonCleaningProcedureDetails {
     fn from(mut value: super::TaxonCleaningProcedure) -> Self {
         Self {
             taxon: ObjectReference::from_deferred(&value.taxon, value.taxon_id),
+            citation: value.citation.take(),
             core: TaxonCleaningProcedureCompact::from(value),
         }
     }

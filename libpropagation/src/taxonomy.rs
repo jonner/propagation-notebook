@@ -317,6 +317,7 @@ pub struct TaxonProtocol {
 
     pub confidence: Option<u8>,
     pub notes: Option<String>,
+    pub citation: Option<String>,
 }
 
 #[derive(Debug, Clone, toasty::Model)]

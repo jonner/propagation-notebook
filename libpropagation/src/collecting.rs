@@ -38,6 +38,7 @@ pub mod dto {
         pub name: String,
         pub notes: Option<String>,
         pub instructions: String,
+        pub citation: Option<String>,
         pub taxa: Vec<ObjectReference>,
     }
 
@@ -48,6 +49,7 @@ pub mod dto {
                 name: value.name,
                 notes: value.notes,
                 instructions: value.instructions,
+                citation: value.citation,
                 taxa: match value.taxon_links.is_unloaded() {
                     true => Vec::default(),
                     false => value
@@ -91,6 +93,7 @@ pub struct TaxonCleaningProcedure {
 
     // notes for customizing the procedure for this taxon
     pub notes: Option<String>,
+    pub citation: Option<String>,
 
     #[key]
     #[index]
@@ -106,7 +109,7 @@ pub struct CleaningProcedure {
     pub id: u64,
     pub name: String,
     pub notes: Option<String>,
-
+    pub citation: Option<String>,
     pub instructions: String,
     #[has_many(pair=procedure)]
     pub taxon_links: Deferred<Vec<TaxonCleaningProcedure>>,

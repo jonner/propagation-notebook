@@ -9,6 +9,7 @@ pub struct ProtocolDetails {
     pub r#type: super::ProtocolType,
     pub instructions: String,
     pub notes: Option<String>,
+    pub citation: Option<String>,
     pub taxa: Vec<ObjectReference>,
 }
 
@@ -20,6 +21,7 @@ impl From<super::Protocol> for ProtocolDetails {
             r#type: value.r#type,
             instructions: value.instructions,
             notes: value.notes,
+            citation: value.citation,
             taxa: match value.taxon_protocols.is_unloaded() {
                 true => Vec::default(),
                 false => value

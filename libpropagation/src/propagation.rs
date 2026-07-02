@@ -35,6 +35,7 @@ pub struct Protocol {
     pub instructions: String,
     pub notes: Option<String>,
     pub r#type: ProtocolType,
+    pub citation: Option<String>,
 
     #[has_many]
     pub taxon_protocols: Deferred<Vec<TaxonProtocol>>,

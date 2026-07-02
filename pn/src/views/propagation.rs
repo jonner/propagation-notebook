@@ -55,6 +55,7 @@ impl<'a> TaxonPropagationProtocolDetailView<'a> {
             "Taxon-specific notes",
             self.tp.core.notes.as_deref().unwrap_or("-"),
         ]);
+        tbuilder.push_record(["Citation", self.tp.core.citation.as_deref().unwrap_or("-")]);
         tbuilder.push_record(["Protocol", &self.tp.core.protocol.to_string()]);
         Ok(tbuilder.build().with(style::DetailTable).to_string())
     }
@@ -98,6 +99,7 @@ impl<'a> PropagationProtocolDetailView<'a> {
         tbuilder.push_record(["Name", &self.protocol.name]);
         tbuilder.push_record(["Type", &self.protocol.r#type.to_string()]);
         tbuilder.push_record(["Notes", self.protocol.notes.as_deref().unwrap_or("-")]);
+        tbuilder.push_record(["Citation", self.protocol.citation.as_deref().unwrap_or("-")]);
         tbuilder.push_record(["Instructions", &self.protocol.instructions]);
         let mut inner_table = tabled::builder::Builder::default();
         if !self.protocol.taxa.is_empty() {
