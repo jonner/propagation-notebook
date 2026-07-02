@@ -79,24 +79,7 @@ impl TaxonCleaningCommands {
                 println!("{output}");
             }
             TaxonCleaningCommands::Show { procedure_id } => {
-                let tcp: TaxonCleaningProcedureDetails =
-                    TaxonCleaningProcedure::filter_by_taxon_id_and_procedure_id(
-                        taxon_id,
-                        procedure_id,
-                    )
-                    .include(TaxonCleaningProcedure::fields().taxon())
-                    .include(TaxonCleaningProcedure::fields().procedure())
-                    .one()
-                    .exec(db)
-                    .await?
-                    .into();
-
-                let output = match format {
-                    OutputFormat::Text => TaxonCleaningProcedureDetailView::new(&tcp).render()?,
-                    OutputFormat::Json => JsonView::new(&tcp).render()?,
-                    OutputFormat::Yaml => YamlView::new(&tcp).render()?,
-                };
-                println!("{output}");
+                load_and_show_taxon_cleaning_details(db, taxon_id, format, procedure_id).await?;
             }
             TaxonCleaningCommands::Add {
                 procedure_id,
@@ -134,7 +117,7 @@ impl TaxonCleaningCommands {
                     query = query.citation(citation)
                 }
                 query.exec(db).await?;
-                println!("Procedure {} updated for taxon {}", procedure_id, taxon_id);
+                load_and_show_taxon_cleaning_details(db, taxon_id, format, procedure_id).await?;
             }
             TaxonCleaningCommands::Remove {
                 procedure_id,
@@ -157,4 +140,27 @@ impl TaxonCleaningCommands {
         }
         Ok(())
     }
+}
+
+async fn load_and_show_taxon_cleaning_details(
+    db: &mut Db,
+    taxon_id: u64,
+    format: OutputFormat,
+    procedure_id: &u64,
+) -> Result<(), anyhow::Error> {
+    let tcp: TaxonCleaningProcedureDetails =
+        TaxonCleaningProcedure::filter_by_taxon_id_and_procedure_id(taxon_id, procedure_id)
+            .include(TaxonCleaningProcedure::fields().taxon())
+            .include(TaxonCleaningProcedure::fields().procedure())
+            .one()
+            .exec(db)
+            .await?
+            .into();
+    let output = match format {
+        OutputFormat::Text => TaxonCleaningProcedureDetailView::new(&tcp).render()?,
+        OutputFormat::Json => JsonView::new(&tcp).render()?,
+        OutputFormat::Yaml => YamlView::new(&tcp).render()?,
+    };
+    println!("{output}");
+    Ok(())
 }
