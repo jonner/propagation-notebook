@@ -89,18 +89,7 @@ impl PropagationCommands {
                 println!("{output}");
             }
             PropagationCommands::Show { id } => {
-                let protocol: ProtocolDetails = Protocol::filter_by_id(id)
-                    .include(Protocol::fields().taxon_protocols().taxon())
-                    .one()
-                    .exec(db)
-                    .await?
-                    .into();
-                let output = match format {
-                    OutputFormat::Text => PropagationProtocolDetailView::new(&protocol).render()?,
-                    OutputFormat::Json => JsonView::new(&protocol).render()?,
-                    OutputFormat::Yaml => YamlView::new(&protocol).render()?,
-                };
-                println!("{output}");
+                load_and_display_propagation_details(db, format, id).await?;
             }
             PropagationCommands::Add {
                 name,
@@ -109,15 +98,21 @@ impl PropagationCommands {
                 notes,
                 citation,
             } => {
-                let item = Protocol::create()
+                let item: ProtocolDetails = Protocol::create()
                     .name(name)
                     .r#type(r#type)
                     .instructions(instructions)
                     .notes(notes)
                     .citation(citation)
                     .exec(db)
-                    .await?;
-                println!("Added protocol {}", item.id);
+                    .await?
+                    .into();
+                let output = match format {
+                    OutputFormat::Text => PropagationProtocolDetailView::new(&item).render()?,
+                    OutputFormat::Json => JsonView::new(&item).render()?,
+                    OutputFormat::Yaml => YamlView::new(&item).render()?,
+                };
+                println!("{output}");
             }
             PropagationCommands::Modify {
                 id,
@@ -144,7 +139,7 @@ impl PropagationCommands {
                     query = query.citation(citation);
                 }
                 query.exec(db).await?;
-                println!("Updated protocol {id}");
+                load_and_display_propagation_details(db, format, id).await?;
             }
             PropagationCommands::Remove { id, assumeyes } => {
                 if *assumeyes || {
@@ -193,4 +188,24 @@ impl PropagationCommands {
         }
         Ok(())
     }
+}
+
+async fn load_and_display_propagation_details(
+    db: &mut Db,
+    format: OutputFormat,
+    id: &u64,
+) -> Result<(), anyhow::Error> {
+    let protocol: ProtocolDetails = Protocol::filter_by_id(id)
+        .include(Protocol::fields().taxon_protocols().taxon())
+        .one()
+        .exec(db)
+        .await?
+        .into();
+    let output = match format {
+        OutputFormat::Text => PropagationProtocolDetailView::new(&protocol).render()?,
+        OutputFormat::Json => JsonView::new(&protocol).render()?,
+        OutputFormat::Yaml => YamlView::new(&protocol).render()?,
+    };
+    println!("{output}");
+    Ok(())
 }

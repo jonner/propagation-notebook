@@ -95,18 +95,7 @@ impl TaxonPropagationCommands {
             println!("{output}");
         }
         TaxonPropagationCommands::Show { protocol_id } => {
-            let tp: TaxonProtocolDetails = TaxonProtocol::filter_by_taxon_id_and_protocol_id(taxon_id, protocol_id)
-                .include(TaxonProtocol::fields().taxon())
-                .include(TaxonProtocol::fields().protocol())
-                .one()
-                .exec(db)
-                .await?.into();
-            let output = match format {
-                OutputFormat::Text => TaxonPropagationProtocolDetailView::new(&tp).render()?,
-                OutputFormat::Json => JsonView::new(&tp).render()?,
-                OutputFormat::Yaml => YamlView::new(&tp).render()?,
-            };
-            println!("{output}");
+            load_and_show_taxon_propagation_details(db, taxon_id, format, protocol_id).await?;
         }
         TaxonPropagationCommands::Add {
             protocol_id,
@@ -147,7 +136,7 @@ impl TaxonPropagationCommands {
                 query = query.citation(citation);
             }
             query.exec(db).await?;
-            println!("Updated propagation info");
+            load_and_show_taxon_propagation_details(db, taxon_id, format, protocol_id).await?;
         }
         TaxonPropagationCommands::Remove {
             protocol_id,
@@ -172,4 +161,27 @@ impl TaxonPropagationCommands {
     }
         Ok(())
     }
+}
+
+async fn load_and_show_taxon_propagation_details(
+    db: &mut Db,
+    taxon_id: u64,
+    format: OutputFormat,
+    protocol_id: &u64,
+) -> Result<(), anyhow::Error> {
+    let tp: TaxonProtocolDetails =
+        TaxonProtocol::filter_by_taxon_id_and_protocol_id(taxon_id, protocol_id)
+            .include(TaxonProtocol::fields().taxon())
+            .include(TaxonProtocol::fields().protocol())
+            .one()
+            .exec(db)
+            .await?
+            .into();
+    let output = match format {
+        OutputFormat::Text => TaxonPropagationProtocolDetailView::new(&tp).render()?,
+        OutputFormat::Json => JsonView::new(&tp).render()?,
+        OutputFormat::Yaml => YamlView::new(&tp).render()?,
+    };
+    println!("{output}");
+    Ok(())
 }
