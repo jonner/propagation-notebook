@@ -11,8 +11,8 @@ pub enum OutputFormat {
 pub struct Options {
     #[command(subcommand)]
     pub command: MainCommand,
-    #[arg(short, long, global = true, value_enum, default_value_t = OutputFormat::Text, help = "Choose output format")]
-    pub output: OutputFormat,
+    #[arg(long="fmt", global = true, value_enum, default_value_t = OutputFormat::Text, help = "Choose output format")]
+    pub format: OutputFormat,
 }
 
 #[derive(Debug, clap::Subcommand)]
