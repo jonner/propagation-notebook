@@ -18,8 +18,8 @@ impl From<super::Protocol> for ProtocolDetails {
             id: value.id,
             name: value.name,
             r#type: value.r#type,
-            instructions: value.instructions.clone(),
-            notes: value.notes.clone(),
+            instructions: value.instructions,
+            notes: value.notes,
             taxa: match value.taxon_protocols.is_unloaded() {
                 true => Vec::default(),
                 false => value
