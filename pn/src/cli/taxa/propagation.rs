@@ -27,7 +27,6 @@ pub enum TaxonPropagationCommands {
         #[arg(help = "An ID of a propagation protocol ID")]
         protocol_id: u64,
         #[arg(
-            short,
             long,
             help = "Confidence level in this propagation protocol (0-10)",
             value_parser = clap::value_parser!(u8).range(0..=10)
@@ -39,11 +38,7 @@ pub enum TaxonPropagationCommands {
             help = "Taxon-specific notes for this propagation protocol"
         )]
         notes: Option<String>,
-        #[arg(
-            short,
-            long,
-            help = "Taxon-specific citation for this propagation protocol"
-        )]
+        #[arg(long, help = "Taxon-specific citation for this propagation protocol")]
         citation: Option<String>,
     },
     #[command(about = "Modify propagation information for a taxon", group(clap::ArgGroup::new("modify_props").args(["confidence", "notes", "citation"]).required(true).multiple(true)))]
@@ -51,7 +46,6 @@ pub enum TaxonPropagationCommands {
         #[arg(help = "A propagation protocol ID assigned to this taxon")]
         protocol_id: u64,
         #[arg(
-            short,
             long,
             help = "Confidence level in this propagation protocol (0-10)",
             value_parser = clap::value_parser!(u8).range(0..=10)
@@ -63,11 +57,7 @@ pub enum TaxonPropagationCommands {
             help = "Taxon-specific notes for this propagation protocol"
         )]
         notes: Option<String>,
-        #[arg(
-            short,
-            long,
-            help = "Taxon-specific citation for this propagation protocol"
-        )]
+        #[arg(long, help = "Taxon-specific citation for this propagation protocol")]
         citation: Option<String>,
     },
     #[command(about = "Remove propagation information from the taxon")]
