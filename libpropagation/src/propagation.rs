@@ -2,6 +2,8 @@ use crate::{dto::ObjectReference, taxonomy::TaxonProtocol};
 use serde::{Deserialize, Serialize};
 use toasty::Deferred;
 
+pub mod dto;
+
 #[derive(
     Debug, Clone, Copy, toasty::Embed, clap::ValueEnum, strum::Display, Deserialize, Serialize,
 )]

@@ -23,7 +23,7 @@ async fn main() -> anyhow::Result<()> {
         MainCommand::Taxa { command } => command.run(&mut db, options.output).await?,
         MainCommand::Regions { command } => command.run(&mut db, options.output).await?,
         MainCommand::Cleaning { command } => command.run(&mut db, options.output).await?,
-        MainCommand::Propagation { command } => command.run(&mut db).await?,
+        MainCommand::Propagation { command } => command.run(&mut db, options.output).await?,
     };
     Ok(())
 }

@@ -1,10 +1,19 @@
 use std::path::PathBuf;
 
-use libpropagation::propagation::{Protocol, ProtocolType};
+use libpropagation::propagation::{
+    Protocol, ProtocolType,
+    dto::{ProtocolCompact, ProtocolDetails},
+};
 use serde::Deserialize;
 use toasty::Db;
 
-use crate::style;
+use crate::{
+    cli::OutputFormat,
+    views::{
+        JsonView, YamlView,
+        propagation::{PropagationProtocolDetailView, PropagationProtocolListView},
+    },
+};
 
 #[derive(Debug, clap::Subcommand)]
 pub enum PropagationCommands {
@@ -59,28 +68,35 @@ pub enum PropagationCommands {
 }
 
 impl PropagationCommands {
-    pub async fn run(&self, db: &mut Db) -> anyhow::Result<()> {
+    pub async fn run(&self, db: &mut Db, format: OutputFormat) -> anyhow::Result<()> {
         match self {
             PropagationCommands::List { r#type } => {
                 let mut query = Protocol::all();
                 if let Some(t) = r#type {
                     query = query.filter(Protocol::fields().r#type().eq(t));
                 }
-                let protocols = query.exec(db).await?;
-                let mut tbuilder = tabled::builder::Builder::default();
-                tbuilder.push_record(["ID", "Name", "Type"]);
-                for protocol in protocols {
-                    tbuilder.push_record([
-                        protocol.id.to_string(),
-                        protocol.name,
-                        protocol.r#type.to_string(),
-                    ])
-                }
-                println!("{}", tbuilder.build().with(style::ListTable));
+                let protocols: Vec<ProtocolCompact> =
+                    query.exec(db).await?.into_iter().map(Into::into).collect();
+                let output = match format {
+                    OutputFormat::Text => PropagationProtocolListView::new(&protocols).render()?,
+                    OutputFormat::Json => JsonView::new(&protocols).render()?,
+                    OutputFormat::Yaml => YamlView::new(&protocols).render()?,
+                };
+                println!("{output}");
             }
             PropagationCommands::Show { id } => {
-                let mut table = propagation_protocol_details_table(db, id).await?;
-                println!("{}", table.with(style::DetailTable));
+                let protocol: ProtocolDetails = Protocol::filter_by_id(id)
+                    .include(Protocol::fields().taxon_protocols().taxon())
+                    .one()
+                    .exec(db)
+                    .await?
+                    .into();
+                let output = match format {
+                    OutputFormat::Text => PropagationProtocolDetailView::new(&protocol).render()?,
+                    OutputFormat::Json => JsonView::new(&protocol).render()?,
+                    OutputFormat::Yaml => YamlView::new(&protocol).render()?,
+                };
+                println!("{output}");
             }
             PropagationCommands::Add {
                 name,
@@ -122,8 +138,17 @@ impl PropagationCommands {
             }
             PropagationCommands::Remove { id, assumeyes } => {
                 if *assumeyes || {
-                    let mut table = propagation_protocol_details_table(db, id).await?;
-                    println!("{}", table.with(style::DetailTable));
+                    let protocol: ProtocolDetails = Protocol::filter_by_id(id)
+                        .include(Protocol::fields().taxon_protocols().taxon())
+                        .one()
+                        .exec(db)
+                        .await?
+                        .into();
+
+                    println!(
+                        "{}",
+                        PropagationProtocolDetailView::new(&protocol).render()?
+                    );
                     inquire::Confirm::new(
                         "Are you sure you wish to remove this Propagation protocol?",
                     )
@@ -158,36 +183,4 @@ impl PropagationCommands {
         }
         Ok(())
     }
-}
-
-async fn propagation_protocol_details_table(
-    db: &mut Db,
-    id: &u64,
-) -> Result<tabled::Table, anyhow::Error> {
-    let p = Protocol::filter_by_id(id)
-        .include(Protocol::fields().taxon_protocols().taxon())
-        .one()
-        .exec(db)
-        .await?;
-    let mut tbuilder = tabled::builder::Builder::default();
-    tbuilder.push_record(["ID", &p.id.to_string()]);
-    tbuilder.push_record(["Name", &p.name]);
-    tbuilder.push_record(["Type", &p.r#type.to_string()]);
-    tbuilder.push_record(["Notes", &p.notes.unwrap_or_else(|| "-".into())]);
-    tbuilder.push_record(["Instructions", &p.instructions]);
-    let mut inner_table = tabled::builder::Builder::default();
-    let tps = p.taxon_protocols.get();
-    if !tps.is_empty() {
-        inner_table.push_record(["ID", "Name"]);
-        for tp in tps {
-            let taxon = tp.taxon.get();
-            inner_table.push_record([&taxon.id.to_string(), &taxon.complete_name]);
-        }
-    }
-
-    tbuilder.push_record([
-        "Taxa",
-        &(inner_table.build().with(style::ListTable).to_string() + "\n"),
-    ]);
-    Ok(tbuilder.build())
 }
