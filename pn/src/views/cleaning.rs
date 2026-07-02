@@ -1,16 +1,16 @@
 use libpropagation::{
     collecting::dto::{CleaningProcedureCompact, CleaningProcedureDetails},
-    taxonomy::dto::{TaxonCleaningProcedureDetails, TaxonCleaningProcedureNoTaxon},
+    taxonomy::dto::{TaxonCleaningProcedureCompact, TaxonCleaningProcedureDetails},
 };
 
 use crate::style;
 
 pub struct TaxonCleaningProcedureListView<'a> {
-    procedures: &'a Vec<TaxonCleaningProcedureNoTaxon>,
+    procedures: &'a Vec<TaxonCleaningProcedureCompact>,
 }
 
 impl<'a> TaxonCleaningProcedureListView<'a> {
-    pub fn new(procedures: &'a Vec<TaxonCleaningProcedureNoTaxon>) -> Self {
+    pub fn new(procedures: &'a Vec<TaxonCleaningProcedureCompact>) -> Self {
         Self { procedures }
     }
 
@@ -39,8 +39,8 @@ impl<'a> TaxonCleaningProcedureDetailView<'a> {
     pub fn render(&self) -> anyhow::Result<String> {
         let mut tbuilder = tabled::builder::Builder::default();
         tbuilder.push_record(["Taxon", &self.tcp.taxon.to_string()]);
-        tbuilder.push_record(["Procedure", &self.tcp.procedure.to_string()]);
-        tbuilder.push_record(["Notes", self.tcp.notes.as_deref().unwrap_or("-")]);
+        tbuilder.push_record(["Procedure", &self.tcp.core.procedure.to_string()]);
+        tbuilder.push_record(["Notes", self.tcp.core.notes.as_deref().unwrap_or("-")]);
         Ok(tbuilder.build().with(style::DetailTable).to_string())
     }
 }

@@ -48,8 +48,8 @@ pub struct TaxonDetails {
     pub synonyms: Vec<String>,
     pub regions: Vec<RegionalTaxonStatusDetailsNoTaxon>,
     pub collecting_data: Option<CollectingDataNoTaxon>,
-    pub seed_cleaning: Vec<TaxonCleaningProcedureNoTaxon>,
-    pub propagation_protocols: Vec<TaxonProtocolNoTaxon>,
+    pub seed_cleaning: Vec<TaxonCleaningProcedureCompact>,
+    pub propagation_protocols: Vec<TaxonProtocolCompact>,
     pub notes: Vec<TaxonNoteNoTaxon>,
 }
 
@@ -230,15 +230,13 @@ impl From<super::CollectingData> for CollectingDataNoTaxon {
 #[derive(Debug, Clone, Serialize)]
 pub struct TaxonCleaningProcedureDetails {
     pub taxon: ObjectReference,
-    pub procedure: ObjectReference,
-    pub notes: Option<String>,
+    pub core: TaxonCleaningProcedureCompact,
 }
 impl From<super::TaxonCleaningProcedure> for TaxonCleaningProcedureDetails {
-    fn from(value: super::TaxonCleaningProcedure) -> Self {
+    fn from(mut value: super::TaxonCleaningProcedure) -> Self {
         Self {
             taxon: ObjectReference::from_deferred(&value.taxon, value.taxon_id),
-            procedure: ObjectReference::from_deferred(&value.procedure, value.procedure_id),
-            notes: value.notes,
+            core: TaxonCleaningProcedureCompact::from(value),
         }
     }
 }
@@ -251,12 +249,12 @@ impl From<&super::TaxonCleaningProcedure> for TaxonCleaningProcedureDetails {
 
 #[skip_serializing_none]
 #[derive(Debug, Clone, Serialize)]
-pub struct TaxonCleaningProcedureNoTaxon {
+pub struct TaxonCleaningProcedureCompact {
     pub procedure: ObjectReference,
     pub notes: Option<String>,
 }
 
-impl From<super::TaxonCleaningProcedure> for TaxonCleaningProcedureNoTaxon {
+impl From<super::TaxonCleaningProcedure> for TaxonCleaningProcedureCompact {
     fn from(value: super::TaxonCleaningProcedure) -> Self {
         Self {
             procedure: ObjectReference::from_deferred(&value.procedure, value.procedure_id),
@@ -265,7 +263,7 @@ impl From<super::TaxonCleaningProcedure> for TaxonCleaningProcedureNoTaxon {
     }
 }
 
-impl From<&super::TaxonCleaningProcedure> for TaxonCleaningProcedureNoTaxon {
+impl From<&super::TaxonCleaningProcedure> for TaxonCleaningProcedureCompact {
     fn from(value: &super::TaxonCleaningProcedure) -> Self {
         value.clone().into()
     }
@@ -275,18 +273,14 @@ impl From<&super::TaxonCleaningProcedure> for TaxonCleaningProcedureNoTaxon {
 #[derive(Debug, Clone, Serialize)]
 pub struct TaxonProtocolDetails {
     pub taxon: ObjectReference,
-    pub core: TaxonProtocolNoTaxon,
+    pub core: TaxonProtocolCompact,
 }
 
 impl From<super::TaxonProtocol> for TaxonProtocolDetails {
     fn from(value: super::TaxonProtocol) -> Self {
         Self {
             taxon: ObjectReference::from_deferred(&value.taxon, value.taxon_id),
-            core: TaxonProtocolNoTaxon {
-                protocol: ObjectReference::from_deferred(&value.protocol, value.protocol_id),
-                confidence: value.confidence,
-                notes: value.notes,
-            },
+            core: TaxonProtocolCompact::from(value),
         }
     }
 }
@@ -299,22 +293,24 @@ impl From<&super::TaxonProtocol> for TaxonProtocolDetails {
 
 #[skip_serializing_none]
 #[derive(Debug, Clone, Serialize)]
-pub struct TaxonProtocolNoTaxon {
+pub struct TaxonProtocolCompact {
     pub protocol: ObjectReference,
     pub confidence: Option<u8>,
     pub notes: Option<String>,
+    pub citation: Option<String>,
 }
-impl From<super::TaxonProtocol> for TaxonProtocolNoTaxon {
+impl From<super::TaxonProtocol> for TaxonProtocolCompact {
     fn from(value: super::TaxonProtocol) -> Self {
         Self {
             protocol: ObjectReference::from_deferred(&value.protocol, value.protocol_id),
             confidence: value.confidence,
             notes: value.notes,
+            citation: value.citation,
         }
     }
 }
 
-impl From<&super::TaxonProtocol> for TaxonProtocolNoTaxon {
+impl From<&super::TaxonProtocol> for TaxonProtocolCompact {
     fn from(value: &super::TaxonProtocol) -> Self {
         value.clone().into()
     }

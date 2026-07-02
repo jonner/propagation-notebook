@@ -1,16 +1,16 @@
 use libpropagation::{
     propagation::dto::{ProtocolCompact, ProtocolDetails},
-    taxonomy::dto::{TaxonProtocolDetails, TaxonProtocolNoTaxon},
+    taxonomy::dto::{TaxonProtocolCompact, TaxonProtocolDetails},
 };
 
 use crate::style;
 
 pub struct TaxonPropagationProtocolListView<'a> {
-    tps: &'a Vec<TaxonProtocolNoTaxon>,
+    tps: &'a Vec<TaxonProtocolCompact>,
 }
 
 impl<'a> TaxonPropagationProtocolListView<'a> {
-    pub fn new(tps: &'a Vec<TaxonProtocolNoTaxon>) -> Self {
+    pub fn new(tps: &'a Vec<TaxonProtocolCompact>) -> Self {
         Self { tps }
     }
     pub fn render(&self) -> anyhow::Result<String> {

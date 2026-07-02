@@ -57,7 +57,7 @@ impl TaxonCleaningCommands {
     ) -> anyhow::Result<()> {
         match self {
             TaxonCleaningCommands::List => {
-                let procedures: Vec<libpropagation::taxonomy::dto::TaxonCleaningProcedureNoTaxon> =
+                let procedures: Vec<libpropagation::taxonomy::dto::TaxonCleaningProcedureCompact> =
                     TaxonCleaningProcedure::filter_by_taxon_id(taxon_id)
                         .exec(db)
                         .await?

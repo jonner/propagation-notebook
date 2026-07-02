@@ -1,6 +1,6 @@
 use libpropagation::taxonomy::{
     TaxonProtocol,
-    dto::{TaxonProtocolDetails, TaxonProtocolNoTaxon},
+    dto::{TaxonProtocolCompact, TaxonProtocolDetails},
 };
 
 use toasty::Db;
@@ -80,7 +80,7 @@ impl TaxonPropagationCommands {
     ) -> anyhow::Result<()> {
         match self {
         TaxonPropagationCommands::List => {
-            let tps: Vec<TaxonProtocolNoTaxon> = TaxonProtocol::filter_by_taxon_id(taxon_id)
+            let tps: Vec<TaxonProtocolCompact> = TaxonProtocol::filter_by_taxon_id(taxon_id)
                 .include(TaxonProtocol::fields().taxon())
                 .include(TaxonProtocol::fields().protocol())
                 .exec(db)
