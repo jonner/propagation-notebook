@@ -49,7 +49,7 @@ pub struct TaxonDetails {
     pub regions: Vec<RegionalTaxonStatusDetailsNoTaxon>,
     pub collecting_data: Option<CollectingDataNoTaxon>,
     pub seed_cleaning: Vec<TaxonCleaningProcedureCompact>,
-    pub propagation_protocols: Vec<TaxonProtocolCompact>,
+    pub propagation_procedures: Vec<TaxonPropagationProcedureCompact>,
     pub notes: Vec<TaxonNoteNoTaxon>,
 }
 
@@ -104,10 +104,10 @@ impl From<super::Taxon> for TaxonDetails {
                     .map(Into::into)
                     .collect(),
             },
-            propagation_protocols: match value.propagation_protocols.is_unloaded() {
+            propagation_procedures: match value.propagation_procedures.is_unloaded() {
                 true => Vec::default(),
                 false => value
-                    .propagation_protocols
+                    .propagation_procedures
                     .get()
                     .iter()
                     .map(Into::into)
@@ -273,38 +273,38 @@ impl From<&super::TaxonCleaningProcedure> for TaxonCleaningProcedureCompact {
 
 #[skip_serializing_none]
 #[derive(Debug, Clone, Serialize)]
-pub struct TaxonProtocolDetails {
+pub struct TaxonPropagationProcedureDetails {
     pub taxon: ObjectReference,
-    pub core: TaxonProtocolCompact,
+    pub core: TaxonPropagationProcedureCompact,
 }
 
-impl From<super::TaxonProtocol> for TaxonProtocolDetails {
-    fn from(value: super::TaxonProtocol) -> Self {
+impl From<super::TaxonPropagationProcedure> for TaxonPropagationProcedureDetails {
+    fn from(value: super::TaxonPropagationProcedure) -> Self {
         Self {
             taxon: ObjectReference::from_deferred(&value.taxon, value.taxon_id),
-            core: TaxonProtocolCompact::from(value),
+            core: TaxonPropagationProcedureCompact::from(value),
         }
     }
 }
 
-impl From<&super::TaxonProtocol> for TaxonProtocolDetails {
-    fn from(value: &super::TaxonProtocol) -> Self {
+impl From<&super::TaxonPropagationProcedure> for TaxonPropagationProcedureDetails {
+    fn from(value: &super::TaxonPropagationProcedure) -> Self {
         value.clone().into()
     }
 }
 
 #[skip_serializing_none]
 #[derive(Debug, Clone, Serialize)]
-pub struct TaxonProtocolCompact {
-    pub protocol: ObjectReference,
+pub struct TaxonPropagationProcedureCompact {
+    pub propagation: ObjectReference,
     pub confidence: Option<u8>,
     pub notes: Option<String>,
     pub citation: Option<String>,
 }
-impl From<super::TaxonProtocol> for TaxonProtocolCompact {
-    fn from(value: super::TaxonProtocol) -> Self {
+impl From<super::TaxonPropagationProcedure> for TaxonPropagationProcedureCompact {
+    fn from(value: super::TaxonPropagationProcedure) -> Self {
         Self {
-            protocol: ObjectReference::from_deferred(&value.protocol, value.protocol_id),
+            propagation: ObjectReference::from_deferred(&value.propagation, value.propagation_id),
             confidence: value.confidence,
             notes: value.notes,
             citation: value.citation,
@@ -312,8 +312,8 @@ impl From<super::TaxonProtocol> for TaxonProtocolCompact {
     }
 }
 
-impl From<&super::TaxonProtocol> for TaxonProtocolCompact {
-    fn from(value: &super::TaxonProtocol) -> Self {
+impl From<&super::TaxonPropagationProcedure> for TaxonPropagationProcedureCompact {
+    fn from(value: &super::TaxonPropagationProcedure) -> Self {
         value.clone().into()
     }
 }

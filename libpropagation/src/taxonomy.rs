@@ -16,7 +16,7 @@ use crate::{
     collecting::{CollectingData, TaxonCleaningProcedure},
     dto::ObjectReference,
     error::ImportExportError,
-    propagation::Protocol,
+    propagation::PropagationProcedure,
     region::RegionalTaxonStatus,
 };
 
@@ -225,7 +225,7 @@ pub struct Taxon {
     #[has_many]
     pub cleaning_procedures: Deferred<Vec<TaxonCleaningProcedure>>,
     #[has_many]
-    pub propagation_protocols: Deferred<Vec<TaxonProtocol>>,
+    pub propagation_procedures: Deferred<Vec<TaxonPropagationProcedure>>,
     #[has_many]
     pub notes: Deferred<Vec<TaxonNote>>,
 }
@@ -299,10 +299,10 @@ pub struct Synonym {
     // is_accepted: bool,
 }
 
-// TODO: if protocols become parametrized, we'd need to add the parameters to
+// TODO: if procedures become parametrized, we'd need to add the parameters to
 // this model...
 #[derive(Debug, Clone, toasty::Model)]
-pub struct TaxonProtocol {
+pub struct TaxonPropagationProcedure {
     #[key]
     #[index]
     pub taxon_id: u64,
@@ -311,9 +311,9 @@ pub struct TaxonProtocol {
 
     #[key]
     #[index]
-    pub protocol_id: u64,
-    #[belongs_to(key=protocol_id, references=id)]
-    pub protocol: Deferred<Protocol>,
+    pub propagation_id: u64,
+    #[belongs_to(key=propagation_id, references=id)]
+    pub propagation: Deferred<PropagationProcedure>,
 
     pub confidence: Option<u8>,
     pub notes: Option<String>,

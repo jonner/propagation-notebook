@@ -1,6 +1,6 @@
 use libpropagation::taxonomy::{
-    TaxonProtocol,
-    dto::{TaxonProtocolCompact, TaxonProtocolDetails},
+    TaxonPropagationProcedure,
+    dto::{TaxonPropagationProcedureCompact, TaxonPropagationProcedureDetails},
 };
 
 use toasty::Db;
@@ -9,61 +9,63 @@ use crate::{
     cli::OutputFormat,
     views::{
         JsonView, YamlView,
-        propagation::{TaxonPropagationProtocolDetailView, TaxonPropagationProtocolListView},
+        propagation::{
+            TaxonPropagationProcedureListView, TaxonPropagationPropagationProcedureDetailView,
+        },
     },
 };
 
 #[derive(Debug, clap::Subcommand)]
 pub enum TaxonPropagationCommands {
-    #[command(about = "List seed propagation protocols for the taxon")]
+    #[command(about = "List seed propagation procedure for the taxon")]
     List,
     #[command(about = "Show seed propagation information for the taxon")]
     Show {
-        #[arg(help = "An ID of a propagation protocol ID assigned to this taxon")]
-        protocol_id: u64,
+        #[arg(help = "An ID of a propagation procedure ID assigned to this taxon")]
+        propagation_id: u64,
     },
-    #[command(about = "Assign a new seed propagation protocol to a taxon")]
+    #[command(about = "Assign a new seed propagation procedure to a taxon")]
     Add {
-        #[arg(help = "An ID of a propagation protocol ID")]
-        protocol_id: u64,
+        #[arg(help = "An ID of a propagation procedure ID")]
+        propagation_id: u64,
         #[arg(
             long,
-            help = "Confidence level in this propagation protocol (0-10)",
+            help = "Confidence level in this propagation procedure (0-10)",
             value_parser = clap::value_parser!(u8).range(0..=10)
         )]
         confidence: Option<u8>,
         #[arg(
             short,
             long,
-            help = "Taxon-specific notes for this propagation protocol"
+            help = "Taxon-specific notes for this propagation procedure"
         )]
         notes: Option<String>,
-        #[arg(long, help = "Taxon-specific citation for this propagation protocol")]
+        #[arg(long, help = "Taxon-specific citation for this propagation procedure")]
         citation: Option<String>,
     },
     #[command(about = "Modify propagation information for a taxon", group(clap::ArgGroup::new("modify_props").args(["confidence", "notes", "citation"]).required(true).multiple(true)))]
     Modify {
-        #[arg(help = "A propagation protocol ID assigned to this taxon")]
-        protocol_id: u64,
+        #[arg(help = "A propagation procedure ID assigned to this taxon")]
+        propagation_id: u64,
         #[arg(
             long,
-            help = "Confidence level in this propagation protocol (0-10)",
+            help = "Confidence level in this propagation procedure (0-10)",
             value_parser = clap::value_parser!(u8).range(0..=10)
         )]
         confidence: Option<u8>,
         #[arg(
             short,
             long,
-            help = "Taxon-specific notes for this propagation protocol"
+            help = "Taxon-specific notes for this propagation procedure"
         )]
         notes: Option<String>,
-        #[arg(long, help = "Taxon-specific citation for this propagation protocol")]
+        #[arg(long, help = "Taxon-specific citation for this propagation procedure")]
         citation: Option<String>,
     },
     #[command(about = "Remove propagation information from the taxon")]
     Remove {
-        #[arg(help = "A propagation protocol ID assigned to this taxon")]
-        protocol_id: u64,
+        #[arg(help = "A propagation procedure ID assigned to this taxon")]
+        propagation_id: u64,
         #[arg(
             short = 'y',
             long,
@@ -82,29 +84,29 @@ impl TaxonPropagationCommands {
     ) -> anyhow::Result<()> {
         match self {
         TaxonPropagationCommands::List => {
-            let tps: Vec<TaxonProtocolCompact> = TaxonProtocol::filter_by_taxon_id(taxon_id)
-                .include(TaxonProtocol::fields().taxon())
-                .include(TaxonProtocol::fields().protocol())
+            let tps: Vec<TaxonPropagationProcedureCompact> = TaxonPropagationProcedure::filter_by_taxon_id(taxon_id)
+                .include(TaxonPropagationProcedure::fields().taxon())
+                .include(TaxonPropagationProcedure::fields().propagation())
                 .exec(db)
                 .await?.into_iter().map(Into::into).collect();
             let output = match format {
-                OutputFormat::Text => TaxonPropagationProtocolListView::new(&tps).render()?,
+                OutputFormat::Text => TaxonPropagationProcedureListView::new(&tps).render()?,
                 OutputFormat::Json => JsonView::new(&tps).render()?,
                 OutputFormat::Yaml => YamlView::new(&tps).render()?,
             };
             println!("{output}");
         }
-        TaxonPropagationCommands::Show { protocol_id } => {
-            load_and_show_taxon_propagation_details(db, taxon_id, format, protocol_id).await?;
+        TaxonPropagationCommands::Show { propagation_id } => {
+            load_and_show_taxon_propagation_details(db, taxon_id, format, propagation_id).await?;
         }
         TaxonPropagationCommands::Add {
-            protocol_id,
+            propagation_id,
             confidence,
             notes,
             citation
         } => {
-            let tp: TaxonProtocolDetails = TaxonProtocol::create()
-                .protocol_id(protocol_id)
+            let tp: TaxonPropagationProcedureDetails = TaxonPropagationProcedure::create()
+                .propagation_id(propagation_id)
                 .taxon_id(taxon_id)
                 .confidence(confidence)
                 .notes(notes)
@@ -112,20 +114,20 @@ impl TaxonPropagationCommands {
                 .exec(db)
                 .await?.into();
             let output = match format {
-                OutputFormat::Text => TaxonPropagationProtocolDetailView::new(&tp).render()?,
+                OutputFormat::Text => TaxonPropagationPropagationProcedureDetailView::new(&tp).render()?,
                 OutputFormat::Json => JsonView::new(&tp).render()?,
                 OutputFormat::Yaml => YamlView::new(&tp).render()?,
             };
             println!("{output}");
         }
         TaxonPropagationCommands::Modify {
-            protocol_id,
+            propagation_id,
             confidence,
             notes,
             citation
         } => {
             let mut query =
-                TaxonProtocol::update_by_taxon_id_and_protocol_id(taxon_id, protocol_id);
+                TaxonPropagationProcedure::update_by_taxon_id_and_propagation_id(taxon_id, propagation_id);
             if let Some(confidence) = confidence {
                 query = query.confidence(confidence);
             }
@@ -136,26 +138,26 @@ impl TaxonPropagationCommands {
                 query = query.citation(citation);
             }
             query.exec(db).await?;
-            load_and_show_taxon_propagation_details(db, taxon_id, format, protocol_id).await?;
+            load_and_show_taxon_propagation_details(db, taxon_id, format, propagation_id).await?;
         }
         TaxonPropagationCommands::Remove {
-            protocol_id,
+            propagation_id,
             assumeyes,
         } => {
             if *assumeyes
                         || inquire::Confirm::new(
-                            &format!("Are you sure you wish to remove this propagation protocol from taxon {taxon_id}?"),
+                            &format!("Are you sure you wish to remove this propagation procedure from taxon {taxon_id}?"),
                         )
                         .with_default(false)
                         .prompt()?
                     {
-                        TaxonProtocol::delete_by_taxon_id_and_protocol_id(
+                        TaxonPropagationProcedure::delete_by_taxon_id_and_propagation_id(
                             db,
                             taxon_id,
-                            protocol_id,
+                            propagation_id,
                         )
                         .await?;
-                        println!("Removed propagation protocol {protocol_id} for taxon {taxon_id}");
+                        println!("Removed propagation procedure {propagation_id} for taxon {taxon_id}");
                     }
         }
     }
@@ -167,18 +169,18 @@ async fn load_and_show_taxon_propagation_details(
     db: &mut Db,
     taxon_id: u64,
     format: OutputFormat,
-    protocol_id: &u64,
+    propagation_id: &u64,
 ) -> Result<(), anyhow::Error> {
-    let tp: TaxonProtocolDetails =
-        TaxonProtocol::filter_by_taxon_id_and_protocol_id(taxon_id, protocol_id)
-            .include(TaxonProtocol::fields().taxon())
-            .include(TaxonProtocol::fields().protocol())
+    let tp: TaxonPropagationProcedureDetails =
+        TaxonPropagationProcedure::filter_by_taxon_id_and_propagation_id(taxon_id, propagation_id)
+            .include(TaxonPropagationProcedure::fields().taxon())
+            .include(TaxonPropagationProcedure::fields().propagation())
             .one()
             .exec(db)
             .await?
             .into();
     let output = match format {
-        OutputFormat::Text => TaxonPropagationProtocolDetailView::new(&tp).render()?,
+        OutputFormat::Text => TaxonPropagationPropagationProcedureDetailView::new(&tp).render()?,
         OutputFormat::Json => JsonView::new(&tp).render()?,
         OutputFormat::Yaml => YamlView::new(&tp).render()?,
     };

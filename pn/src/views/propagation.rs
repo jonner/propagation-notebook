@@ -1,24 +1,24 @@
 use libpropagation::{
-    propagation::dto::{ProtocolCompact, ProtocolDetails},
-    taxonomy::dto::{TaxonProtocolCompact, TaxonProtocolDetails},
+    propagation::dto::{PropagationProcedureCompact, PropagationProcedureDetails},
+    taxonomy::dto::{TaxonPropagationProcedureCompact, TaxonPropagationProcedureDetails},
 };
 
 use crate::style;
 
-pub struct TaxonPropagationProtocolListView<'a> {
-    tps: &'a Vec<TaxonProtocolCompact>,
+pub struct TaxonPropagationProcedureListView<'a> {
+    tps: &'a Vec<TaxonPropagationProcedureCompact>,
 }
 
-impl<'a> TaxonPropagationProtocolListView<'a> {
-    pub fn new(tps: &'a Vec<TaxonProtocolCompact>) -> Self {
+impl<'a> TaxonPropagationProcedureListView<'a> {
+    pub fn new(tps: &'a Vec<TaxonPropagationProcedureCompact>) -> Self {
         Self { tps }
     }
     pub fn render(&self) -> anyhow::Result<String> {
         let mut tbuilder = tabled::builder::Builder::default();
-        tbuilder.push_record(["Protocol", "Confidence", "Notes"]);
+        tbuilder.push_record(["Procedure", "Confidence", "Notes"]);
         for tp in self.tps {
             tbuilder.push_record([
-                &tp.protocol.to_string(),
+                &tp.propagation.to_string(),
                 tp.confidence
                     .map(|v| v.to_string())
                     .as_deref()
@@ -30,12 +30,12 @@ impl<'a> TaxonPropagationProtocolListView<'a> {
     }
 }
 
-pub struct TaxonPropagationProtocolDetailView<'a> {
-    tp: &'a TaxonProtocolDetails,
+pub struct TaxonPropagationPropagationProcedureDetailView<'a> {
+    tp: &'a TaxonPropagationProcedureDetails,
 }
 
-impl<'a> TaxonPropagationProtocolDetailView<'a> {
-    pub fn new(tp: &'a TaxonProtocolDetails) -> Self {
+impl<'a> TaxonPropagationPropagationProcedureDetailView<'a> {
+    pub fn new(tp: &'a TaxonPropagationProcedureDetails) -> Self {
         Self { tp }
     }
 
@@ -56,55 +56,58 @@ impl<'a> TaxonPropagationProtocolDetailView<'a> {
             self.tp.core.notes.as_deref().unwrap_or("-"),
         ]);
         tbuilder.push_record(["Citation", self.tp.core.citation.as_deref().unwrap_or("-")]);
-        tbuilder.push_record(["Protocol", &self.tp.core.protocol.to_string()]);
+        tbuilder.push_record(["Procedure", &self.tp.core.propagation.to_string()]);
         Ok(tbuilder.build().with(style::DetailTable).to_string())
     }
 }
 
-pub struct PropagationProtocolListView<'a> {
-    protocols: &'a Vec<ProtocolCompact>,
+pub struct PropagationProcedureListView<'a> {
+    procedures: &'a Vec<PropagationProcedureCompact>,
 }
 
-impl<'a> PropagationProtocolListView<'a> {
-    pub fn new(protocols: &'a Vec<ProtocolCompact>) -> Self {
-        Self { protocols }
+impl<'a> PropagationProcedureListView<'a> {
+    pub fn new(procedures: &'a Vec<PropagationProcedureCompact>) -> Self {
+        Self { procedures }
     }
 
     pub fn render(&self) -> anyhow::Result<String> {
         let mut tbuilder = tabled::builder::Builder::default();
         tbuilder.push_record(["ID", "Name", "Type"]);
-        for protocol in self.protocols {
+        for procedure in self.procedures {
             tbuilder.push_record([
-                &protocol.id.to_string(),
-                &protocol.name,
-                &protocol.r#type.to_string(),
+                &procedure.id.to_string(),
+                &procedure.name,
+                &procedure.r#type.to_string(),
             ])
         }
         Ok(tbuilder.build().with(style::ListTable).to_string())
     }
 }
 
-pub struct PropagationProtocolDetailView<'a> {
-    protocol: &'a ProtocolDetails,
+pub struct PropagationProcedureDetailView<'a> {
+    procedure: &'a PropagationProcedureDetails,
 }
 
-impl<'a> PropagationProtocolDetailView<'a> {
-    pub fn new(protocol: &'a ProtocolDetails) -> Self {
-        Self { protocol }
+impl<'a> PropagationProcedureDetailView<'a> {
+    pub fn new(procedure: &'a PropagationProcedureDetails) -> Self {
+        Self { procedure }
     }
 
     pub fn render(&self) -> anyhow::Result<String> {
         let mut tbuilder = tabled::builder::Builder::default();
-        tbuilder.push_record(["ID", &self.protocol.id.to_string()]);
-        tbuilder.push_record(["Name", &self.protocol.name]);
-        tbuilder.push_record(["Type", &self.protocol.r#type.to_string()]);
-        tbuilder.push_record(["Notes", self.protocol.notes.as_deref().unwrap_or("-")]);
-        tbuilder.push_record(["Citation", self.protocol.citation.as_deref().unwrap_or("-")]);
-        tbuilder.push_record(["Instructions", &self.protocol.instructions]);
+        tbuilder.push_record(["ID", &self.procedure.id.to_string()]);
+        tbuilder.push_record(["Name", &self.procedure.name]);
+        tbuilder.push_record(["Type", &self.procedure.r#type.to_string()]);
+        tbuilder.push_record(["Notes", self.procedure.notes.as_deref().unwrap_or("-")]);
+        tbuilder.push_record([
+            "Citation",
+            self.procedure.citation.as_deref().unwrap_or("-"),
+        ]);
+        tbuilder.push_record(["Instructions", &self.procedure.instructions]);
         let mut inner_table = tabled::builder::Builder::default();
-        if !self.protocol.taxa.is_empty() {
+        if !self.procedure.taxa.is_empty() {
             inner_table.push_record(["ID", "Name"]);
-            for taxon in &self.protocol.taxa {
+            for taxon in &self.procedure.taxa {
                 inner_table.push_record([
                     &taxon.id.to_string(),
                     taxon.name.as_deref().unwrap_or_default(),

@@ -3,18 +3,18 @@ use serde::Serialize;
 use crate::dto::ObjectReference;
 
 #[derive(Debug, Clone, Serialize)]
-pub struct ProtocolDetails {
+pub struct PropagationProcedureDetails {
     pub id: u64,
     pub name: String,
-    pub r#type: super::ProtocolType,
+    pub r#type: super::ProcedureType,
     pub instructions: String,
     pub notes: Option<String>,
     pub citation: Option<String>,
     pub taxa: Vec<ObjectReference>,
 }
 
-impl From<super::Protocol> for ProtocolDetails {
-    fn from(value: super::Protocol) -> Self {
+impl From<super::PropagationProcedure> for PropagationProcedureDetails {
+    fn from(value: super::PropagationProcedure) -> Self {
         Self {
             id: value.id,
             name: value.name,
@@ -22,10 +22,10 @@ impl From<super::Protocol> for ProtocolDetails {
             instructions: value.instructions,
             notes: value.notes,
             citation: value.citation,
-            taxa: match value.taxon_protocols.is_unloaded() {
+            taxa: match value.taxa.is_unloaded() {
                 true => Vec::default(),
                 false => value
-                    .taxon_protocols
+                    .taxa
                     .get()
                     .iter()
                     .map(|tp| ObjectReference::from_deferred(&tp.taxon, tp.taxon_id))
@@ -36,14 +36,14 @@ impl From<super::Protocol> for ProtocolDetails {
 }
 
 #[derive(Debug, Clone, Serialize)]
-pub struct ProtocolCompact {
+pub struct PropagationProcedureCompact {
     pub id: u64,
     pub name: String,
-    pub r#type: super::ProtocolType,
+    pub r#type: super::ProcedureType,
 }
 
-impl From<super::Protocol> for ProtocolCompact {
-    fn from(value: super::Protocol) -> Self {
+impl From<super::PropagationProcedure> for PropagationProcedureCompact {
+    fn from(value: super::PropagationProcedure) -> Self {
         Self {
             id: value.id,
             name: value.name,

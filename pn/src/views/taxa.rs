@@ -78,16 +78,16 @@ impl<'a> TaxonView<'a> {
                 }
             }
         }]);
-        tbuilder.push_record(["Propagation Protocols", &{
-            match &self.taxon.propagation_protocols {
+        tbuilder.push_record(["Propagation Procedures", &{
+            match &self.taxon.propagation_procedures {
                 tp if tp.is_empty() => "-".to_string(),
                 tps => {
                     let mut inner_table = tabled::builder::Builder::default();
                     inner_table.push_record(["ID", "Name"]);
                     tps.iter().for_each(|tp| {
                         inner_table.push_record([
-                            &tp.protocol.id.to_string(),
-                            tp.protocol.name.as_deref().unwrap_or_default(),
+                            &tp.propagation.id.to_string(),
+                            tp.propagation.name.as_deref().unwrap_or_default(),
                         ]);
                     });
                     inner_table.build().with(style::ListTable).to_string() + "\n"

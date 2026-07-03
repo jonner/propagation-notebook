@@ -28,7 +28,7 @@ pub enum TaxonNoteCommands {
     },
     #[command(about = "Modify a note for a taxon")]
     Modify {
-        #[arg(help = "A propagation protocol ID assigned to this taxon")]
+        #[arg(help = "A note ID assigned to this taxon")]
         note_id: u64,
         #[arg(help = "A note")]
         text: String,

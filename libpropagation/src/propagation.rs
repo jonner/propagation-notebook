@@ -1,4 +1,4 @@
-use crate::{dto::ObjectReference, taxonomy::TaxonProtocol};
+use crate::{dto::ObjectReference, taxonomy::TaxonPropagationProcedure};
 use serde::{Deserialize, Serialize};
 use toasty::Deferred;
 
@@ -9,7 +9,7 @@ pub mod dto;
 )]
 #[clap(rename_all = "kebab-case")]
 #[serde(rename_all = "kebab-case")]
-pub enum ProtocolType {
+pub enum ProcedureType {
     #[column(variant = 1)]
     Pretreatment,
     #[column(variant = 2)]
@@ -24,7 +24,7 @@ pub enum ProtocolType {
 
 // TODO: offer customizable parameters (e.g. 'days' for cold moist stratification)?
 #[derive(Debug, Clone, toasty::Model)]
-pub struct Protocol {
+pub struct PropagationProcedure {
     #[key]
     #[auto]
     pub id: u64,
@@ -34,15 +34,15 @@ pub struct Protocol {
 
     pub instructions: String,
     pub notes: Option<String>,
-    pub r#type: ProtocolType,
+    pub r#type: ProcedureType,
     pub citation: Option<String>,
 
-    #[has_many]
-    pub taxon_protocols: Deferred<Vec<TaxonProtocol>>,
+    #[has_many(pair=propagation)]
+    pub taxa: Deferred<Vec<TaxonPropagationProcedure>>,
 }
 
-impl From<Protocol> for ObjectReference {
-    fn from(value: Protocol) -> Self {
+impl From<PropagationProcedure> for ObjectReference {
+    fn from(value: PropagationProcedure) -> Self {
         Self {
             id: value.id,
             name: Some(value.name),
@@ -50,8 +50,8 @@ impl From<Protocol> for ObjectReference {
     }
 }
 
-impl From<&Protocol> for ObjectReference {
-    fn from(value: &Protocol) -> Self {
+impl From<&PropagationProcedure> for ObjectReference {
+    fn from(value: &PropagationProcedure) -> Self {
         Self {
             id: value.id,
             name: Some(value.name.clone()),
@@ -59,7 +59,7 @@ impl From<&Protocol> for ObjectReference {
     }
 }
 
-impl Protocol {
+impl PropagationProcedure {
     pub fn reference(&self) -> ObjectReference {
         self.into()
     }

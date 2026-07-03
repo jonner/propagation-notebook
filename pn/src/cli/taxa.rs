@@ -3,7 +3,7 @@ use libpropagation::{
     dto::ObjectReference,
     region::{RegionalTaxonStatus, dto::RegionalTaxonStatusDetailsNoRegion},
     taxonomy::{
-        Synonym, Taxon, TaxonNote, TaxonProtocol, TaxonomicAuthority, VernacularName,
+        Synonym, Taxon, TaxonNote, TaxonPropagationProcedure, TaxonomicAuthority, VernacularName,
         dto::TaxonDetails,
     },
 };
@@ -159,7 +159,7 @@ impl TaxonCommands {
                     .include(Taxon::fields().regional_statuses().region())
                     .include(Taxon::fields().collecting_data())
                     .include(Taxon::fields().cleaning_procedures().procedure())
-                    .include(Taxon::fields().propagation_protocols().protocol())
+                    .include(Taxon::fields().propagation_procedures().propagation())
                     .include(Taxon::fields().notes())
                     .one()
                     .exec(db)
@@ -218,8 +218,8 @@ impl TaxonCommands {
                                     .cleaning_procedures()
                                     .any(TaxonCleaningProcedure::fields().taxon_id().gt(0)))
                                 .or(Taxon::fields()
-                                    .propagation_protocols()
-                                    .any(TaxonProtocol::fields().taxon_id().gt(0)))
+                                    .propagation_procedures()
+                                    .any(TaxonPropagationProcedure::fields().taxon_id().gt(0)))
                                 .or(Taxon::fields()
                                     .notes()
                                     .any(TaxonNote::fields().taxon_id().gt(0))),
