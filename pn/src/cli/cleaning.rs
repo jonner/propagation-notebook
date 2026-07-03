@@ -23,10 +23,8 @@ pub enum CleaningCommands {
         instructions: String,
         #[arg(long, help = "General notes about the procedure")]
         notes: Option<String>,
-        #[arg(long, help = "A citation for the procedure")]
-        citation: Option<String>,
     },
-    #[command(about = "Modify a seed cleaning procedure", group(clap::ArgGroup::new("cleaning_props").args(["name", "instructions", "notes", "citation"]).required(true).multiple(false)))]
+    #[command(about = "Modify a seed cleaning procedure", group(clap::ArgGroup::new("cleaning_props").args(["name", "instructions", "notes"]).required(true).multiple(false)))]
     Modify {
         id: u64,
         #[arg(short, long, help = "A name for the procedure")]
@@ -35,8 +33,6 @@ pub enum CleaningCommands {
         name: Option<String>,
         #[arg(long, help = "General notes about the procedure")]
         notes: Option<String>,
-        #[arg(long, help = "A citation for the procedure")]
-        citation: Option<String>,
     },
     #[command(about = "Remove a seed cleaning procedure")]
     Remove {
@@ -86,13 +82,11 @@ impl CleaningCommands {
                 name,
                 instructions,
                 notes,
-                citation,
             } => {
                 let item: CleaningProcedureDetails = CleaningProcedure::create()
                     .name(name)
                     .instructions(instructions)
                     .notes(notes)
-                    .citation(citation)
                     .exec(db)
                     .await?
                     .into();
@@ -128,7 +122,6 @@ impl CleaningCommands {
                 name,
                 instructions,
                 notes,
-                citation,
             } => {
                 let mut query = CleaningProcedure::update_by_id(id);
                 if let Some(name) = name {
@@ -139,9 +132,6 @@ impl CleaningCommands {
                 }
                 if let Some(notes) = notes {
                     query = query.notes(notes);
-                }
-                if let Some(citation) = citation {
-                    query = query.citation(citation);
                 }
                 query.exec(db).await?;
                 let item: CleaningProcedureDetails = CleaningProcedure::filter_by_id(id)

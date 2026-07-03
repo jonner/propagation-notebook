@@ -13,6 +13,7 @@ pub enum TaxonomicAuthority {
 
 use crate::{
     ImportProgressReporter,
+    citation::{Citation, TaxonPropagationProcedureCitation},
     collecting::{CollectingData, TaxonCleaningProcedure},
     dto::ObjectReference,
     error::ImportExportError,
@@ -317,7 +318,10 @@ pub struct TaxonPropagationProcedure {
 
     pub confidence: Option<u8>,
     pub notes: Option<String>,
-    pub citation: Option<String>,
+    #[has_many(pair=taxon_propagation)]
+    pub citation_links: Deferred<Vec<TaxonPropagationProcedureCitation>>,
+    #[has_many(via=citation_links.citation)]
+    pub citations: Deferred<Vec<Citation>>,
 }
 
 #[derive(Debug, Clone, toasty::Model)]

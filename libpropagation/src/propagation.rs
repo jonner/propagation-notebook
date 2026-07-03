@@ -1,4 +1,8 @@
-use crate::{dto::ObjectReference, taxonomy::TaxonPropagationProcedure};
+use crate::{
+    citation::{Citation, PropagationProcedureCitation},
+    dto::ObjectReference,
+    taxonomy::TaxonPropagationProcedure,
+};
 use serde::{Deserialize, Serialize};
 use toasty::Deferred;
 
@@ -35,10 +39,13 @@ pub struct PropagationProcedure {
     pub instructions: String,
     pub notes: Option<String>,
     pub r#type: ProcedureType,
-    pub citation: Option<String>,
 
     #[has_many(pair=propagation)]
     pub taxa: Deferred<Vec<TaxonPropagationProcedure>>,
+    #[has_many(pair=propagation)]
+    pub citation_links: Deferred<Vec<PropagationProcedureCitation>>,
+    #[has_many(via=citation_links.citation)]
+    pub citations: Deferred<Vec<Citation>>,
 }
 
 impl From<PropagationProcedure> for ObjectReference {

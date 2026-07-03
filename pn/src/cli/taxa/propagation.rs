@@ -40,10 +40,8 @@ pub enum TaxonPropagationCommands {
             help = "Taxon-specific notes for this propagation procedure"
         )]
         notes: Option<String>,
-        #[arg(long, help = "Taxon-specific citation for this propagation procedure")]
-        citation: Option<String>,
     },
-    #[command(about = "Modify propagation information for a taxon", group(clap::ArgGroup::new("modify_props").args(["confidence", "notes", "citation"]).required(true).multiple(true)))]
+    #[command(about = "Modify propagation information for a taxon", group(clap::ArgGroup::new("modify_props").args(["confidence", "notes"]).required(true).multiple(true)))]
     Modify {
         #[arg(help = "A propagation procedure ID assigned to this taxon")]
         propagation_id: u64,
@@ -59,8 +57,6 @@ pub enum TaxonPropagationCommands {
             help = "Taxon-specific notes for this propagation procedure"
         )]
         notes: Option<String>,
-        #[arg(long, help = "Taxon-specific citation for this propagation procedure")]
-        citation: Option<String>,
     },
     #[command(about = "Remove propagation information from the taxon")]
     Remove {
@@ -103,14 +99,12 @@ impl TaxonPropagationCommands {
             propagation_id,
             confidence,
             notes,
-            citation
         } => {
             let tp: TaxonPropagationProcedureDetails = TaxonPropagationProcedure::create()
                 .propagation_id(propagation_id)
                 .taxon_id(taxon_id)
                 .confidence(confidence)
                 .notes(notes)
-                .citation(citation)
                 .exec(db)
                 .await?.into();
             let output = match format {
@@ -124,7 +118,6 @@ impl TaxonPropagationCommands {
             propagation_id,
             confidence,
             notes,
-            citation
         } => {
             let mut query =
                 TaxonPropagationProcedure::update_by_taxon_id_and_propagation_id(taxon_id, propagation_id);
@@ -133,9 +126,6 @@ impl TaxonPropagationCommands {
             }
             if let Some(notes) = notes {
                 query = query.notes(notes);
-            }
-            if let Some(citation) = citation {
-                query = query.citation(citation);
             }
             query.exec(db).await?;
             load_and_show_taxon_propagation_details(db, taxon_id, format, propagation_id).await?;

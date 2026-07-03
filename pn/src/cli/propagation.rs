@@ -39,10 +39,8 @@ pub enum PropagationCommands {
         instructions: String,
         #[arg(long, help = "Additional notes for this procedure")]
         notes: Option<String>,
-        #[arg(long, help = "A citation for this procedure")]
-        citation: Option<String>,
     },
-    #[command(about = "Add a seed propagation procedure", group(clap::ArgGroup::new("modify_fields").args(["name", "type", "notes", "instructions", "citation"]).required(true).multiple(true)))]
+    #[command(about = "Add a seed propagation procedure", group(clap::ArgGroup::new("modify_fields").args(["name", "type", "notes", "instructions"]).required(true).multiple(true)))]
     Modify {
         #[arg(help = "A procedure ID")]
         id: u64,
@@ -54,8 +52,6 @@ pub enum PropagationCommands {
         instructions: Option<String>,
         #[arg(long, help = "Additional notes for this procedure")]
         notes: Option<String>,
-        #[arg(long, help = "A citation for this procedure")]
-        citation: Option<String>,
     },
     #[command(about = "Remove a seed propagation procedure")]
     Remove {
@@ -98,14 +94,12 @@ impl PropagationCommands {
                 r#type,
                 instructions,
                 notes,
-                citation,
             } => {
                 let item: PropagationProcedureDetails = PropagationProcedure::create()
                     .name(name)
                     .r#type(r#type)
                     .instructions(instructions)
                     .notes(notes)
-                    .citation(citation)
                     .exec(db)
                     .await?
                     .into();
@@ -122,7 +116,6 @@ impl PropagationCommands {
                 r#type,
                 instructions,
                 notes,
-                citation,
             } => {
                 let mut query = PropagationProcedure::update_by_id(id);
                 if let Some(name) = name {
@@ -136,9 +129,6 @@ impl PropagationCommands {
                 }
                 if let Some(notes) = notes {
                     query = query.notes(notes);
-                }
-                if let Some(citation) = citation {
-                    query = query.citation(citation);
                 }
                 query.exec(db).await?;
                 load_and_display_propagation_details(db, format, id).await?;

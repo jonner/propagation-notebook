@@ -3,6 +3,7 @@ use toasty::ModelSet;
 
 use crate::error::Error;
 
+pub mod citation;
 pub mod collecting;
 pub mod dto;
 pub mod error;

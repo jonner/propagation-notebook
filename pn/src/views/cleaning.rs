@@ -41,7 +41,6 @@ impl<'a> TaxonCleaningProcedureDetailView<'a> {
         tbuilder.push_record(["Taxon", &self.tcp.taxon.to_string()]);
         tbuilder.push_record(["Procedure", &self.tcp.core.procedure.to_string()]);
         tbuilder.push_record(["Notes", self.tcp.core.notes.as_deref().unwrap_or("-")]);
-        tbuilder.push_record(["Citation", self.tcp.citation.as_deref().unwrap_or("-")]);
         Ok(tbuilder.build().with(style::DetailTable).to_string())
     }
 }
@@ -86,10 +85,6 @@ impl<'a> CleaningProcedureDetailsView<'a> {
         tbuilder.push_record(["ID", &self.procedure.id.to_string()]);
         tbuilder.push_record(["Name", &self.procedure.name]);
         tbuilder.push_record(["Notes", self.procedure.notes.as_deref().unwrap_or("-")]);
-        tbuilder.push_record([
-            "Citation",
-            self.procedure.citation.as_deref().unwrap_or("-"),
-        ]);
         tbuilder.push_record(["Instructions", &self.procedure.instructions]);
 
         let mut inner_table = tabled::builder::Builder::default();

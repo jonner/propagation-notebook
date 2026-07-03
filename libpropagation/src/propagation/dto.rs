@@ -9,7 +9,6 @@ pub struct PropagationProcedureDetails {
     pub r#type: super::ProcedureType,
     pub instructions: String,
     pub notes: Option<String>,
-    pub citation: Option<String>,
     pub taxa: Vec<ObjectReference>,
 }
 
@@ -21,7 +20,6 @@ impl From<super::PropagationProcedure> for PropagationProcedureDetails {
             r#type: value.r#type,
             instructions: value.instructions,
             notes: value.notes,
-            citation: value.citation,
             taxa: match value.taxa.is_unloaded() {
                 true => Vec::default(),
                 false => value

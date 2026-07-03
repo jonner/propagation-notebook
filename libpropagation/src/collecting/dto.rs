@@ -33,7 +33,6 @@ pub struct CleaningProcedureDetails {
     pub name: String,
     pub notes: Option<String>,
     pub instructions: String,
-    pub citation: Option<String>,
     pub taxa: Vec<ObjectReference>,
 }
 
@@ -44,7 +43,6 @@ impl From<super::CleaningProcedure> for CleaningProcedureDetails {
             name: value.name,
             notes: value.notes,
             instructions: value.instructions,
-            citation: value.citation,
             taxa: match value.taxon_links.is_unloaded() {
                 true => Vec::default(),
                 false => value

@@ -55,7 +55,6 @@ impl<'a> TaxonPropagationPropagationProcedureDetailView<'a> {
             "Taxon-specific notes",
             self.tp.core.notes.as_deref().unwrap_or("-"),
         ]);
-        tbuilder.push_record(["Citation", self.tp.core.citation.as_deref().unwrap_or("-")]);
         tbuilder.push_record(["Procedure", &self.tp.core.propagation.to_string()]);
         Ok(tbuilder.build().with(style::DetailTable).to_string())
     }
@@ -99,10 +98,6 @@ impl<'a> PropagationProcedureDetailView<'a> {
         tbuilder.push_record(["Name", &self.procedure.name]);
         tbuilder.push_record(["Type", &self.procedure.r#type.to_string()]);
         tbuilder.push_record(["Notes", self.procedure.notes.as_deref().unwrap_or("-")]);
-        tbuilder.push_record([
-            "Citation",
-            self.procedure.citation.as_deref().unwrap_or("-"),
-        ]);
         tbuilder.push_record(["Instructions", &self.procedure.instructions]);
         let mut inner_table = tabled::builder::Builder::default();
         if !self.procedure.taxa.is_empty() {

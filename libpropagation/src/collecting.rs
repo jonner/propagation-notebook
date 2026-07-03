@@ -1,6 +1,10 @@
 use toasty::Deferred;
 
-use crate::{dto::ObjectReference, taxonomy::Taxon};
+use crate::{
+    citation::{Citation, CleaningProcedureCitation, TaxonCleaningProcedureCitation},
+    dto::ObjectReference,
+    taxonomy::Taxon,
+};
 
 pub mod dto;
 
@@ -33,13 +37,16 @@ pub struct TaxonCleaningProcedure {
 
     // notes for customizing the procedure for this taxon
     pub notes: Option<String>,
-    pub citation: Option<String>,
 
     #[key]
     #[index]
     pub procedure_id: u64,
     #[belongs_to(key=procedure_id, references=id)]
     pub procedure: Deferred<CleaningProcedure>,
+    #[has_many(pair=taxon_cleaning)]
+    pub citation_links: Deferred<Vec<TaxonCleaningProcedureCitation>>,
+    #[has_many(via=citation_links.citation)]
+    pub citations: Deferred<Vec<Citation>>,
 }
 
 #[derive(Debug, Clone, toasty::Model)]
@@ -49,10 +56,13 @@ pub struct CleaningProcedure {
     pub id: u64,
     pub name: String,
     pub notes: Option<String>,
-    pub citation: Option<String>,
     pub instructions: String,
     #[has_many(pair=procedure)]
     pub taxon_links: Deferred<Vec<TaxonCleaningProcedure>>,
+    #[has_many(pair=cleaning)]
+    pub citation_links: Deferred<Vec<CleaningProcedureCitation>>,
+    #[has_many(via=citation_links.citation)]
+    pub citations: Deferred<Vec<Citation>>,
 }
 
 impl From<CleaningProcedure> for ObjectReference {
