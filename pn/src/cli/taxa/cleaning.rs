@@ -28,7 +28,7 @@ pub enum TaxonCleaningCommands {
         #[arg(short, long, help = "Taxon-specific notes for this procedure")]
         notes: Option<String>,
     },
-    #[command(about = "Modify taxon-specific information seed cleaning information")]
+    #[command(about = "Modify taxon-specific information seed cleaning information", group(clap::ArgGroup::new("modify_props").args(["notes"]).required(true).multiple(true)))]
     Modify {
         #[arg(help = "A cleaning procedure ID")]
         procedure_id: u64,
