@@ -34,6 +34,7 @@ pub struct CleaningProcedureDetails {
     pub notes: Option<String>,
     pub instructions: String,
     pub taxa: Vec<ObjectReference>,
+    pub citations: Vec<ObjectReference>,
 }
 
 impl From<super::CleaningProcedure> for CleaningProcedureDetails {
@@ -50,6 +51,15 @@ impl From<super::CleaningProcedure> for CleaningProcedureDetails {
                     .get()
                     .iter()
                     .map(|tl| ObjectReference::from_deferred(&tl.taxon, tl.taxon_id))
+                    .collect(),
+            },
+            citations: match value.citations.is_unloaded() {
+                true => Vec::default(),
+                false => value
+                    .citations
+                    .get()
+                    .iter()
+                    .map(ObjectReference::from)
                     .collect(),
             },
         }

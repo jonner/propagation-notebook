@@ -87,8 +87,8 @@ impl<'a> CleaningProcedureDetailsView<'a> {
         tbuilder.push_record(["Notes", self.procedure.notes.as_deref().unwrap_or("-")]);
         tbuilder.push_record(["Instructions", &self.procedure.instructions]);
 
-        let mut inner_table = tabled::builder::Builder::default();
         if !self.procedure.taxa.is_empty() {
+            let mut inner_table = tabled::builder::Builder::default();
             inner_table.push_record(["ID", "Name"]);
             for link in &self.procedure.taxa {
                 inner_table.push_record([
@@ -96,11 +96,26 @@ impl<'a> CleaningProcedureDetailsView<'a> {
                     link.name.as_deref().unwrap_or_default(),
                 ])
             }
+            tbuilder.push_record([
+                "Taxa",
+                &(inner_table.build().with(style::ListTable).to_string() + "\n"),
+            ]);
         }
-        tbuilder.push_record([
-            "Taxa",
-            &inner_table.build().with(style::ListTable).to_string(),
-        ]);
+
+        if !self.procedure.citations.is_empty() {
+            let mut inner_table = tabled::builder::Builder::default();
+            inner_table.push_record(["ID", "Name"]);
+            for citation in &self.procedure.citations {
+                inner_table.push_record([
+                    &citation.id.to_string(),
+                    citation.name.as_deref().unwrap_or_default(),
+                ])
+            }
+            tbuilder.push_record([
+                "Citations",
+                &(inner_table.build().with(style::ListTable).to_string() + "\n"),
+            ]);
+        }
         Ok(tbuilder.build().with(style::DetailTable).to_string())
     }
 }

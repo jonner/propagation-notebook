@@ -1,12 +1,18 @@
-use libpropagation::collecting::{
-    CleaningProcedure,
-    dto::{CleaningProcedureCompact, CleaningProcedureDetails},
+use libpropagation::{
+    citation::{Citation, CleaningProcedureCitation, dto::CitationDetails},
+    collecting::{
+        CleaningProcedure,
+        dto::{CleaningProcedureCompact, CleaningProcedureDetails},
+    },
 };
 use toasty::Db;
 
 use crate::{
     cli::OutputFormat,
-    views::cleaning::{CleaningProcedureDetailsView, CleaningProcedureListView},
+    views::{
+        citation::CitationDetailsView,
+        cleaning::{CleaningProcedureDetailsView, CleaningProcedureListView},
+    },
 };
 
 #[derive(Debug, clap::Subcommand)]
@@ -44,6 +50,28 @@ pub enum CleaningCommands {
         )]
         assumeyes: bool,
     },
+    AddCitation {
+        #[arg(help = "A cleaning procedure ID")]
+        id: u64,
+        #[arg(help = "Citation subject")]
+        subject: String,
+        #[arg(long, help = "A canonical URL for the citation")]
+        url: Option<String>,
+        #[arg(long, help = "The author being cited")]
+        author: Option<String>,
+    },
+    RemoveCitation {
+        #[arg(help = "A cleaning procedure ID")]
+        id: u64,
+        #[arg(short, long, help = "A citation ID")]
+        citation_id: u64,
+        #[arg(
+            short = 'y',
+            long,
+            help = "Assume yes for all questions requiring confirmation"
+        )]
+        assumeyes: bool,
+    },
 }
 
 impl CleaningCommands {
@@ -65,18 +93,7 @@ impl CleaningCommands {
                 println!("{output}");
             }
             CleaningCommands::Show { id } => {
-                let procedure: CleaningProcedureDetails = CleaningProcedure::filter_by_id(id)
-                    .include(CleaningProcedure::fields().taxon_links().taxon())
-                    .one()
-                    .exec(db)
-                    .await?
-                    .into();
-                let output = match format {
-                    OutputFormat::Text => CleaningProcedureDetailsView::new(&procedure).render()?,
-                    OutputFormat::Json => todo!(),
-                    OutputFormat::Yaml => todo!(),
-                };
-                println!("{output}");
+                load_and_display_cleaning_details(db, format, id).await?;
             }
             CleaningCommands::Add {
                 name,
@@ -142,7 +159,96 @@ impl CleaningCommands {
                     .into();
                 println!("{}", CleaningProcedureDetailsView::new(&item).render()?);
             }
+            CleaningCommands::AddCitation {
+                id,
+                subject,
+                url,
+                author,
+            } => {
+                let citation = Citation::create()
+                    .text(subject)
+                    .url(url)
+                    .author(author)
+                    .exec(db)
+                    .await?;
+                CleaningProcedureCitation::create()
+                    .citation_id(citation.id)
+                    .cleaning_id(id)
+                    .exec(db)
+                    .await?;
+                load_and_display_cleaning_details(db, format, id).await?;
+            }
+            CleaningCommands::RemoveCitation {
+                id,
+                citation_id,
+                assumeyes,
+            } => {
+                if *assumeyes || {
+                    let pc: CitationDetails =
+                        CleaningProcedureCitation::filter_by_citation_id_and_cleaning_id(
+                            citation_id,
+                            id,
+                        )
+                        .include(CleaningProcedureCitation::fields().citation())
+                        .one()
+                        .exec(db)
+                        .await?
+                        .citation
+                        .get()
+                        .into();
+                    let output = CitationDetailsView::new(&pc).render()?;
+                    println!("{output}");
+                    inquire::Confirm::new("Do you want to remove this citation?")
+                        .with_default(false)
+                        .prompt()?
+                } {
+                    CleaningProcedureCitation::delete_by_citation_id_and_cleaning_id(
+                        db,
+                        citation_id,
+                        id,
+                    )
+                    .await?;
+                    let citation = Citation::filter_by_id(citation_id)
+                        .include(Citation::fields().propagation_procedures())
+                        .include(Citation::fields().taxon_propagation_procedures())
+                        .include(Citation::fields().cleaning_procedures())
+                        .include(Citation::fields().taxon_cleaning_procedures())
+                        .one()
+                        .exec(db)
+                        .await?;
+                    // if the citation is no longer rused, remove it from the database
+                    if citation.propagation_procedures.get().is_empty()
+                        && citation.taxon_propagation_procedures.get().is_empty()
+                        && citation.cleaning_procedures.get().is_empty()
+                        && citation.taxon_cleaning_procedures.get().is_empty()
+                    {
+                        Citation::delete_by_id(db, citation_id).await?;
+                    }
+                    load_and_display_cleaning_details(db, format, id).await?;
+                }
+            }
         }
         Ok(())
     }
+}
+
+async fn load_and_display_cleaning_details(
+    db: &mut Db,
+    format: OutputFormat,
+    id: &u64,
+) -> Result<(), anyhow::Error> {
+    let procedure: CleaningProcedureDetails = CleaningProcedure::filter_by_id(id)
+        .include(CleaningProcedure::fields().taxon_links().taxon())
+        .include(CleaningProcedure::fields().citations())
+        .one()
+        .exec(db)
+        .await?
+        .into();
+    let output = match format {
+        OutputFormat::Text => CleaningProcedureDetailsView::new(&procedure).render()?,
+        OutputFormat::Json => todo!(),
+        OutputFormat::Yaml => todo!(),
+    };
+    println!("{output}");
+    Ok(())
 }
