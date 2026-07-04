@@ -10,6 +10,7 @@ pub struct PropagationProcedureDetails {
     pub instructions: String,
     pub notes: Option<String>,
     pub taxa: Vec<ObjectReference>,
+    pub citations: Vec<ObjectReference>,
 }
 
 impl From<super::PropagationProcedure> for PropagationProcedureDetails {
@@ -27,6 +28,15 @@ impl From<super::PropagationProcedure> for PropagationProcedureDetails {
                     .get()
                     .iter()
                     .map(|tp| ObjectReference::from_deferred(&tp.taxon, tp.taxon_id))
+                    .collect(),
+            },
+            citations: match value.citations.is_unloaded() {
+                true => Vec::default(),
+                false => value
+                    .citations
+                    .get()
+                    .iter()
+                    .map(ObjectReference::from)
                     .collect(),
             },
         }

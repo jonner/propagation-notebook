@@ -2,9 +2,46 @@ use toasty::Deferred;
 
 use crate::{
     collecting::{CleaningProcedure, TaxonCleaningProcedure},
+    dto::ObjectReference,
     propagation::PropagationProcedure,
     taxonomy::TaxonPropagationProcedure,
 };
+
+pub mod dto {
+    use serde::Serialize;
+    use serde_with::skip_serializing_none;
+
+    #[skip_serializing_none]
+    #[derive(Serialize)]
+    pub struct CitationDetails {
+        pub id: u64,
+        pub subject: String,
+        pub url: Option<String>,
+        pub author: Option<String>,
+    }
+
+    impl From<super::Citation> for CitationDetails {
+        fn from(value: super::Citation) -> Self {
+            Self {
+                id: value.id,
+                subject: value.text,
+                url: value.url,
+                author: value.author,
+            }
+        }
+    }
+
+    impl From<&super::Citation> for CitationDetails {
+        fn from(value: &super::Citation) -> Self {
+            Self {
+                id: value.id,
+                subject: value.text.clone(),
+                url: value.url.clone(),
+                author: value.author.clone(),
+            }
+        }
+    }
+}
 
 #[derive(Debug, Clone, toasty::Model)]
 pub struct Citation {
@@ -23,6 +60,15 @@ pub struct Citation {
     pub propagation_procedures: Deferred<Vec<PropagationProcedureCitation>>,
     #[has_many]
     pub taxon_propagation_procedures: Deferred<Vec<TaxonPropagationProcedureCitation>>,
+}
+
+impl From<&Citation> for ObjectReference {
+    fn from(value: &Citation) -> Self {
+        Self {
+            id: value.id,
+            name: Some(value.text.clone()),
+        }
+    }
 }
 
 #[derive(Debug, Clone, toasty::Model)]

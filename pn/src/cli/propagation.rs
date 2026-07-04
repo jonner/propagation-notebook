@@ -1,8 +1,11 @@
 use std::path::PathBuf;
 
-use libpropagation::propagation::{
-    ProcedureType, PropagationProcedure,
-    dto::{PropagationProcedureCompact, PropagationProcedureDetails},
+use libpropagation::{
+    citation::{Citation, PropagationProcedureCitation, dto::CitationDetails},
+    propagation::{
+        ProcedureType, PropagationProcedure,
+        dto::{PropagationProcedureCompact, PropagationProcedureDetails},
+    },
 };
 use serde::Deserialize;
 use toasty::Db;
@@ -11,6 +14,7 @@ use crate::{
     cli::OutputFormat,
     views::{
         JsonView, YamlView,
+        citation::CitationDetailsView,
         propagation::{PropagationProcedureDetailView, PropagationProcedureListView},
     },
 };
@@ -56,6 +60,28 @@ pub enum PropagationCommands {
     #[command(about = "Remove a seed propagation procedure")]
     Remove {
         id: u64,
+        #[arg(
+            short = 'y',
+            long,
+            help = "Assume yes for all questions requiring confirmation"
+        )]
+        assumeyes: bool,
+    },
+    AddCitation {
+        #[arg(help = "A procedure ID")]
+        propagation_id: u64,
+        #[arg(help = "Citation subject")]
+        subject: String,
+        #[arg(long, help = "A canonical URL for the citation")]
+        url: Option<String>,
+        #[arg(long, help = "The author being cited")]
+        author: Option<String>,
+    },
+    RemoveCitation {
+        #[arg(help = "A procedure ID")]
+        propagation_id: u64,
+        #[arg(short, long, help = "A citation ID")]
+        citation_id: u64,
         #[arg(
             short = 'y',
             long,
@@ -178,6 +204,74 @@ impl PropagationCommands {
                         .await?;
                 }
             }
+            PropagationCommands::AddCitation {
+                propagation_id,
+                subject,
+                url,
+                author,
+            } => {
+                let citation = Citation::create()
+                    .text(subject)
+                    .url(url)
+                    .author(author)
+                    .exec(db)
+                    .await?;
+                PropagationProcedureCitation::create()
+                    .citation_id(citation.id)
+                    .propagation_id(propagation_id)
+                    .exec(db)
+                    .await?;
+                load_and_display_propagation_details(db, format, propagation_id).await?;
+            }
+            PropagationCommands::RemoveCitation {
+                propagation_id,
+                citation_id,
+                assumeyes,
+            } => {
+                if *assumeyes || {
+                    let pc: CitationDetails =
+                        PropagationProcedureCitation::filter_by_citation_id_and_propagation_id(
+                            citation_id,
+                            propagation_id,
+                        )
+                        .include(PropagationProcedureCitation::fields().citation())
+                        .one()
+                        .exec(db)
+                        .await?
+                        .citation
+                        .get()
+                        .into();
+                    let output = CitationDetailsView::new(&pc).render()?;
+                    println!("{output}");
+                    inquire::Confirm::new("Do you want to remove this citation?")
+                        .with_default(false)
+                        .prompt()?
+                } {
+                    PropagationProcedureCitation::delete_by_citation_id_and_propagation_id(
+                        db,
+                        citation_id,
+                        propagation_id,
+                    )
+                    .await?;
+                    let citation = Citation::filter_by_id(citation_id)
+                        .include(Citation::fields().propagation_procedures())
+                        .include(Citation::fields().taxon_propagation_procedures())
+                        .include(Citation::fields().cleaning_procedures())
+                        .include(Citation::fields().taxon_cleaning_procedures())
+                        .one()
+                        .exec(db)
+                        .await?;
+                    // if the citation is no longer rused, remove it from the database
+                    if citation.propagation_procedures.get().is_empty()
+                        && citation.taxon_propagation_procedures.get().is_empty()
+                        && citation.cleaning_procedures.get().is_empty()
+                        && citation.taxon_cleaning_procedures.get().is_empty()
+                    {
+                        Citation::delete_by_id(db, citation_id).await?;
+                    }
+                    load_and_display_propagation_details(db, format, propagation_id).await?;
+                }
+            }
         }
         Ok(())
     }
@@ -190,6 +284,7 @@ async fn load_and_display_propagation_details(
 ) -> Result<(), anyhow::Error> {
     let procedure: PropagationProcedureDetails = PropagationProcedure::filter_by_id(id)
         .include(PropagationProcedure::fields().taxa().taxon())
+        .include(PropagationProcedure::fields().citations())
         .one()
         .exec(db)
         .await?
