@@ -74,7 +74,7 @@ impl<'a> TaxonView<'a> {
                             tcp.procedure.name.as_deref().unwrap_or_default(),
                         ]);
                     });
-                    inner_table.build().with(style::DetailTable).to_string() + "\n"
+                    inner_table.build().with(style::ListTable).to_string() + "\n"
                 }
             }
         }]);
