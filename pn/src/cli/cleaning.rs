@@ -10,6 +10,7 @@ use toasty::Db;
 use crate::{
     cli::OutputFormat,
     views::{
+        JsonView, YamlView,
         citation::CitationDetailsView,
         cleaning::{CleaningProcedureDetailsView, CleaningProcedureListView},
     },
@@ -87,8 +88,8 @@ impl CleaningCommands {
                     .collect();
                 let output = match format {
                     OutputFormat::Text => CleaningProcedureListView::new(&items).render()?,
-                    OutputFormat::Json => todo!(),
-                    OutputFormat::Yaml => todo!(),
+                    OutputFormat::Json => JsonView::new(&items).render()?,
+                    OutputFormat::Yaml => YamlView::new(&items).render()?,
                 };
                 println!("{output}");
             }
@@ -109,8 +110,8 @@ impl CleaningCommands {
                     .into();
                 let output = match format {
                     OutputFormat::Text => CleaningProcedureDetailsView::new(&item).render()?,
-                    OutputFormat::Json => todo!(),
-                    OutputFormat::Yaml => todo!(),
+                    OutputFormat::Json => JsonView::new(&item).render()?,
+                    OutputFormat::Yaml => YamlView::new(&item).render()?,
                 };
                 println!("{output}");
             }
@@ -246,8 +247,8 @@ async fn load_and_display_cleaning_details(
         .into();
     let output = match format {
         OutputFormat::Text => CleaningProcedureDetailsView::new(&procedure).render()?,
-        OutputFormat::Json => todo!(),
-        OutputFormat::Yaml => todo!(),
+        OutputFormat::Json => JsonView::new(&procedure).render()?,
+        OutputFormat::Yaml => YamlView::new(&procedure).render()?,
     };
     println!("{output}");
     Ok(())
