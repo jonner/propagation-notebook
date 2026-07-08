@@ -149,7 +149,6 @@ impl From<super::RegionalTaxonStatus> for RegionalTaxonStatusDetails {
 #[derive(Serialize)]
 pub struct RegionalTaxonHarvestInfo {
     pub taxon: ObjectReference,
-    pub region: ObjectReference,
     pub harvest_window: super::RegionalHarvestWindow,
 }
 
@@ -157,7 +156,6 @@ impl From<super::RegionalTaxonStatus> for RegionalTaxonHarvestInfo {
     fn from(rts: super::RegionalTaxonStatus) -> Self {
         Self {
             taxon: rts.taxon.get().into(),
-            region: rts.region.get().into(),
             harvest_window: rts.harvest_window,
         }
     }

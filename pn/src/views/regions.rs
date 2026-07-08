@@ -159,12 +159,12 @@ impl<'a> RegionalHarvestDateListView<'a> {
 
     pub fn render(&self) -> anyhow::Result<String> {
         let mut tbuilder = tabled::builder::Builder::default();
-        tbuilder.push_record(["Region", "Taxon", "Harvest Dates"]);
+        tbuilder.push_record(["ID", "Taxon", "Harvest Dates"]);
         for regional_taxon in self.regional_taxa {
             tbuilder.push_record([
-                regional_taxon.region.to_string(),
-                regional_taxon.taxon.to_string(),
-                regional_taxon.harvest_window.to_string(),
+                &regional_taxon.taxon.id.to_string(),
+                regional_taxon.taxon.name.as_deref().unwrap_or_default(),
+                &regional_taxon.harvest_window.to_string(),
             ])
         }
         Ok(tbuilder.build().with(style::ListTable).to_string())

@@ -413,6 +413,8 @@ pub enum RegionTaxaCommands {
         missing_dates: bool,
         #[arg(long, help = "Show only species that are ready to harvest today")]
         ready_to_harvest: bool,
+        #[arg(long, help = "Show only native species")]
+        native: bool,
     },
     #[command(about = "Show regional information about a taxon")]
     Show {
@@ -455,16 +457,6 @@ pub enum RegionTaxaCommands {
             default_value_t = 10
         )]
         min_samples: usize,
-    },
-    #[command(about = "Show species ready to harvest on a certain date")]
-    ReadyToHarvest {
-        #[arg(
-            short,
-            long,
-            help = "A date in YYYY-MM-DD format",
-            default_value_t = jiff::Zoned::now().date()
-        )]
-        date: Date,
     },
 }
 
@@ -538,10 +530,16 @@ impl RegionTaxaCommands {
             RegionTaxaCommands::List {
                 missing_dates,
                 ready_to_harvest,
+                native,
             } => {
-                let region_filter = RegionalTaxonStatus::fields().region_id().eq(region_id);
-                let filter = if *missing_dates {
-                    Some(
+                let day = jiff::Zoned::now().date().day_of_year();
+                // include species that start harvesting in the next week
+                let start = day + 7;
+                // include species that finished harvesting a week ago
+                let end = day - 7;
+                let mut filter = RegionalTaxonStatus::fields().region_id().eq(region_id);
+                filter = if *missing_dates {
+                    filter.and(
                         RegionalTaxonStatus::fields()
                             .harvest_window()
                             .start_doy()
@@ -554,17 +552,17 @@ impl RegionTaxaCommands {
                             ),
                     )
                 } else if *ready_to_harvest {
-                    let day = jiff::Zoned::now().date().day_of_year();
-                    Some(
+                    tracing::debug!("Finding species ready to harvest");
+                    filter.and(
                         RegionalTaxonStatus::fields()
                             .harvest_window()
                             .start_doy()
-                            .le(day)
+                            .le(start)
                             .and(
                                 RegionalTaxonStatus::fields()
                                     .harvest_window()
                                     .end_doy()
-                                    .ge(day),
+                                    .ge(end),
                             )
                             .or(RegionalTaxonStatus::fields()
                                 .harvest_window()
@@ -574,29 +572,60 @@ impl RegionTaxaCommands {
                                     RegionalTaxonStatus::fields()
                                         .harvest_window()
                                         .start_doy()
-                                        .le(day)
+                                        .le(start)
                                         .or(RegionalTaxonStatus::fields()
                                             .harvest_window()
                                             .end_doy()
-                                            .ge(day)),
+                                            .ge(end)),
                                 )),
                     )
                 } else {
-                    None
+                    filter
                 };
-                let taxa = Taxon::filter(Taxon::fields().regional_statuses().any(match filter {
-                    Some(f) => region_filter.and(f),
-                    None => region_filter,
-                }))
-                .include(Taxon::fields().regional_statuses())
-                .order_by(Taxon::fields().sequence().asc())
-                .exec(db)
-                .await?;
-                let statuses = RegionalTaxonStatusDetailsNoRegion::from_taxa(taxa, region_id);
-                let output = match format {
-                    OutputFormat::Text => RegionalTaxaListView::new(&statuses).render()?,
-                    OutputFormat::Json => JsonView::new(&statuses).render()?,
-                    OutputFormat::Yaml => YamlView::new(&statuses).render()?,
+                filter = if *native {
+                    filter.and(RegionalTaxonStatus::fields().origin().eq(Origin::Native))
+                } else {
+                    filter
+                };
+                let taxa = Taxon::filter(Taxon::fields().regional_statuses().any(filter))
+                    .include(Taxon::fields().regional_statuses())
+                    .order_by(Taxon::fields().sequence().asc())
+                    .exec(db)
+                    .await?;
+                let output = if *ready_to_harvest {
+                    let mut regional_taxa = taxa
+                        .into_iter()
+                        .filter_map(|item| {
+                            item.regional_statuses
+                                .get()
+                                .iter()
+                                .find(|&rts| rts.region_id == region_id)
+                                .map(|rts| RegionalTaxonHarvestInfo {
+                                    taxon: (&item).into(),
+                                    harvest_window: rts.harvest_window.clone(),
+                                })
+                        })
+                        .collect::<Vec<_>>();
+                    // toasty can't sort by an expression on a column (e.g.
+                    // difference between today and end day), so sort in memory
+                    // after fetching
+                    regional_taxa.sort_by_key(|item| {
+                        (item.harvest_window.end_doy.unwrap() - end).rem_euclid(365)
+                    });
+                    match format {
+                        OutputFormat::Text => {
+                            RegionalHarvestDateListView::new(&regional_taxa).render()?
+                        }
+                        OutputFormat::Json => JsonView::new(&regional_taxa).render()?,
+                        OutputFormat::Yaml => YamlView::new(&regional_taxa).render()?,
+                    }
+                } else {
+                    let statuses = RegionalTaxonStatusDetailsNoRegion::from_taxa(taxa, region_id);
+                    match format {
+                        OutputFormat::Text => RegionalTaxaListView::new(&statuses).render()?,
+                        OutputFormat::Json => JsonView::new(&statuses).render()?,
+                        OutputFormat::Yaml => YamlView::new(&statuses).render()?,
+                    }
                 };
                 println!("{output}");
             }
@@ -675,45 +704,6 @@ impl RegionTaxaCommands {
                 {
                     rts.update().harvest_window(window).exec(db).await?;
                 }
-            }
-            Self::ReadyToHarvest { date } => {
-                let window = RegionalTaxonStatus::fields().harvest_window();
-                let day = date.day_of_year();
-                // include species that start harvesting in the next week
-                let start = day + 7;
-                // include species that finished harvesting a week ago
-                let end = day - 7;
-                let expr = RegionalTaxonStatus::fields()
-                    .region_id()
-                    .eq(region_id)
-                    .and(window.start_doy().le(start).and(window.end_doy().ge(end)))
-                    .or(window
-                        .start_doy()
-                        .gt(window.end_doy())
-                        .and(window.start_doy().le(start).or(window.end_doy().ge(end))));
-                let mut regional_taxa: Vec<RegionalTaxonHarvestInfo> =
-                    RegionalTaxonStatus::filter(expr)
-                        .include(RegionalTaxonStatus::fields().taxon())
-                        .include(RegionalTaxonStatus::fields().region())
-                        .exec(db)
-                        .await?
-                        .into_iter()
-                        .map(|v| v.into())
-                        .collect();
-                // toasty can't sort by an expression on a column (e.g.
-                // difference between today and end day), so sort in memory
-                // after fetching
-                regional_taxa.sort_by_key(|item| {
-                    (item.harvest_window.end_doy.unwrap() - end).rem_euclid(365)
-                });
-                let output = match format {
-                    OutputFormat::Text => {
-                        RegionalHarvestDateListView::new(&regional_taxa).render()?
-                    }
-                    OutputFormat::Json => JsonView::new(&regional_taxa).render()?,
-                    OutputFormat::Yaml => YamlView::new(&regional_taxa).render()?,
-                };
-                println!("{output}");
             }
         }
         Ok(())
