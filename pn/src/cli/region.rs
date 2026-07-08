@@ -679,15 +679,19 @@ impl RegionTaxaCommands {
             Self::ReadyToHarvest { date } => {
                 let window = RegionalTaxonStatus::fields().harvest_window();
                 let day = date.day_of_year();
+                // include species that start harvesting in the next week
+                let start = day + 7;
+                // include species that finished harvesting a week ago
+                let end = day - 7;
                 let expr = RegionalTaxonStatus::fields()
                     .region_id()
                     .eq(region_id)
-                    .and(window.start_doy().le(day).and(window.end_doy().ge(day)))
+                    .and(window.start_doy().le(start).and(window.end_doy().ge(end)))
                     .or(window
                         .start_doy()
                         .gt(window.end_doy())
-                        .and(window.start_doy().le(day).or(window.end_doy().ge(day))));
-                let regional_taxa: Vec<RegionalTaxonHarvestInfo> =
+                        .and(window.start_doy().le(start).or(window.end_doy().ge(end))));
+                let mut regional_taxa: Vec<RegionalTaxonHarvestInfo> =
                     RegionalTaxonStatus::filter(expr)
                         .include(RegionalTaxonStatus::fields().taxon())
                         .include(RegionalTaxonStatus::fields().region())
@@ -696,6 +700,12 @@ impl RegionTaxaCommands {
                         .into_iter()
                         .map(|v| v.into())
                         .collect();
+                // toasty can't sort by an expression on a column (e.g.
+                // difference between today and end day), so sort in memory
+                // after fetching
+                regional_taxa.sort_by_key(|item| {
+                    (item.harvest_window.end_doy.unwrap() - end).rem_euclid(365)
+                });
                 let output = match format {
                     OutputFormat::Text => {
                         RegionalHarvestDateListView::new(&regional_taxa).render()?
