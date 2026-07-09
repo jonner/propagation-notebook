@@ -288,13 +288,6 @@ impl Taxon {
             .exec(db)
             .await
     }
-
-    pub fn filter_by_identifier(identifier: &TaxonIdentifier) -> Expr<bool> {
-        match identifier {
-            TaxonIdentifier::Id(id) => Taxon::fields().id().eq(id),
-            TaxonIdentifier::Name(name) => Taxon::fields().complete_name().like(name),
-        }
-    }
 }
 
 #[derive(Debug, Clone, toasty::Model)]

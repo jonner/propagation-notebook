@@ -151,20 +151,23 @@ impl TaxonCommands {
                 }
             }
             TaxonCommands::Show { name_or_id } => {
-                let taxon: TaxonDetails = Taxon::filter(Taxon::filter_by_identifier(name_or_id))
-                    .include(Taxon::fields().parent())
-                    .include(Taxon::fields().children())
-                    .include(Taxon::fields().vernaculars())
-                    .include(Taxon::fields().synonyms())
-                    .include(Taxon::fields().regional_statuses().region())
-                    .include(Taxon::fields().collecting_data())
-                    .include(Taxon::fields().cleaning_procedures().procedure())
-                    .include(Taxon::fields().propagation_procedures().propagation())
-                    .include(Taxon::fields().notes())
-                    .one()
-                    .exec(db)
-                    .await?
-                    .into();
+                let taxon: TaxonDetails = Taxon::filter(match name_or_id {
+                    TaxonIdentifier::Id(id) => Taxon::fields().id().eq(id),
+                    TaxonIdentifier::Name(name) => Taxon::fields().complete_name().like(name),
+                })
+                .include(Taxon::fields().parent())
+                .include(Taxon::fields().children())
+                .include(Taxon::fields().vernaculars())
+                .include(Taxon::fields().synonyms())
+                .include(Taxon::fields().regional_statuses().region())
+                .include(Taxon::fields().collecting_data())
+                .include(Taxon::fields().cleaning_procedures().procedure())
+                .include(Taxon::fields().propagation_procedures().propagation())
+                .include(Taxon::fields().notes())
+                .one()
+                .exec(db)
+                .await?
+                .into();
 
                 let output = match format {
                     OutputFormat::Text => TaxonView::new(&taxon).render()?,
