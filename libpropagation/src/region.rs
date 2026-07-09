@@ -190,7 +190,7 @@ pub enum Origin {
 }
 
 #[skip_serializing_none]
-#[derive(Debug, Clone, Default, toasty::Embed, Serialize)]
+#[derive(Debug, Clone, Default, toasty::Embed, Serialize, PartialEq)]
 pub struct RegionalHarvestWindow {
     pub start_doy: Option<i16>,
     pub end_doy: Option<i16>,

@@ -702,19 +702,26 @@ impl RegionTaxaCommands {
                     start_doy: Some(observation_window.start_doy),
                     end_doy: Some(observation_window.end_doy),
                 };
-                println!(
-                    "Based on {} samples, the harvest window for '{}' in region '{}' is [{}]. ",
-                    observation_window.nsamples,
-                    taxon.reference(),
-                    region.reference(),
-                    window
-                );
-                if inquire::Confirm::new("Update database?")
-                    .with_default(false)
-                    .with_help_message(&format!("Current harvest window: {}", rts.harvest_window))
-                    .prompt()?
-                {
-                    rts.update().harvest_window(window).exec(db).await?;
+                if window != rts.harvest_window {
+                    println!(
+                        "Based on {} samples, the harvest window for '{}' in region '{}' is [{}]. ",
+                        observation_window.nsamples,
+                        taxon.reference(),
+                        region.reference(),
+                        window
+                    );
+                    if inquire::Confirm::new("Update database?")
+                        .with_default(false)
+                        .with_help_message(&format!(
+                            "Current harvest window: {}",
+                            rts.harvest_window
+                        ))
+                        .prompt()?
+                    {
+                        rts.update().harvest_window(window).exec(db).await?;
+                    }
+                } else {
+                    println!("{} is already up to date ({window})", taxon.complete_name);
                 }
             }
         }
