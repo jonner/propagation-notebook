@@ -1,7 +1,7 @@
 use std::convert::Infallible;
 
 use serde::Serialize;
-use toasty::{Deferred, stmt::Expr};
+use toasty::Deferred;
 
 pub mod dto;
 
