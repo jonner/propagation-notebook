@@ -12,7 +12,7 @@ use crate::views::{JsonView, YamlView};
 use anyhow::anyhow;
 use geo::BoundingRect;
 use geo::ChamberlainDuquetteArea;
-use indicatif::ProgressIterator;
+use indicatif::{ProgressBar, ProgressIterator, ProgressStyle};
 use jiff::civil::Date;
 use libpropagation::region::dto::{
     CompactRegion, FullRegion, RegionalTaxonHarvestInfo, RegionalTaxonStatusDetails,
@@ -276,7 +276,13 @@ impl RegionCommands {
                     .exec(db)
                     .await?;
                 let mut n_updates = 0;
-                for rts in region.taxon_statuses.get().iter().progress() {
+                let statuses = region.taxon_statuses.get();
+                let pb = ProgressBar::new(statuses.len() as u64);
+                pb.set_style(ProgressStyle::with_template(
+                    "{wide_bar} {percent}%\nQuerying '{msg}'",
+                )?);
+                pb.set_message("Preparing...");
+                for rts in statuses.iter().progress_with(pb.clone()) {
                     if rts.harvest_window.start_doy.is_none()
                         && rts.harvest_window.end_doy.is_none()
                     {
@@ -285,6 +291,7 @@ impl RegionCommands {
                             .one()
                             .exec(db)
                             .await?;
+                        pb.set_message(taxon.complete_name.clone());
                         let inat = inaturalist::Client::new()?;
                         let inat_taxon = if let Some(id) = taxon.inaturalist_id {
                             let taxon = inat.taxon_info(id).await?;
