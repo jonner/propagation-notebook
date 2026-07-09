@@ -279,6 +279,15 @@ impl Taxon {
             }
         }
     }
+    pub async fn complete_name_like(
+        db: &mut dyn toasty::Executor,
+        name: &str,
+    ) -> Result<Taxon, toasty::Error> {
+        Self::filter(Self::fields().complete_name().like(name))
+            .one()
+            .exec(db)
+            .await
+    }
 
     pub fn filter_by_identifier(identifier: &TaxonIdentifier) -> Expr<bool> {
         match identifier {

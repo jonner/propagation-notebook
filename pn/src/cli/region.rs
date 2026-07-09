@@ -436,22 +436,22 @@ pub enum RegionTaxaCommands {
     },
     #[command(about = "Add a taxon to a region")]
     Add {
-        #[arg(help = "A taxon ID")]
-        taxon_id: u64,
+        #[arg(help = "A taxon name or ID")]
+        name_or_id: TaxonIdentifier,
         #[command(flatten)]
         props: RegionalTaxonProperties,
     },
     #[command(about = "Modify information about a taxon within a region", group(clap::ArgGroup::new("modify_taxon_fields").args(["origin", "c_value", "conservation_status", "wetland_indicator", "harvest_start", "harvest_end"]).required(true).multiple(false)))]
     Modify {
-        #[arg(help = "A taxon ID")]
-        taxon_id: u64,
+        #[arg(help = "A taxon name or ID")]
+        name_or_id: TaxonIdentifier,
         #[command(flatten)]
         props: RegionalTaxonProperties,
     },
     #[command(about = "Remove a taxon from a region")]
     Remove {
-        #[arg(help = "A taxon ID")]
-        taxon_id: u64,
+        #[arg(help = "A taxon name or ID")]
+        name_or_id: TaxonIdentifier,
         #[arg(
             short = 'y',
             long,
@@ -484,11 +484,15 @@ impl RegionTaxaCommands {
             RegionTaxaCommands::Show { name_or_id } => {
                 let taxon_id = match name_or_id {
                     TaxonIdentifier::Id(id) => *id,
-                    TaxonIdentifier::Name(name) => Taxon::get_by_complete_name(db, name).await?.id,
+                    TaxonIdentifier::Name(name) => Taxon::complete_name_like(db, name).await?.id,
                 };
                 load_and_show_regional_taxon_details(db, region_id, taxon_id, format).await?;
             }
-            RegionTaxaCommands::Add { taxon_id, props } => {
+            RegionTaxaCommands::Add { name_or_id, props } => {
+                let taxon_id = match name_or_id {
+                    TaxonIdentifier::Id(id) => *id,
+                    TaxonIdentifier::Name(name) => Taxon::get_by_complete_name(db, name).await?.id,
+                };
                 // make sure region exists
                 let _r = Region::get_by_id(db, region_id).await?;
                 let status: RegionalTaxonStatusDetails = RegionalTaxonStatus::create()
@@ -512,7 +516,11 @@ impl RegionTaxaCommands {
                 };
                 println!("{output}");
             }
-            RegionTaxaCommands::Modify { taxon_id, props } => {
+            RegionTaxaCommands::Modify { name_or_id, props } => {
+                let taxon_id = match name_or_id {
+                    TaxonIdentifier::Id(id) => *id,
+                    TaxonIdentifier::Name(name) => Taxon::complete_name_like(db, name).await?.id,
+                };
                 // make sure region exists
                 let _r = Region::get_by_id(db, region_id).await?;
                 let mut query =
@@ -542,7 +550,7 @@ impl RegionTaxaCommands {
                     ));
                 }
                 query.exec(db).await?;
-                load_and_show_regional_taxon_details(db, region_id, *taxon_id, format).await?;
+                load_and_show_regional_taxon_details(db, region_id, taxon_id, format).await?;
             }
             RegionTaxaCommands::List {
                 missing_dates,
@@ -647,14 +655,18 @@ impl RegionTaxaCommands {
                 println!("{output}");
             }
             RegionTaxaCommands::Remove {
-                taxon_id,
+                name_or_id,
                 assumeyes,
             } => {
+                let taxon_id = match name_or_id {
+                    TaxonIdentifier::Id(id) => *id,
+                    TaxonIdentifier::Name(name) => Taxon::complete_name_like(db, name).await?.id,
+                };
                 if *assumeyes || {
                     load_and_show_regional_taxon_details(
                         db,
                         region_id,
-                        *taxon_id,
+                        taxon_id,
                         OutputFormat::Text,
                     )
                     .await?;
