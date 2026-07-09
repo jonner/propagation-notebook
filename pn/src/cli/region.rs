@@ -18,6 +18,7 @@ use libpropagation::region::dto::{
     CompactRegion, FullRegion, RegionalTaxonHarvestInfo, RegionalTaxonStatusDetails,
     RegionalTaxonStatusDetailsNoRegion,
 };
+use libpropagation::taxonomy::TaxonIdentifier;
 use libpropagation::{
     region::{
         ConservationStatus, Origin, Region, RegionalHarvestWindow, RegionalTaxonStatus,
@@ -460,8 +461,8 @@ pub enum RegionTaxaCommands {
     },
     #[command(about = "Look up harvest dates from iNaturalist")]
     LookupHarvestDates {
-        #[arg(help = "A taxon ID")]
-        taxon_id: u64,
+        #[arg(help = "A taxon name or ID")]
+        name_or_id: TaxonIdentifier,
         #[arg(
             short,
             long,
@@ -665,9 +666,13 @@ impl RegionTaxaCommands {
                 }
             }
             Self::LookupHarvestDates {
-                taxon_id,
+                name_or_id,
                 min_samples,
             } => {
+                let taxon_id = match name_or_id {
+                    TaxonIdentifier::Id(id) => *id,
+                    TaxonIdentifier::Name(name) => Taxon::get_by_complete_name(db, name).await?.id,
+                };
                 let mut rts =
                     RegionalTaxonStatus::filter_by_taxon_id_and_region_id(taxon_id, region_id)
                         .include(RegionalTaxonStatus::fields().taxon().vernaculars())
