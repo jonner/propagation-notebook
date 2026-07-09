@@ -116,7 +116,7 @@ impl Region {
             reporter.increment();
             let t = match taxon_info.name.parse::<u64>() {
                 Ok(val) => Taxon::get_by_id(db, val).await?,
-                Err(_) => Taxon::find_by_name_or_synonym(db, &taxon_info.name)
+                Err(_) => Taxon::get_by_name_or_synonym(db, &taxon_info.name)
                     .await
                     .map_err(|_e| ImportExportError::NoMatchingTaxon(taxon_info.name.clone()))?,
             };

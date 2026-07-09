@@ -261,7 +261,7 @@ impl Taxon {
             .join(" ")
     }
 
-    pub async fn find_by_name_or_synonym(
+    pub async fn get_by_name_or_synonym(
         db: &mut dyn toasty::Executor,
         name: &str,
     ) -> Result<Taxon, toasty::Error> {
