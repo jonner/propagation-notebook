@@ -34,7 +34,10 @@ pub enum TaxonCommands {
         has_data: bool,
     },
     #[command(about = "Show detailed information about a Taxon")]
-    Show { name_or_id: TaxonIdentifier },
+    Show {
+        #[arg(help = "A taxon name or ID")]
+        name_or_id: TaxonIdentifier,
+    },
     #[command(about = "Search for a taxon")]
     Search { search_string: String },
     #[command(about = "Import a new taxonomy for use with this tool")]
@@ -52,29 +55,29 @@ pub enum TaxonCommands {
     },
     #[command(about = "Manage collecting information for a taxon")]
     Collecting {
-        #[arg(short, long, help = "A Taxon ID")]
-        taxon_id: u64,
+        #[arg(short, long, help = "A taxon name or ID")]
+        taxon: TaxonIdentifier,
         #[command(subcommand)]
         command: collecting::TaxonCollectingCommands,
     },
     #[command(about = "Manage cleaning information for a taxon")]
     Cleaning {
-        #[arg(short, long, help = "A Taxon ID")]
-        taxon_id: u64,
+        #[arg(short, long, help = "A taxon name or ID")]
+        taxon: TaxonIdentifier,
         #[command(subcommand)]
         command: cleaning::TaxonCleaningCommands,
     },
     #[command(about = "Manage cleaning information for a taxon")]
     Propagation {
-        #[arg(short, long, help = "A Taxon ID")]
-        taxon_id: u64,
+        #[arg(short, long, help = "A taxon name or ID")]
+        taxon: TaxonIdentifier,
         #[command(subcommand)]
         command: propagation::TaxonPropagationCommands,
     },
     #[command(about = "Manage notes for a taxon")]
     Notes {
-        #[arg(short, long, help = "A Taxon ID")]
-        taxon_id: u64,
+        #[arg(short, long, help = "A taxon name or ID")]
+        taxon: TaxonIdentifier,
         #[command(subcommand)]
         command: note::TaxonNoteCommands,
     },
@@ -259,17 +262,53 @@ impl TaxonCommands {
                 )
                 .await?
             }
-            TaxonCommands::Cleaning { taxon_id, command } => {
-                command.run(db, *taxon_id, format).await?
+            TaxonCommands::Cleaning {
+                taxon: name_or_id,
+                command,
+            } => {
+                let taxon_id = match name_or_id {
+                    TaxonIdentifier::Id(id) => *id,
+                    TaxonIdentifier::Name(name) => {
+                        Taxon::get_by_complete_name_ignore_case(db, name).await?.id
+                    }
+                };
+                command.run(db, taxon_id, format).await?
             }
-            TaxonCommands::Collecting { taxon_id, command } => {
-                command.run(db, *taxon_id, format).await?
+            TaxonCommands::Collecting {
+                taxon: name_or_id,
+                command,
+            } => {
+                let taxon_id = match name_or_id {
+                    TaxonIdentifier::Id(id) => *id,
+                    TaxonIdentifier::Name(name) => {
+                        Taxon::get_by_complete_name_ignore_case(db, name).await?.id
+                    }
+                };
+                command.run(db, taxon_id, format).await?
             }
-            TaxonCommands::Propagation { taxon_id, command } => {
-                command.run(db, *taxon_id, format).await?
+            TaxonCommands::Propagation {
+                taxon: name_or_id,
+                command,
+            } => {
+                let taxon_id = match name_or_id {
+                    TaxonIdentifier::Id(id) => *id,
+                    TaxonIdentifier::Name(name) => {
+                        Taxon::get_by_complete_name_ignore_case(db, name).await?.id
+                    }
+                };
+                command.run(db, taxon_id, format).await?
             }
-            TaxonCommands::Notes { taxon_id, command } => {
-                command.run(db, *taxon_id, format).await?
+            TaxonCommands::Notes {
+                taxon: name_or_id,
+                command,
+            } => {
+                let taxon_id = match name_or_id {
+                    TaxonIdentifier::Id(id) => *id,
+                    TaxonIdentifier::Name(name) => {
+                        Taxon::get_by_complete_name_ignore_case(db, name).await?.id
+                    }
+                };
+                command.run(db, taxon_id, format).await?
             }
         }
         Ok(())
