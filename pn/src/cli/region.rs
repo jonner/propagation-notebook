@@ -431,8 +431,8 @@ pub enum RegionTaxaCommands {
     },
     #[command(about = "Show regional information about a taxon")]
     Show {
-        #[arg(help = "A taxon ID")]
-        taxon_id: u64,
+        #[arg(help = "A taxon name or ID")]
+        name_or_id: TaxonIdentifier,
     },
     #[command(about = "Add a taxon to a region")]
     Add {
@@ -481,7 +481,11 @@ impl RegionTaxaCommands {
         format: OutputFormat,
     ) -> anyhow::Result<()> {
         match self {
-            RegionTaxaCommands::Show { taxon_id } => {
+            RegionTaxaCommands::Show { name_or_id } => {
+                let taxon_id = match name_or_id {
+                    TaxonIdentifier::Id(id) => *id,
+                    TaxonIdentifier::Name(name) => Taxon::get_by_complete_name(db, name).await?.id,
+                };
                 load_and_show_regional_taxon_details(db, region_id, taxon_id, format).await?;
             }
             RegionTaxaCommands::Add { taxon_id, props } => {
@@ -538,7 +542,7 @@ impl RegionTaxaCommands {
                     ));
                 }
                 query.exec(db).await?;
-                load_and_show_regional_taxon_details(db, region_id, taxon_id, format).await?;
+                load_and_show_regional_taxon_details(db, region_id, *taxon_id, format).await?;
             }
             RegionTaxaCommands::List {
                 missing_dates,
@@ -650,7 +654,7 @@ impl RegionTaxaCommands {
                     load_and_show_regional_taxon_details(
                         db,
                         region_id,
-                        taxon_id,
+                        *taxon_id,
                         OutputFormat::Text,
                     )
                     .await?;
@@ -737,7 +741,7 @@ impl RegionTaxaCommands {
 async fn load_and_show_regional_taxon_details(
     db: &mut Db,
     region_id: u64,
-    taxon_id: &u64,
+    taxon_id: u64,
     format: OutputFormat,
 ) -> Result<(), anyhow::Error> {
     let status: RegionalTaxonStatusDetails =
