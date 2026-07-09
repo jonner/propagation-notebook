@@ -270,27 +270,32 @@ impl RegionCommands {
                 }
             }
             RegionCommands::LookupHarvestDates { id, min_samples } => {
-                let region = Region::filter_by_id(id)
-                    .include(Region::fields().taxon_statuses())
-                    .one()
-                    .exec(db)
-                    .await?;
+                let region = Region::filter_by_id(id).one().exec(db).await?;
+                let taxa = Taxon::filter(
+                    Taxon::fields()
+                        .regional_statuses()
+                        .any(RegionalTaxonStatus::fields().region_id().eq(id)),
+                )
+                .include(Taxon::fields().regional_statuses())
+                .order_by(Taxon::fields().sequence().asc())
+                .exec(db)
+                .await?;
                 let mut n_updates = 0;
-                let statuses = region.taxon_statuses.get();
-                let pb = ProgressBar::new(statuses.len() as u64);
+                let pb = ProgressBar::new(taxa.len() as u64);
                 pb.set_style(ProgressStyle::with_template(
                     "{wide_bar} {percent}%\nQuerying '{msg}'",
                 )?);
                 pb.set_message("Preparing...");
-                for rts in statuses.iter().progress_with(pb.clone()) {
+                for taxon in taxa.iter().progress_with(pb.clone()) {
+                    let rts = taxon
+                        .regional_statuses
+                        .get()
+                        .iter()
+                        .find(|rts| rts.region_id == *id)
+                        .unwrap();
                     if rts.harvest_window.start_doy.is_none()
                         && rts.harvest_window.end_doy.is_none()
                     {
-                        let taxon = Taxon::filter_by_id(rts.taxon_id)
-                            .include(Taxon::fields().vernaculars())
-                            .one()
-                            .exec(db)
-                            .await?;
                         pb.set_message(taxon.complete_name.clone());
                         let inat = inaturalist::Client::new()?;
                         let inat_taxon = if let Some(id) = taxon.inaturalist_id {
