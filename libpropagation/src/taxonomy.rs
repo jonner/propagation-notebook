@@ -279,7 +279,7 @@ impl Taxon {
             }
         }
     }
-    pub async fn complete_name_like(
+    pub async fn get_by_complete_name_ignore_case(
         db: &mut dyn toasty::Executor,
         name: &str,
     ) -> Result<Taxon, toasty::Error> {
