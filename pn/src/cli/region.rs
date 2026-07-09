@@ -493,7 +493,9 @@ impl RegionTaxaCommands {
             RegionTaxaCommands::Add { name_or_id, props } => {
                 let taxon_id = match name_or_id {
                     TaxonIdentifier::Id(id) => *id,
-                    TaxonIdentifier::Name(name) => Taxon::get_by_complete_name(db, name).await?.id,
+                    TaxonIdentifier::Name(name) => {
+                        Taxon::get_by_complete_name_ignore_case(db, name).await?.id
+                    }
                 };
                 // make sure region exists
                 let _r = Region::get_by_id(db, region_id).await?;
@@ -693,7 +695,9 @@ impl RegionTaxaCommands {
             } => {
                 let taxon_id = match name_or_id {
                     TaxonIdentifier::Id(id) => *id,
-                    TaxonIdentifier::Name(name) => Taxon::get_by_complete_name(db, name).await?.id,
+                    TaxonIdentifier::Name(name) => {
+                        Taxon::get_by_complete_name_ignore_case(db, name).await?.id
+                    }
                 };
                 let mut rts =
                     RegionalTaxonStatus::filter_by_taxon_id_and_region_id(taxon_id, region_id)
