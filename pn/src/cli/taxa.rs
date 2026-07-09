@@ -3,8 +3,8 @@ use libpropagation::{
     dto::ObjectReference,
     region::{RegionalTaxonStatus, dto::RegionalTaxonStatusDetailsNoRegion},
     taxonomy::{
-        Synonym, Taxon, TaxonNote, TaxonPropagationProcedure, TaxonomicAuthority, VernacularName,
-        dto::TaxonDetails,
+        Synonym, Taxon, TaxonIdentifier, TaxonNote, TaxonPropagationProcedure, TaxonomicAuthority,
+        VernacularName, dto::TaxonDetails,
     },
 };
 use serde::Serialize;
@@ -34,7 +34,7 @@ pub enum TaxonCommands {
         has_data: bool,
     },
     #[command(about = "Show detailed information about a Taxon")]
-    Show { id: u64 },
+    Show { name_or_id: TaxonIdentifier },
     #[command(about = "Search for a taxon")]
     Search { search_string: String },
     #[command(about = "Import a new taxonomy for use with this tool")]
@@ -150,8 +150,8 @@ impl TaxonCommands {
                     println!("{output}");
                 }
             }
-            TaxonCommands::Show { id } => {
-                let taxon: TaxonDetails = Taxon::filter_by_id(id)
+            TaxonCommands::Show { name_or_id } => {
+                let taxon: TaxonDetails = Taxon::filter(Taxon::filter_by_identifier(name_or_id))
                     .include(Taxon::fields().parent())
                     .include(Taxon::fields().children())
                     .include(Taxon::fields().vernaculars())

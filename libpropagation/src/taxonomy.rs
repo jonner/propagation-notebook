@@ -1,7 +1,7 @@
 use std::convert::Infallible;
 
 use serde::Serialize;
-use toasty::Deferred;
+use toasty::{Deferred, stmt::Expr};
 
 pub mod dto;
 
@@ -231,6 +231,23 @@ pub struct Taxon {
     pub notes: Deferred<Vec<TaxonNote>>,
 }
 
+#[derive(Debug, Clone)]
+pub enum TaxonIdentifier {
+    Id(u64),
+    Name(String),
+}
+
+impl std::str::FromStr for TaxonIdentifier {
+    type Err = Infallible;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.parse::<u64>() {
+            Ok(id) => Ok(Self::Id(id)),
+            Err(_) => Ok(Self::Name(s.to_string())),
+        }
+    }
+}
+
 impl Taxon {
     pub fn reference(&self) -> ObjectReference {
         self.into()
@@ -260,6 +277,13 @@ impl Taxon {
                 .exec(db)
                 .await
             }
+        }
+    }
+
+    pub fn filter_by_identifier(identifier: &TaxonIdentifier) -> Expr<bool> {
+        match identifier {
+            TaxonIdentifier::Id(id) => Taxon::fields().id().eq(id),
+            TaxonIdentifier::Name(name) => Taxon::fields().complete_name().like(name),
         }
     }
 }
