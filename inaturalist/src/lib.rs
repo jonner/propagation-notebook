@@ -10,7 +10,7 @@ pub enum Error {
     #[error("Not enough iNaturalist observations found ({0})")]
     InsufficientObservations(usize),
     #[error("Unable to fetch details for iNaturalist taxon {0}")]
-    TaxonNotFound(u64),
+    TaxonNotFound(String),
     #[error(transparent)]
     Reqwest(#[from] reqwest::Error),
     #[error(transparent)]
@@ -136,8 +136,13 @@ impl Client {
         ))
     }
 
-    pub async fn taxon_info(&self, taxon_id: u64) -> Result<Taxon, Error> {
-        let taxa_endpoint = API_BASE_URL.join("taxa/")?.join(&taxon_id.to_string())?;
+    pub async fn taxa_info(&self, ids: &[u64]) -> Result<Vec<Taxon>, Error> {
+        let ids_string: String = ids
+            .iter()
+            .map(|i| i.to_string())
+            .collect::<Vec<_>>()
+            .join(",");
+        let taxa_endpoint = API_BASE_URL.join("taxa/")?.join(&ids_string)?;
         let res: Response<Taxon> = self
             .0
             .get(taxa_endpoint)
@@ -148,12 +153,28 @@ impl Client {
             .await?;
 
         match res {
-            Response::Success(mut results_response) => results_response
-                .results
-                .pop()
-                .ok_or_else(|| Error::TaxonNotFound(taxon_id)),
+            Response::Success(results_response) => {
+                if results_response.results.is_empty() {
+                    Err(Error::TaxonNotFound(
+                        ids.iter()
+                            .map(|i| i.to_string())
+                            .collect::<Vec<_>>()
+                            .join(","),
+                    ))
+                } else {
+                    Ok(results_response.results)
+                }
+            }
             Response::Failure(error_response) => Err(Error::Response(error_response)),
         }
+    }
+
+    pub async fn taxon_info(&self, taxon_id: u64) -> Result<Taxon, Error> {
+        let mut taxa = self.taxa_info(&[taxon_id]).await?;
+
+        // the parent taxa_info() guarantees that the returned vec is not empty
+        // on success, so just unwrap
+        Ok(taxa.pop().unwrap())
     }
 
     pub async fn taxon_search(&self, taxon_name: &str) -> Result<Vec<Taxon>, Error> {
