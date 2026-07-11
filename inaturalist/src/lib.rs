@@ -69,18 +69,19 @@ impl Display for ErrorObj {
     }
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct Taxon {
     pub id: u64,
     pub parent_id: Option<u64>,
     pub name: String,
     pub rank: String,
     pub is_active: bool,
+    pub current_synonymous_taxon_ids: Option<Vec<u64>>,
 }
 
 impl Taxon {
     fn fields() -> &'static str {
-        "id,name,rank,is_active,parent_id"
+        "id,name,rank,is_active,parent_id,current_synonymous_taxon_ids"
     }
 }
 
@@ -186,7 +187,7 @@ impl Client {
             .get(taxa_endpoint)
             .query(&[
                 ("q", taxon_name),
-                ("per_page", "5"),
+                ("per_page", "25"),
                 ("fields", Taxon::fields()),
             ])
             .send()

@@ -3,7 +3,7 @@ use std::fmt::Display;
 use std::path::PathBuf;
 
 use crate::cli::OutputFormat;
-use crate::util::IndicatifImportProgress;
+use crate::util::{IndicatifImportProgress, inat_taxon_for_taxon};
 use crate::views::regions::{
     RegionDetailsView, RegionalHarvestDateListView, RegionalTaxonStatusDetailsView, RegionsListView,
 };
@@ -840,46 +840,6 @@ async fn calculate_harvest_window_for_taxon(
     Ok(observation_window)
 }
 
-// assumes loaded vernacular names
-async fn inat_taxon_for_taxon(
-    taxon: &Taxon,
-    client: &inaturalist::Client,
-) -> anyhow::Result<inaturalist::Taxon> {
-    if let Ok(inat_taxon) = inat_taxon_for_query(client, &taxon.names()).await {
-        println!(
-            "Using inaturalist taxon '{} ({})'",
-            inat_taxon.name, inat_taxon.rank
-        );
-        Ok(inat_taxon)
-    } else {
-        println!(
-            "Couldn't find a matching taxon for the scientific name '{}'",
-            taxon.complete_name
-        );
-        let vernaculars = taxon.vernaculars.get();
-        if !vernaculars.is_empty() {
-            println!("Attempting to find a match by common name...");
-            for vn in taxon.vernaculars.get() {
-                if let Ok(inat_taxon) = inat_taxon_for_query(client, &vn.name).await {
-                    println!(
-                        "Using inaturalist taxon '{} ({})'",
-                        inat_taxon.name, inat_taxon.rank
-                    );
-                    return Ok(inat_taxon);
-                }
-                println!(
-                    "Couldn't find a matching taxon for the common name '{}'",
-                    vn.name
-                );
-            }
-        }
-        Err(anyhow!(
-            "Unable to find a match for '{}' in iNaturalist",
-            taxon.reference()
-        ))
-    }
-}
-
 async fn calculate_harvest_window(
     observations_doy: &[i16],
 ) -> Result<(i16, i16), inaturalist::Error> {
@@ -1108,31 +1068,4 @@ async fn seed_observation_window_with_expansion(
             nsamples: observations_doy.len(),
         });
     }
-}
-
-async fn inat_taxon_for_query(
-    client: &inaturalist::Client,
-    query: &str,
-) -> anyhow::Result<inaturalist::Taxon> {
-    let mut possible_taxa = client
-        .taxon_search(query)
-        .await?
-        .into_iter()
-        .filter(|t| t.is_active)
-        .collect::<Vec<_>>();
-    let taxon = if possible_taxa.len() > 1 {
-        inquire::Select::new(
-            &format!(
-                "Please select an iNaturalist taxon that matches '{}'",
-                query
-            ),
-            possible_taxa,
-        )
-        .prompt()?
-    } else if possible_taxa.len() == 1 {
-        possible_taxa.pop().unwrap()
-    } else {
-        return Err(anyhow!("Unable to find an iNaturalist taxon for '{query}'",));
-    };
-    Ok(taxon)
 }

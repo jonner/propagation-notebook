@@ -288,6 +288,13 @@ impl Taxon {
             .exec(db)
             .await
     }
+
+    pub fn matches(&self, inat_taxon: &inaturalist::Taxon) -> bool {
+        let rank = inat_taxon.rank.parse::<Rank>();
+        rank == Ok(self.rank)
+            && (self.complete_name.eq_ignore_ascii_case(&inat_taxon.name)
+                || self.names().eq_ignore_ascii_case(&inat_taxon.name))
+    }
 }
 
 #[derive(Debug, Clone, toasty::Model)]
