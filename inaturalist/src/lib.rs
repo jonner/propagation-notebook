@@ -137,6 +137,7 @@ impl Client {
     }
 
     pub async fn taxa_info(&self, ids: &[u64]) -> Result<Vec<Taxon>, Error> {
+        tracing::trace!(?ids, "getting taxa info");
         let ids_string: String = ids
             .iter()
             .map(|i| i.to_string())
@@ -178,6 +179,7 @@ impl Client {
     }
 
     pub async fn taxon_search(&self, taxon_name: &str) -> Result<Vec<Taxon>, Error> {
+        tracing::debug!("Searching for {taxon_name}");
         let taxa_endpoint = API_BASE_URL.join("taxa")?;
         let res: Response<Taxon> = self
             .0

@@ -12,6 +12,7 @@ reqwest-retry = "0.9.1"
 reqwest.workspace = true
 serde.workspace = true
 thiserror.workspace = true
+tracing.workspace = true
 url.workspace = true
 
 [dev-dependencies]
