@@ -15,7 +15,7 @@ use crate::{
     util::IndicatifImportProgress,
     views::{
         JsonView, YamlView,
-        taxa::{RegionalTaxaListView, TaxaListView, TaxaSearchResultsView, TaxonView},
+        taxa::{RegionalTaxaListView, TaxaListView, TaxaSearchResultsView, TaxonDetailsView},
     },
 };
 
@@ -173,7 +173,7 @@ impl TaxonCommands {
                 .into();
 
                 let output = match format {
-                    OutputFormat::Text => TaxonView::new(&taxon).render()?,
+                    OutputFormat::Text => TaxonDetailsView::new(&taxon).render()?,
                     OutputFormat::Json => JsonView::new(&taxon).render()?,
                     OutputFormat::Yaml => YamlView::new(&taxon).render()?,
                 };

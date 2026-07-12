@@ -6,11 +6,11 @@ use libpropagation::{
 
 use crate::{cli::taxa::TaxonSearchResult, style, util::join_or_default};
 
-pub struct TaxonView<'a> {
+pub struct TaxonDetailsView<'a> {
     taxon: &'a TaxonDetails,
 }
 
-impl<'a> TaxonView<'a> {
+impl<'a> TaxonDetailsView<'a> {
     pub fn new(taxon: &'a TaxonDetails) -> Self {
         Self { taxon }
     }
