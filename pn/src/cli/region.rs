@@ -294,27 +294,39 @@ impl RegionCommands {
                 .exec(db)
                 .await?;
                 let mut n_updates = 0;
-                let pb = ProgressBar::new(taxa.len() as u64);
-                pb.set_style(ProgressStyle::with_template(
-                    "{wide_bar} {percent}%\nQuerying '{msg}'",
-                )?);
-                pb.set_message("Preparing...");
-                for taxon in taxa.iter().progress_with(pb.clone()) {
-                    let mut fullrts =
-                        RegionalTaxonStatus::filter_by_taxon_id_and_region_id(taxon.id, region_id)
-                            .one()
-                            .include(RegionalTaxonStatus::fields().taxon().vernaculars())
-                            .include(RegionalTaxonStatus::fields().region())
-                            .exec(db)
-                            .await?;
-                    if *interactive {
+                if *interactive {
+                    for taxon in taxa.iter() {
+                        let mut fullrts = RegionalTaxonStatus::filter_by_taxon_id_and_region_id(
+                            taxon.id, region_id,
+                        )
+                        .one()
+                        .include(RegionalTaxonStatus::fields().taxon().vernaculars())
+                        .include(RegionalTaxonStatus::fields().region())
+                        .exec(db)
+                        .await?;
                         if lookup_harvest_dates_interactive(db, &mut fullrts, min_samples)
                             .await
                             .is_ok()
                         {
                             n_updates += 1
                         };
-                    } else {
+                        println!();
+                    }
+                } else {
+                    let pb = ProgressBar::new(taxa.len() as u64);
+                    pb.set_style(ProgressStyle::with_template(
+                        "{wide_bar} {percent}%\nQuerying '{msg}'",
+                    )?);
+                    pb.set_message("Preparing...");
+                    for taxon in taxa.iter().progress_with(pb.clone()) {
+                        let fullrts = RegionalTaxonStatus::filter_by_taxon_id_and_region_id(
+                            taxon.id, region_id,
+                        )
+                        .one()
+                        .include(RegionalTaxonStatus::fields().taxon().vernaculars())
+                        .include(RegionalTaxonStatus::fields().region())
+                        .exec(db)
+                        .await?;
                         let taxon = fullrts.taxon.get();
                         if fullrts.harvest_window.start_doy.is_none()
                             && fullrts.harvest_window.end_doy.is_none()
@@ -351,7 +363,7 @@ impl RegionCommands {
                                 continue;
                             };
 
-                            match calculate_harvest_window_for_taxon(
+                            match query_harvest_window_for_taxon(
                                 min_samples,
                                 inat_taxon,
                                 &region,
@@ -742,11 +754,8 @@ async fn lookup_harvest_dates_interactive(
     let mut updated = false;
     let taxon = rts.taxon.get();
     let region = rts.region.get();
-    println!(
-        "Looking up observations of '{}' with seed annotations within region '{}' at iNaturalist.org",
-        taxon.reference(),
-        region.reference(),
-    );
+    let dto: RegionalTaxonStatusDetails = rts.clone().into();
+    println!("{}", RegionalTaxonStatusDetailsView::new(&dto).render()?);
     let inat = inaturalist::Client::new()?;
     let inat_taxon = if let Some(id) = taxon.inaturalist_id {
         let taxon = inat.taxon_info(id).await?;
@@ -761,7 +770,7 @@ async fn lookup_harvest_dates_interactive(
         inat_taxon
     };
     let observation_window =
-        calculate_harvest_window_for_taxon(min_samples, inat_taxon, region, true).await?;
+        query_harvest_window_for_taxon(min_samples, inat_taxon, region, true).await?;
     let window = RegionalHarvestWindow {
         start_doy: Some(observation_window.start_doy),
         end_doy: Some(observation_window.end_doy),
@@ -783,8 +792,9 @@ async fn lookup_harvest_dates_interactive(
             updated = true;
         }
     } else {
-        println!("{} is already up to date ({window})", taxon.complete_name);
+        println!("Database value already matches calculated harvest window");
     }
+    println!();
     Ok(updated)
 }
 
@@ -811,7 +821,7 @@ async fn load_and_show_regional_taxon_details(
     Ok(())
 }
 
-async fn calculate_harvest_window_for_taxon(
+async fn query_harvest_window_for_taxon(
     min_samples: &usize,
     inat_taxon: inaturalist::Taxon,
     region: &Region,
