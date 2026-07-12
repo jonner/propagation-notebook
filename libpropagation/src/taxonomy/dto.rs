@@ -51,6 +51,8 @@ pub struct TaxonDetails {
     pub seed_cleaning: Vec<TaxonCleaningProcedureCompact>,
     pub propagation_procedures: Vec<TaxonPropagationProcedureCompact>,
     pub notes: Vec<TaxonNoteNoTaxon>,
+    pub itis_id: u64,
+    pub inaturalist_id: Option<u64>,
 }
 
 impl From<super::Taxon> for TaxonDetails {
@@ -117,6 +119,8 @@ impl From<super::Taxon> for TaxonDetails {
                 true => Vec::default(),
                 false => value.notes.get().iter().map(|n| n.into()).collect(),
             },
+            itis_id: value.itis_id,
+            inaturalist_id: value.inaturalist_id,
         }
     }
 }

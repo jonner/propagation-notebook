@@ -41,6 +41,10 @@ impl<'a> TaxonView<'a> {
             "Child taxa",
             &join_or_default(&self.taxon.children, "-", |t| t.to_string()),
         ]);
+        tbuilder.push_record(["ITIS taxon ID", &self.taxon.itis_id.to_string()]);
+        if let Some(inat_id) = self.taxon.inaturalist_id {
+            tbuilder.push_record(["iNaturalist taxon ID", &inat_id.to_string()]);
+        }
         if let Some(collecting_data) = self.taxon.collecting_data.as_ref() {
             tbuilder.push_record([
                 "Ripening",
