@@ -67,14 +67,15 @@ pub async fn inat_taxon_for_taxon(
             }
         }
     } else {
-        let active_options: Vec<_> = possible_taxa.into_iter().filter(|t| t.is_active).collect();
-        if !active_options.is_empty() {
-            // FIXME: add an explicit option to "search by common name" if common names exist
-            if let Some(taxon) = inquire::Select::new(
+        let mut active_options: Vec<_> =
+            possible_taxa.into_iter().filter(|t| t.is_active).collect();
+        if active_options.len() == 1 {
+            return Ok(active_options.pop().unwrap());
+        } else {
+            if !active_options.is_empty() &&
+            let Some(taxon) = inquire::Select::new(
                 &format!("Couldn't find an exact match for '{query}', but iNaturalist returned the following matches:"),
-                active_options,
-            )
-            .prompt_skippable()?
+                active_options).prompt_skippable()?
             {
                 return Ok(taxon);
             }
