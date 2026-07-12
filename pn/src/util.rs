@@ -1,6 +1,5 @@
 use anyhow::anyhow;
 use indicatif::ProgressBar;
-use inquire::InquireError;
 use libpropagation::{ImportProgressReporter, taxonomy::Taxon};
 
 pub(crate) fn join_or_default<T, F>(items: &[T], default: &str, extract: F) -> String
@@ -38,32 +37,6 @@ impl ImportProgressReporter for IndicatifImportProgress {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
-pub enum SelectionWithNone<T> {
-    Some(T),
-    None,
-}
-
-impl<T: std::fmt::Display> std::fmt::Display for SelectionWithNone<T> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{}",
-            match self {
-                SelectionWithNone::Some(val) => val.to_string(),
-                SelectionWithNone::None => "None of these options".to_string(),
-            }
-        )
-    }
-}
-
-fn selections<T>(value: Vec<T>) -> Vec<SelectionWithNone<T>> {
-    let mut newvec: Vec<SelectionWithNone<T>> =
-        value.into_iter().map(SelectionWithNone::Some).collect();
-    newvec.push(SelectionWithNone::None);
-    newvec
-}
-
 // assumes loaded vernacular names
 pub async fn inat_taxon_for_taxon(
     taxon: &Taxon,
@@ -71,6 +44,7 @@ pub async fn inat_taxon_for_taxon(
 ) -> anyhow::Result<inaturalist::Taxon> {
     let query: &str = &taxon.names();
     let possible_taxa = client.taxon_search(query).await?;
+    tracing::debug!(?possible_taxa);
     if let Some(it) = possible_taxa.iter().find(|item| taxon.matches(item)) {
         if it.is_active {
             return Ok(it.clone());
@@ -81,38 +55,29 @@ pub async fn inat_taxon_for_taxon(
                 if active_synonyms.len() == 1 {
                     return Ok(active_synonyms[0].clone());
                 } else {
-                    match inquire::Select::new(
+                    if let Some(t) = inquire::Select::new(
                         &format!(
-                            "'{}' is not a valid taxon on inaturalist. Choose one of the following active synonyms",
+                            "'{}' is not a valid taxon on iNaturalist. Choose one of the following active synonyms",
                             query
                         ),
-                        selections(active_synonyms),
+                        active_synonyms,
                     )
-                    .prompt()? {
-                        SelectionWithNone::Some(t) => return Ok(t),
-                        SelectionWithNone::None => (),
-                    }
+                    .prompt_skippable()? { return Ok(t) }
                 };
             }
         }
-    }
-    // there were no exact matches above, and no synonyms were chosen, so present active options to the user
-    let active_options: Vec<_> = possible_taxa.into_iter().filter(|t| t.is_active).collect();
-    if active_options.len() > 1 {
-        // FIXME: add an explicit option to "search by common name" if common names exist
-        match inquire::Select::new(
-            &format!(
-                "Please select an iNaturalist taxon that matches '{}'",
-                query
-            ),
-            selections(active_options),
-        )
-        .prompt()
-        {
-            Ok(SelectionWithNone::Some(taxon)) => return Ok(taxon),
-            Ok(SelectionWithNone::None) => (),
-            Err(InquireError::OperationCanceled) => (),
-            Err(e) => return Err(e.into()),
+    } else {
+        let active_options: Vec<_> = possible_taxa.into_iter().filter(|t| t.is_active).collect();
+        if !active_options.is_empty() {
+            // FIXME: add an explicit option to "search by common name" if common names exist
+            if let Some(taxon) = inquire::Select::new(
+                &format!("Couldn't find an exact match for '{query}', but iNaturalist returned the following matches:"),
+                active_options,
+            )
+            .prompt_skippable()?
+            {
+                return Ok(taxon);
+            }
         }
     }
     tracing::debug!(
@@ -129,20 +94,23 @@ pub async fn inat_taxon_for_taxon(
             for vn in taxon.vernaculars.get() {
                 let options = client.taxon_search(&vn.name).await?;
                 tracing::debug!(?options, "Got matching common name options");
-                common_name_options.extend(options);
+                common_name_options.extend(options.into_iter().map(|t| CommonNameSearchResult {
+                    common_name: vn.name.clone(),
+                    taxon: t,
+                }));
             }
             tracing::debug!(?common_name_options, "all common name results");
             if !common_name_options.is_empty()
-                && let SelectionWithNone::Some(taxon) = inquire::Select::new(
+                && let Some(res) = inquire::Select::new(
                     &format!(
                         "The following iNaturalist taxa match one of the common names of '{}'",
                         query
                     ),
-                    selections(common_name_options),
+                    common_name_options,
                 )
-                .prompt()?
+                .prompt_skippable()?
             {
-                return Ok(taxon);
+                return Ok(res.taxon);
             }
         }
     }
@@ -150,6 +118,18 @@ pub async fn inat_taxon_for_taxon(
         "Unable to find a match for '{}' in iNaturalist",
         taxon.reference()
     ))
+}
+
+#[derive(Debug)]
+struct CommonNameSearchResult {
+    common_name: String,
+    taxon: inaturalist::Taxon,
+}
+
+impl std::fmt::Display for CommonNameSearchResult {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{} matches '{}'", self.taxon, self.common_name)
+    }
 }
 
 #[cfg(test)]
