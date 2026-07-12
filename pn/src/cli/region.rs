@@ -24,7 +24,7 @@ use libpropagation::{
         ConservationStatus, Origin, Region, RegionalHarvestWindow, RegionalTaxonStatus,
         WetlandIndicator,
     },
-    taxonomy::{Rank, Taxon},
+    taxonomy::Taxon,
 };
 use toasty::Db;
 use tracing::debug;
@@ -120,6 +120,12 @@ pub enum RegionCommands {
             default_value_t = 10
         )]
         min_samples: usize,
+        #[arg(
+            long,
+            help = "use interactive mode",
+            long_help = "In interactive mode, you may be prompted to update values. In non-interactive mode it only updates taxa that don't yet have a value set."
+        )]
+        interactive: bool,
     },
     #[command(about = "Manage taxa for a region")]
     Taxa {
@@ -270,14 +276,20 @@ impl RegionCommands {
                     println!("Deleted region {id} from the database");
                 }
             }
-            RegionCommands::LookupHarvestDates { id, min_samples } => {
-                let region = Region::filter_by_id(id).one().exec(db).await?;
+            RegionCommands::LookupHarvestDates {
+                id: region_id,
+                min_samples,
+                interactive,
+            } => {
+                let region = Region::filter_by_id(region_id).one().exec(db).await?;
+                // the db querying is such a small part of this overall
+                // algorithm, so get a full list quickly by not including any
+                // child fields and then fetch the full object within the loop
                 let taxa = Taxon::filter(
                     Taxon::fields()
                         .regional_statuses()
-                        .any(RegionalTaxonStatus::fields().region_id().eq(id)),
+                        .any(RegionalTaxonStatus::fields().region_id().eq(region_id)),
                 )
-                .include(Taxon::fields().regional_statuses())
                 .order_by(Taxon::fields().sequence().asc())
                 .exec(db)
                 .await?;
@@ -288,80 +300,89 @@ impl RegionCommands {
                 )?);
                 pb.set_message("Preparing...");
                 for taxon in taxa.iter().progress_with(pb.clone()) {
-                    let rts = taxon
-                        .regional_statuses
-                        .get()
-                        .iter()
-                        .find(|rts| rts.region_id == *id)
-                        .unwrap();
-                    if rts.harvest_window.start_doy.is_none()
-                        && rts.harvest_window.end_doy.is_none()
-                    {
-                        pb.set_message(taxon.complete_name.clone());
-                        let inat = inaturalist::Client::new()?;
-                        let inat_taxon = if let Some(id) = taxon.inaturalist_id {
-                            let taxon = inat.taxon_info(id).await?;
-                            Some(taxon)
-                        } else {
-                            let mut found = None;
-                            let possible_taxa = inat
-                                .taxon_search(&taxon.names())
-                                .await?
-                                .into_iter()
-                                .filter(|t| t.is_active)
-                                .collect::<Vec<_>>();
-                            if !possible_taxa.is_empty() {
-                                for possibility in possible_taxa {
-                                    let rank: Rank = possibility.rank.parse().unwrap();
-                                    if taxon.complete_name == possibility.name && taxon.rank == rank
-                                    {
-                                        debug!(
-                                            "Using {} for {}",
-                                            possibility.name,
-                                            taxon.reference()
-                                        );
-                                        found = Some(possibility);
-                                        break;
-                                    }
-                                }
-                            }
-                            found
-                        };
-                        let Some(inat_taxon) = inat_taxon else {
-                            continue;
-                        };
-
-                        match calculate_harvest_window_for_taxon(
-                            min_samples,
-                            inat_taxon,
-                            &region,
-                            false,
-                        )
-                        .await
+                    let mut fullrts =
+                        RegionalTaxonStatus::filter_by_taxon_id_and_region_id(taxon.id, region_id)
+                            .one()
+                            .include(RegionalTaxonStatus::fields().taxon().vernaculars())
+                            .include(RegionalTaxonStatus::fields().region())
+                            .exec(db)
+                            .await?;
+                    if *interactive {
+                        if lookup_harvest_dates_interactive(db, &mut fullrts, min_samples)
+                            .await
+                            .is_ok()
                         {
-                            Ok(obs_window) => {
-                                let harvest_window = RegionalHarvestWindow {
-                                    start_doy: Some(obs_window.start_doy),
-                                    end_doy: Some(obs_window.end_doy),
-                                };
-                                RegionalTaxonStatus::update_by_id(rts.id)
-                                    .harvest_window(&harvest_window)
-                                    .exec(db)
-                                    .await?;
-                                n_updates += 1;
-                                debug!("Updated {} to {}", taxon.reference(), harvest_window)
-                            }
-                            Err(e) => debug!(
-                                "Failed to calculate a harvest window for {}: {e}",
-                                rts.taxon_id
-                            ),
+                            n_updates += 1
                         };
                     } else {
-                        debug!(
-                            "Skipping taxon {} as it already has harvest data",
-                            rts.taxon_id,
-                        )
-                    };
+                        let taxon = fullrts.taxon.get();
+                        if fullrts.harvest_window.start_doy.is_none()
+                            && fullrts.harvest_window.end_doy.is_none()
+                        {
+                            pb.set_message(taxon.complete_name.clone());
+                            let inat = inaturalist::Client::new()?;
+                            let inat_taxon = if let Some(id) = taxon.inaturalist_id {
+                                let taxon = inat.taxon_info(id).await?;
+                                Some(taxon)
+                            } else {
+                                let mut found = None;
+                                let possible_taxa = inat
+                                    .taxon_search(&taxon.names())
+                                    .await?
+                                    .into_iter()
+                                    .filter(|t| t.is_active)
+                                    .collect::<Vec<_>>();
+                                if !possible_taxa.is_empty() {
+                                    for possibility in possible_taxa {
+                                        if taxon.matches(&possibility) {
+                                            debug!(
+                                                "Using {} for {}",
+                                                possibility.name,
+                                                taxon.reference()
+                                            );
+                                            found = Some(possibility);
+                                            break;
+                                        }
+                                    }
+                                }
+                                found
+                            };
+                            let Some(inat_taxon) = inat_taxon else {
+                                continue;
+                            };
+
+                            match calculate_harvest_window_for_taxon(
+                                min_samples,
+                                inat_taxon,
+                                &region,
+                                false,
+                            )
+                            .await
+                            {
+                                Ok(obs_window) => {
+                                    let harvest_window = RegionalHarvestWindow {
+                                        start_doy: Some(obs_window.start_doy),
+                                        end_doy: Some(obs_window.end_doy),
+                                    };
+                                    RegionalTaxonStatus::update_by_id(fullrts.id)
+                                        .harvest_window(&harvest_window)
+                                        .exec(db)
+                                        .await?;
+                                    n_updates += 1;
+                                    debug!("Updated {} to {}", taxon.reference(), harvest_window)
+                                }
+                                Err(e) => debug!(
+                                    "Failed to calculate a harvest window for {}: {e}",
+                                    fullrts.taxon_id
+                                ),
+                            };
+                        } else {
+                            debug!(
+                                "Skipping taxon {} as it already has harvest data",
+                                fullrts.taxon_id,
+                            )
+                        };
+                    }
                 }
                 println!("Updated {n_updates} taxa");
             }
@@ -706,58 +727,65 @@ impl RegionTaxaCommands {
                         .one()
                         .exec(db)
                         .await?;
-                let taxon = rts.taxon.get();
-                let region = rts.region.get();
-                println!(
-                    "Looking up observations of '{}' with seed annotations within region '{}' at iNaturalist.org",
-                    taxon.reference(),
-                    region.reference(),
-                );
-                let inat = inaturalist::Client::new()?;
-                let inat_taxon = if let Some(id) = taxon.inaturalist_id {
-                    let taxon = inat.taxon_info(id).await?;
-                    println!("Using iNaturalist taxon '{} ({})'", taxon.name, taxon.rank);
-                    taxon
-                } else {
-                    let inat_taxon = inat_taxon_for_taxon(taxon, &inat).await?;
-                    Taxon::update_by_id(taxon.id)
-                        .inaturalist_id(inat_taxon.id)
-                        .exec(db)
-                        .await?;
-                    inat_taxon
-                };
-                let observation_window =
-                    calculate_harvest_window_for_taxon(min_samples, inat_taxon, region, true)
-                        .await?;
-                let window = RegionalHarvestWindow {
-                    start_doy: Some(observation_window.start_doy),
-                    end_doy: Some(observation_window.end_doy),
-                };
-                if window != rts.harvest_window {
-                    println!(
-                        "Based on {} samples, the harvest window for '{}' in region '{}' is [{}]. ",
-                        observation_window.nsamples,
-                        taxon.reference(),
-                        region.reference(),
-                        window
-                    );
-                    if inquire::Confirm::new("Update database?")
-                        .with_default(false)
-                        .with_help_message(&format!(
-                            "Current harvest window: {}",
-                            rts.harvest_window
-                        ))
-                        .prompt()?
-                    {
-                        rts.update().harvest_window(window).exec(db).await?;
-                    }
-                } else {
-                    println!("{} is already up to date ({window})", taxon.complete_name);
-                }
+                lookup_harvest_dates_interactive(db, &mut rts, min_samples).await?;
             }
         }
         Ok(())
     }
+}
+
+async fn lookup_harvest_dates_interactive(
+    db: &mut Db,
+    rts: &mut RegionalTaxonStatus,
+    min_samples: &usize,
+) -> Result<bool, anyhow::Error> {
+    let mut updated = false;
+    let taxon = rts.taxon.get();
+    let region = rts.region.get();
+    println!(
+        "Looking up observations of '{}' with seed annotations within region '{}' at iNaturalist.org",
+        taxon.reference(),
+        region.reference(),
+    );
+    let inat = inaturalist::Client::new()?;
+    let inat_taxon = if let Some(id) = taxon.inaturalist_id {
+        let taxon = inat.taxon_info(id).await?;
+        println!("Using iNaturalist taxon '{} ({})'", taxon.name, taxon.rank);
+        taxon
+    } else {
+        let inat_taxon = inat_taxon_for_taxon(taxon, &inat).await?;
+        Taxon::update_by_id(taxon.id)
+            .inaturalist_id(inat_taxon.id)
+            .exec(db)
+            .await?;
+        inat_taxon
+    };
+    let observation_window =
+        calculate_harvest_window_for_taxon(min_samples, inat_taxon, region, true).await?;
+    let window = RegionalHarvestWindow {
+        start_doy: Some(observation_window.start_doy),
+        end_doy: Some(observation_window.end_doy),
+    };
+    if window != rts.harvest_window {
+        println!(
+            "Based on {} samples, the harvest window for '{}' in region '{}' is [{}]. ",
+            observation_window.nsamples,
+            taxon.reference(),
+            region.reference(),
+            window
+        );
+        if inquire::Confirm::new("Update database?")
+            .with_default(false)
+            .with_help_message(&format!("Current harvest window: {}", rts.harvest_window))
+            .prompt()?
+        {
+            rts.update().harvest_window(window).exec(db).await?;
+            updated = true;
+        }
+    } else {
+        println!("{} is already up to date ({window})", taxon.complete_name);
+    }
+    Ok(updated)
 }
 
 async fn load_and_show_regional_taxon_details(
@@ -941,12 +969,39 @@ impl Display for MinimumObservationsAction {
     }
 }
 
+#[tokio::test]
+async fn test_seed_observation_window_with_expansion() {
+    tracing_subscriber::fmt::init();
+    let mut db = libpropagation::db().await.unwrap();
+    let taxon = Taxon::filter_by_complete_name("Polemonium reptans var. reptans")
+        .include(Taxon::fields().vernaculars())
+        .one()
+        .exec(&mut db)
+        .await
+        .unwrap();
+    let client = inaturalist::Client::new().unwrap();
+    let inat_taxon = inat_taxon_for_taxon(&taxon, &client).await.unwrap();
+    let mn_bbox = geo::Rect::new(
+        geo::coord! { x: -97.239651, y: 43.499269 }, // Southwest corner
+        geo::coord! { x: -89.490365, y: 49.384687 }, // Northeast corner
+    );
+    let _obs = seed_observation_window_with_expansion(
+        &client,
+        inat_taxon,
+        inaturalist::SearchArea::BoundingBox(mn_bbox),
+        10,
+    )
+    .await
+    .unwrap();
+}
+
 async fn seed_observation_window_with_expansion(
     client: &inaturalist::Client,
     taxon: inaturalist::Taxon,
     mut loc: inaturalist::SearchArea,
     min_samples: usize,
 ) -> anyhow::Result<ObservationWindow> {
+    tracing::debug!(?taxon, "getting seed observations with expansion");
     let mut taxon = taxon;
     loop {
         let observations_doy = client
