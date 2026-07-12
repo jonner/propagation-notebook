@@ -980,6 +980,7 @@ async fn seed_observation_window_with_expansion(
                     if n < 2 {
                         vec![
                             MinimumObservationsAction::ExpandSearch,
+                            MinimumObservationsAction::UseParentTaxon,
                             MinimumObservationsAction::Abort,
                         ]
                     } else {
