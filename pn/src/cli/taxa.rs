@@ -21,6 +21,7 @@ use crate::{
 
 pub mod cleaning;
 pub mod collecting;
+pub mod link;
 pub mod note;
 pub mod propagation;
 
@@ -80,6 +81,16 @@ pub enum TaxonCommands {
         taxon: TaxonIdentifier,
         #[command(subcommand)]
         command: note::TaxonNoteCommands,
+    },
+    #[command(about = "Manage links to external taxonomies")]
+    Link {
+        #[arg(short, long, help = "A taxon name or ID")]
+        taxon: TaxonIdentifier,
+        #[arg(short = 'e', long, help = "A taxon name or ID", value_enum, default_value_t=ExternalTaxonomy::Inaturalist)]
+        taxonomy: link::ExternalTaxonomy,
+
+        #[command(subcommand)]
+        command: link::TaxonLinkCommands,
     },
 }
 
@@ -309,6 +320,19 @@ impl TaxonCommands {
                     }
                 };
                 command.run(db, taxon_id, format).await?
+            }
+            TaxonCommands::Link {
+                taxon: name_or_id,
+                taxonomy,
+                command,
+            } => {
+                let taxon_id = match name_or_id {
+                    TaxonIdentifier::Id(id) => *id,
+                    TaxonIdentifier::Name(name) => {
+                        Taxon::get_by_complete_name_ignore_case(db, name).await?.id
+                    }
+                };
+                command.run(db, taxon_id, *taxonomy, format).await?
             }
         }
         Ok(())
