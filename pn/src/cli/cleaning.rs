@@ -116,21 +116,23 @@ impl CleaningCommands {
                 println!("{output}");
             }
             CleaningCommands::Remove { id, assumeyes } => {
-                if *assumeyes || {
-                    let item: CleaningProcedureDetails = CleaningProcedure::filter_by_id(id)
-                        .include(CleaningProcedure::fields().taxon_links().taxon())
-                        .one()
-                        .exec(db)
-                        .await?
-                        .into();
-                    println!("{}", CleaningProcedureDetailsView::new(&item).render()?);
-                    inquire::Confirm::new(&format!(
-                        "Are you sure you wish to remove cleaning procedure {id}?"
+                if *assumeyes
+                    || {
+                        let item: CleaningProcedureDetails = CleaningProcedure::filter_by_id(id)
+                            .include(CleaningProcedure::fields().taxon_links().taxon())
+                            .one()
+                            .exec(db)
+                            .await?
+                            .into();
+                        println!("{}", CleaningProcedureDetailsView::new(&item).render()?);
+                        dialoguer::Confirm::new().with_prompt(&format!(
+                        "Are you sure you wish to remove cleaning procedure {id}? It is used by {} taxa",
+                        item.taxa.len()
                     ))
-                    .with_default(false)
-                    .with_help_message(&format!("It is used by {} taxa", item.taxa.len()))
-                    .prompt()?
-                } {
+                    .default(false)
+                    .interact()?
+                    }
+                {
                     CleaningProcedure::delete_by_id(db, id).await?;
                     println!("Removed cleaning procedure {id}");
                 }
@@ -199,9 +201,10 @@ impl CleaningCommands {
                         .into();
                     let output = CitationDetailsView::new(&pc).render()?;
                     println!("{output}");
-                    inquire::Confirm::new("Do you want to remove this citation?")
-                        .with_default(false)
-                        .prompt()?
+                    dialoguer::Confirm::new()
+                        .with_prompt("Do you want to remove this citation?")
+                        .default(false)
+                        .interact()?
                 } {
                     CleaningProcedureCitation::delete_by_citation_id_and_cleaning_id(
                         db,

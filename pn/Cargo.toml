@@ -6,12 +6,12 @@ edition.workspace = true
 [dependencies]
 anyhow = { workspace = true }
 clap = { workspace = true }
+dialoguer = { workspace = true }
 futures = { workspace = true }
 geo = { workspace = true }
 geojson = { workspace = true }
 inaturalist = { workspace = true}
 indicatif = { workspace = true}
-inquire = { workspace = true }
 itertools = { workspace = true }
 jiff = { workspace = true }
 libpropagation = { workspace = true }

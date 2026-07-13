@@ -259,19 +259,20 @@ impl RegionCommands {
                 };
             }
             RegionCommands::Remove { id, assumeyes } => {
-                if *assumeyes || {
-                    let region: FullRegion = Region::filter_by_id(id)
-                        .include(Region::fields().taxon_statuses())
-                        .one()
-                        .exec(db)
-                        .await?
-                        .into();
-                    println!("{}", RegionDetailsView::new(&region).render()?);
-                    inquire::Confirm::new("Are you sure you wish to delete this region?")
-                        .with_default(false)
-                        .with_help_message("All associated data will be deleted")
-                        .prompt()?
-                } {
+                if *assumeyes
+                    || {
+                        let region: FullRegion = Region::filter_by_id(id)
+                            .include(Region::fields().taxon_statuses())
+                            .one()
+                            .exec(db)
+                            .await?
+                            .into();
+                        println!("{}", RegionDetailsView::new(&region).render()?);
+                        dialoguer::Confirm::new().with_prompt("Are you sure you wish to delete this region? All associated data will be deleted.")
+                        .default(false)
+                        .interact()?
+                    }
+                {
                     Region::delete_by_id(db, id).await?;
                     println!("Deleted region {id} from the database");
                 }
@@ -711,11 +712,10 @@ impl RegionTaxaCommands {
                         OutputFormat::Text,
                     )
                     .await?;
-                    inquire::Confirm::new(
-                        "Are you sure you wish to remove this taxon from the region? ",
-                    )
-                    .with_default(false)
-                    .prompt()?
+                    dialoguer::Confirm::new()
+                        .with_prompt("Are you sure you wish to remove this taxon from the region? ")
+                        .default(false)
+                        .interact()?
                 } {
                     RegionalTaxonStatus::delete_by_taxon_id_and_region_id(db, taxon_id, region_id)
                         .await?;
@@ -783,10 +783,13 @@ async fn lookup_harvest_dates_interactive(
             region.reference(),
             window
         );
-        if inquire::Confirm::new("Update database?")
-            .with_default(false)
-            .with_help_message(&format!("Current harvest window: {}", rts.harvest_window))
-            .prompt()?
+        if dialoguer::Confirm::new()
+            .with_prompt(&format!(
+                "Update database? Current harvest window: {}",
+                rts.harvest_window,
+            ))
+            .default(false)
+            .interact()?
         {
             rts.update().harvest_window(window).exec(db).await?;
             updated = true;
@@ -840,18 +843,18 @@ async fn query_harvest_window_for_taxon(
         None => {
             let options = inat
                 .place_search(
-                    &inquire::Text::new(
-                        "Search for a place on inaturalist that represents this region:",
-                    )
-                    .prompt()?,
+                    &dialoguer::Input::<String>::new()
+                        .with_prompt(
+                            "Search for a place on inaturalist that represents this region:",
+                        )
+                        .interact()?,
                 )
                 .await?;
-            let selected = inquire::Select::new(
-                "Please select one of the following iNaturalist places:",
-                options,
-            )
-            .prompt()?;
-            inaturalist::SearchArea::Place(selected.id)
+            let selected = dialoguer::Select::new()
+                .with_prompt("Please select one of the following iNaturalist places:")
+                .items(&options)
+                .interact()?;
+            inaturalist::SearchArea::Place(options[selected].id)
         }
     };
     let observation_window = if allow_expansion {
@@ -1066,8 +1069,11 @@ async fn seed_observation_window_with_expansion(
                     },
                 ),
             };
-            let action = inquire::Select::new(&msg, options).prompt()?;
-            match action {
+            let idx = dialoguer::Select::new()
+                .with_prompt(&msg)
+                .items(&options)
+                .interact()?;
+            match options[idx] {
                 MinimumObservationsAction::ExpandSearch => {
                     let newloc = match &loc {
                         inaturalist::SearchArea::Place(_) => todo!(),

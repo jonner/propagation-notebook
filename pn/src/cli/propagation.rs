@@ -160,26 +160,27 @@ impl PropagationCommands {
                 load_and_display_propagation_details(db, format, id).await?;
             }
             PropagationCommands::Remove { id, assumeyes } => {
-                if *assumeyes || {
-                    let procedure: PropagationProcedureDetails =
-                        PropagationProcedure::filter_by_id(id)
-                            .include(PropagationProcedure::fields().taxa().taxon())
-                            .one()
-                            .exec(db)
-                            .await?
-                            .into();
+                if *assumeyes
+                    || {
+                        let procedure: PropagationProcedureDetails =
+                            PropagationProcedure::filter_by_id(id)
+                                .include(PropagationProcedure::fields().taxa().taxon())
+                                .one()
+                                .exec(db)
+                                .await?
+                                .into();
 
-                    println!(
-                        "{}",
-                        PropagationProcedureDetailView::new(&procedure).render()?
-                    );
-                    inquire::Confirm::new(
-                        "Are you sure you wish to remove this Propagation procedure?",
+                        println!(
+                            "{}",
+                            PropagationProcedureDetailView::new(&procedure).render()?
+                        );
+                        dialoguer::Confirm::new().with_prompt(
+                        "Are you sure you wish to remove this Propagation procedure? It will remove all related steps",
                     )
-                    .with_default(false)
-                    .with_help_message("It will remove all related steps")
-                    .prompt()?
-                } {
+                    .default(false)
+                    .interact()?
+                    }
+                {
                     PropagationProcedure::delete_by_id(db, id).await?;
                     println!("Removed propagation procedure {id}");
                 }
@@ -243,9 +244,10 @@ impl PropagationCommands {
                         .into();
                     let output = CitationDetailsView::new(&pc).render()?;
                     println!("{output}");
-                    inquire::Confirm::new("Do you want to remove this citation?")
-                        .with_default(false)
-                        .prompt()?
+                    dialoguer::Confirm::new()
+                        .with_prompt("Do you want to remove this citation?")
+                        .default(false)
+                        .interact()?
                 } {
                     PropagationProcedureCitation::delete_by_citation_id_and_propagation_id(
                         db,

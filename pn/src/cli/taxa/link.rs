@@ -73,29 +73,32 @@ impl TaxonLinkCommands {
                             options.push(InaturalistSearchTerm::CommonName(vn.name.clone()));
                         }
                         options.push(InaturalistSearchTerm::Custom);
-                        if let Some(resp) = inquire::Select::new("Choose a search term:", options)
-                            .prompt_skippable()?
+                        if let Some(resp) = dialoguer::Select::new()
+                            .with_prompt("Choose a search term:")
+                            .items(&options)
+                            .interact_opt()?
                         {
-                            let term = match resp {
+                            let term = match &options[resp] {
                                 InaturalistSearchTerm::LatinName(s)
-                                | InaturalistSearchTerm::CommonName(s) => Some(s),
-                                InaturalistSearchTerm::Custom => {
-                                    inquire::Text::new("Custom search term:").prompt_skippable()?
-                                }
+                                | InaturalistSearchTerm::CommonName(s) => Some(s.clone()),
+                                InaturalistSearchTerm::Custom => Some(
+                                    dialoguer::Input::<String>::new()
+                                        .with_prompt("Custom search term:")
+                                        .interact()?,
+                                ),
                             };
                             if let Some(term) = term {
                                 let taxa = client.taxon_search(&term).await?;
                                 if taxa.is_empty() {
                                     anyhow::bail!("No results found");
                                 } else {
-                                    if let Some(chosen) = inquire::Select::new(
-                                        "Choose from the following options:",
-                                        taxa,
-                                    )
-                                    .prompt_skippable()?
+                                    if let Some(idx) = dialoguer::Select::new()
+                                        .with_prompt("Choose from the following options:")
+                                        .items(&taxa)
+                                        .interact_opt()?
                                     {
                                         Taxon::update_by_id(taxon_id)
-                                            .inaturalist_id(chosen.id)
+                                            .inaturalist_id(taxa[idx].id)
                                             .exec(db)
                                             .await?;
                                         println!("Updated iNaturalist ID")

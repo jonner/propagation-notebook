@@ -73,11 +73,10 @@ impl TaxonCollectingCommands {
             }
             TaxonCollectingCommands::Remove { assumeyes } => {
                 if *assumeyes
-                    || inquire::Confirm::new(
-                        "Are you sure you wish to remove this collecting data?",
-                    )
-                    .with_default(false)
-                    .prompt()?
+                    || dialoguer::Confirm::new()
+                        .with_prompt("Are you sure you wish to remove this collecting data?")
+                        .default(false)
+                        .interact()?
                 {
                     CollectingData::delete_by_taxon_id(db, taxon_id).await?;
                     println!("Removed collecting data {taxon_id}")

@@ -55,14 +55,12 @@ pub async fn inat_taxon_for_taxon(
                 if active_synonyms.len() == 1 {
                     return Ok(active_synonyms[0].clone());
                 } else {
-                    if let Some(t) = inquire::Select::new(
+                    if let Some(idx) = dialoguer::Select::new().with_prompt(
                         &format!(
                             "'{}' is not a valid taxon on iNaturalist. Choose one of the following active synonyms",
                             query
-                        ),
-                        active_synonyms,
-                    )
-                    .prompt_skippable()? { return Ok(t) }
+                        )).items(&active_synonyms)
+                    .interact_opt()? { return Ok(active_synonyms[idx].clone()) }
                 };
             }
         }
@@ -73,10 +71,12 @@ pub async fn inat_taxon_for_taxon(
             return Ok(active_options.pop().unwrap());
         } else {
             if !active_options.is_empty() &&
-            let Some(taxon) = inquire::Select::new(
-                &format!("Couldn't find an exact match for '{query}', but iNaturalist returned the following matches:"),
-                active_options).prompt_skippable()?
+            let Some(idx) = dialoguer::Select::new()
+                .with_prompt(
+                &format!("Couldn't find an exact match for '{query}', but iNaturalist returned the following matches:"))
+            .items(&active_options).interact_opt()?
             {
+                let taxon = active_options[idx].clone();
                 return Ok(taxon);
             }
         }
@@ -102,16 +102,16 @@ pub async fn inat_taxon_for_taxon(
             }
             tracing::debug!(?common_name_options, "all common name results");
             if !common_name_options.is_empty()
-                && let Some(res) = inquire::Select::new(
-                    &format!(
+                && let Some(idx) = dialoguer::Select::new()
+                    .with_prompt(&format!(
                         "The following iNaturalist taxa match one of the common names of '{}'",
                         query
-                    ),
-                    common_name_options,
-                )
-                .prompt_skippable()?
+                    ))
+                    .items(&common_name_options)
+                    .interact_opt()?
             {
-                return Ok(res.taxon);
+                let taxon = &common_name_options[idx].taxon;
+                return Ok(taxon.clone());
             }
         }
     }

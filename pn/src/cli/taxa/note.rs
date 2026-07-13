@@ -104,11 +104,10 @@ impl TaxonNoteCommands {
                 let note: TaxonNoteDetails = TaxonNote::get_by_id(db, note_id).await?.into();
                 if *assumeyes || {
                     println!("{}", TaxonNoteDetailsView::new(&note).render()?);
-                    inquire::Confirm::new(&format!(
-                        "Are you sure you wish to remove note {note_id}?"
-                    ))
-                    .with_default(false)
-                    .prompt()?
+                    dialoguer::Confirm::new()
+                        .with_prompt(&format!("Are you sure you wish to remove note {note_id}?"))
+                        .default(false)
+                        .interact()?
                 } {
                     {
                         TaxonNote::delete_by_id(db, note_id).await?;
