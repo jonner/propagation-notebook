@@ -1,5 +1,6 @@
 use crate::cli::OutputFormat;
 
+use libpropagation::taxonomy::Taxon;
 use toasty::Db;
 
 #[derive(Debug, Clone, Copy, clap::ValueEnum)]

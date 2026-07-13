@@ -11,7 +11,7 @@ use serde::Serialize;
 use toasty::Db;
 
 use crate::{
-    cli::OutputFormat,
+    cli::{OutputFormat, taxa::link::ExternalTaxonomy},
     util::IndicatifImportProgress,
     views::{
         JsonView, YamlView,
