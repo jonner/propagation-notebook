@@ -3,15 +3,15 @@
 - it would be nice to be able to go back if you made a mistake
 - it would be nice to know the common name(s) of the taxon being looked up
 - [x] it would be nice to know the common name(s) of the taxon in inaturalist when choosing which one is associated with the local taxon
-- it would be nice to have some way to change the inaturalist taxon if it's saved in the db (e.g. Gentianopsis virgata ssp. virgata is current sent to the species)
+- [x] it would be nice to have some way to change the inaturalist taxon if it's saved in the db (e.g. Gentianopsis virgata ssp. virgata is current sent to the species)
 
 # For full region lookups
-- We should have an easy way to cancel out of the entire loop
+- [x] We should have an easy way to cancel out of the entire loop
 - we should have a way to start part way through the list (e.g. "skip first 50")
 - or only lookup certain taxa (those without dates? only natives?)
 - when the dates are not updated, nothing seems to be printed, so it's not obvious to the user what happened
-- we don't need the 'Preparing...' message
-- we don't need the progress bar unless it can play better with stdout
+- [x] we don't need the 'Preparing...' message
+- [x] we don't need the progress bar unless it can play better with stdout
 
 
 # updates
