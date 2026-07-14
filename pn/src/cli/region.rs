@@ -966,7 +966,6 @@ enum MinimumObservationsAction {
     ExpandSearch,
     UseParentTaxon,
     Calculate,
-    Abort,
 }
 
 impl Display for MinimumObservationsAction {
@@ -977,7 +976,6 @@ impl Display for MinimumObservationsAction {
             MinimumObservationsAction::Calculate => {
                 "Calculate harvest window with the existing observations"
             }
-            MinimumObservationsAction::Abort => "Cancel",
         };
         write!(f, "{msg}")
     }
@@ -1033,13 +1031,9 @@ async fn seed_observation_window_with_expansion(
                         vec![
                             MinimumObservationsAction::ExpandSearch,
                             MinimumObservationsAction::UseParentTaxon,
-                            MinimumObservationsAction::Abort,
                         ]
                     } else {
-                        vec![
-                            MinimumObservationsAction::ExpandSearch,
-                            MinimumObservationsAction::Abort,
-                        ]
+                        vec![MinimumObservationsAction::ExpandSearch]
                     },
                 ),
                 n => (
@@ -1050,7 +1044,6 @@ async fn seed_observation_window_with_expansion(
                         vec![
                             MinimumObservationsAction::ExpandSearch,
                             MinimumObservationsAction::UseParentTaxon,
-                            MinimumObservationsAction::Abort,
                         ]
                     } else {
                         if taxon.parent_id.is_some() {
@@ -1058,66 +1051,61 @@ async fn seed_observation_window_with_expansion(
                                 MinimumObservationsAction::ExpandSearch,
                                 MinimumObservationsAction::UseParentTaxon,
                                 MinimumObservationsAction::Calculate,
-                                MinimumObservationsAction::Abort,
                             ]
                         } else {
                             vec![
                                 MinimumObservationsAction::ExpandSearch,
                                 MinimumObservationsAction::Calculate,
-                                MinimumObservationsAction::Abort,
                             ]
                         }
                     },
                 ),
             };
-            let idx = select()
-                .with_prompt(&msg)
-                .items(&options)
-                .interact()?;
-            match options[idx] {
-                MinimumObservationsAction::ExpandSearch => {
-                    let newloc = match &loc {
-                        inaturalist::SearchArea::Place(_) => todo!(),
-                        inaturalist::SearchArea::BoundingBox(rect) => {
-                            let mut newrect = *rect;
-                            newrect.set_min(geo::Coord {
-                                x: rect.min().x - rect.width() / 10.0,
-                                y: rect.min().y - rect.height() / 10.0,
-                            });
-                            newrect.set_max(geo::Coord {
-                                x: rect.max().x + rect.width() / 10.0,
-                                y: rect.max().y + rect.height() / 10.0,
-                            });
-                            // Chamberlain Duquette area gives square meters
-                            const M_PER_KM: f64 = 1000.0;
-                            let old_area =
-                                rect.chamberlain_duquette_unsigned_area() / (M_PER_KM * M_PER_KM);
-                            let new_area = newrect.chamberlain_duquette_unsigned_area()
-                                / (M_PER_KM * M_PER_KM);
-                            println!(
-                                "Expanding search area from {old_area:.1} km^2 to {new_area:.2} km^2",
-                            );
-                            inaturalist::SearchArea::BoundingBox(newrect)
-                        }
-                    };
-                    loc = newloc;
-                    continue;
-                }
-                MinimumObservationsAction::UseParentTaxon => {
-                    if let Some(parent_id) = taxon.parent_id {
-                        taxon = client.taxon_info(parent_id).await?;
-                        println!("Using inaturalist taxon '{} ({})'", taxon.name, taxon.rank);
+            if let Some(idx) = select().with_prompt(&msg).items(&options).interact_opt()? {
+                match options[idx] {
+                    MinimumObservationsAction::ExpandSearch => {
+                        let newloc = match &loc {
+                            inaturalist::SearchArea::Place(_) => todo!(),
+                            inaturalist::SearchArea::BoundingBox(rect) => {
+                                let mut newrect = *rect;
+                                newrect.set_min(geo::Coord {
+                                    x: rect.min().x - rect.width() / 10.0,
+                                    y: rect.min().y - rect.height() / 10.0,
+                                });
+                                newrect.set_max(geo::Coord {
+                                    x: rect.max().x + rect.width() / 10.0,
+                                    y: rect.max().y + rect.height() / 10.0,
+                                });
+                                // Chamberlain Duquette area gives square meters
+                                const M_PER_KM: f64 = 1000.0;
+                                let old_area = rect.chamberlain_duquette_unsigned_area()
+                                    / (M_PER_KM * M_PER_KM);
+                                let new_area = newrect.chamberlain_duquette_unsigned_area()
+                                    / (M_PER_KM * M_PER_KM);
+                                println!(
+                                    "Expanding search area from {old_area:.1} km^2 to {new_area:.2} km^2",
+                                );
+                                inaturalist::SearchArea::BoundingBox(newrect)
+                            }
+                        };
+                        loc = newloc;
                         continue;
-                    } else {
-                        return Err(anyhow!("Unable to find parent taxon"));
                     }
+                    MinimumObservationsAction::UseParentTaxon => {
+                        if let Some(parent_id) = taxon.parent_id {
+                            taxon = client.taxon_info(parent_id).await?;
+                            println!("Using inaturalist taxon '{} ({})'", taxon.name, taxon.rank);
+                            continue;
+                        } else {
+                            return Err(anyhow!("Unable to find parent taxon"));
+                        }
+                    }
+                    MinimumObservationsAction::Calculate => (),
                 }
-                MinimumObservationsAction::Calculate => (),
-                MinimumObservationsAction::Abort => {
-                    return Err(anyhow!(
-                        "Not enough observations to calculate a harvest window"
-                    ));
-                }
+            } else {
+                return Err(anyhow!(
+                    "Not enough observations to calculate a harvest window"
+                ));
             }
         }
         let (start, end) = calculate_harvest_window(&observations_doy).await?;
