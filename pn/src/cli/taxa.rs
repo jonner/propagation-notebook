@@ -11,7 +11,7 @@ use serde::Serialize;
 use toasty::Db;
 
 use crate::{
-    cli::{OutputFormat, taxa::link::ExternalTaxonomy},
+    cli::OutputFormat,
     util::IndicatifImportProgress,
     views::{
         JsonView, YamlView,
@@ -86,8 +86,8 @@ pub enum TaxonCommands {
     Link {
         #[arg(short, long, help = "A taxon name or ID")]
         taxon: TaxonIdentifier,
-        #[arg(short = 'e', long, help = "A taxon name or ID", value_enum, default_value_t=ExternalTaxonomy::Inaturalist)]
-        taxonomy: link::ExternalTaxonomy,
+        #[arg(short = 'a', long, help = "An external taxonomic authority", value_enum, default_value_t=TaxonomicAuthority::Inaturalist)]
+        authority: TaxonomicAuthority,
 
         #[command(subcommand)]
         command: link::TaxonLinkCommands,
@@ -323,7 +323,7 @@ impl TaxonCommands {
             }
             TaxonCommands::Link {
                 taxon: name_or_id,
-                taxonomy,
+                authority,
                 command,
             } => {
                 let taxon_id = match name_or_id {
@@ -332,7 +332,7 @@ impl TaxonCommands {
                         Taxon::get_by_complete_name_ignore_case(db, name).await?.id
                     }
                 };
-                command.run(db, taxon_id, *taxonomy, format).await?
+                command.run(db, taxon_id, *authority, format).await?
             }
         }
         Ok(())

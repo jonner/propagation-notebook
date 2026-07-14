@@ -2,6 +2,8 @@
 pub enum ImportExportError {
     #[error("Database already contains {0} taxa. Refusing to import.")]
     TaxonomyPresent(u64),
+    #[error("The specified taxonomic authority is not supported for this operation")]
+    TaxonomyUnsupported,
     #[error("A region with the name '{0}' already exists")]
     RegionExists(String),
     #[error("Unable to find a taxon equivalent to '{0}' in the database")]

@@ -9,6 +9,7 @@ pub mod dto;
 #[clap(rename_all = "kebab-case")]
 pub enum TaxonomicAuthority {
     Itis,
+    Inaturalist,
 }
 
 use crate::{
@@ -395,6 +396,7 @@ pub async fn import(
 
     match authority {
         TaxonomicAuthority::Itis => itisdb::import(itisdb, &mut txn, reporter).await?,
+        _ => return Err(ImportExportError::TaxonomyUnsupported),
     }
 
     txn.commit().await?;

@@ -3,13 +3,9 @@ use crate::{
     util::dialog::{input, select},
 };
 
-use libpropagation::taxonomy::Taxon;
+use anyhow::anyhow;
+use libpropagation::taxonomy::{Taxon, TaxonomicAuthority};
 use toasty::Db;
-
-#[derive(Debug, Clone, Copy, clap::ValueEnum)]
-pub enum ExternalTaxonomy {
-    Inaturalist,
-}
 
 #[derive(Debug, clap::Subcommand)]
 pub enum TaxonLinkCommands {
@@ -42,24 +38,34 @@ impl TaxonLinkCommands {
         &self,
         db: &mut Db,
         taxon_id: u64,
-        taxonomy: ExternalTaxonomy,
+        taxonomy: TaxonomicAuthority,
         _format: OutputFormat,
     ) -> anyhow::Result<()> {
         match self {
             TaxonLinkCommands::Clear => match taxonomy {
-                ExternalTaxonomy::Inaturalist => {
+                TaxonomicAuthority::Inaturalist => {
                     Taxon::update_by_id(taxon_id)
                         .inaturalist_id(None)
                         .exec(db)
                         .await?
                 }
+                TaxonomicAuthority::Itis => {
+                    return Err(anyhow!(
+                        "ITIS is the internal taxonomic authority for this database"
+                    ));
+                }
             },
             TaxonLinkCommands::Set { id: external_id } => match taxonomy {
-                ExternalTaxonomy::Inaturalist => {
+                TaxonomicAuthority::Inaturalist => {
                     Taxon::update_by_id(taxon_id)
                         .inaturalist_id(external_id)
                         .exec(db)
                         .await?
+                }
+                TaxonomicAuthority::Itis => {
+                    return Err(anyhow!(
+                        "ITIS is the internal taxonomic authority for this database"
+                    ));
                 }
             },
             TaxonLinkCommands::Search => {
@@ -69,7 +75,7 @@ impl TaxonLinkCommands {
                     .exec(db)
                     .await?;
                 match taxonomy {
-                    ExternalTaxonomy::Inaturalist => {
+                    TaxonomicAuthority::Inaturalist => {
                         let client = inaturalist::Client::new()?;
                         let mut options = vec![InaturalistSearchTerm::LatinName(taxon.names())];
                         for vn in taxon.vernaculars.get() {
@@ -107,6 +113,11 @@ impl TaxonLinkCommands {
                                 }
                             }
                         }
+                    }
+                    TaxonomicAuthority::Itis => {
+                        return Err(anyhow!(
+                            "ITIS is the internal taxonomic authority for this database"
+                        ));
                     }
                 }
             }
