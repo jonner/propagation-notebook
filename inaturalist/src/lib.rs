@@ -215,7 +215,7 @@ impl Client {
                 ("taxon_id", taxon_id.to_string().as_str()),
                 ("term_id", PLANT_PHENOLOGY),
                 ("term_value_id", FRUITING),
-                // ("identifications", "most_agree"),
+                ("identifications", "most_agree"),
                 ("page", &page.to_string()),
                 ("per_page", &per_page.to_string()),
                 ("fields", Observation::fields()),
