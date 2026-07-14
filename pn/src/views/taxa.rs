@@ -72,11 +72,8 @@ impl<'a> TaxonDetailsView<'a> {
                 procedures => {
                     let mut inner_table = tabled::builder::Builder::default();
                     inner_table.push_record(["ID", "Name"]);
-                    procedures.iter().for_each(|tcp| {
-                        inner_table.push_record([
-                            &tcp.procedure.id.to_string(),
-                            tcp.procedure.name.as_deref().unwrap_or_default(),
-                        ]);
+                    procedures.iter().for_each(|cp| {
+                        inner_table.push_record([&cp.id.to_string(), &cp.name]);
                     });
                     inner_table.build().with(style::ListTable).to_string() + "\n"
                 }

@@ -15,7 +15,7 @@ pub enum TaxonomicAuthority {
 use crate::{
     ImportProgressReporter,
     citation::{Citation, TaxonPropagationProcedureCitation},
-    collecting::{CollectingData, TaxonCleaningProcedure},
+    collecting::{CleaningProcedure, CollectingData},
     dto::ObjectReference,
     error::ImportExportError,
     propagation::PropagationProcedure,
@@ -225,7 +225,7 @@ pub struct Taxon {
     #[has_one]
     pub collecting_data: Deferred<Option<CollectingData>>,
     #[has_many]
-    pub cleaning_procedures: Deferred<Vec<TaxonCleaningProcedure>>,
+    pub cleaning_procedures: Deferred<Vec<CleaningProcedure>>,
     #[has_many]
     pub propagation_procedures: Deferred<Vec<TaxonPropagationProcedure>>,
     #[has_many]

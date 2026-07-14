@@ -1,4 +1,4 @@
-use crate::cli::{cleaning::CleaningCommands, propagation::PropagationCommands};
+use crate::cli::propagation::PropagationCommands;
 
 #[derive(Debug, Clone, Copy, clap::ValueEnum)]
 pub enum OutputFormat {
@@ -28,11 +28,6 @@ pub enum MainCommand {
         #[command(subcommand)]
         command: region::RegionCommands,
     },
-    #[command(about = "Seed cleaning information")]
-    Cleaning {
-        #[command(subcommand)]
-        command: CleaningCommands,
-    },
     #[command(about = "Seed propagation information", alias = "germination")]
     Propagation {
         #[command(subcommand)]
@@ -42,7 +37,6 @@ pub enum MainCommand {
     Init,
 }
 
-pub mod cleaning;
 pub mod propagation;
 pub mod region;
 pub mod taxa;

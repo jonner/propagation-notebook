@@ -1,9 +1,7 @@
 use toasty::Deferred;
 
 use crate::{
-    collecting::{CleaningProcedure, TaxonCleaningProcedure},
-    dto::ObjectReference,
-    propagation::PropagationProcedure,
+    collecting::CleaningProcedure, dto::ObjectReference, propagation::PropagationProcedure,
     taxonomy::TaxonPropagationProcedure,
 };
 
@@ -55,8 +53,6 @@ pub struct Citation {
     #[has_many]
     pub cleaning_procedures: Deferred<Vec<CleaningProcedureCitation>>,
     #[has_many]
-    pub taxon_cleaning_procedures: Deferred<Vec<TaxonCleaningProcedureCitation>>,
-    #[has_many]
     pub propagation_procedures: Deferred<Vec<PropagationProcedureCitation>>,
     #[has_many]
     pub taxon_propagation_procedures: Deferred<Vec<TaxonPropagationProcedureCitation>>,
@@ -83,22 +79,6 @@ pub struct CleaningProcedureCitation {
     pub cleaning_id: u64,
     #[belongs_to(key=cleaning_id, references=id)]
     pub cleaning: Deferred<CleaningProcedure>,
-}
-
-#[derive(Debug, Clone, toasty::Model)]
-#[index(taxon_id, procedure_id)]
-pub struct TaxonCleaningProcedureCitation {
-    #[key]
-    #[index]
-    pub citation_id: u64,
-    #[belongs_to(key=citation_id, references=id)]
-    pub citation: Deferred<Citation>,
-    #[key]
-    pub taxon_id: u64,
-    #[key]
-    pub procedure_id: u64,
-    #[belongs_to(key=[taxon_id, procedure_id], references=[taxon_id, procedure_id])]
-    pub taxon_cleaning: Deferred<TaxonCleaningProcedure>,
 }
 
 #[derive(Debug, Clone, toasty::Model)]

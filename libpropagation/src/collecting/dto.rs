@@ -9,7 +9,6 @@ use crate::dto::ObjectReference;
 pub struct CleaningProcedureCompact {
     pub id: u64,
     pub name: String,
-    pub n_taxa: Option<usize>,
 }
 
 impl From<super::CleaningProcedure> for CleaningProcedureCompact {
@@ -17,10 +16,15 @@ impl From<super::CleaningProcedure> for CleaningProcedureCompact {
         Self {
             id: value.id,
             name: value.name,
-            n_taxa: match value.taxon_links.is_unloaded() {
-                true => None,
-                false => Some(value.taxon_links.get().len()),
-            },
+        }
+    }
+}
+
+impl From<&super::CleaningProcedure> for CleaningProcedureCompact {
+    fn from(value: &super::CleaningProcedure) -> Self {
+        Self {
+            id: value.id,
+            name: value.name.clone(),
         }
     }
 }
@@ -33,7 +37,6 @@ pub struct CleaningProcedureDetails {
     pub name: String,
     pub notes: Option<String>,
     pub instructions: String,
-    pub taxa: Vec<ObjectReference>,
     pub citations: Vec<ObjectReference>,
 }
 
@@ -44,15 +47,6 @@ impl From<super::CleaningProcedure> for CleaningProcedureDetails {
             name: value.name,
             notes: value.notes,
             instructions: value.instructions,
-            taxa: match value.taxon_links.is_unloaded() {
-                true => Vec::default(),
-                false => value
-                    .taxon_links
-                    .get()
-                    .iter()
-                    .map(|tl| ObjectReference::from_deferred(&tl.taxon, tl.taxon_id))
-                    .collect(),
-            },
             citations: match value.citations.is_unloaded() {
                 true => Vec::default(),
                 false => value

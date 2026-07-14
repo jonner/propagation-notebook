@@ -260,7 +260,6 @@ impl PropagationCommands {
                         .include(Citation::fields().propagation_procedures())
                         .include(Citation::fields().taxon_propagation_procedures())
                         .include(Citation::fields().cleaning_procedures())
-                        .include(Citation::fields().taxon_cleaning_procedures())
                         .one()
                         .exec(db)
                         .await?;
@@ -268,7 +267,6 @@ impl PropagationCommands {
                     if citation.propagation_procedures.get().is_empty()
                         && citation.taxon_propagation_procedures.get().is_empty()
                         && citation.cleaning_procedures.get().is_empty()
-                        && citation.taxon_cleaning_procedures.get().is_empty()
                     {
                         Citation::delete_by_id(db, citation_id).await?;
                     }

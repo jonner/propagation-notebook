@@ -1,5 +1,5 @@
 use libpropagation::{
-    collecting::TaxonCleaningProcedure,
+    collecting::CleaningProcedure,
     dto::ObjectReference,
     region::{RegionalTaxonStatus, dto::RegionalTaxonStatusDetailsNoRegion},
     taxonomy::{
@@ -175,7 +175,7 @@ impl TaxonCommands {
                 .include(Taxon::fields().synonyms())
                 .include(Taxon::fields().regional_statuses().region())
                 .include(Taxon::fields().collecting_data())
-                .include(Taxon::fields().cleaning_procedures().procedure())
+                .include(Taxon::fields().cleaning_procedures())
                 .include(Taxon::fields().propagation_procedures().propagation())
                 .include(Taxon::fields().notes())
                 .one()
@@ -233,7 +233,7 @@ impl TaxonCommands {
                                 ))
                                 .or(Taxon::fields()
                                     .cleaning_procedures()
-                                    .any(TaxonCleaningProcedure::fields().taxon_id().gt(0)))
+                                    .any(CleaningProcedure::fields().taxon_id().gt(0)))
                                 .or(Taxon::fields()
                                     .propagation_procedures()
                                     .any(TaxonPropagationProcedure::fields().taxon_id().gt(0)))

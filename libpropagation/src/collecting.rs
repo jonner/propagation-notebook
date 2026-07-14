@@ -1,7 +1,7 @@
 use toasty::Deferred;
 
 use crate::{
-    citation::{Citation, CleaningProcedureCitation, TaxonCleaningProcedureCitation},
+    citation::{Citation, CleaningProcedureCitation},
     dto::ObjectReference,
     taxonomy::Taxon,
 };
@@ -26,29 +26,6 @@ pub struct CollectingData {
     pub storage_life: Option<String>,
 }
 
-// pivot table for associating a cleaning procedure with a taxon
-#[derive(Debug, Clone, toasty::Model)]
-pub struct TaxonCleaningProcedure {
-    #[key]
-    #[index]
-    pub taxon_id: u64,
-    #[belongs_to(key=taxon_id, references=id)]
-    pub taxon: Deferred<Taxon>,
-
-    // notes for customizing the procedure for this taxon
-    pub notes: Option<String>,
-
-    #[key]
-    #[index]
-    pub procedure_id: u64,
-    #[belongs_to(key=procedure_id, references=id)]
-    pub procedure: Deferred<CleaningProcedure>,
-    #[has_many(pair=taxon_cleaning)]
-    pub citation_links: Deferred<Vec<TaxonCleaningProcedureCitation>>,
-    #[has_many(via=citation_links.citation)]
-    pub citations: Deferred<Vec<Citation>>,
-}
-
 #[derive(Debug, Clone, toasty::Model)]
 pub struct CleaningProcedure {
     #[auto]
@@ -57,12 +34,15 @@ pub struct CleaningProcedure {
     pub name: String,
     pub notes: Option<String>,
     pub instructions: String,
-    #[has_many(pair=procedure)]
-    pub taxon_links: Deferred<Vec<TaxonCleaningProcedure>>,
     #[has_many(pair=cleaning)]
     pub citation_links: Deferred<Vec<CleaningProcedureCitation>>,
     #[has_many(via=citation_links.citation)]
     pub citations: Deferred<Vec<Citation>>,
+
+    #[index]
+    pub taxon_id: u64,
+    #[belongs_to(key=taxon_id, references=id)]
+    pub taxon: Deferred<Taxon>,
 }
 
 impl From<CleaningProcedure> for ObjectReference {

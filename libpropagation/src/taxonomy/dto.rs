@@ -3,7 +3,10 @@ use std::fmt::Display;
 use serde::Serialize;
 use serde_with::skip_serializing_none;
 
-use crate::{dto::ObjectReference, region::dto::RegionalTaxonStatusDetailsNoTaxon};
+use crate::{
+    collecting::dto::CleaningProcedureCompact, dto::ObjectReference,
+    region::dto::RegionalTaxonStatusDetailsNoTaxon,
+};
 
 #[skip_serializing_none]
 #[derive(Debug, Clone, Serialize)]
@@ -48,7 +51,7 @@ pub struct TaxonDetails {
     pub synonyms: Vec<String>,
     pub regions: Vec<RegionalTaxonStatusDetailsNoTaxon>,
     pub collecting_data: Option<CollectingDataNoTaxon>,
-    pub seed_cleaning: Vec<TaxonCleaningProcedureCompact>,
+    pub seed_cleaning: Vec<CleaningProcedureCompact>,
     pub propagation_procedures: Vec<TaxonPropagationProcedureCompact>,
     pub notes: Vec<TaxonNoteNoTaxon>,
     pub itis_id: u64,
@@ -227,49 +230,6 @@ impl From<super::CollectingData> for CollectingDataNoTaxon {
             storage: value.storage,
             storage_life: value.storage_life,
         }
-    }
-}
-
-#[skip_serializing_none]
-#[derive(Debug, Clone, Serialize)]
-pub struct TaxonCleaningProcedureDetails {
-    pub taxon: ObjectReference,
-    pub core: TaxonCleaningProcedureCompact,
-}
-impl From<super::TaxonCleaningProcedure> for TaxonCleaningProcedureDetails {
-    fn from(value: super::TaxonCleaningProcedure) -> Self {
-        Self {
-            taxon: ObjectReference::from_deferred(&value.taxon, value.taxon_id),
-            core: TaxonCleaningProcedureCompact::from(value),
-        }
-    }
-}
-
-impl From<&super::TaxonCleaningProcedure> for TaxonCleaningProcedureDetails {
-    fn from(value: &super::TaxonCleaningProcedure) -> Self {
-        value.clone().into()
-    }
-}
-
-#[skip_serializing_none]
-#[derive(Debug, Clone, Serialize)]
-pub struct TaxonCleaningProcedureCompact {
-    pub procedure: ObjectReference,
-    pub notes: Option<String>,
-}
-
-impl From<super::TaxonCleaningProcedure> for TaxonCleaningProcedureCompact {
-    fn from(value: super::TaxonCleaningProcedure) -> Self {
-        Self {
-            procedure: ObjectReference::from_deferred(&value.procedure, value.procedure_id),
-            notes: value.notes,
-        }
-    }
-}
-
-impl From<&super::TaxonCleaningProcedure> for TaxonCleaningProcedureCompact {
-    fn from(value: &super::TaxonCleaningProcedure) -> Self {
-        value.clone().into()
     }
 }
 
