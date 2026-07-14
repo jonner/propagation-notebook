@@ -19,11 +19,11 @@ use crate::{
 
 #[derive(Debug, clap::Subcommand)]
 pub enum CleaningCommands {
-    #[command(about = "List all seed cleaning procedures")]
+    #[command(about = "List all seed cleaning procedures", alias = "ls")]
     List,
     #[command(about = "Show detailed information about a seed cleaning procedure")]
     Show { id: u64 },
-    #[command(about = "Add a new seed cleaning procedure")]
+    #[command(about = "Add a new seed cleaning procedure", alias = "new")]
     Add {
         #[arg(short, long, help = "A name for the procedure")]
         name: String,
@@ -32,7 +32,7 @@ pub enum CleaningCommands {
         #[arg(long, help = "General notes about the procedure")]
         notes: Option<String>,
     },
-    #[command(about = "Modify a seed cleaning procedure", group(clap::ArgGroup::new("cleaning_props").args(["name", "instructions", "notes"]).required(true).multiple(false)))]
+    #[command(about = "Modify a seed cleaning procedure", group(clap::ArgGroup::new("cleaning_props").args(["name", "instructions", "notes"]).required(true).multiple(false)), alias="edit")]
     Modify {
         id: u64,
         #[arg(short, long, help = "A name for the procedure")]

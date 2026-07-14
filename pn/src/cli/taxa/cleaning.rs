@@ -15,21 +15,24 @@ use crate::{
 
 #[derive(Debug, clap::Subcommand)]
 pub enum TaxonCleaningCommands {
-    #[command(about = "Show all seed cleaning procedures for a taxon")]
+    #[command(about = "Show all seed cleaning procedures for a taxon", alias = "ls")]
     List,
     #[command(about = "Show all seed cleaning procedures for a taxon")]
     Show {
         #[arg(help = "A cleaning procedure ID")]
         procedure_id: u64,
     },
-    #[command(about = "Associate a taxon with a seed cleaning procedure")]
+    #[command(
+        about = "Associate a taxon with a seed cleaning procedure",
+        alias = "new"
+    )]
     Add {
         #[arg(help = "A cleaning procedure ID")]
         procedure_id: u64,
         #[arg(short, long, help = "Taxon-specific notes for this procedure")]
         notes: Option<String>,
     },
-    #[command(about = "Modify taxon-specific information seed cleaning information", group(clap::ArgGroup::new("modify_props").args(["notes"]).required(true).multiple(true)))]
+    #[command(about = "Modify taxon-specific information seed cleaning information", group(clap::ArgGroup::new("modify_props").args(["notes"]).required(true).multiple(true)), alias="edit")]
     Modify {
         #[arg(help = "A cleaning procedure ID")]
         procedure_id: u64,

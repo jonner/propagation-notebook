@@ -18,12 +18,12 @@ pub struct Options {
 
 #[derive(Debug, clap::Subcommand)]
 pub enum MainCommand {
-    #[command(about = "Taxonomy-related commands")]
+    #[command(about = "Taxonomy-related commands", aliases=["taxon", "t", "species"])]
     Taxa {
         #[command(subcommand)]
         command: taxa::TaxonCommands,
     },
-    #[command(about = "Region-related commands")]
+    #[command(about = "Region-related commands", aliases=["region", "r"])]
     Regions {
         #[command(subcommand)]
         command: region::RegionCommands,
@@ -33,7 +33,7 @@ pub enum MainCommand {
         #[command(subcommand)]
         command: CleaningCommands,
     },
-    #[command(about = "Seed propagation information")]
+    #[command(about = "Seed propagation information", alias = "germination")]
     Propagation {
         #[command(subcommand)]
         command: PropagationCommands,

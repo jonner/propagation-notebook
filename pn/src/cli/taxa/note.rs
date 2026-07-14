@@ -15,19 +15,19 @@ use crate::{
 
 #[derive(Debug, clap::Subcommand)]
 pub enum TaxonNoteCommands {
-    #[command(about = "List notes for the taxon")]
+    #[command(about = "List notes for the taxon", alias = "ls")]
     List,
     #[command(about = "Show a note for the taxon")]
     Show {
         #[arg(help = "A note ID")]
         note_id: u64,
     },
-    #[command(about = "Add a new note to a taxon")]
+    #[command(about = "Add a new note to a taxon", alias = "new")]
     Add {
         #[arg(help = "A note")]
         text: String,
     },
-    #[command(about = "Modify a note for a taxon")]
+    #[command(about = "Modify a note for a taxon", alias = "edit")]
     Modify {
         #[arg(help = "A note ID assigned to this taxon")]
         note_id: u64,

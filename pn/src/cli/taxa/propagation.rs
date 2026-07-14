@@ -18,14 +18,17 @@ use crate::{
 
 #[derive(Debug, clap::Subcommand)]
 pub enum TaxonPropagationCommands {
-    #[command(about = "List seed propagation procedure for the taxon")]
+    #[command(about = "List seed propagation procedure for the taxon", alias = "ls")]
     List,
     #[command(about = "Show seed propagation information for the taxon")]
     Show {
         #[arg(help = "An ID of a propagation procedure ID assigned to this taxon")]
         propagation_id: u64,
     },
-    #[command(about = "Assign a new seed propagation procedure to a taxon")]
+    #[command(
+        about = "Assign a new seed propagation procedure to a taxon",
+        alias = "new"
+    )]
     Add {
         #[arg(help = "An ID of a propagation procedure ID")]
         propagation_id: u64,
@@ -42,7 +45,7 @@ pub enum TaxonPropagationCommands {
         )]
         notes: Option<String>,
     },
-    #[command(about = "Modify propagation information for a taxon", group(clap::ArgGroup::new("modify_props").args(["confidence", "notes"]).required(true).multiple(true)))]
+    #[command(about = "Modify propagation information for a taxon", group(clap::ArgGroup::new("modify_props").args(["confidence", "notes"]).required(true).multiple(true)), alias="edit")]
     Modify {
         #[arg(help = "A propagation procedure ID assigned to this taxon")]
         propagation_id: u64,

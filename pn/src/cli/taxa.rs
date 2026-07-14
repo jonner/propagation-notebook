@@ -27,7 +27,7 @@ pub mod propagation;
 
 #[derive(Debug, clap::Subcommand)]
 pub enum TaxonCommands {
-    #[command(about = "Print a list of all taxa")]
+    #[command(about = "Print a list of all taxa", alias = "ls")]
     List {
         #[arg(short, long, help = "Show only taxa in the specified region")]
         region_id: Option<u64>,

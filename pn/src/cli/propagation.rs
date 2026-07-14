@@ -22,7 +22,7 @@ use crate::{
 
 #[derive(Debug, clap::Subcommand)]
 pub enum PropagationCommands {
-    #[command(about = "List all seed propagation procedures")]
+    #[command(about = "List all seed propagation procedures", alias = "ls")]
     List {
         #[arg(
             short,
@@ -34,7 +34,7 @@ pub enum PropagationCommands {
     },
     #[command(about = "Show a seed propagation procedure")]
     Show { id: u64 },
-    #[command(about = "Add a seed propagation procedure")]
+    #[command(about = "Add a seed propagation procedure", alias = "new")]
     Add {
         #[arg(help = "A short name for the procedure")]
         name: String,
@@ -45,7 +45,7 @@ pub enum PropagationCommands {
         #[arg(long, help = "Additional notes for this procedure")]
         notes: Option<String>,
     },
-    #[command(about = "Add a seed propagation procedure", group(clap::ArgGroup::new("modify_fields").args(["name", "type", "notes", "instructions"]).required(true).multiple(true)))]
+    #[command(about = "Modify a seed propagation procedure", group(clap::ArgGroup::new("modify_fields").args(["name", "type", "notes", "instructions"]).required(true).multiple(true)), alias="edit")]
     Modify {
         #[arg(help = "A procedure ID")]
         id: u64,

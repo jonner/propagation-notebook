@@ -12,7 +12,7 @@ use crate::{
 pub enum TaxonCollectingCommands {
     #[command(about = "Show seed collecting information")]
     Show,
-    #[command(about = "Modify seed collecting information for a taxon", group(clap::ArgGroup::new("modify_props").args(["ripening_indicators", "harvesting_notes", "storage_conditions", "storage_life"]).required(true).multiple(true)))]
+    #[command(about = "Modify seed collecting information for a taxon", group(clap::ArgGroup::new("modify_props").args(["ripening_indicators", "harvesting_notes", "storage_conditions", "storage_life"]).required(true).multiple(true)), alias="edit")]
     Modify {
         #[arg(
             short,

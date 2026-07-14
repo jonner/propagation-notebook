@@ -67,11 +67,11 @@ impl GeometryArg {
 
 #[derive(Debug, clap::Subcommand)]
 pub enum RegionCommands {
-    #[command(about = "Print a list of regions")]
+    #[command(about = "Print a list of regions", alias = "ls")]
     List,
     #[command(about = "Show detailed information about a region")]
     Show { id: u64 },
-    #[command(about = "Add a new region to the database")]
+    #[command(about = "Add a new region to the database", alias = "new")]
     Add {
         region_name: String,
         #[clap(flatten)]
@@ -91,7 +91,7 @@ pub enum RegionCommands {
         #[arg(short, long, help = "A path to save the file describing the region")]
         output_file: Option<PathBuf>,
     },
-    #[command(about = "Modify information about a region", group(clap::ArgGroup::new("modify_fields").args(["name", "geometry_string", "geometry_file", "notes"]).required(true).multiple(true)))]
+    #[command(about = "Modify information about a region", group(clap::ArgGroup::new("modify_fields").args(["name", "geometry_string", "geometry_file", "notes"]).required(true).multiple(true)), alias="edit")]
     Modify {
         id: u64,
         #[command(flatten)]
@@ -452,7 +452,7 @@ pub struct RegionalTaxonProperties {
 
 #[derive(Debug, clap::Subcommand)]
 pub enum RegionTaxaCommands {
-    #[command(about = "Print a list of taxa for a region", group(clap::ArgGroup::new("list_taxa_fields").args(["missing_dates", "ready_to_harvest"]).required(false).multiple(false)))]
+    #[command(about = "Print a list of taxa for a region", group(clap::ArgGroup::new("list_taxa_fields").args(["missing_dates", "ready_to_harvest"]).required(false).multiple(false)), alias="ls")]
     List {
         #[arg(
             long,
@@ -469,14 +469,14 @@ pub enum RegionTaxaCommands {
         #[arg(help = "A taxon name or ID")]
         name_or_id: TaxonIdentifier,
     },
-    #[command(about = "Add a taxon to a region")]
+    #[command(about = "Add a taxon to a region", alias = "new")]
     Add {
         #[arg(help = "A taxon name or ID")]
         name_or_id: TaxonIdentifier,
         #[command(flatten)]
         props: RegionalTaxonProperties,
     },
-    #[command(about = "Modify information about a taxon within a region", group(clap::ArgGroup::new("modify_taxon_fields").args(["origin", "c_value", "conservation_status", "wetland_indicator", "harvest_start", "harvest_end"]).required(true).multiple(false)))]
+    #[command(about = "Modify information about a taxon within a region", group(clap::ArgGroup::new("modify_taxon_fields").args(["origin", "c_value", "conservation_status", "wetland_indicator", "harvest_start", "harvest_end"]).required(true).multiple(false)), alias="edit")]
     Modify {
         #[arg(help = "A taxon name or ID")]
         name_or_id: TaxonIdentifier,
