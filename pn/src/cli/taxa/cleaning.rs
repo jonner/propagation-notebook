@@ -6,6 +6,7 @@ use toasty::Db;
 
 use crate::{
     cli::OutputFormat,
+    util::dialog::confirm,
     views::{
         JsonView, YamlView,
         cleaning::{TaxonCleaningProcedureDetailView, TaxonCleaningProcedureListView},
@@ -114,7 +115,7 @@ impl TaxonCleaningCommands {
                 assumeyes,
             } => {
                 if *assumeyes
-                    || dialoguer::Confirm::new()
+                    || confirm()
                         .with_prompt("Are you sure you wish to remove this procedure?")
                         .default(false)
                         .interact()?

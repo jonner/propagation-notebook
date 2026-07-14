@@ -12,6 +12,7 @@ use toasty::Db;
 
 use crate::{
     cli::OutputFormat,
+    util::dialog::confirm,
     views::{
         JsonView, YamlView,
         citation::CitationDetailsView,
@@ -174,7 +175,7 @@ impl PropagationCommands {
                             "{}",
                             PropagationProcedureDetailView::new(&procedure).render()?
                         );
-                        dialoguer::Confirm::new().with_prompt(
+                        confirm().with_prompt(
                         "Are you sure you wish to remove this Propagation procedure? It will remove all related steps",
                     )
                     .default(false)
@@ -244,7 +245,7 @@ impl PropagationCommands {
                         .into();
                     let output = CitationDetailsView::new(&pc).render()?;
                     println!("{output}");
-                    dialoguer::Confirm::new()
+                    confirm()
                         .with_prompt("Do you want to remove this citation?")
                         .default(false)
                         .interact()?

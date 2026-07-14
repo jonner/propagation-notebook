@@ -1,4 +1,7 @@
-use crate::cli::OutputFormat;
+use crate::{
+    cli::OutputFormat,
+    util::dialog::{input, select},
+};
 
 use libpropagation::taxonomy::Taxon;
 use toasty::Db;
@@ -73,27 +76,25 @@ impl TaxonLinkCommands {
                             options.push(InaturalistSearchTerm::CommonName(vn.name.clone()));
                         }
                         options.push(InaturalistSearchTerm::Custom);
-                        if let Some(resp) = dialoguer::Select::new()
-                            .with_prompt("Choose a search term:")
+                        if let Some(resp) = select()
+                            .with_prompt("Choose a search term")
                             .items(&options)
                             .interact_opt()?
                         {
                             let term = match &options[resp] {
                                 InaturalistSearchTerm::LatinName(s)
                                 | InaturalistSearchTerm::CommonName(s) => Some(s.clone()),
-                                InaturalistSearchTerm::Custom => Some(
-                                    dialoguer::Input::<String>::new()
-                                        .with_prompt("Custom search term:")
-                                        .interact()?,
-                                ),
+                                InaturalistSearchTerm::Custom => {
+                                    Some(input().with_prompt("Custom search term").interact()?)
+                                }
                             };
                             if let Some(term) = term {
                                 let taxa = client.taxon_search(&term).await?;
                                 if taxa.is_empty() {
                                     anyhow::bail!("No results found");
                                 } else {
-                                    if let Some(idx) = dialoguer::Select::new()
-                                        .with_prompt("Choose from the following options:")
+                                    if let Some(idx) = select()
+                                        .with_prompt("Choose from the following options")
                                         .items(&taxa)
                                         .interact_opt()?
                                     {

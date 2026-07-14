@@ -6,6 +6,7 @@ use toasty::Db;
 
 use crate::{
     cli::OutputFormat,
+    util::dialog::confirm,
     views::{
         JsonView, YamlView,
         taxa::{TaxonNoteDetailsView, TaxonNotesListView},
@@ -104,8 +105,8 @@ impl TaxonNoteCommands {
                 let note: TaxonNoteDetails = TaxonNote::get_by_id(db, note_id).await?.into();
                 if *assumeyes || {
                     println!("{}", TaxonNoteDetailsView::new(&note).render()?);
-                    dialoguer::Confirm::new()
-                        .with_prompt(&format!("Are you sure you wish to remove note {note_id}?"))
+                    confirm()
+                        .with_prompt(format!("Are you sure you wish to remove note {note_id}?"))
                         .default(false)
                         .interact()?
                 } {

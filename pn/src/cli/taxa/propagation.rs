@@ -7,6 +7,7 @@ use toasty::Db;
 
 use crate::{
     cli::OutputFormat,
+    util::dialog::confirm,
     views::{
         JsonView, YamlView,
         propagation::{
@@ -135,8 +136,8 @@ impl TaxonPropagationCommands {
             assumeyes,
         } => {
             if *assumeyes
-                        || dialoguer::Confirm::new().with_prompt(
-                            &format!("Are you sure you wish to remove this propagation procedure from taxon {taxon_id}?"),
+                        || confirm().with_prompt(
+                            format!("Are you sure you wish to remove this propagation procedure from taxon {taxon_id}?"),
                         )
                         .default(false)
                         .interact()?

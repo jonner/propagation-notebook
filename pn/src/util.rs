@@ -2,6 +2,8 @@ use anyhow::anyhow;
 use indicatif::ProgressBar;
 use libpropagation::{ImportProgressReporter, taxonomy::Taxon};
 
+use crate::util::dialog::select;
+
 pub(crate) fn join_or_default<T, F>(items: &[T], default: &str, extract: F) -> String
 where
     F: Fn(&T) -> String,
@@ -55,8 +57,8 @@ pub async fn inat_taxon_for_taxon(
                 if active_synonyms.len() == 1 {
                     return Ok(active_synonyms[0].clone());
                 } else {
-                    if let Some(idx) = dialoguer::Select::new().with_prompt(
-                        &format!(
+                    if let Some(idx) = select().with_prompt(
+                        format!(
                             "'{}' is not a valid taxon on iNaturalist. Choose one of the following active synonyms",
                             query
                         )).items(&active_synonyms)
@@ -71,9 +73,9 @@ pub async fn inat_taxon_for_taxon(
             return Ok(active_options.pop().unwrap());
         } else {
             if !active_options.is_empty() &&
-            let Some(idx) = dialoguer::Select::new()
+            let Some(idx) = select()
                 .with_prompt(
-                &format!("Couldn't find an exact match for '{query}', but iNaturalist returned the following matches:"))
+                format!("Couldn't find an exact match for '{query}', but iNaturalist returned the following matches"))
             .items(&active_options).interact_opt()?
             {
                 let taxon = active_options[idx].clone();
@@ -102,8 +104,8 @@ pub async fn inat_taxon_for_taxon(
             }
             tracing::debug!(?common_name_options, "all common name results");
             if !common_name_options.is_empty()
-                && let Some(idx) = dialoguer::Select::new()
-                    .with_prompt(&format!(
+                && let Some(idx) = select()
+                    .with_prompt(format!(
                         "The following iNaturalist taxa match one of the common names of '{}'",
                         query
                     ))
@@ -130,6 +132,29 @@ struct CommonNameSearchResult {
 impl std::fmt::Display for CommonNameSearchResult {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{} matches '{}'", self.taxon, self.common_name)
+    }
+}
+
+pub mod dialog {
+    use std::sync::OnceLock;
+
+    use dialoguer::{Confirm, Input, Select, theme::ColorfulTheme};
+
+    pub fn dialog_theme() -> &'static ColorfulTheme {
+        static DIALOG_THEME: OnceLock<ColorfulTheme> = OnceLock::new();
+        DIALOG_THEME.get_or_init(ColorfulTheme::default)
+    }
+
+    pub fn confirm<'a>() -> Confirm<'a> {
+        Confirm::with_theme(dialog_theme())
+    }
+
+    pub fn input<'a>() -> Input<'a, String> {
+        Input::<String>::with_theme(dialog_theme())
+    }
+
+    pub fn select<'a>() -> Select<'a> {
+        Select::with_theme(dialog_theme())
     }
 }
 

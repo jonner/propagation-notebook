@@ -4,6 +4,7 @@ use toasty::Db;
 
 use crate::{
     cli::OutputFormat,
+    util::dialog::confirm,
     views::{JsonView, YamlView, collecting::CollectingDataView},
 };
 
@@ -73,7 +74,7 @@ impl TaxonCollectingCommands {
             }
             TaxonCollectingCommands::Remove { assumeyes } => {
                 if *assumeyes
-                    || dialoguer::Confirm::new()
+                    || confirm()
                         .with_prompt("Are you sure you wish to remove this collecting data?")
                         .default(false)
                         .interact()?

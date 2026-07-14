@@ -9,6 +9,7 @@ use toasty::Db;
 
 use crate::{
     cli::OutputFormat,
+    util::dialog::confirm,
     views::{
         JsonView, YamlView,
         citation::CitationDetailsView,
@@ -125,7 +126,7 @@ impl CleaningCommands {
                             .await?
                             .into();
                         println!("{}", CleaningProcedureDetailsView::new(&item).render()?);
-                        dialoguer::Confirm::new().with_prompt(&format!(
+                        confirm().with_prompt(format!(
                         "Are you sure you wish to remove cleaning procedure {id}? It is used by {} taxa",
                         item.taxa.len()
                     ))
@@ -201,7 +202,7 @@ impl CleaningCommands {
                         .into();
                     let output = CitationDetailsView::new(&pc).render()?;
                     println!("{output}");
-                    dialoguer::Confirm::new()
+                    confirm()
                         .with_prompt("Do you want to remove this citation?")
                         .default(false)
                         .interact()?

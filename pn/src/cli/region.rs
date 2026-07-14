@@ -3,6 +3,7 @@ use std::fmt::Display;
 use std::path::PathBuf;
 
 use crate::cli::OutputFormat;
+use crate::util::dialog::{confirm, input, select};
 use crate::util::{IndicatifImportProgress, inat_taxon_for_taxon};
 use crate::views::regions::{
     RegionDetailsView, RegionalHarvestDateListView, RegionalTaxonStatusDetailsView, RegionsListView,
@@ -268,7 +269,7 @@ impl RegionCommands {
                             .await?
                             .into();
                         println!("{}", RegionDetailsView::new(&region).render()?);
-                        dialoguer::Confirm::new().with_prompt("Are you sure you wish to delete this region? All associated data will be deleted.")
+                        confirm().with_prompt("Are you sure you wish to delete this region? All associated data will be deleted.")
                         .default(false)
                         .interact()?
                     }
@@ -712,8 +713,8 @@ impl RegionTaxaCommands {
                         OutputFormat::Text,
                     )
                     .await?;
-                    dialoguer::Confirm::new()
-                        .with_prompt("Are you sure you wish to remove this taxon from the region? ")
+                    confirm()
+                        .with_prompt("Are you sure you wish to remove this taxon from the region?")
                         .default(false)
                         .interact()?
                 } {
@@ -783,8 +784,8 @@ async fn lookup_harvest_dates_interactive(
             region.reference(),
             window
         );
-        if dialoguer::Confirm::new()
-            .with_prompt(&format!(
+        if confirm()
+            .with_prompt(format!(
                 "Update database? Current harvest window: {}",
                 rts.harvest_window,
             ))
@@ -843,15 +844,15 @@ async fn query_harvest_window_for_taxon(
         None => {
             let options = inat
                 .place_search(
-                    &dialoguer::Input::<String>::new()
+                    &input()
                         .with_prompt(
-                            "Search for a place on inaturalist that represents this region:",
+                            "Search for a place on inaturalist that represents this region",
                         )
                         .interact()?,
                 )
                 .await?;
-            let selected = dialoguer::Select::new()
-                .with_prompt("Please select one of the following iNaturalist places:")
+            let selected = select()
+                .with_prompt("Please select one of the following iNaturalist places")
                 .items(&options)
                 .interact()?;
             inaturalist::SearchArea::Place(options[selected].id)
@@ -1069,7 +1070,7 @@ async fn seed_observation_window_with_expansion(
                     },
                 ),
             };
-            let idx = dialoguer::Select::new()
+            let idx = select()
                 .with_prompt(&msg)
                 .items(&options)
                 .interact()?;
