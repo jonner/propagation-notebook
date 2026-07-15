@@ -129,6 +129,8 @@ pub enum RegionCommands {
             long_help = "In interactive mode, you may be prompted to update values. In non-interactive mode it only updates taxa that don't yet have a value set."
         )]
         interactive: bool,
+        #[arg(long, help = "skip the first N taxa")]
+        skip: Option<usize>,
     },
     #[command(about = "Manage taxa for a region")]
     Taxa {
@@ -284,6 +286,7 @@ impl RegionCommands {
                 id: region_id,
                 min_samples,
                 interactive,
+                skip,
             } => {
                 let region = Region::filter_by_id(region_id).one().exec(db).await?;
                 // the db querying is such a small part of this overall
@@ -299,8 +302,9 @@ impl RegionCommands {
                 .await?;
                 let mut n_updates = 0;
                 let total = taxa.len();
+                let taxon_iter = taxa.iter().skip(skip.unwrap_or_default());
                 if *interactive {
-                    for (i, taxon) in taxa.iter().enumerate() {
+                    for (i, taxon) in taxon_iter.enumerate() {
                         let mut fullrts = RegionalTaxonStatus::filter_by_taxon_id_and_region_id(
                             taxon.id, region_id,
                         )
@@ -309,7 +313,7 @@ impl RegionCommands {
                         .include(RegionalTaxonStatus::fields().region())
                         .exec(db)
                         .await?;
-                        println!("{}/{total}", i + 1);
+                        println!("{}/{total}", i + 1 + skip.unwrap_or_default());
                         if lookup_harvest_dates_interactive(db, &mut fullrts, min_samples)
                             .await
                             .is_ok()
@@ -324,7 +328,7 @@ impl RegionCommands {
                         "{wide_bar} {percent}%\nQuerying '{msg}'",
                     )?);
                     pb.set_message("Preparing...");
-                    for taxon in taxa.iter().progress_with(pb.clone()) {
+                    for taxon in taxon_iter.progress_with(pb.clone()) {
                         let fullrts = RegionalTaxonStatus::filter_by_taxon_id_and_region_id(
                             taxon.id, region_id,
                         )

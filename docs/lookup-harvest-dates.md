@@ -7,7 +7,7 @@
 
 # For full region lookups
 - [x] We should have an easy way to cancel out of the entire loop
-- we should have a way to start part way through the list (e.g. "skip first 50")
+- [x] we should have a way to start part way through the list (e.g. "skip first 50")
 - or only lookup certain taxa (those without dates? only natives?)
 - when the dates are not updated, nothing seems to be printed, so it's not obvious to the user what happened
 - [x] we don't need the 'Preparing...' message
