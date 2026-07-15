@@ -6,7 +6,8 @@ use crate::cli::OutputFormat;
 use crate::util::dialog::{confirm, input, select};
 use crate::util::{IndicatifImportProgress, inat_taxon_for_taxon};
 use crate::views::regions::{
-    RegionDetailsView, RegionalHarvestDateListView, RegionalTaxonStatusDetailsView, RegionsListView,
+    RegionDetailsView, RegionalHarvestDateListView, RegionalTaxonStatusDetailsView,
+    RegionalTaxonStatusHarvestView, RegionsListView,
 };
 use crate::views::taxa::RegionalTaxaListView;
 use crate::views::{JsonView, YamlView};
@@ -18,7 +19,7 @@ use indicatif::{ProgressBar, ProgressIterator, ProgressStyle};
 use jiff::civil::Date;
 use libpropagation::region::dto::{
     CompactRegion, FullRegion, RegionalTaxonHarvestInfo, RegionalTaxonStatusDetails,
-    RegionalTaxonStatusDetailsNoRegion,
+    RegionalTaxonStatusDetailsNoRegion, RegionalTaxonStatusHarvest,
 };
 use libpropagation::taxonomy::TaxonIdentifier;
 use libpropagation::{
@@ -297,8 +298,9 @@ impl RegionCommands {
                 .exec(db)
                 .await?;
                 let mut n_updates = 0;
+                let total = taxa.len();
                 if *interactive {
-                    for taxon in taxa.iter() {
+                    for (i, taxon) in taxa.iter().enumerate() {
                         let mut fullrts = RegionalTaxonStatus::filter_by_taxon_id_and_region_id(
                             taxon.id, region_id,
                         )
@@ -307,6 +309,7 @@ impl RegionCommands {
                         .include(RegionalTaxonStatus::fields().region())
                         .exec(db)
                         .await?;
+                        println!("{}/{total}", i + 1);
                         if lookup_harvest_dates_interactive(db, &mut fullrts, min_samples)
                             .await
                             .is_ok()
@@ -755,8 +758,8 @@ async fn lookup_harvest_dates_interactive(
     let mut updated = false;
     let taxon = rts.taxon.get();
     let region = rts.region.get();
-    let dto: RegionalTaxonStatusDetails = rts.clone().into();
-    println!("{}", RegionalTaxonStatusDetailsView::new(&dto).render()?);
+    let dto: RegionalTaxonStatusHarvest = rts.clone().into();
+    println!("{}", RegionalTaxonStatusHarvestView::new(&dto).render()?);
     let inat = inaturalist::Client::new()?;
     let inat_taxon = if let Some(id) = taxon.inaturalist_id {
         let taxon = inat.taxon_info(id).await?;

@@ -51,6 +51,17 @@ impl From<super::Region> for FullRegion {
 
 #[skip_serializing_none]
 #[derive(Debug, Clone, Serialize)]
+pub struct RegionalTaxonStatusHarvest {
+    pub taxon: ObjectReference,
+    pub taxon_vernaculars: Vec<String>,
+    pub region: ObjectReference,
+    pub origin: Option<super::Origin>,
+    #[serde(skip_serializing_if = "super::RegionalHarvestWindow::is_empty")]
+    pub harvest_window: super::RegionalHarvestWindow,
+}
+
+#[skip_serializing_none]
+#[derive(Debug, Clone, Serialize)]
 pub struct RegionalTaxonStatusDetails {
     pub taxon: ObjectReference,
     pub region: ObjectReference,
@@ -142,6 +153,31 @@ impl From<super::RegionalTaxonStatus> for RegionalTaxonStatusDetails {
                 wetland_indicator: value.wetland_indicator,
                 harvest_window: value.harvest_window,
             },
+        }
+    }
+}
+
+impl From<super::RegionalTaxonStatus> for RegionalTaxonStatusHarvest {
+    fn from(value: super::RegionalTaxonStatus) -> Self {
+        Self {
+            taxon: value.taxon.get().into(),
+            taxon_vernaculars: if value.taxon.is_unloaded()
+                || value.taxon.get().vernaculars.is_unloaded()
+            {
+                Vec::default()
+            } else {
+                value
+                    .taxon
+                    .get()
+                    .vernaculars
+                    .get()
+                    .iter()
+                    .map(|v| v.name.clone())
+                    .collect()
+            },
+            region: value.region.get().into(),
+            origin: value.origin,
+            harvest_window: value.harvest_window,
         }
     }
 }

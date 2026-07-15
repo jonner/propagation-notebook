@@ -1,5 +1,6 @@
 use libpropagation::region::dto::{
     CompactRegion, FullRegion, RegionalTaxonHarvestInfo, RegionalTaxonStatusDetails,
+    RegionalTaxonStatusHarvest,
 };
 
 use crate::style;
@@ -87,6 +88,36 @@ impl<'a> RegionDetailsView<'a> {
             .as_deref()
             .unwrap_or("-"),
         ]);
+        Ok(tbuilder.build().with(style::DetailTable).to_string())
+    }
+}
+
+pub struct RegionalTaxonStatusHarvestView<'a> {
+    status: &'a RegionalTaxonStatusHarvest,
+}
+
+impl<'a> RegionalTaxonStatusHarvestView<'a> {
+    pub fn new(status: &'a RegionalTaxonStatusHarvest) -> Self {
+        Self { status }
+    }
+
+    pub fn render(&self) -> anyhow::Result<String> {
+        let mut tbuilder = tabled::builder::Builder::default();
+        tbuilder.push_record(["Taxon", &self.status.taxon.to_string()]);
+        if !self.status.taxon_vernaculars.is_empty() {
+            tbuilder.push_record(["Common names", &self.status.taxon_vernaculars.join("\n")]);
+        }
+        tbuilder.push_record(["Taxon", &self.status.taxon.to_string()]);
+        tbuilder.push_record(["Region", &self.status.region.to_string()]);
+        tbuilder.push_record([
+            "Origin",
+            &self
+                .status
+                .origin
+                .unwrap_or(libpropagation::region::Origin::Unknown)
+                .to_string(),
+        ]);
+        tbuilder.push_record(["Harvest Window", &self.status.harvest_window.to_string()]);
         Ok(tbuilder.build().with(style::DetailTable).to_string())
     }
 }
