@@ -4,6 +4,7 @@ use crate::{
 };
 
 use anyhow::anyhow;
+use demand::DemandOption;
 use libpropagation::taxonomy::{Taxon, TaxonomicAuthority};
 use toasty::Db;
 
@@ -82,16 +83,16 @@ impl TaxonLinkCommands {
                             options.push(InaturalistSearchTerm::CommonName(vn.name.clone()));
                         }
                         options.push(InaturalistSearchTerm::Custom);
-                        if let Some(resp) = select()
-                            .with_prompt("Choose a search term")
-                            .items(&options)
-                            .interact_opt()?
+                        if let Ok(resp) = select("Choose a search term:")
+                            .filterable(true)
+                            .options(options.into_iter().map(DemandOption::new).collect())
+                            .run()
                         {
-                            let term = match &options[resp] {
+                            let term = match resp {
                                 InaturalistSearchTerm::LatinName(s)
                                 | InaturalistSearchTerm::CommonName(s) => Some(s.clone()),
                                 InaturalistSearchTerm::Custom => {
-                                    Some(input().with_prompt("Custom search term").interact()?)
+                                    input("Custom search term:").run().ok()
                                 }
                             };
                             if let Some(term) = term {
@@ -99,13 +100,15 @@ impl TaxonLinkCommands {
                                 if taxa.is_empty() {
                                     anyhow::bail!("No results found");
                                 } else {
-                                    if let Some(idx) = select()
-                                        .with_prompt("Choose from the following options")
-                                        .items(&taxa)
-                                        .interact_opt()?
+                                    if let Ok(inat_taxon) =
+                                        select("Choose from the following options:")
+                                            .options(
+                                                taxa.into_iter().map(DemandOption::new).collect(),
+                                            )
+                                            .run()
                                     {
                                         Taxon::update_by_id(taxon_id)
-                                            .inaturalist_id(taxa[idx].id)
+                                            .inaturalist_id(inat_taxon.id)
                                             .exec(db)
                                             .await?;
                                         println!("Updated iNaturalist ID")

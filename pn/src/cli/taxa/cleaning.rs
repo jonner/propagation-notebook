@@ -158,12 +158,11 @@ impl TaxonCleaningCommands {
                         .await?
                         .into();
                     println!("{}", CleaningProcedureDetailsView::new(&item).render()?);
-                    confirm()
-                        .with_prompt(format!(
-                            "Are you sure you wish to remove cleaning procedure {id}?",
-                        ))
-                        .default(false)
-                        .interact()?
+                    confirm(&format!(
+                        "Are you sure you wish to remove cleaning procedure {id}?",
+                    ))
+                    .selected(false)
+                    .run()?
                 } {
                     CleaningProcedure::delete_by_id(db, id).await?;
                     println!("Removed cleaning procedure {id}");
@@ -208,10 +207,9 @@ impl TaxonCleaningCommands {
                         .into();
                     let output = CitationDetailsView::new(&pc).render()?;
                     println!("{output}");
-                    confirm()
-                        .with_prompt("Do you want to remove this citation?")
-                        .default(false)
-                        .interact()?
+                    confirm("Do you want to remove this citation?")
+                        .selected(false)
+                        .run()?
                 } {
                     CleaningProcedureCitation::delete_by_citation_id_and_cleaning_id(
                         db,

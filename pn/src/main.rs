@@ -16,6 +16,15 @@ async fn main() -> anyhow::Result<()> {
         .with(tracing_subscriber::fmt::layer())
         .with(filter)
         .init();
+
+    // Because the 'demand' crate enters raw terminal mode and swallows ctrl+c,
+    // we need to add a handler here to ensure that we can break out of a prompt
+    // loop.
+    ctrlc::set_handler(move || {
+        std::process::exit(130);
+    })
+    .expect("Failed to set ctrl+c handler");
+
     let options = Options::parse();
     let mut db = libpropagation::db().await?;
     match options.command {

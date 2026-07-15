@@ -1,4 +1,5 @@
 use anyhow::anyhow;
+use demand::DemandOption;
 use indicatif::ProgressBar;
 use libpropagation::{ImportProgressReporter, taxonomy::Taxon};
 
@@ -57,12 +58,12 @@ pub async fn inat_taxon_for_taxon(
                 if active_synonyms.len() == 1 {
                     return Ok(active_synonyms[0].clone());
                 } else {
-                    if let Some(idx) = select().with_prompt(
-                        format!(
-                            "'{}' is not a valid taxon on iNaturalist. Choose one of the following active synonyms",
+                    if let Ok(selected) = select(
+                        &format!(
+                            "'{}' is not a valid taxon on iNaturalist. Choose one of the following active synonyms:",
                             query
-                        )).items(&active_synonyms)
-                    .interact_opt()? { return Ok(active_synonyms[idx].clone()) }
+                        )).options(active_synonyms.into_iter().map(DemandOption::new).collect())
+                    .run() { return Ok(selected) }
                 };
             }
         }
@@ -73,12 +74,10 @@ pub async fn inat_taxon_for_taxon(
             return Ok(active_options.pop().unwrap());
         } else {
             if !active_options.is_empty() &&
-            let Some(idx) = select()
-                .with_prompt(
-                format!("Couldn't find an exact match for '{query}', but iNaturalist returned the following matches"))
-            .items(&active_options).interact_opt()?
+            let Ok(taxon) = select(
+                &format!("Couldn't find an exact match for '{query}', but iNaturalist returned the following matches:"))
+            .options(active_options.into_iter().map(DemandOption::new).collect()).run()
             {
-                let taxon = active_options[idx].clone();
                 return Ok(taxon);
             }
         }
@@ -104,16 +103,19 @@ pub async fn inat_taxon_for_taxon(
             }
             tracing::debug!(?common_name_options, "all common name results");
             if !common_name_options.is_empty()
-                && let Some(idx) = select()
-                    .with_prompt(format!(
-                        "The following iNaturalist taxa match one of the common names of '{}'",
-                        query
-                    ))
-                    .items(&common_name_options)
-                    .interact_opt()?
+                && let Ok(result) = select(&format!(
+                    "The following iNaturalist taxa match one of the common names of '{}'",
+                    query
+                ))
+                .options(
+                    common_name_options
+                        .into_iter()
+                        .map(DemandOption::new)
+                        .collect::<Vec<DemandOption<_>>>(),
+                )
+                .run()
             {
-                let taxon = &common_name_options[idx].taxon;
-                return Ok(taxon.clone());
+                return Ok(result.taxon);
             }
         }
     }
@@ -138,23 +140,23 @@ impl std::fmt::Display for CommonNameSearchResult {
 pub mod dialog {
     use std::sync::OnceLock;
 
-    use dialoguer::{Confirm, Input, Select, theme::ColorfulTheme};
+    use demand::{Confirm, Input, Select, Theme};
 
-    pub fn dialog_theme() -> &'static ColorfulTheme {
-        static DIALOG_THEME: OnceLock<ColorfulTheme> = OnceLock::new();
-        DIALOG_THEME.get_or_init(ColorfulTheme::default)
+    pub fn theme<'a>() -> &'a Theme {
+        static DIALOG_THEME: OnceLock<Theme> = OnceLock::new();
+        DIALOG_THEME.get_or_init(Theme::default)
     }
 
-    pub fn confirm<'a>() -> Confirm<'a> {
-        Confirm::with_theme(dialog_theme())
+    pub fn confirm<'a>(title: &str) -> Confirm<'a> {
+        Confirm::new(title).theme(theme())
     }
 
-    pub fn input<'a>() -> Input<'a, String> {
-        Input::<String>::with_theme(dialog_theme())
+    pub fn input<'a>(title: &str) -> Input<'a> {
+        Input::new(title).theme(theme())
     }
 
-    pub fn select<'a>() -> Select<'a> {
-        Select::with_theme(dialog_theme())
+    pub fn select<'a, T>(title: &str) -> Select<'a, T> {
+        Select::new(title).theme(theme())
     }
 }
 

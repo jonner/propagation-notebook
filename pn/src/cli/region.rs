@@ -11,6 +11,7 @@ use crate::views::regions::{
 use crate::views::taxa::RegionalTaxaListView;
 use crate::views::{JsonView, YamlView};
 use anyhow::anyhow;
+use demand::DemandOption;
 use geo::BoundingRect;
 use geo::ChamberlainDuquetteArea;
 use indicatif::{ProgressBar, ProgressIterator, ProgressStyle};
@@ -269,9 +270,9 @@ impl RegionCommands {
                             .await?
                             .into();
                         println!("{}", RegionDetailsView::new(&region).render()?);
-                        confirm().with_prompt("Are you sure you wish to delete this region? All associated data will be deleted.")
-                        .default(false)
-                        .interact()?
+                        confirm("Are you sure you wish to delete this region? All associated data will be deleted.")
+                        .selected(false)
+                        .run()?
                     }
                 {
                     Region::delete_by_id(db, id).await?;
@@ -713,10 +714,9 @@ impl RegionTaxaCommands {
                         OutputFormat::Text,
                     )
                     .await?;
-                    confirm()
-                        .with_prompt("Are you sure you wish to remove this taxon from the region?")
-                        .default(false)
-                        .interact()?
+                    confirm("Are you sure you wish to remove this taxon from the region?")
+                        .selected(false)
+                        .run()?
                 } {
                     RegionalTaxonStatus::delete_by_taxon_id_and_region_id(db, taxon_id, region_id)
                         .await?;
@@ -784,13 +784,12 @@ async fn lookup_harvest_dates_interactive(
             region.reference(),
             window
         );
-        if confirm()
-            .with_prompt(format!(
-                "Update database? Current harvest window: {}",
-                rts.harvest_window,
-            ))
-            .default(false)
-            .interact()?
+        if confirm(&format!(
+            "Update database? Current harvest window: {}",
+            rts.harvest_window,
+        ))
+        .selected(false)
+        .run()?
         {
             rts.update().harvest_window(window).exec(db).await?;
             updated = true;
@@ -844,18 +843,14 @@ async fn query_harvest_window_for_taxon(
         None => {
             let options = inat
                 .place_search(
-                    &input()
-                        .with_prompt(
-                            "Search for a place on inaturalist that represents this region",
-                        )
-                        .interact()?,
+                    &input("Search for a place on inaturalist that represents this region:")
+                        .run()?,
                 )
                 .await?;
-            let selected = select()
-                .with_prompt("Please select one of the following iNaturalist places")
-                .items(&options)
-                .interact()?;
-            inaturalist::SearchArea::Place(options[selected].id)
+            let selected = select("Please select one of the following iNaturalist places:")
+                .options(options.into_iter().map(DemandOption::new).collect())
+                .run()?;
+            inaturalist::SearchArea::Place(selected.id)
         }
     };
     let observation_window = if allow_expansion {
@@ -1061,8 +1056,11 @@ async fn seed_observation_window_with_expansion(
                     },
                 ),
             };
-            if let Some(idx) = select().with_prompt(&msg).items(&options).interact_opt()? {
-                match options[idx] {
+            if let Ok(selected) = select(&msg)
+                .options(options.into_iter().map(DemandOption::new).collect())
+                .run()
+            {
+                match selected {
                     MinimumObservationsAction::ExpandSearch => {
                         let newloc = match &loc {
                             inaturalist::SearchArea::Place(_) => todo!(),

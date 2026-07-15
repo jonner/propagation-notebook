@@ -139,11 +139,11 @@ impl TaxonPropagationCommands {
             assumeyes,
         } => {
             if *assumeyes
-                        || confirm().with_prompt(
-                            format!("Are you sure you wish to remove this propagation procedure from taxon {taxon_id}?"),
+                        || confirm(
+                            &format!("Are you sure you wish to remove this propagation procedure from taxon {taxon_id}?"),
                         )
-                        .default(false)
-                        .interact()?
+                        .selected(false)
+                        .run()?
                     {
                         TaxonPropagationProcedure::delete_by_taxon_id_and_propagation_id(
                             db,
