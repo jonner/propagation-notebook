@@ -37,6 +37,7 @@ pub enum MainCommand {
     Init,
 }
 
+pub mod citation;
 pub mod propagation;
 pub mod region;
 pub mod taxa;
