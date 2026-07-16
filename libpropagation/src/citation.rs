@@ -22,7 +22,7 @@ pub mod dto {
         fn from(value: super::Citation) -> Self {
             Self {
                 id: value.id,
-                subject: value.text,
+                subject: value.title,
                 url: value.url,
                 author: value.author,
             }
@@ -33,7 +33,7 @@ pub mod dto {
         fn from(value: &super::Citation) -> Self {
             Self {
                 id: value.id,
-                subject: value.text.clone(),
+                subject: value.title.clone(),
                 url: value.url.clone(),
                 author: value.author.clone(),
             }
@@ -46,9 +46,10 @@ pub struct Citation {
     #[key]
     #[auto]
     pub id: u64,
-    pub text: String,
+    pub title: String,
     pub url: Option<String>,
     pub author: Option<String>,
+    pub date: Option<jiff::civil::Date>,
 
     #[has_many]
     pub cleaning_procedures: Deferred<Vec<CleaningProcedureCitation>>,
@@ -62,7 +63,7 @@ impl From<&Citation> for ObjectReference {
     fn from(value: &Citation) -> Self {
         Self {
             id: value.id,
-            name: Some(value.text.clone()),
+            name: Some(value.title.clone()),
         }
     }
 }

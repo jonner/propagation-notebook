@@ -209,7 +209,7 @@ impl PropagationCommands {
                 author,
             } => {
                 let citation = Citation::create()
-                    .text(subject)
+                    .title(subject)
                     .url(url)
                     .author(author)
                     .exec(db)

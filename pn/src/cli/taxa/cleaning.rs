@@ -69,8 +69,8 @@ pub enum CitationCommands {
         id: u64,
     },
     Add {
-        #[arg(help = "Citation subject")]
-        subject: String,
+        #[arg(help = "Citation title")]
+        title: String,
         #[arg(long, help = "A canonical URL for the citation")]
         url: Option<String>,
         #[arg(long, help = "The author being cited")]
@@ -194,15 +194,11 @@ impl CitationCommands {
         format: OutputFormat,
     ) -> anyhow::Result<()> {
         match self {
-            CitationCommands::Add {
-                subject,
-                url,
-                author,
-            } => {
+            CitationCommands::Add { title, url, author } => {
                 CleaningProcedureCitation::create()
                     .citation(
                         Citation::create()
-                            .text(subject)
+                            .title(title)
                             .url(url)
                             .author(author)
                             .exec(db)
