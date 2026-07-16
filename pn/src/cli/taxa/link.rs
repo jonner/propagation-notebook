@@ -13,7 +13,10 @@ pub enum TaxonLinkCommands {
     #[command(about = "Clear the link to the external taxonomy")]
     Clear,
     #[command(about = "Set a new id for this taxon in the external taxonomy")]
-    Set { id: u64 },
+    Set {
+        #[arg(help = "A external taxonomy taxon ID")]
+        id: u64,
+    },
     #[command(about = "Search for the taxon in the external taxonomy")]
     Search,
 }

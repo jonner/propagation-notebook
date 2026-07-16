@@ -1,10 +1,13 @@
 #[derive(Debug, Clone, clap::Subcommand)]
 pub enum CitationCommands {
+    #[command(about = "List all citations")]
     List,
+    #[command(about = "Show citation details")]
     Show {
         #[arg(help = "A Citation ID")]
         id: u64,
     },
+    #[command(about = "Add a new citation")]
     Add {
         #[arg(help = "Citation title")]
         title: String,
@@ -15,6 +18,7 @@ pub enum CitationCommands {
         #[arg(long, help = "The date of the citation")]
         date: Option<jiff::civil::Date>,
     },
+    #[command(about = "Remove a citation")]
     Remove {
         #[arg(help = "A citation ID")]
         citation_id: u64,
