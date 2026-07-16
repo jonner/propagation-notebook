@@ -9,7 +9,7 @@ use crate::{
     util::dialog::confirm,
     views::{
         JsonView, YamlView,
-        citation::CitationDetailsView,
+        citation::{CitationDetailsView, CitationListView},
         cleaning::{CleaningProcedureDetailsView, CleaningProcedureListView},
     },
 };
@@ -52,9 +52,23 @@ pub enum TaxonCleaningCommands {
         )]
         assumeyes: bool,
     },
-    AddCitation {
+    #[command(about = "Manage citations for cleaning procedures")]
+    Citation {
         #[arg(help = "A cleaning procedure ID")]
         id: u64,
+        #[command(subcommand)]
+        command: CitationCommands,
+    },
+}
+
+#[derive(Debug, Clone, clap::Subcommand)]
+pub enum CitationCommands {
+    List,
+    Show {
+        #[arg(help = "A Citation ID")]
+        id: u64,
+    },
+    Add {
         #[arg(help = "Citation subject")]
         subject: String,
         #[arg(long, help = "A canonical URL for the citation")]
@@ -62,9 +76,7 @@ pub enum TaxonCleaningCommands {
         #[arg(long, help = "The author being cited")]
         author: Option<String>,
     },
-    RemoveCitation {
-        #[arg(help = "A cleaning procedure ID")]
-        id: u64,
+    Remove {
         #[arg(short, long, help = "A citation ID")]
         citation_id: u64,
         #[arg(
@@ -168,45 +180,45 @@ impl TaxonCleaningCommands {
                     println!("Removed cleaning procedure {id}");
                 }
             }
-            TaxonCleaningCommands::AddCitation {
-                id,
+            TaxonCleaningCommands::Citation { command, id } => command.run(db, *id, format).await?,
+        }
+        Ok(())
+    }
+}
+
+impl CitationCommands {
+    pub async fn run(
+        &self,
+        db: &mut Db,
+        cleaning_id: u64,
+        format: OutputFormat,
+    ) -> anyhow::Result<()> {
+        match self {
+            CitationCommands::Add {
                 subject,
                 url,
                 author,
             } => {
-                let citation = Citation::create()
-                    .text(subject)
-                    .url(url)
-                    .author(author)
-                    .exec(db)
-                    .await?;
                 CleaningProcedureCitation::create()
-                    .citation_id(citation.id)
-                    .cleaning_id(id)
+                    .citation(
+                        Citation::create()
+                            .text(subject)
+                            .url(url)
+                            .author(author)
+                            .exec(db)
+                            .await?,
+                    )
+                    .cleaning_id(cleaning_id)
                     .exec(db)
                     .await?;
-                load_and_display_cleaning_details(db, format, id).await?;
+                load_and_display_cleaning_details(db, format, &cleaning_id).await?;
             }
-            TaxonCleaningCommands::RemoveCitation {
-                id,
+            CitationCommands::Remove {
                 citation_id,
                 assumeyes,
             } => {
                 if *assumeyes || {
-                    let pc: CitationDetails =
-                        CleaningProcedureCitation::filter_by_citation_id_and_cleaning_id(
-                            citation_id,
-                            id,
-                        )
-                        .include(CleaningProcedureCitation::fields().citation())
-                        .one()
-                        .exec(db)
-                        .await?
-                        .citation
-                        .get()
-                        .into();
-                    let output = CitationDetailsView::new(&pc).render()?;
-                    println!("{output}");
+                    load_and_display_citation_details(db, citation_id, cleaning_id, format).await?;
                     confirm("Do you want to remove this citation?")
                         .selected(false)
                         .run()?
@@ -214,7 +226,7 @@ impl TaxonCleaningCommands {
                     CleaningProcedureCitation::delete_by_citation_id_and_cleaning_id(
                         db,
                         citation_id,
-                        id,
+                        cleaning_id,
                     )
                     .await?;
                     let citation = Citation::filter_by_id(citation_id)
@@ -231,12 +243,55 @@ impl TaxonCleaningCommands {
                     {
                         Citation::delete_by_id(db, citation_id).await?;
                     }
-                    load_and_display_cleaning_details(db, format, id).await?;
+                    load_and_display_cleaning_details(db, format, &cleaning_id).await?;
                 }
+            }
+            CitationCommands::List => {
+                let citations: Vec<CitationDetails> =
+                    CleaningProcedureCitation::filter_by_cleaning_id(cleaning_id)
+                        .include(CleaningProcedureCitation::fields().citation())
+                        .exec(db)
+                        .await?
+                        .into_iter()
+                        .map(|pc| pc.citation.get().into())
+                        .collect();
+                let output = match format {
+                    OutputFormat::Text => CitationListView::new(&citations).render()?,
+                    OutputFormat::Json => JsonView::new(&citations).render()?,
+                    OutputFormat::Yaml => YamlView::new(&citations).render()?,
+                };
+                println!("{output}");
+            }
+            CitationCommands::Show { id } => {
+                load_and_display_citation_details(db, id, cleaning_id, format).await?
             }
         }
         Ok(())
     }
+}
+
+async fn load_and_display_citation_details(
+    db: &mut Db,
+    citation_id: &u64,
+    cleaning_id: u64,
+    format: OutputFormat,
+) -> Result<(), anyhow::Error> {
+    let pc: CitationDetails =
+        CleaningProcedureCitation::filter_by_citation_id_and_cleaning_id(citation_id, cleaning_id)
+            .include(CleaningProcedureCitation::fields().citation())
+            .one()
+            .exec(db)
+            .await?
+            .citation
+            .get()
+            .into();
+    let output = match format {
+        OutputFormat::Text => CitationDetailsView::new(&pc).render()?,
+        OutputFormat::Json => JsonView::new(&pc).render()?,
+        OutputFormat::Yaml => YamlView::new(&pc).render()?,
+    };
+    println!("{output}");
+    Ok(())
 }
 
 async fn load_and_display_cleaning_details(
