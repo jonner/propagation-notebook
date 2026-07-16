@@ -10,9 +10,7 @@ use crate::{
     util::dialog::confirm,
     views::{
         JsonView, YamlView,
-        propagation::{
-            TaxonPropagationProcedureListView, TaxonPropagationPropagationProcedureDetailView,
-        },
+        propagation::{TaxonPropagationProcedureDetailView, TaxonPropagationProcedureListView},
     },
 };
 
@@ -112,7 +110,7 @@ impl TaxonPropagationCommands {
                 .exec(db)
                 .await?.into();
             let output = match format {
-                OutputFormat::Text => TaxonPropagationPropagationProcedureDetailView::new(&tp).render()?,
+                OutputFormat::Text => TaxonPropagationProcedureDetailView::new(&tp).render()?,
                 OutputFormat::Json => JsonView::new(&tp).render()?,
                 OutputFormat::Yaml => YamlView::new(&tp).render()?,
             };

@@ -30,11 +30,11 @@ impl<'a> TaxonPropagationProcedureListView<'a> {
     }
 }
 
-pub struct TaxonPropagationPropagationProcedureDetailView<'a> {
+pub struct TaxonPropagationProcedureDetailView<'a> {
     tp: &'a TaxonPropagationProcedureDetails,
 }
 
-impl<'a> TaxonPropagationPropagationProcedureDetailView<'a> {
+impl<'a> TaxonPropagationProcedureDetailView<'a> {
     pub fn new(tp: &'a TaxonPropagationProcedureDetails) -> Self {
         Self { tp }
     }
