@@ -75,6 +75,8 @@ pub enum CitationCommands {
         url: Option<String>,
         #[arg(long, help = "The author being cited")]
         author: Option<String>,
+        #[arg(long, help = "The date of the citation")]
+        date: Option<jiff::civil::Date>,
     },
     Remove {
         #[arg(help = "A citation ID")]
@@ -194,13 +196,19 @@ impl CitationCommands {
         format: OutputFormat,
     ) -> anyhow::Result<()> {
         match self {
-            CitationCommands::Add { title, url, author } => {
+            CitationCommands::Add {
+                title,
+                url,
+                author,
+                date,
+            } => {
                 CleaningProcedureCitation::create()
                     .citation(
                         Citation::create()
                             .title(title)
                             .url(url)
                             .author(author)
+                            .date(date)
                             .exec(db)
                             .await?,
                     )

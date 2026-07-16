@@ -16,6 +16,7 @@ pub mod dto {
         pub subject: String,
         pub url: Option<String>,
         pub author: Option<String>,
+        pub date: Option<jiff::civil::Date>,
     }
 
     impl From<super::Citation> for CitationDetails {
@@ -25,6 +26,7 @@ pub mod dto {
                 subject: value.title,
                 url: value.url,
                 author: value.author,
+                date: value.date,
             }
         }
     }
@@ -36,6 +38,7 @@ pub mod dto {
                 subject: value.title.clone(),
                 url: value.url.clone(),
                 author: value.author.clone(),
+                date: value.date,
             }
         }
     }

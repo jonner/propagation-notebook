@@ -17,6 +17,14 @@ impl<'a> CitationDetailsView<'a> {
         tbuilder.push_record(["Subject", &self.citation.subject]);
         tbuilder.push_record(["Author", self.citation.author.as_deref().unwrap_or("-")]);
         tbuilder.push_record(["URL", self.citation.url.as_deref().unwrap_or("-")]);
+        tbuilder.push_record([
+            "Date",
+            self.citation
+                .date
+                .map(|d| d.to_string())
+                .as_deref()
+                .unwrap_or("-"),
+        ]);
 
         Ok(tbuilder.build().with(style::DetailTable).to_string())
     }
@@ -34,12 +42,17 @@ impl<'a> CitationListView<'a> {
     pub fn render(&self) -> anyhow::Result<String> {
         let mut tbuilder = tabled::builder::Builder::default();
         for citation in self.citations {
-            tbuilder.push_record(["ID", "Subject", "Author", "URL"]);
+            tbuilder.push_record(["ID", "Subject", "Author", "URL", "Date"]);
             tbuilder.push_record([
                 &citation.id.to_string(),
                 &citation.subject,
                 citation.author.as_deref().unwrap_or("-"),
                 citation.url.as_deref().unwrap_or("-"),
+                citation
+                    .date
+                    .map(|d| d.to_string())
+                    .as_deref()
+                    .unwrap_or("-"),
             ]);
         }
 

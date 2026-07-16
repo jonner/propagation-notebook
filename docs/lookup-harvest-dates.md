@@ -1,7 +1,7 @@
 # Nice to have features
 - [x] Before starting, it would be nice to know the current status of the harvest dates in the DB
 - it would be nice to be able to go back if you made a mistake
-- it would be nice to know the common name(s) of the taxon being looked up
+- [x] it would be nice to know the common name(s) of the taxon being looked up
 - [x] it would be nice to know the common name(s) of the taxon in inaturalist when choosing which one is associated with the local taxon
 - [x] it would be nice to have some way to change the inaturalist taxon if it's saved in the db (e.g. Gentianopsis virgata ssp. virgata is current sent to the species)
 

@@ -93,6 +93,8 @@ pub enum CitationCommands {
         url: Option<String>,
         #[arg(long, help = "The author being cited")]
         author: Option<String>,
+        #[arg(long, help = "The date of the citation")]
+        date: Option<jiff::civil::Date>,
     },
     Remove {
         #[arg(help = "A citation ID")]
@@ -247,11 +249,17 @@ impl CitationCommands {
             CitationCommands::Show { id } => {
                 load_and_display_citation_details(db, id, propagation_id, format).await?
             }
-            CitationCommands::Add { title, url, author } => {
+            CitationCommands::Add {
+                title,
+                url,
+                author,
+                date,
+            } => {
                 let citation = Citation::create()
                     .title(title)
                     .url(url)
                     .author(author)
+                    .date(date)
                     .exec(db)
                     .await?;
                 PropagationProcedureCitation::create()
