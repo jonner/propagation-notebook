@@ -238,12 +238,19 @@ impl From<super::CollectingData> for CollectingDataNoTaxon {
 pub struct TaxonPropagationProcedureDetails {
     pub taxon: ObjectReference,
     pub core: TaxonPropagationProcedureCompact,
+    pub citations: Vec<ObjectReference>,
 }
 
 impl From<super::TaxonPropagationProcedure> for TaxonPropagationProcedureDetails {
     fn from(value: super::TaxonPropagationProcedure) -> Self {
         Self {
             taxon: ObjectReference::from_deferred(&value.taxon, value.taxon_id),
+            citations: value
+                .citation_links
+                .get()
+                .iter()
+                .map(|v| v.citation.get().into())
+                .collect(),
             core: TaxonPropagationProcedureCompact::from(value),
         }
     }

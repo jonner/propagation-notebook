@@ -71,7 +71,7 @@ pub enum PropagationCommands {
     #[command(about = "Import seed propagation procedures from YAML")]
     Import { path: PathBuf },
     #[command(about = "Manage citations for propagation procedures")]
-    Citation {
+    Citations {
         #[arg(help = "A propagation procedure ID")]
         id: u64,
         #[command(subcommand)]
@@ -187,7 +187,7 @@ impl PropagationCommands {
                         .await?;
                 }
             }
-            PropagationCommands::Citation { id, command } => {
+            PropagationCommands::Citations { id, command } => {
                 command.run_propagation(db, *id, format).await?
             }
         }

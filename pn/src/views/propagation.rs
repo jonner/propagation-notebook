@@ -56,6 +56,20 @@ impl<'a> TaxonPropagationProcedureDetailView<'a> {
             self.tp.core.notes.as_deref().unwrap_or("-"),
         ]);
         tbuilder.push_record(["Procedure", &self.tp.core.propagation.to_string()]);
+        if !self.tp.citations.is_empty() {
+            let mut inner_table = tabled::builder::Builder::default();
+            inner_table.push_record(["ID", "Name"]);
+            for citation in &self.tp.citations {
+                inner_table.push_record([
+                    &citation.id.to_string(),
+                    citation.name.as_deref().unwrap_or_default(),
+                ])
+            }
+            tbuilder.push_record([
+                "Citations",
+                &(inner_table.build().with(style::ListTable).to_string() + "\n"),
+            ]);
+        }
         Ok(tbuilder.build().with(style::DetailTable).to_string())
     }
 }

@@ -1,4 +1,4 @@
-use toasty::Deferred;
+use toasty::{Db, Deferred};
 
 use crate::{
     collecting::CleaningProcedure, dto::ObjectReference, propagation::PropagationProcedure,
@@ -10,7 +10,7 @@ pub mod dto {
     use serde_with::skip_serializing_none;
 
     #[skip_serializing_none]
-    #[derive(Serialize)]
+    #[derive(Serialize, Clone, Debug)]
     pub struct CitationDetails {
         pub id: u64,
         pub subject: String,
@@ -60,6 +60,25 @@ pub struct Citation {
     pub propagation_procedures: Deferred<Vec<PropagationProcedureCitation>>,
     #[has_many]
     pub taxon_propagation_procedures: Deferred<Vec<TaxonPropagationProcedureCitation>>,
+}
+
+impl Citation {
+    pub async fn delete_if_unused(db: &mut Db, citation_id: &u64) -> Result<(), toasty::Error> {
+        let citation = Self::filter_by_id(citation_id)
+            .include(Self::fields().propagation_procedures())
+            .include(Self::fields().taxon_propagation_procedures())
+            .include(Self::fields().cleaning_procedures())
+            .one()
+            .exec(db)
+            .await?;
+        if citation.propagation_procedures.get().is_empty()
+            && citation.taxon_propagation_procedures.get().is_empty()
+            && citation.cleaning_procedures.get().is_empty()
+        {
+            Citation::delete_by_id(db, citation_id).await?;
+        }
+        Ok(())
+    }
 }
 
 impl From<&Citation> for ObjectReference {

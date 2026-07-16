@@ -53,7 +53,7 @@ pub enum TaxonCleaningCommands {
         assumeyes: bool,
     },
     #[command(about = "Manage citations for cleaning procedures")]
-    Citation {
+    Citations {
         #[arg(help = "A cleaning procedure ID")]
         id: u64,
         #[command(subcommand)]
@@ -153,7 +153,7 @@ impl TaxonCleaningCommands {
                     println!("Removed cleaning procedure {id}");
                 }
             }
-            TaxonCleaningCommands::Citation { command, id } => {
+            TaxonCleaningCommands::Citations { command, id } => {
                 command.run_cleaning(db, *id, format).await?
             }
         }
@@ -212,20 +212,7 @@ impl CitationCommands {
                         cleaning_id,
                     )
                     .await?;
-                    let citation = Citation::filter_by_id(citation_id)
-                        .include(Citation::fields().propagation_procedures())
-                        .include(Citation::fields().taxon_propagation_procedures())
-                        .include(Citation::fields().cleaning_procedures())
-                        .one()
-                        .exec(db)
-                        .await?;
-                    // if the citation is no longer rused, remove it from the database
-                    if citation.propagation_procedures.get().is_empty()
-                        && citation.taxon_propagation_procedures.get().is_empty()
-                        && citation.cleaning_procedures.get().is_empty()
-                    {
-                        Citation::delete_by_id(db, citation_id).await?;
-                    }
+                    Citation::delete_if_unused(db, citation_id).await?;
                     load_and_display_cleaning_details(db, format, &cleaning_id).await?;
                 }
             }

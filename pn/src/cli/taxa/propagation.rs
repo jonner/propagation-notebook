@@ -1,15 +1,19 @@
-use libpropagation::taxonomy::{
-    TaxonPropagationProcedure,
-    dto::{TaxonPropagationProcedureCompact, TaxonPropagationProcedureDetails},
+use libpropagation::{
+    citation::{Citation, TaxonPropagationProcedureCitation, dto::CitationDetails},
+    taxonomy::{
+        TaxonPropagationProcedure,
+        dto::{TaxonPropagationProcedureCompact, TaxonPropagationProcedureDetails},
+    },
 };
 
 use toasty::Db;
 
 use crate::{
-    cli::OutputFormat,
+    cli::{OutputFormat, citation::CitationCommands},
     util::dialog::confirm,
     views::{
         JsonView, YamlView,
+        citation::{CitationDetailsView, CitationListView},
         propagation::{TaxonPropagationProcedureDetailView, TaxonPropagationProcedureListView},
     },
 };
@@ -71,6 +75,13 @@ pub enum TaxonPropagationCommands {
         )]
         assumeyes: bool,
     },
+    #[command(about = "Manage citations for taxon propagation procedures")]
+    Citations {
+        #[arg(help = "An ID of a propagation procedure")]
+        propagation_id: u64,
+        #[command(subcommand)]
+        command: CitationCommands,
+    },
 }
 
 impl TaxonPropagationCommands {
@@ -95,7 +106,7 @@ impl TaxonPropagationCommands {
             println!("{output}");
         }
         TaxonPropagationCommands::Show { propagation_id } => {
-            load_and_show_taxon_propagation_details(db, taxon_id, format, propagation_id).await?;
+            load_and_display_taxon_propagation_details(db, taxon_id, propagation_id, format).await?;
         }
         TaxonPropagationCommands::Add {
             propagation_id,
@@ -130,7 +141,7 @@ impl TaxonPropagationCommands {
                 query = query.notes(notes);
             }
             query.exec(db).await?;
-            load_and_show_taxon_propagation_details(db, taxon_id, format, propagation_id).await?;
+            load_and_display_taxon_propagation_details(db, taxon_id, propagation_id, format).await?;
         }
         TaxonPropagationCommands::Remove {
             propagation_id,
@@ -152,29 +163,166 @@ impl TaxonPropagationCommands {
                         println!("Removed propagation procedure {propagation_id} for taxon {taxon_id}");
                     }
         }
+        TaxonPropagationCommands::Citations { propagation_id, command } => {
+            command.run_taxon_propagation(db, *propagation_id, taxon_id, format).await?;
+            }
     }
         Ok(())
     }
 }
 
-async fn load_and_show_taxon_propagation_details(
+async fn load_and_display_taxon_propagation_details(
     db: &mut Db,
     taxon_id: u64,
-    format: OutputFormat,
     propagation_id: &u64,
+    format: OutputFormat,
 ) -> Result<(), anyhow::Error> {
     let tp: TaxonPropagationProcedureDetails =
         TaxonPropagationProcedure::filter_by_taxon_id_and_propagation_id(taxon_id, propagation_id)
             .include(TaxonPropagationProcedure::fields().taxon())
             .include(TaxonPropagationProcedure::fields().propagation())
+            .include(
+                TaxonPropagationProcedure::fields()
+                    .citation_links()
+                    .citation(),
+            )
             .one()
             .exec(db)
             .await?
             .into();
     let output = match format {
-        OutputFormat::Text => TaxonPropagationPropagationProcedureDetailView::new(&tp).render()?,
+        OutputFormat::Text => TaxonPropagationProcedureDetailView::new(&tp).render()?,
         OutputFormat::Json => JsonView::new(&tp).render()?,
         OutputFormat::Yaml => YamlView::new(&tp).render()?,
+    };
+    println!("{output}");
+    Ok(())
+}
+
+impl CitationCommands {
+    async fn run_taxon_propagation(
+        &self,
+        db: &mut toasty::Db,
+        propagation_id: u64,
+        taxon_id: u64,
+        format: super::OutputFormat,
+    ) -> anyhow::Result<()> {
+        match self {
+            CitationCommands::List => {
+                let procedure_citations: Vec<CitationDetails> =
+                    TaxonPropagationProcedure::filter_by_taxon_id_and_propagation_id(
+                        taxon_id,
+                        propagation_id,
+                    )
+                    .include(
+                        TaxonPropagationProcedure::fields()
+                            .citation_links()
+                            .citation(),
+                    )
+                    .one()
+                    .exec(db)
+                    .await?
+                    .citation_links
+                    .get()
+                    .iter()
+                    .map(|link| link.citation.get().into())
+                    .collect();
+                let output = match format {
+                    OutputFormat::Text => CitationListView::new(&procedure_citations).render()?,
+                    OutputFormat::Json => JsonView::new(&procedure_citations).render()?,
+                    OutputFormat::Yaml => YamlView::new(&procedure_citations).render()?,
+                };
+                println!("{output}");
+            }
+            CitationCommands::Show { id } => {
+                load_and_display_citation_details(db, taxon_id, propagation_id, id, format).await?
+            }
+            CitationCommands::Add {
+                title,
+                url,
+                author,
+                date,
+            } => {
+                TaxonPropagationProcedureCitation::create()
+                    .citation(
+                        Citation::create()
+                            .title(title)
+                            .url(url)
+                            .author(author)
+                            .date(date)
+                            .exec(db)
+                            .await?,
+                    )
+                    .taxon_id(taxon_id)
+                    .propagation_id(propagation_id)
+                    .exec(db)
+                    .await?;
+                load_and_display_taxon_propagation_details(db, taxon_id, &propagation_id, format)
+                    .await?;
+            }
+            CitationCommands::Remove {
+                citation_id,
+                assumeyes,
+            } => {
+                if *assumeyes || {
+                    load_and_display_citation_details(
+                        db,
+                        taxon_id,
+                        propagation_id,
+                        citation_id,
+                        OutputFormat::Text,
+                    )
+                    .await?;
+                    confirm("Do you want to remove this citation?")
+                        .selected(false)
+                        .run()?
+                } {
+                    TaxonPropagationProcedureCitation::delete_by_citation_id_and_propagation_id_and_taxon_id(
+                        db,
+                        citation_id,
+                        propagation_id,
+                        taxon_id,
+                    )
+                    .await?;
+                    Citation::delete_if_unused(db, citation_id).await?;
+                    load_and_display_taxon_propagation_details(
+                        db,
+                        taxon_id,
+                        &propagation_id,
+                        format,
+                    )
+                    .await?;
+                }
+            }
+        }
+        Ok(())
+    }
+}
+
+async fn load_and_display_citation_details(
+    db: &mut Db,
+    taxon_id: u64,
+    propagation_id: u64,
+    citation_id: &u64,
+    format: OutputFormat,
+) -> Result<(), anyhow::Error> {
+    let pc: CitationDetails =
+        TaxonPropagationProcedureCitation::filter_by_citation_id_and_propagation_id_and_taxon_id(
+            citation_id,
+            propagation_id,
+            taxon_id,
+        )
+        .include(TaxonPropagationProcedureCitation::fields().citation())
+        .one()
+        .exec(db)
+        .await?
+        .citation
+        .get()
+        .into();
+    let output = match format {
+        OutputFormat::Text => CitationDetailsView::new(&pc).render()?,
+        OutputFormat::Json => JsonView::new(&pc).render()?,
+        OutputFormat::Yaml => YamlView::new(&pc).render()?,
     };
     println!("{output}");
     Ok(())

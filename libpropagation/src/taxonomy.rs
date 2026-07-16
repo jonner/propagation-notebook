@@ -354,8 +354,6 @@ pub struct TaxonPropagationProcedure {
     pub notes: Option<String>,
     #[has_many(pair=taxon_propagation)]
     pub citation_links: Deferred<Vec<TaxonPropagationProcedureCitation>>,
-    #[has_many(via=citation_links.citation)]
-    pub citations: Deferred<Vec<Citation>>,
 }
 
 #[derive(Debug, Clone, toasty::Model)]
