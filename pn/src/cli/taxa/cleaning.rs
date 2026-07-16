@@ -77,7 +77,7 @@ pub enum CitationCommands {
         author: Option<String>,
     },
     Remove {
-        #[arg(short, long, help = "A citation ID")]
+        #[arg(help = "A citation ID")]
         citation_id: u64,
         #[arg(
             short = 'y',
@@ -214,7 +214,13 @@ impl CitationCommands {
                 assumeyes,
             } => {
                 if *assumeyes || {
-                    load_and_display_citation_details(db, citation_id, cleaning_id, format).await?;
+                    load_and_display_citation_details(
+                        db,
+                        citation_id,
+                        cleaning_id,
+                        OutputFormat::Text,
+                    )
+                    .await?;
                     confirm("Do you want to remove this citation?")
                         .selected(false)
                         .run()?

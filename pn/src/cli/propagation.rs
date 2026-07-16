@@ -15,7 +15,7 @@ use crate::{
     util::dialog::confirm,
     views::{
         JsonView, YamlView,
-        citation::CitationDetailsView,
+        citation::{CitationDetailsView, CitationListView},
         propagation::{PropagationProcedureDetailView, PropagationProcedureListView},
     },
 };
@@ -68,20 +68,34 @@ pub enum PropagationCommands {
         )]
         assumeyes: bool,
     },
-    AddCitation {
-        #[arg(help = "A procedure ID")]
-        propagation_id: u64,
-        #[arg(help = "Citation subject")]
-        subject: String,
+    #[command(about = "Import seed propagation procedures from YAML")]
+    Import { path: PathBuf },
+    #[command(about = "Manage citations for propagation procedures")]
+    Citation {
+        #[arg(help = "A propagation procedure ID")]
+        id: u64,
+        #[command(subcommand)]
+        command: CitationCommands,
+    },
+}
+
+#[derive(Debug, Clone, clap::Subcommand)]
+pub enum CitationCommands {
+    List,
+    Show {
+        #[arg(help = "A citation ID")]
+        id: u64,
+    },
+    Add {
+        #[arg(help = "Citation title")]
+        title: String,
         #[arg(long, help = "A canonical URL for the citation")]
         url: Option<String>,
         #[arg(long, help = "The author being cited")]
         author: Option<String>,
     },
-    RemoveCitation {
-        #[arg(help = "A procedure ID")]
-        propagation_id: u64,
-        #[arg(short, long, help = "A citation ID")]
+    Remove {
+        #[arg(help = "A citation ID")]
         citation_id: u64,
         #[arg(
             short = 'y',
@@ -90,8 +104,6 @@ pub enum PropagationCommands {
         )]
         assumeyes: bool,
     },
-    #[command(about = "Import seed propagation procedures from YAML")]
-    Import { path: PathBuf },
 }
 
 impl PropagationCommands {
@@ -202,14 +214,42 @@ impl PropagationCommands {
                         .await?;
                 }
             }
-            PropagationCommands::AddCitation {
-                propagation_id,
-                subject,
-                url,
-                author,
-            } => {
+            PropagationCommands::Citation { id, command } => command.run(db, *id, format).await?,
+        }
+        Ok(())
+    }
+}
+
+impl CitationCommands {
+    pub async fn run(
+        &self,
+        db: &mut Db,
+        propagation_id: u64,
+        format: OutputFormat,
+    ) -> anyhow::Result<()> {
+        match self {
+            CitationCommands::List => {
+                let citations: Vec<CitationDetails> =
+                    PropagationProcedureCitation::filter_by_propagation_id(propagation_id)
+                        .include(PropagationProcedureCitation::fields().citation())
+                        .exec(db)
+                        .await?
+                        .into_iter()
+                        .map(|val| val.citation.get().into())
+                        .collect();
+                let output = match format {
+                    OutputFormat::Text => CitationListView::new(&citations).render()?,
+                    OutputFormat::Json => JsonView::new(&citations).render()?,
+                    OutputFormat::Yaml => YamlView::new(&citations).render()?,
+                };
+                println!("{output}");
+            }
+            CitationCommands::Show { id } => {
+                load_and_display_citation_details(db, id, propagation_id, format).await?
+            }
+            CitationCommands::Add { title, url, author } => {
                 let citation = Citation::create()
-                    .title(subject)
+                    .title(title)
                     .url(url)
                     .author(author)
                     .exec(db)
@@ -219,28 +259,20 @@ impl PropagationCommands {
                     .propagation_id(propagation_id)
                     .exec(db)
                     .await?;
-                load_and_display_propagation_details(db, format, propagation_id).await?;
+                load_and_display_propagation_details(db, format, &propagation_id).await?;
             }
-            PropagationCommands::RemoveCitation {
-                propagation_id,
+            CitationCommands::Remove {
                 citation_id,
                 assumeyes,
             } => {
                 if *assumeyes || {
-                    let pc: CitationDetails =
-                        PropagationProcedureCitation::filter_by_citation_id_and_propagation_id(
-                            citation_id,
-                            propagation_id,
-                        )
-                        .include(PropagationProcedureCitation::fields().citation())
-                        .one()
-                        .exec(db)
-                        .await?
-                        .citation
-                        .get()
-                        .into();
-                    let output = CitationDetailsView::new(&pc).render()?;
-                    println!("{output}");
+                    load_and_display_citation_details(
+                        db,
+                        citation_id,
+                        propagation_id,
+                        OutputFormat::Text,
+                    )
+                    .await?;
                     confirm("Do you want to remove this citation?")
                         .selected(false)
                         .run()?
@@ -265,12 +297,39 @@ impl PropagationCommands {
                     {
                         Citation::delete_by_id(db, citation_id).await?;
                     }
-                    load_and_display_propagation_details(db, format, propagation_id).await?;
+                    load_and_display_propagation_details(db, format, &propagation_id).await?;
                 }
             }
         }
         Ok(())
     }
+}
+
+async fn load_and_display_citation_details(
+    db: &mut Db,
+    citation_id: &u64,
+    propagation_id: u64,
+    format: OutputFormat,
+) -> Result<(), anyhow::Error> {
+    let pc: CitationDetails =
+        PropagationProcedureCitation::filter_by_citation_id_and_propagation_id(
+            citation_id,
+            propagation_id,
+        )
+        .include(PropagationProcedureCitation::fields().citation())
+        .one()
+        .exec(db)
+        .await?
+        .citation
+        .get()
+        .into();
+    let output = match format {
+        OutputFormat::Text => CitationDetailsView::new(&pc).render()?,
+        OutputFormat::Json => JsonView::new(&pc).render()?,
+        OutputFormat::Yaml => YamlView::new(&pc).render()?,
+    };
+    println!("{output}");
+    Ok(())
 }
 
 async fn load_and_display_propagation_details(
