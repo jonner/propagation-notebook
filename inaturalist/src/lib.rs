@@ -77,19 +77,27 @@ pub struct Taxon {
     pub rank: String,
     pub is_active: bool,
     pub current_synonymous_taxon_ids: Option<Vec<u64>>,
+    pub preferred_common_name: Option<String>,
 }
 
 impl Taxon {
     fn fields() -> &'static str {
-        "id,name,rank,is_active,parent_id,current_synonymous_taxon_ids"
+        "id,name,rank,is_active,parent_id,preferred_common_name,current_synonymous_taxon_ids"
     }
 }
 
 impl Display for Taxon {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} ({}){}", self.name, self.rank, {
-            if self.is_active { "" } else { " (inactive)" }
-        })
+        let mut vec = Vec::with_capacity(4);
+        vec.push(self.name.as_str());
+        if let Some(cn) = &self.preferred_common_name {
+            vec.push(cn);
+        }
+        vec.push(&self.rank);
+        if !self.is_active {
+            vec.push("inactive");
+        }
+        write!(f, "{}", vec.join(" // "))
     }
 }
 

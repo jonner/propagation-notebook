@@ -767,7 +767,7 @@ async fn lookup_harvest_dates_interactive(
     let inat = inaturalist::Client::new()?;
     let inat_taxon = if let Some(id) = taxon.inaturalist_id {
         let taxon = inat.taxon_info(id).await?;
-        println!("Using iNaturalist taxon '{} ({})'", taxon.name, taxon.rank);
+        println!("Using iNaturalist taxon '{}'", taxon);
         taxon
     } else {
         let inat_taxon = inat_taxon_for_taxon(taxon, &inat).await?;
@@ -1099,7 +1099,7 @@ async fn seed_observation_window_with_expansion(
                     MinimumObservationsAction::UseParentTaxon => {
                         if let Some(parent_id) = taxon.parent_id {
                             taxon = client.taxon_info(parent_id).await?;
-                            println!("Using inaturalist taxon '{} ({})'", taxon.name, taxon.rank);
+                            println!("Using inaturalist taxon '{}'", taxon);
                             continue;
                         } else {
                             return Err(anyhow!("Unable to find parent taxon"));
