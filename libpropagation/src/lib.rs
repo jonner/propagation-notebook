@@ -1,5 +1,6 @@
 use directories::ProjectDirs;
 use toasty::ModelSet;
+use tracing::trace;
 
 use crate::error::Error;
 
@@ -34,6 +35,7 @@ pub async fn db() -> Result<toasty::Db, Error> {
         }
         Err(e) => Err(Error::Runtime(error::Runtime::InvalidEnvVar(e.to_string()))),
     }?;
+    trace!(?db_uri);
     Ok(toasty::Db::builder()
         .models(models())
         .connect(&db_uri)
