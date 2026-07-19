@@ -2,7 +2,8 @@
 members = ["inaturalist",
   "itis",
   "libpropagation",
-  "pn"
+  "pn",
+  "web",
 ]
 resolver = "3"
 
