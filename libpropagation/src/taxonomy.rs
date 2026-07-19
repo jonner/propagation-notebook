@@ -14,7 +14,7 @@ pub enum TaxonomicAuthority {
 
 use crate::{
     ImportProgressReporter,
-    citation::{Citation, TaxonPropagationProcedureCitation},
+    citation::TaxonPropagationProcedureCitation,
     collecting::{CleaningProcedure, CollectingData},
     dto::ObjectReference,
     error::ImportExportError,
