@@ -4,6 +4,7 @@ use axum::{Router, response::IntoResponse, routing::get};
 use clap::Parser;
 use tracing_subscriber::{EnvFilter, layer::SubscriberExt, util::SubscriberInitExt};
 
+pub mod propagation;
 pub mod region;
 mod templates;
 
@@ -53,6 +54,7 @@ impl App {
             router: Router::new()
                 .route("/", get(handle_root))
                 .nest("/regions/", region::router())
+                .nest("/propagation/", propagation::router())
                 .with_state(Arc::new(AppState::new().await?)),
         })
     }
