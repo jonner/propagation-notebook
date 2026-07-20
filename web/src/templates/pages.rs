@@ -18,7 +18,7 @@ pub mod regions {
     use maud::{Markup, html};
     use tracing::trace;
 
-    use crate::templates::{header, map, region_link};
+    use crate::templates::{Path, header, map};
 
     pub fn root(regions: &[Region]) -> Markup {
         trace!("rendering");
@@ -28,7 +28,7 @@ pub mod regions {
             h1 { (title) }
             ul {
                 @for region in regions {
-                    li { (region_link(region) ) }
+                    li { a href=(region.path()) { (region.name) } }
                 }
             }
         }
@@ -64,7 +64,7 @@ pub mod propagation {
     use libpropagation::propagation::PropagationProcedure;
     use maud::{Markup, html};
 
-    use crate::templates::header;
+    use crate::templates::{Path, header};
 
     pub fn root(procedures: &[PropagationProcedure]) -> Markup {
         let title = "Propagation Procedures";
@@ -106,7 +106,7 @@ pub mod propagation {
                         @for tproc in procedure.taxa.get() {
                             tr {
                                 td { (tproc.taxon.get().id) }
-                                td { (tproc.taxon.get().complete_name) }
+                                td { a href=(tproc.taxon.get().path()) { (tproc.taxon.get().complete_name) } }
 
                             }
                         }
@@ -145,7 +145,7 @@ pub mod taxonomy {
     use maud::{Markup, html};
     use tracing::trace;
 
-    use crate::templates::{header, region_link, taxon_link};
+    use crate::templates::{Path, header};
 
     pub fn root(taxa: &[Taxon]) -> Markup {
         trace!("rendering");
@@ -155,7 +155,7 @@ pub mod taxonomy {
             h1 { (title) }
             ul {
                 @for taxon in taxa {
-                    li { (taxon_link(taxon)) }
+                    li { a href=(taxon.path()) {(taxon.complete_name)} }
                 }
             }
         }
@@ -176,7 +176,7 @@ pub mod taxonomy {
             dt { "Parent" }
             dd {
                 @match taxon.parent.get() {
-                    Some(p) => (taxon_link(p)),
+                    Some(p) => a href=(p.path()) { (p.complete_name) },
                     None => "",
                 }
             }
@@ -203,7 +203,7 @@ pub mod taxonomy {
             dd {
                 ul {
                     @for child in taxon.children.get() {
-                        li { (taxon_link(child)) }
+                        li { a href=(child.path()) { (child.complete_name) } }
                     }
                 }
             }
@@ -255,7 +255,7 @@ pub mod taxonomy {
                         @for tp in taxon.propagation_procedures.get() {
                             tr {
                                 td { (tp.propagation.get().id) }
-                                td { (tp.propagation.get().name) }
+                                td { a href=(tp.propagation.get().path()) { (tp.propagation.get().name) } }
                             }
                         }
                     }
@@ -275,7 +275,7 @@ pub mod taxonomy {
                         @for rs in taxon.regional_statuses.get() {
                             tr {
                                 td { (rs.region.get().id) }
-                                td { (region_link(rs.region.get())) }
+                                td { a href=(rs.region.get().path()) { (rs.region.get().name) } }
                                 td { (rs.origin.map(|v| v.to_string()).unwrap_or_default()) }
                                 td { (rs.harvest_window) }
                             }

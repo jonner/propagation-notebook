@@ -1,4 +1,4 @@
-use libpropagation::{region::Region, taxonomy::Taxon};
+use libpropagation::{propagation::PropagationProcedure, region::Region, taxonomy::Taxon};
 use maud::{DOCTYPE, Markup, html};
 
 pub mod pages;
@@ -75,10 +75,24 @@ pub fn map(
     }
 }
 
-pub fn taxon_link(taxon: &Taxon) -> Markup {
-    html! {a href={"/taxa/" (taxon.id) } { (taxon.complete_name) }}
+pub trait Path {
+    fn path(&self) -> String;
 }
 
-pub fn region_link(region: &Region) -> Markup {
-    html! {a href={"/regions/" (region.id) } { (region.name) }}
+impl Path for PropagationProcedure {
+    fn path(&self) -> String {
+        format!("/propagation/{}", self.id)
+    }
+}
+
+impl Path for Taxon {
+    fn path(&self) -> String {
+        format!("/taxa/{}", self.id)
+    }
+}
+
+impl Path for Region {
+    fn path(&self) -> String {
+        format!("/regions/{}", self.id)
+    }
 }
