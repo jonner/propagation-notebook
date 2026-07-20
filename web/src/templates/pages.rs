@@ -319,7 +319,7 @@ pub mod taxonomy {
                         @for rs in taxon.regional_statuses.get() {
                             tr {
                                 td { (rs.region.get().id) }
-                                td { a href=(rs.region.get().path()) { (rs.region.get().name) } }
+                                td { a href=(rs.path()) { (rs.region.get().name) } }
                                 td { (rs.origin.map(|v| v.to_string()).unwrap_or_default()) }
                                 td { (rs.harvest_window) }
                             }
