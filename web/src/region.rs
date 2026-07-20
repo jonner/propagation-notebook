@@ -18,7 +18,8 @@ pub fn router() -> Router<Arc<AppState>> {
     Router::new()
         .route("/", get(handle_root))
         .route("/{id}", get(handle_region_details))
-        .route("/{id}/taxa", get(handle_region_taxa))
+        .route("/{id}/taxa", get(handle_region_taxa_list))
+        .route("/{region_id}/taxa/{taxon_id}", get(handle_region_taxon))
 }
 
 pub async fn handle_root(State(s): State<Arc<AppState>>) -> Result<impl IntoResponse, Error> {
@@ -42,7 +43,7 @@ pub async fn handle_region_details(
     Ok(templates::pages::regions::details(&region))
 }
 
-pub async fn handle_region_taxa(
+pub async fn handle_region_taxa_list(
     State(s): State<Arc<AppState>>,
     Path(region_id): Path<u64>,
 ) -> Result<impl IntoResponse, Error> {
@@ -58,4 +59,18 @@ pub async fn handle_region_taxa(
     .await?;
     let region = Region::get_by_id(&mut db, region_id).await?;
     Ok(templates::pages::regions::taxa_list(&region, &taxa))
+}
+
+pub async fn handle_region_taxon(
+    State(s): State<Arc<AppState>>,
+    Path((region_id, taxon_id)): Path<(u64, u64)>,
+) -> Result<impl IntoResponse, Error> {
+    let mut db = s.db.clone();
+    let rt = RegionalTaxonStatus::filter_by_taxon_id_and_region_id(taxon_id, region_id)
+        .include(RegionalTaxonStatus::fields().region())
+        .include(RegionalTaxonStatus::fields().taxon().vernaculars())
+        .one()
+        .exec(&mut db)
+        .await?;
+    Ok(templates::pages::regions::taxon_details(&rt))
 }

@@ -14,7 +14,10 @@ pub fn root() -> Markup {
 }
 
 pub mod regions {
-    use libpropagation::{region::Region, taxonomy::Taxon};
+    use libpropagation::{
+        region::{Region, RegionalTaxonStatus},
+        taxonomy::Taxon,
+    };
     use maud::{Markup, html};
     use tracing::trace;
 
@@ -72,6 +75,31 @@ pub mod regions {
                     }
                 }
             }
+        }
+    }
+
+    pub fn taxon_details(status: &RegionalTaxonStatus) -> Markup {
+        let region = status.region.get();
+        let taxon = status.taxon.get();
+        let title = format!("{} in {}", taxon.complete_name, region.name);
+
+        html! {
+            (header(&title))
+            h1 { (title) }
+            dt { "Taxon" }
+            dd {  a href=(taxon.path()) { (taxon.complete_name) } }
+            dt { "Region" }
+            dd {  a href=(region.path()) { (region.name) } }
+            dt { "Origin" }
+            dd { (status.origin.map(|v| v.to_string()).unwrap_or_default() )}
+            dt { "C-value" }
+            dd { (status.c_value.map(|v| v.to_string()).unwrap_or_default()) }
+            dt { "Conservation Status" }
+            dd { (status.conservation_status.map(|v| v.to_string()).unwrap_or_default() )}
+            dt { "Wetland Indicator" }
+            dd { (status.wetland_indicator.map(|v| v.to_string()).unwrap_or_default() )}
+            dt { "Harvest Window" }
+            dd { (status.harvest_window.to_string() )}
         }
     }
 }
