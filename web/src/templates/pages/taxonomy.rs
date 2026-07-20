@@ -180,16 +180,18 @@ pub fn propagation_details(tp: &TaxonPropagationProcedure) -> Markup {
         dt { "Taxon-specific notes" }
         dd { (tp.notes.as_deref().unwrap_or_default()) }
         dt { "Citations" }
-        table {
-            tr {
-                th { "ID" }
-                th { "Name" }
-            }
-            @for cl in tp.citation_links.get() {
+        dd {
+            table {
                 tr {
+                    th { "ID" }
+                    th { "Name" }
+                }
+                @for cl in tp.citation_links.get() {
+                    tr {
 
-                    td { (cl.citation.get().id) }
-                    td { (cl.citation.get().title) }
+                        td { (cl.citation.get().id) }
+                        td { (cl.citation.get().title) }
+                    }
                 }
             }
         }
@@ -209,16 +211,18 @@ pub fn cleaning_details(proc: &CleaningProcedure) -> Markup {
         dt { "Additional Notes" }
         dd { (proc.notes.as_deref().unwrap_or_default()) }
         dt { "Citations" }
-        table {
-            tr {
-                th { "ID" }
-                th { "Name" }
-            }
-            @for cl in proc.citation_links.get() {
+        dd {
+            table {
                 tr {
+                    th { "ID" }
+                    th { "Name" }
+                }
+                @for cl in proc.citation_links.get() {
+                    tr {
 
-                    td { (cl.citation.get().id) }
-                    td { (cl.citation.get().title) }
+                        td { (cl.citation.get().id) }
+                        td { (cl.citation.get().title) }
+                    }
                 }
             }
         }
