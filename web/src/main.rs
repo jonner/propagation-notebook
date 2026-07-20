@@ -4,6 +4,7 @@ use axum::{Router, response::IntoResponse, routing::get};
 use clap::Parser;
 use tracing_subscriber::{EnvFilter, layer::SubscriberExt, util::SubscriberInitExt};
 
+pub mod error;
 pub mod propagation;
 pub mod region;
 pub mod taxonomy;

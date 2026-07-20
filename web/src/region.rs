@@ -9,7 +9,7 @@ use axum::{
 use libpropagation::region::Region;
 use tracing::trace;
 
-use crate::{AppState, templates};
+use crate::{AppState, error::Error, templates};
 
 pub fn router() -> Router<Arc<AppState>> {
     Router::new()
@@ -17,24 +17,23 @@ pub fn router() -> Router<Arc<AppState>> {
         .route("/{id}", get(handle_region_details))
 }
 
-pub async fn handle_root(State(s): State<Arc<AppState>>) -> impl IntoResponse {
+pub async fn handle_root(State(s): State<Arc<AppState>>) -> Result<impl IntoResponse, Error> {
     let mut db = s.db.clone();
-    let regions = Region::all().exec(&mut db).await.unwrap();
+    let regions = Region::all().exec(&mut db).await?;
     trace!(?regions);
-    templates::pages::regions::root(&regions)
+    Ok(templates::pages::regions::root(&regions))
 }
 
 pub async fn handle_region_details(
     State(s): State<Arc<AppState>>,
     Path(id): Path<u64>,
-) -> impl IntoResponse {
+) -> Result<impl IntoResponse, Error> {
     let mut db = s.db.clone();
     let region = Region::filter_by_id(id)
         .include(Region::fields().taxon_statuses())
         .one()
         .exec(&mut db)
-        .await
-        .unwrap();
+        .await?;
     trace!(?region);
-    templates::pages::regions::details(&region)
+    Ok(templates::pages::regions::details(&region))
 }

@@ -9,7 +9,7 @@ use axum::{
 use libpropagation::propagation::PropagationProcedure;
 use tracing::trace;
 
-use crate::{AppState, templates};
+use crate::{AppState, error::Error, templates};
 
 pub fn router() -> Router<Arc<AppState>> {
     Router::new()
@@ -17,25 +17,24 @@ pub fn router() -> Router<Arc<AppState>> {
         .route("/{id}", get(handle_propagation_details))
 }
 
-pub async fn handle_root(State(s): State<Arc<AppState>>) -> impl IntoResponse {
+pub async fn handle_root(State(s): State<Arc<AppState>>) -> Result<impl IntoResponse, Error> {
     let mut db = s.db.clone();
-    let procedures = PropagationProcedure::all().exec(&mut db).await.unwrap();
+    let procedures = PropagationProcedure::all().exec(&mut db).await?;
     trace!(?procedures);
-    templates::pages::propagation::root(&procedures)
+    Ok(templates::pages::propagation::root(&procedures))
 }
 
 pub async fn handle_propagation_details(
     State(s): State<Arc<AppState>>,
     Path(id): Path<u64>,
-) -> impl IntoResponse {
+) -> Result<impl IntoResponse, Error> {
     let mut db = s.db.clone();
     let proc = PropagationProcedure::filter_by_id(id)
         .include(PropagationProcedure::fields().taxa().taxon())
         .include(PropagationProcedure::fields().citations())
         .one()
         .exec(&mut db)
-        .await
-        .unwrap();
+        .await?;
     trace!(?proc);
-    templates::pages::propagation::details(&proc)
+    Ok(templates::pages::propagation::details(&proc))
 }
