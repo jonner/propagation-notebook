@@ -1,4 +1,8 @@
-use libpropagation::{propagation::PropagationProcedure, region::Region, taxonomy::Taxon};
+use libpropagation::{
+    propagation::PropagationProcedure,
+    region::{Region, RegionalTaxonStatus},
+    taxonomy::Taxon,
+};
 use maud::{DOCTYPE, Markup, html};
 
 pub mod pages;
@@ -94,5 +98,11 @@ impl Path for Taxon {
 impl Path for Region {
     fn path(&self) -> String {
         format!("/regions/{}", self.id)
+    }
+}
+
+impl Path for RegionalTaxonStatus {
+    fn path(&self) -> String {
+        format!("/regions/{}/taxa/{}", self.region_id, self.taxon_id)
     }
 }

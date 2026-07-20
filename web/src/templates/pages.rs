@@ -14,7 +14,7 @@ pub fn root() -> Markup {
 }
 
 pub mod regions {
-    use libpropagation::region::Region;
+    use libpropagation::{region::Region, taxonomy::Taxon};
     use maud::{Markup, html};
     use tracing::trace;
 
@@ -56,6 +56,22 @@ pub mod regions {
                 }
             }
         }
+        }
+    }
+
+    pub fn taxa_list(region: &Region, taxa: &[Taxon]) -> Markup {
+        html! {
+            (header(&region.name))
+            h1 { (region.name) }
+            ul {
+                @for taxon in taxa {
+                    @for rts in taxon.regional_statuses.get() {
+                        @if rts.region_id == region.id {
+                            li { a href=(rts.path()) { (taxon.complete_name) }}
+                        }
+                    }
+                }
+            }
         }
     }
 }
