@@ -1,4 +1,5 @@
 use libpropagation::{
+    collecting::CleaningProcedure,
     propagation::PropagationProcedure,
     region::{Region, RegionalTaxonStatus},
     taxonomy::{Taxon, TaxonPropagationProcedure},
@@ -81,6 +82,12 @@ pub fn map(
 
 pub trait Path {
     fn path(&self) -> String;
+}
+
+impl Path for CleaningProcedure {
+    fn path(&self) -> String {
+        format!("/taxa/{}/cleaning/{}", self.taxon_id, self.id)
+    }
 }
 
 impl Path for PropagationProcedure {

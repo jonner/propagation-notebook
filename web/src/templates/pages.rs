@@ -185,7 +185,10 @@ pub mod propagation {
 }
 
 pub mod taxonomy {
-    use libpropagation::taxonomy::{Taxon, TaxonPropagationProcedure};
+    use libpropagation::{
+        collecting::CleaningProcedure,
+        taxonomy::{Taxon, TaxonPropagationProcedure},
+    };
     use maud::{Markup, html};
     use tracing::trace;
 
@@ -281,7 +284,7 @@ pub mod taxonomy {
                         @for procedure in taxon.cleaning_procedures.get() {
                             tr {
                                 td { (procedure.id) }
-                                td { (procedure.name) }
+                                td { a href=(procedure.path()) { (procedure.name) } }
                             }
                         }
                     }
@@ -370,6 +373,35 @@ pub mod taxonomy {
                     th { "Name" }
                 }
                 @for cl in tp.citation_links.get() {
+                    tr {
+
+                        td { (cl.citation.get().id) }
+                        td { (cl.citation.get().title) }
+                    }
+                }
+            }
+        }
+    }
+
+    pub fn cleaning_details(proc: &CleaningProcedure) -> Markup {
+        let taxon = proc.taxon.get();
+        let title = format!("{} for {}", proc.name, taxon.complete_name);
+        html! {
+                (header(&title))
+                h1 { (title) }
+            dt { "Taxon" }
+            dd { a href=(taxon.path()) { (taxon.complete_name) } }
+            dt { "Instructions" }
+            dd { (proc.instructions) }
+            dt { "Additional Notes" }
+            dd { (proc.notes.as_deref().unwrap_or_default()) }
+            dt { "Citations" }
+            table {
+                tr {
+                    th { "ID" }
+                    th { "Name" }
+                }
+                @for cl in proc.citation_links.get() {
                     tr {
 
                         td { (cl.citation.get().id) }
