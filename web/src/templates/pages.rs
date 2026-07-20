@@ -185,7 +185,7 @@ pub mod propagation {
 }
 
 pub mod taxonomy {
-    use libpropagation::taxonomy::Taxon;
+    use libpropagation::taxonomy::{Taxon, TaxonPropagationProcedure};
     use maud::{Markup, html};
     use tracing::trace;
 
@@ -299,7 +299,7 @@ pub mod taxonomy {
                         @for tp in taxon.propagation_procedures.get() {
                             tr {
                                 td { (tp.propagation.get().id) }
-                                td { a href=(tp.propagation.get().path()) { (tp.propagation.get().name) } }
+                                td { a href=(tp.path()) { (tp.propagation.get().name) } }
                             }
                         }
                     }
@@ -343,6 +343,38 @@ pub mod taxonomy {
                         }
                     }
 
+                }
+            }
+        }
+    }
+
+    pub fn propagation_details(tp: &TaxonPropagationProcedure) -> Markup {
+        let proc = tp.propagation.get();
+        let taxon = tp.taxon.get();
+        let title = format!("{} for {}", proc.name, taxon.complete_name);
+        html! {
+                (header(&title))
+                h1 { (title) }
+            dt { "Procedure" }
+            dd { a href=(tp.propagation.get().path()) { (tp.propagation.get().name) } }
+            dt { "Taxon" }
+            dd { a href=(taxon.path()) { (taxon.complete_name) } }
+            dt { "Confidence" }
+            dd { (tp.confidence.map(|v| v.to_string()).unwrap_or_default()) }
+            dt { "Taxon-specific notes" }
+            dd { (tp.notes.as_deref().unwrap_or_default()) }
+            dt { "Citations" }
+            table {
+                tr {
+                    th { "ID" }
+                    th { "Name" }
+                }
+                @for cl in tp.citation_links.get() {
+                    tr {
+
+                        td { (cl.citation.get().id) }
+                        td { (cl.citation.get().title) }
+                    }
                 }
             }
         }

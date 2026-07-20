@@ -1,7 +1,7 @@
 use libpropagation::{
     propagation::PropagationProcedure,
     region::{Region, RegionalTaxonStatus},
-    taxonomy::Taxon,
+    taxonomy::{Taxon, TaxonPropagationProcedure},
 };
 use maud::{DOCTYPE, Markup, html};
 
@@ -86,6 +86,15 @@ pub trait Path {
 impl Path for PropagationProcedure {
     fn path(&self) -> String {
         format!("/propagation/{}", self.id)
+    }
+}
+
+impl Path for TaxonPropagationProcedure {
+    fn path(&self) -> String {
+        format!(
+            "/taxa/{}/propagation/{}",
+            self.taxon_id, self.propagation_id
+        )
     }
 }
 
