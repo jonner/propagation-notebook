@@ -1,3 +1,4 @@
+use libpropagation::{region::Region, taxonomy::Taxon};
 use maud::{DOCTYPE, Markup, html};
 
 pub mod pages;
@@ -72,4 +73,12 @@ pub fn map(
                     )))
             }
     }
+}
+
+pub fn taxon_link(taxon: &Taxon) -> Markup {
+    html! {a href={"/taxa/" (taxon.id) } { (taxon.complete_name) }}
+}
+
+pub fn region_link(region: &Region) -> Markup {
+    html! {a href={"/regions/" (region.id) } { (region.name) }}
 }

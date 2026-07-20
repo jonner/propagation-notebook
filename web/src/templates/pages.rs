@@ -6,7 +6,7 @@ pub fn root() -> Markup {
         ( crate::templates::header(title) )
         h1 { (title) }
         ul {
-            li { a href="/taxonomy/" { "Taxonomy" }}
+            li { a href="/taxa/" { "Taxonomy" }}
             li { a href="/regions/" { "Regions" }}
             li { a href="/propagation/" { "Propagation Protocols" }}
         }
@@ -18,7 +18,7 @@ pub mod regions {
     use maud::{Markup, html};
     use tracing::trace;
 
-    use crate::templates::{header, map};
+    use crate::templates::{header, map, region_link};
 
     pub fn root(regions: &[Region]) -> Markup {
         trace!("rendering");
@@ -28,7 +28,7 @@ pub mod regions {
             h1 { (title) }
             ul {
                 @for region in regions {
-                    li { a href=(format!("./{}", region.id)) {(region.name)} }
+                    li { (region_link(region) ) }
                 }
             }
         }
@@ -134,6 +134,171 @@ pub mod propagation {
                     }
                 } @else {
                     "None"
+                }
+            }
+        }
+    }
+}
+
+pub mod taxonomy {
+    use libpropagation::taxonomy::Taxon;
+    use maud::{Markup, html};
+    use tracing::trace;
+
+    use crate::templates::{header, region_link, taxon_link};
+
+    pub fn root(taxa: &[Taxon]) -> Markup {
+        trace!("rendering");
+        let title = "Taxon List";
+        html! {
+            (header(title))
+            h1 { (title) }
+            ul {
+                @for taxon in taxa {
+                    li { (taxon_link(taxon)) }
+                }
+            }
+        }
+    }
+
+    pub fn details(taxon: &Taxon) -> Markup {
+        trace!("rendering");
+        html! {
+            (header(&taxon.complete_name))
+            h1 { (taxon.complete_name) }
+            dt { "ID" }
+            dd { (taxon.id) }
+            dt { "Name" }
+            dd { (taxon.complete_name) }
+            dt { "Rank" }
+            dd { (taxon.rank) }
+
+            dt { "Parent" }
+            dd {
+                @match taxon.parent.get() {
+                    Some(p) => (taxon_link(p)),
+                    None => "",
+                }
+            }
+
+            dt { "Synonyms" }
+            dd {
+                ul {
+                    @for syn in taxon.synonyms.get() {
+                        li { (syn.complete_name) }
+                    }
+                }
+            }
+
+            dt { "Common Name(s)" }
+            dd {
+                ul {
+                    @for cn in taxon.vernaculars.get(){
+                        li { (cn.name) }
+                    }
+                }
+            }
+
+            dt { "Child taxa" }
+            dd {
+                ul {
+                    @for child in taxon.children.get() {
+                        li { (taxon_link(child)) }
+                    }
+                }
+            }
+
+            dt { "ITIS taxon ID" }
+            dd { (taxon.itis_id) }
+
+            dt { "iNaturalist taxon ID" }
+            dd { (taxon.inaturalist_id.map(|v| v.to_string()).unwrap_or_default()) }
+            @if let Some(collecting_data) = &taxon.collecting_data.get() {
+                dt { "Ripening" }
+                dd { (collecting_data.ripening_indicators.as_deref().unwrap_or_default()) }
+
+                dt { "Harvesting Notes" }
+                dd { (collecting_data.harvesting_notes.as_deref().unwrap_or_default()) }
+
+                dt { "Storage Conditions" }
+                dd { (collecting_data.storage.as_deref().unwrap_or_default()) }
+
+                dt { "Storage Life" }
+                dd { (collecting_data.storage_life.as_deref().unwrap_or_default()) }
+            }
+            dt { "Seed Cleaning" }
+            dd {
+                @if !taxon.cleaning_procedures.get().is_empty() {
+                    table {
+                        tr {
+                            th { "ID" }
+                            th { "Name" }
+                        }
+                        @for procedure in taxon.cleaning_procedures.get() {
+                            tr {
+                                td { (procedure.id) }
+                                td { (procedure.name) }
+                            }
+                        }
+                    }
+
+                }
+            }
+            dt { "Propagation Procedures" }
+            dd {
+                @if !taxon.propagation_procedures.get().is_empty() {
+                    table {
+                        tr {
+                            th { "ID" }
+                            th { "Name" }
+                        }
+                        @for tp in taxon.propagation_procedures.get() {
+                            tr {
+                                td { (tp.propagation.get().id) }
+                                td { (tp.propagation.get().name) }
+                            }
+                        }
+                    }
+
+                }
+            }
+            dt { "Regions" }
+            dd {
+                @if !taxon.regional_statuses.get().is_empty() {
+                    table {
+                        tr {
+                            th { "ID" }
+                            th { "Name" }
+                            th { "Origin" }
+                            th { "Harvest Window" }
+                        }
+                        @for rs in taxon.regional_statuses.get() {
+                            tr {
+                                td { (rs.region.get().id) }
+                                td { (region_link(rs.region.get())) }
+                                td { (rs.origin.map(|v| v.to_string()).unwrap_or_default()) }
+                                td { (rs.harvest_window) }
+                            }
+                        }
+                    }
+                }
+            }
+            dt { "Notes" }
+            dd {
+                @if !taxon.notes.get().is_empty() {
+                    table {
+                        tr {
+                            th { "ID" }
+                            th { "Name" }
+                        }
+                        @for note in taxon.notes.get() {
+                            tr {
+                                td { (note.id) }
+                                td { (note.text) }
+                            }
+                        }
+                    }
+
                 }
             }
         }

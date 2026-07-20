@@ -6,6 +6,7 @@ use tracing_subscriber::{EnvFilter, layer::SubscriberExt, util::SubscriberInitEx
 
 pub mod propagation;
 pub mod region;
+pub mod taxonomy;
 mod templates;
 
 #[derive(Debug, Clone, clap::Parser)]
@@ -55,6 +56,7 @@ impl App {
                 .route("/", get(handle_root))
                 .nest("/regions/", region::router())
                 .nest("/propagation/", propagation::router())
+                .nest("/taxa/", taxonomy::router())
                 .with_state(Arc::new(AppState::new().await?)),
         })
     }
