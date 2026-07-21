@@ -7,7 +7,7 @@ use tracing::trace;
 
 use crate::{
     templates::{Path, layout, map, pagination_control},
-    util::PageState,
+    util::{PageQueryParams, PageState},
 };
 
 pub fn root(regions: &[Region]) -> Markup {
@@ -47,7 +47,12 @@ pub fn details(region: &Region) -> Markup {
     layout(&region.name, content)
 }
 
-pub fn taxa_list(region: &Region, taxa: &[Taxon], page_state: &PageState) -> Markup {
+pub fn taxa_list(
+    region: &Region,
+    taxa: &[Taxon],
+    page_state: &PageState,
+    params: &PageQueryParams,
+) -> Markup {
     let content = html! {
         ul {
             @for taxon in taxa {
@@ -58,7 +63,7 @@ pub fn taxa_list(region: &Region, taxa: &[Taxon], page_state: &PageState) -> Mar
                 }
             }
         }
-        (pagination_control(page_state))
+        (pagination_control(page_state, params))
     };
     layout(&region.name, content)
 }

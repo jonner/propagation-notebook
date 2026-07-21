@@ -42,7 +42,7 @@ pub async fn get_taxa_list(
         Taxon::fields().sequence().asc(),
         Taxon::fields().complete_name().asc(),
     ));
-    let total = q.clone().count().exec(&mut db).await?;
+    let total = q.clone().count().exec(&mut db).await? as usize;
     let page_state = PageState {
         per_page: PER_PAGE,
         offset: params.offset.unwrap_or_default(),
@@ -54,7 +54,11 @@ pub async fn get_taxa_list(
         .exec(&mut db)
         .await?;
     trace!(?taxa);
-    Ok(templates::pages::taxonomy::root(&taxa, &page_state))
+    Ok(templates::pages::taxonomy::root(
+        &taxa,
+        &page_state,
+        &params,
+    ))
 }
 
 pub async fn get_taxon_details(

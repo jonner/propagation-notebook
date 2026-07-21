@@ -6,7 +6,7 @@ use libpropagation::{
 };
 use maud::{DOCTYPE, Markup, html};
 
-use crate::util::PageState;
+use crate::util::{ModifyOffset, PageState};
 
 pub mod pages;
 
@@ -47,18 +47,18 @@ pub fn layout(page_title: &str, content: Markup) -> Markup {
     }
 }
 
-pub fn pagination_control(page_state: &PageState) -> Markup {
+pub fn pagination_control<T: ModifyOffset + Clone>(state: &PageState, params: &T) -> Markup {
     html! {
         nav {
             ul {
                 li {
-                    @if page_state.has_prev() {
-                        a href={"?offset=" (page_state.prev_offset())} { "< Prev" }
+                    @if let Some(offset) = state.offset_for_page(state.current_page() - 1) {
+                        a href=(state.query_with_offset(offset, params.clone())) { "< Prev" }
                     }
                 }
                 li {
-                    @if page_state.has_next() {
-                        a href={"?offset=" (page_state.next_offset())} { "Next >" }
+                    @if let Some(offset) = state.offset_for_page(state.current_page() + 1) {
+                        a href=(state.query_with_offset(offset, params.clone())) { "Next >" }
                     }
                 }
             }

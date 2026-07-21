@@ -59,7 +59,7 @@ pub async fn get_region_taxa_list(
             .regional_statuses()
             .any(RegionalTaxonStatus::fields().region_id().eq(region_id)),
     );
-    let total = filter.clone().count().exec(&mut db).await?;
+    let total = filter.clone().count().exec(&mut db).await? as usize;
     let page_state = PageState {
         per_page: PER_PAGE,
         offset: params.offset.unwrap_or_default(),
@@ -77,6 +77,7 @@ pub async fn get_region_taxa_list(
         &region,
         &taxa,
         &page_state,
+        &params,
     ))
 }
 

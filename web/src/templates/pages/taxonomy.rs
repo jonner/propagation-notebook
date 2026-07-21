@@ -7,17 +7,17 @@ use tracing::trace;
 
 use crate::{
     templates::{Path, layout, pagination_control},
-    util::PageState,
+    util::{PageQueryParams, PageState},
 };
 
-pub fn root(taxa: &[Taxon], page_state: &PageState) -> Markup {
+pub fn root(taxa: &[Taxon], page_state: &PageState, params: &PageQueryParams) -> Markup {
     let content = html! {
         ul {
             @for taxon in taxa.iter() {
                 li { a href=(taxon.path()) {(taxon.complete_name)} }
             }
         }
-        (pagination_control(page_state))
+        (pagination_control(page_state, params))
     };
 
     layout("Taxon List", content)
