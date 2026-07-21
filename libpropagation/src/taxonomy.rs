@@ -296,6 +296,19 @@ impl Taxon {
             && (self.complete_name.eq_ignore_ascii_case(&inat_taxon.name)
                 || self.names().eq_ignore_ascii_case(&inat_taxon.name))
     }
+
+    pub fn search_filter(search_string: &str) -> toasty::stmt::Expr<bool> {
+        let wildcard = format!("%{search_string}%");
+        Self::fields()
+            .complete_name()
+            .like(&wildcard)
+            .or(Self::fields()
+                .vernaculars()
+                .any(VernacularName::fields().name().like(&wildcard)))
+            .or(Self::fields()
+                .synonyms()
+                .any(Synonym::fields().complete_name().like(&wildcard)))
+    }
 }
 
 #[derive(Debug, Clone, toasty::Model)]

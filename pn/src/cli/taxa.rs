@@ -3,8 +3,8 @@ use libpropagation::{
     dto::ObjectReference,
     region::{RegionalTaxonStatus, dto::RegionalTaxonStatusDetailsNoRegion},
     taxonomy::{
-        Synonym, Taxon, TaxonIdentifier, TaxonNote, TaxonPropagationProcedure, TaxonomicAuthority,
-        VernacularName, dto::TaxonDetails,
+        Taxon, TaxonIdentifier, TaxonNote, TaxonPropagationProcedure, TaxonomicAuthority,
+        dto::TaxonDetails,
     },
 };
 use serde::Serialize;
@@ -108,24 +108,12 @@ impl TaxonCommands {
     pub async fn run(&self, db: &mut Db, format: OutputFormat) -> anyhow::Result<()> {
         match self {
             TaxonCommands::Search { search_string } => {
-                let wildcard = format!("%{search_string}%");
-
-                if let Ok(found) = Taxon::filter(
-                    Taxon::fields()
-                        .complete_name()
-                        .like(&wildcard)
-                        .or(Taxon::fields()
-                            .vernaculars()
-                            .any(VernacularName::fields().name().like(&wildcard)))
-                        .or(Taxon::fields()
-                            .synonyms()
-                            .any(Synonym::fields().complete_name().like(&wildcard))),
-                )
-                .order_by(Taxon::fields().sequence().asc())
-                .include(Taxon::fields().vernaculars())
-                .include(Taxon::fields().synonyms())
-                .exec(db)
-                .await
+                if let Ok(found) = Taxon::filter(Taxon::search_filter(search_string))
+                    .order_by(Taxon::fields().sequence().asc())
+                    .include(Taxon::fields().vernaculars())
+                    .include(Taxon::fields().synonyms())
+                    .exec(db)
+                    .await
                 {
                     let results = found
                         .into_iter()
