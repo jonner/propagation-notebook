@@ -21,16 +21,19 @@ use crate::{
 
 pub fn router() -> Router<Arc<AppState>> {
     Router::new()
-        .route("/", get(handle_root))
-        .route("/{id}", get(handle_details))
+        .route("/", get(get_taxa_list))
+        .route("/{id}", get(get_taxon_details))
         .route(
             "/{taxon_id}/propagation/{propagation_id}",
-            get(handle_propagation),
+            get(get_taxon_propagation),
         )
-        .route("/{taxon_id}/cleaning/{cleaning_id}", get(handle_cleaning))
+        .route(
+            "/{taxon_id}/cleaning/{cleaning_id}",
+            get(get_taxon_cleaning),
+        )
 }
 
-pub async fn handle_root(
+pub async fn get_taxa_list(
     Query(params): Query<PageQueryParams>,
     State(s): State<Arc<AppState>>,
 ) -> Result<impl IntoResponse, Error> {
@@ -54,7 +57,7 @@ pub async fn handle_root(
     Ok(templates::pages::taxonomy::root(&taxa, &page_state))
 }
 
-pub async fn handle_details(
+pub async fn get_taxon_details(
     State(s): State<Arc<AppState>>,
     Path(id): Path<u64>,
 ) -> Result<impl IntoResponse, Error> {
@@ -76,7 +79,7 @@ pub async fn handle_details(
     Ok(templates::pages::taxonomy::details(&taxon))
 }
 
-pub async fn handle_propagation(
+pub async fn get_taxon_propagation(
     State(s): State<Arc<AppState>>,
     Path((taxon_id, propagation_id)): Path<(u64, u64)>,
 ) -> Result<impl IntoResponse, Error> {
@@ -97,7 +100,7 @@ pub async fn handle_propagation(
     Ok(templates::pages::taxonomy::propagation_details(&tp))
 }
 
-pub async fn handle_cleaning(
+pub async fn get_taxon_cleaning(
     State(s): State<Arc<AppState>>,
     Path((taxon_id, cleaning_id)): Path<(u64, u64)>,
 ) -> Result<impl IntoResponse, Error> {

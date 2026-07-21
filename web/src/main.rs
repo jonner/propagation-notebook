@@ -47,7 +47,7 @@ impl AppState {
 }
 
 #[axum::debug_handler]
-pub async fn handle_root() -> impl IntoResponse {
+pub async fn get_index() -> impl IntoResponse {
     templates::pages::root()
 }
 
@@ -55,7 +55,7 @@ impl App {
     pub async fn new() -> anyhow::Result<Self> {
         Ok(Self {
             router: Router::new()
-                .route("/", get(handle_root))
+                .route("/", get(get_index))
                 .nest("/regions/", region::router())
                 .nest("/propagation/", propagation::router())
                 .nest("/taxa/", taxonomy::router())

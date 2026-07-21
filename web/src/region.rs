@@ -21,20 +21,20 @@ use crate::{
 
 pub fn router() -> Router<Arc<AppState>> {
     Router::new()
-        .route("/", get(handle_root))
-        .route("/{id}", get(handle_region_details))
-        .route("/{id}/taxa", get(handle_region_taxa_list))
-        .route("/{region_id}/taxa/{taxon_id}", get(handle_region_taxon))
+        .route("/", get(get_region_list))
+        .route("/{id}", get(get_region_details))
+        .route("/{id}/taxa", get(get_region_taxa_list))
+        .route("/{region_id}/taxa/{taxon_id}", get(get_region_taxon_status))
 }
 
-pub async fn handle_root(State(s): State<Arc<AppState>>) -> Result<impl IntoResponse, Error> {
+pub async fn get_region_list(State(s): State<Arc<AppState>>) -> Result<impl IntoResponse, Error> {
     let mut db = s.db.clone();
     let regions = Region::all().exec(&mut db).await?;
     trace!(?regions);
     Ok(templates::pages::region::root(&regions))
 }
 
-pub async fn handle_region_details(
+pub async fn get_region_details(
     State(s): State<Arc<AppState>>,
     Path(id): Path<u64>,
 ) -> Result<impl IntoResponse, Error> {
@@ -48,7 +48,7 @@ pub async fn handle_region_details(
     Ok(templates::pages::region::details(&region))
 }
 
-pub async fn handle_region_taxa_list(
+pub async fn get_region_taxa_list(
     State(s): State<Arc<AppState>>,
     Path(region_id): Path<u64>,
     Query(params): Query<PageQueryParams>,
@@ -80,7 +80,7 @@ pub async fn handle_region_taxa_list(
     ))
 }
 
-pub async fn handle_region_taxon(
+pub async fn get_region_taxon_status(
     State(s): State<Arc<AppState>>,
     Path((region_id, taxon_id)): Path<(u64, u64)>,
 ) -> Result<impl IntoResponse, Error> {

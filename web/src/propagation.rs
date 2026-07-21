@@ -13,18 +13,20 @@ use crate::{AppState, error::Error, templates};
 
 pub fn router() -> Router<Arc<AppState>> {
     Router::new()
-        .route("/", get(handle_root))
-        .route("/{id}", get(handle_propagation_details))
+        .route("/", get(get_propagation_list))
+        .route("/{id}", get(get_propagation_details))
 }
 
-pub async fn handle_root(State(s): State<Arc<AppState>>) -> Result<impl IntoResponse, Error> {
+pub async fn get_propagation_list(
+    State(s): State<Arc<AppState>>,
+) -> Result<impl IntoResponse, Error> {
     let mut db = s.db.clone();
     let procedures = PropagationProcedure::all().exec(&mut db).await?;
     trace!(?procedures);
     Ok(templates::pages::propagation::root(&procedures))
 }
 
-pub async fn handle_propagation_details(
+pub async fn get_propagation_details(
     State(s): State<Arc<AppState>>,
     Path(id): Path<u64>,
 ) -> Result<impl IntoResponse, Error> {
