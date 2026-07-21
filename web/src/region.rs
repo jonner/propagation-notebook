@@ -31,7 +31,7 @@ pub async fn get_region_list(State(s): State<Arc<AppState>>) -> Result<impl Into
     let mut db = s.db.clone();
     let regions = Region::all().exec(&mut db).await?;
     trace!(?regions);
-    Ok(templates::pages::region::root(&regions))
+    Ok(templates::pages::region::region_list(&regions))
 }
 
 pub async fn get_region_details(
@@ -45,7 +45,7 @@ pub async fn get_region_details(
         .exec(&mut db)
         .await?;
     trace!(?region);
-    Ok(templates::pages::region::details(&region))
+    Ok(templates::pages::region::region_details(&region))
 }
 
 pub async fn get_region_taxa_list(
@@ -69,7 +69,7 @@ pub async fn get_region_taxa_list(
         .exec(&mut db)
         .await?;
     let region = Region::get_by_id(&mut db, region_id).await?;
-    Ok(templates::pages::region::taxa_list(
+    Ok(templates::pages::region::region_taxa_list(
         &region,
         &taxa,
         &page_state,
@@ -88,5 +88,5 @@ pub async fn get_region_taxon_status(
         .one()
         .exec(&mut db)
         .await?;
-    Ok(templates::pages::region::taxon_details(&rt))
+    Ok(templates::pages::region::region_taxon_status(&rt))
 }

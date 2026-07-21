@@ -3,7 +3,7 @@ use maud::{Markup, html};
 
 use crate::templates::{Path, layout};
 
-pub fn root(procedures: &[PropagationProcedure]) -> Markup {
+pub fn propagation_list(procedures: &[PropagationProcedure]) -> Markup {
     let title = "Propagation Procedures";
     let content = html! {
         ul {
@@ -17,7 +17,7 @@ pub fn root(procedures: &[PropagationProcedure]) -> Markup {
     layout(title, content)
 }
 
-pub fn details(procedure: &PropagationProcedure) -> Markup {
+pub fn propagation_details(procedure: &PropagationProcedure) -> Markup {
     let content = html! {
         dt { "ID" }
         dd { (procedure.id) }

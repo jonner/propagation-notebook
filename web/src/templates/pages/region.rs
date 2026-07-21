@@ -10,7 +10,7 @@ use crate::{
     util::{PageQueryParams, PageState},
 };
 
-pub fn root(regions: &[Region]) -> Markup {
+pub fn region_list(regions: &[Region]) -> Markup {
     trace!("rendering");
     let title = "Region List";
     let content = html! {
@@ -23,7 +23,7 @@ pub fn root(regions: &[Region]) -> Markup {
     layout(title, content)
 }
 
-pub fn details(region: &Region) -> Markup {
+pub fn region_details(region: &Region) -> Markup {
     trace!("rendering");
     let content = html! {
         dl {
@@ -47,7 +47,7 @@ pub fn details(region: &Region) -> Markup {
     layout(&region.name, content)
 }
 
-pub fn taxa_list(
+pub fn region_taxa_list(
     region: &Region,
     taxa: &[Taxon],
     page_state: &PageState,
@@ -68,7 +68,7 @@ pub fn taxa_list(
     layout(&region.name, content)
 }
 
-pub fn taxon_details(status: &RegionalTaxonStatus) -> Markup {
+pub fn region_taxon_status(status: &RegionalTaxonStatus) -> Markup {
     let region = status.region.get();
     let taxon = status.taxon.get();
     let title = format!("{} in {}", taxon.complete_name, region.name);

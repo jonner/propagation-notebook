@@ -11,7 +11,7 @@ use crate::{
     util::PageState,
 };
 
-pub fn root(taxa: &[Taxon], page_state: &PageState, params: &TaxaListParams) -> Markup {
+pub fn taxa_list(taxa: &[Taxon], page_state: &PageState, params: &TaxaListParams) -> Markup {
     let content = html! {
         ul {
             @for taxon in taxa.iter() {
@@ -24,7 +24,7 @@ pub fn root(taxa: &[Taxon], page_state: &PageState, params: &TaxaListParams) -> 
     layout("Taxon List", content)
 }
 
-pub fn details(taxon: &Taxon) -> Markup {
+pub fn taxon_details(taxon: &Taxon) -> Markup {
     trace!("rendering");
     let content = html! {
         dt { "ID" }
@@ -167,7 +167,7 @@ pub fn details(taxon: &Taxon) -> Markup {
     layout(&taxon.complete_name, content)
 }
 
-pub fn propagation_details(tp: &TaxonPropagationProcedure) -> Markup {
+pub fn taxon_propagation(tp: &TaxonPropagationProcedure) -> Markup {
     let proc = tp.propagation.get();
     let taxon = tp.taxon.get();
     let title = format!("{} for {}", proc.name, taxon.complete_name);
@@ -200,7 +200,7 @@ pub fn propagation_details(tp: &TaxonPropagationProcedure) -> Markup {
     layout(&title, content)
 }
 
-pub fn cleaning_details(proc: &CleaningProcedure) -> Markup {
+pub fn taxon_cleaning(proc: &CleaningProcedure) -> Markup {
     let taxon = proc.taxon.get();
     let title = format!("{} for {}", proc.name, taxon.complete_name);
     let content = html! {

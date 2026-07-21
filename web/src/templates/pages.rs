@@ -6,7 +6,7 @@ pub mod propagation;
 pub mod region;
 pub mod taxonomy;
 
-pub fn root() -> Markup {
+pub fn index() -> Markup {
     let content = html! {
         p { "Main page" }
     };

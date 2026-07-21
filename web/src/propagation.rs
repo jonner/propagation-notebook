@@ -23,7 +23,7 @@ pub async fn get_propagation_list(
     let mut db = s.db.clone();
     let procedures = PropagationProcedure::all().exec(&mut db).await?;
     trace!(?procedures);
-    Ok(templates::pages::propagation::root(&procedures))
+    Ok(templates::pages::propagation::propagation_list(&procedures))
 }
 
 pub async fn get_propagation_details(
@@ -38,5 +38,5 @@ pub async fn get_propagation_details(
         .exec(&mut db)
         .await?;
     trace!(?proc);
-    Ok(templates::pages::propagation::details(&proc))
+    Ok(templates::pages::propagation::propagation_details(&proc))
 }

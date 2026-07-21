@@ -48,7 +48,7 @@ impl AppState {
 
 #[axum::debug_handler]
 pub async fn get_index() -> impl IntoResponse {
-    templates::pages::root()
+    templates::pages::index()
 }
 
 impl App {

@@ -68,7 +68,7 @@ pub async fn get_taxa_list(
         .exec(&mut db)
         .await?;
     trace!(?taxa);
-    Ok(templates::pages::taxonomy::root(
+    Ok(templates::pages::taxonomy::taxa_list(
         &taxa,
         &page_state,
         &params,
@@ -94,7 +94,7 @@ pub async fn get_taxon_details(
         .exec(&mut db)
         .await?;
     trace!(?taxon);
-    Ok(templates::pages::taxonomy::details(&taxon))
+    Ok(templates::pages::taxonomy::taxon_details(&taxon))
 }
 
 pub async fn get_taxon_propagation(
@@ -115,7 +115,7 @@ pub async fn get_taxon_propagation(
             .exec(&mut db)
             .await?;
     trace!(?tp);
-    Ok(templates::pages::taxonomy::propagation_details(&tp))
+    Ok(templates::pages::taxonomy::taxon_propagation(&tp))
 }
 
 pub async fn get_taxon_cleaning(
@@ -135,5 +135,5 @@ pub async fn get_taxon_cleaning(
     .exec(&mut db)
     .await?;
     trace!(?proc);
-    Ok(templates::pages::taxonomy::cleaning_details(&proc))
+    Ok(templates::pages::taxonomy::taxon_cleaning(&proc))
 }
