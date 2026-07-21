@@ -6,11 +6,12 @@ use maud::{Markup, html};
 use tracing::trace;
 
 use crate::{
+    taxonomy::TaxaListParams,
     templates::{Path, layout, pagination_control},
-    util::{PageQueryParams, PageState},
+    util::PageState,
 };
 
-pub fn root(taxa: &[Taxon], page_state: &PageState, params: &PageQueryParams) -> Markup {
+pub fn root(taxa: &[Taxon], page_state: &PageState, params: &TaxaListParams) -> Markup {
     let content = html! {
         ul {
             @for taxon in taxa.iter() {

@@ -10,13 +10,14 @@ use libpropagation::{
     collecting::CleaningProcedure,
     taxonomy::{Taxon, TaxonPropagationProcedure},
 };
+use serde::{Deserialize, Serialize};
 use tracing::trace;
 
 use crate::{
     AppState,
     error::Error,
     templates,
-    util::{PER_PAGE, PageQueryParams, PageState},
+    util::{ModifyOffset, PER_PAGE, PageState},
 };
 
 pub fn router() -> Router<Arc<AppState>> {
@@ -33,22 +34,41 @@ pub fn router() -> Router<Arc<AppState>> {
         )
 }
 
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct TaxaListParams {
+    offset: Option<usize>,
+    #[serde(rename = "q")]
+    search_term: Option<String>,
+}
+
+impl ModifyOffset for TaxaListParams {
+    fn modify_offset(&mut self, new_offset: usize) {
+        self.offset = Some(new_offset);
+    }
+}
+
 pub async fn get_taxa_list(
-    Query(params): Query<PageQueryParams>,
+    Query(params): Query<TaxaListParams>,
     State(s): State<Arc<AppState>>,
 ) -> Result<impl IntoResponse, Error> {
     let mut db = s.db.clone();
-    let q = Taxon::all().order_by((
+    let query = match params.search_term.as_ref() {
+        Some(q) => Taxon::filter(Taxon::search_filter(q)),
+        None => Taxon::all(),
+    }
+    .include(Taxon::fields().vernaculars())
+    .include(Taxon::fields().synonyms())
+    .order_by((
         Taxon::fields().sequence().asc(),
         Taxon::fields().complete_name().asc(),
     ));
-    let total = q.clone().count().exec(&mut db).await? as usize;
+    let total = query.clone().count().exec(&mut db).await? as usize;
     let page_state = PageState {
         per_page: PER_PAGE,
         offset: params.offset.unwrap_or_default(),
         total,
     };
-    let taxa = q
+    let taxa = query
         .limit(page_state.per_page)
         .offset(page_state.offset)
         .exec(&mut db)
