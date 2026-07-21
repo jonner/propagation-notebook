@@ -16,7 +16,7 @@ use crate::{
     AppState,
     error::Error,
     templates,
-    util::{PER_PAGE, PageQueryParams, PageState},
+    util::{PageQueryParams, PageState},
 };
 
 pub fn router() -> Router<Arc<AppState>> {
@@ -60,11 +60,7 @@ pub async fn get_region_taxa_list(
             .any(RegionalTaxonStatus::fields().region_id().eq(region_id)),
     );
     let total = filter.clone().count().exec(&mut db).await? as usize;
-    let page_state = PageState {
-        per_page: PER_PAGE,
-        offset: params.offset.unwrap_or_default(),
-        total,
-    };
+    let page_state = PageState::new(params.offset, total);
     let taxa = filter
         .include(Taxon::fields().regional_statuses())
         .order_by(Taxon::fields().sequence().asc())

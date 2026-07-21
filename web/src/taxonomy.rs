@@ -17,7 +17,7 @@ use crate::{
     AppState,
     error::Error,
     templates,
-    util::{ModifyOffset, PER_PAGE, PageState},
+    util::{ModifyOffset, PageState},
 };
 
 pub fn router() -> Router<Arc<AppState>> {
@@ -56,18 +56,12 @@ pub async fn get_taxa_list(
         Some(q) => Taxon::filter(Taxon::search_filter(q)),
         None => Taxon::all(),
     }
-    .include(Taxon::fields().vernaculars())
-    .include(Taxon::fields().synonyms())
     .order_by((
         Taxon::fields().sequence().asc(),
         Taxon::fields().complete_name().asc(),
     ));
     let total = query.clone().count().exec(&mut db).await? as usize;
-    let page_state = PageState {
-        per_page: PER_PAGE,
-        offset: params.offset.unwrap_or_default(),
-        total,
-    };
+    let page_state = PageState::new(params.offset, total);
     let taxa = query
         .limit(page_state.per_page)
         .offset(page_state.offset)

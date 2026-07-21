@@ -14,6 +14,14 @@ pub struct PageState {
 }
 
 impl PageState {
+    pub fn new(offset: Option<usize>, total: usize) -> Self {
+        Self {
+            per_page: PER_PAGE,
+            offset: offset.unwrap_or_default(),
+            total,
+        }
+    }
+
     pub fn offset_for_page(&self, page: usize) -> Option<usize> {
         if page > 0 && page <= self.total_pages() {
             Some(self.per_page * page.saturating_sub(1))
