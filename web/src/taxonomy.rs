@@ -36,9 +36,9 @@ pub fn router() -> Router<Arc<AppState>> {
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct TaxaListParams {
-    offset: Option<usize>,
+    pub offset: Option<usize>,
     #[serde(rename = "q")]
-    search_term: Option<String>,
+    pub search_term: Option<String>,
 }
 
 impl ModifyOffset for TaxaListParams {

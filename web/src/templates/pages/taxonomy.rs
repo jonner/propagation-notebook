@@ -13,6 +13,10 @@ use crate::{
 
 pub fn taxa_list(taxa: &[Taxon], page_state: &PageState, params: &TaxaListParams) -> Markup {
     let content = html! {
+        form method="get" {
+            input type="text" name="q" placeholder="Search for a taxon" value=(params.search_term.as_deref().unwrap_or_default());
+            button type="submit" { "Search" }
+        }
         ul {
             @for taxon in taxa.iter() {
                 li { a href=(taxon.path()) {(taxon.complete_name)} }
