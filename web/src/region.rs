@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use axum::{
     Router,
-    extract::{Path, State},
+    extract::{Path, Query, State},
     response::IntoResponse,
     routing::get,
 };
@@ -12,7 +12,12 @@ use libpropagation::{
 };
 use tracing::trace;
 
-use crate::{AppState, error::Error, templates};
+use crate::{
+    AppState,
+    error::Error,
+    templates,
+    util::{PER_PAGE, PageQueryParams, PageState},
+};
 
 pub fn router() -> Router<Arc<AppState>> {
     Router::new()
@@ -46,19 +51,33 @@ pub async fn handle_region_details(
 pub async fn handle_region_taxa_list(
     State(s): State<Arc<AppState>>,
     Path(region_id): Path<u64>,
+    Query(params): Query<PageQueryParams>,
 ) -> Result<impl IntoResponse, Error> {
     let mut db = s.db.clone();
-    let taxa = Taxon::filter(
+    let filter = Taxon::filter(
         Taxon::fields()
             .regional_statuses()
             .any(RegionalTaxonStatus::fields().region_id().eq(region_id)),
-    )
-    .include(Taxon::fields().regional_statuses())
-    .order_by(Taxon::fields().sequence().asc())
-    .exec(&mut db)
-    .await?;
+    );
+    let total = filter.clone().count().exec(&mut db).await?;
+    let page_state = PageState {
+        per_page: PER_PAGE,
+        offset: params.offset.unwrap_or_default(),
+        total,
+    };
+    let taxa = filter
+        .include(Taxon::fields().regional_statuses())
+        .order_by(Taxon::fields().sequence().asc())
+        .limit(page_state.per_page)
+        .offset(page_state.offset)
+        .exec(&mut db)
+        .await?;
     let region = Region::get_by_id(&mut db, region_id).await?;
-    Ok(templates::pages::region::taxa_list(&region, &taxa))
+    Ok(templates::pages::region::taxa_list(
+        &region,
+        &taxa,
+        &page_state,
+    ))
 }
 
 pub async fn handle_region_taxon(

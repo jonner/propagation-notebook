@@ -5,19 +5,22 @@ use libpropagation::{
 use maud::{Markup, html};
 use tracing::trace;
 
-use crate::templates::{Path, header};
+use crate::{
+    templates::{Path, header, page_control},
+    util::PageState,
+};
 
-pub fn root(taxa: &[Taxon]) -> Markup {
-    trace!("rendering");
+pub fn root(taxa: &[Taxon], page_state: &PageState) -> Markup {
     let title = "Taxon List";
     html! {
         (header(title))
         h1 { (title) }
         ul {
-            @for taxon in taxa {
+            @for taxon in taxa.iter() {
                 li { a href=(taxon.path()) {(taxon.complete_name)} }
             }
         }
+        (page_control(page_state))
     }
 }
 

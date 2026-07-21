@@ -5,7 +5,10 @@ use libpropagation::{
 use maud::{Markup, html};
 use tracing::trace;
 
-use crate::templates::{Path, header, map};
+use crate::{
+    templates::{Path, header, map, page_control},
+    util::PageState,
+};
 
 pub fn root(regions: &[Region]) -> Markup {
     trace!("rendering");
@@ -46,7 +49,7 @@ pub fn details(region: &Region) -> Markup {
     }
 }
 
-pub fn taxa_list(region: &Region, taxa: &[Taxon]) -> Markup {
+pub fn taxa_list(region: &Region, taxa: &[Taxon], page_state: &PageState) -> Markup {
     html! {
         (header(&region.name))
         h1 { (region.name) }
@@ -59,6 +62,7 @@ pub fn taxa_list(region: &Region, taxa: &[Taxon]) -> Markup {
                 }
             }
         }
+        (page_control(page_state))
     }
 }
 

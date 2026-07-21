@@ -9,6 +9,7 @@ pub mod propagation;
 pub mod region;
 pub mod taxonomy;
 mod templates;
+mod util;
 
 #[derive(Debug, Clone, clap::Parser)]
 pub struct Cli {

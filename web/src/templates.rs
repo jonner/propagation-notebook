@@ -6,6 +6,8 @@ use libpropagation::{
 };
 use maud::{DOCTYPE, Markup, html};
 
+use crate::util::PageState;
+
 pub mod pages;
 
 pub enum Dimension {
@@ -29,6 +31,25 @@ pub fn header(page_title: &str) -> Markup {
         link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" {}
         script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" {}
         title { (page_title) }
+    }
+}
+
+pub fn page_control(page_state: &PageState) -> Markup {
+    html! {
+        nav {
+            ul {
+                li {
+                    @if page_state.has_prev() {
+                        a href={"?offset=" (page_state.prev_offset())} { "< Prev" }
+                    }
+                }
+                li {
+                    @if page_state.has_next() {
+                        a href={"?offset=" (page_state.next_offset())} { "Next >" }
+                    }
+                }
+            }
+        }
     }
 }
 

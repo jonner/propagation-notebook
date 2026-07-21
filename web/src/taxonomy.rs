@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use axum::{
     Router,
-    extract::{Path, State},
+    extract::{Path, Query, State},
     response::IntoResponse,
     routing::get,
 };
@@ -12,7 +12,12 @@ use libpropagation::{
 };
 use tracing::trace;
 
-use crate::{AppState, error::Error, templates};
+use crate::{
+    AppState,
+    error::Error,
+    templates,
+    util::{PER_PAGE, PageQueryParams, PageState},
+};
 
 pub fn router() -> Router<Arc<AppState>> {
     Router::new()
@@ -25,11 +30,28 @@ pub fn router() -> Router<Arc<AppState>> {
         .route("/{taxon_id}/cleaning/{cleaning_id}", get(handle_cleaning))
 }
 
-pub async fn handle_root(State(s): State<Arc<AppState>>) -> Result<impl IntoResponse, Error> {
+pub async fn handle_root(
+    Query(params): Query<PageQueryParams>,
+    State(s): State<Arc<AppState>>,
+) -> Result<impl IntoResponse, Error> {
     let mut db = s.db.clone();
-    let taxa = Taxon::all().exec(&mut db).await?;
+    let q = Taxon::all().order_by((
+        Taxon::fields().sequence().asc(),
+        Taxon::fields().complete_name().asc(),
+    ));
+    let total = q.clone().count().exec(&mut db).await?;
+    let page_state = PageState {
+        per_page: PER_PAGE,
+        offset: params.offset.unwrap_or_default(),
+        total,
+    };
+    let taxa = q
+        .limit(page_state.per_page)
+        .offset(page_state.offset)
+        .exec(&mut db)
+        .await?;
     trace!(?taxa);
-    Ok(templates::pages::taxonomy::root(&taxa))
+    Ok(templates::pages::taxonomy::root(&taxa, &page_state))
 }
 
 pub async fn handle_details(
