@@ -6,53 +6,49 @@ use maud::{Markup, html};
 use tracing::trace;
 
 use crate::{
-    templates::{Path, header, map, page_control},
+    templates::{Path, layout, map, pagination_control},
     util::PageState,
 };
 
 pub fn root(regions: &[Region]) -> Markup {
     trace!("rendering");
     let title = "Region List";
-    html! {
-        (header(title))
-        h1 { (title) }
+    let content = html! {
         ul {
             @for region in regions {
                 li { a href=(region.path()) { (region.name) } }
             }
         }
-    }
+    };
+    layout(title, content)
 }
 
 pub fn details(region: &Region) -> Markup {
     trace!("rendering");
-    html! {
-        (header(&region.name))
-    h1 { (region.name) }
-    dl {
-        dt { "ID" }
-        dd { (region.id) }
-        dt { "Notes" }
-        dd { (region.notes.as_deref().unwrap_or_default()) }
-        dt { "Taxa" }
-        dd { a href=(format!("./{}/taxa", region.id)) {
-            (region.taxon_statuses.get().len())}
-        }
-        dt { "Geometry" }
-        dd {
-            @match region.geometry.as_ref() {
-                Some(value) => (map(value, None, None))
-                None => ""
+    let content = html! {
+        dl {
+            dt { "ID" }
+            dd { (region.id) }
+            dt { "Notes" }
+            dd { (region.notes.as_deref().unwrap_or_default()) }
+            dt { "Taxa" }
+            dd { a href=(format!("./{}/taxa", region.id)) {
+                (region.taxon_statuses.get().len())}
+            }
+            dt { "Geometry" }
+            dd {
+                @match region.geometry.as_ref() {
+                    Some(value) => (map(value, None, None))
+                    None => ""
+                }
             }
         }
-    }
-    }
+    };
+    layout(&region.name, content)
 }
 
 pub fn taxa_list(region: &Region, taxa: &[Taxon], page_state: &PageState) -> Markup {
-    html! {
-        (header(&region.name))
-        h1 { (region.name) }
+    let content = html! {
         ul {
             @for taxon in taxa {
                 @for rts in taxon.regional_statuses.get() {
@@ -62,8 +58,9 @@ pub fn taxa_list(region: &Region, taxa: &[Taxon], page_state: &PageState) -> Mar
                 }
             }
         }
-        (page_control(page_state))
-    }
+        (pagination_control(page_state))
+    };
+    layout(&region.name, content)
 }
 
 pub fn taxon_details(status: &RegionalTaxonStatus) -> Markup {
@@ -71,9 +68,7 @@ pub fn taxon_details(status: &RegionalTaxonStatus) -> Markup {
     let taxon = status.taxon.get();
     let title = format!("{} in {}", taxon.complete_name, region.name);
 
-    html! {
-        (header(&title))
-        h1 { (title) }
+    let content = html! {
         dt { "Taxon" }
         dd {  a href=(taxon.path()) { (taxon.complete_name) } }
         dt { "Region" }
@@ -88,5 +83,6 @@ pub fn taxon_details(status: &RegionalTaxonStatus) -> Markup {
         dd { (status.wetland_indicator.map(|v| v.to_string()).unwrap_or_default() )}
         dt { "Harvest Window" }
         dd { (status.harvest_window.to_string() )}
-    }
+    };
+    layout(&title, content)
 }

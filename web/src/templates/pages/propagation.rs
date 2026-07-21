@@ -1,13 +1,11 @@
 use libpropagation::propagation::PropagationProcedure;
 use maud::{Markup, html};
 
-use crate::templates::{Path, header};
+use crate::templates::{Path, layout};
 
 pub fn root(procedures: &[PropagationProcedure]) -> Markup {
     let title = "Propagation Procedures";
-    html! {
-        (header(title))
-        h1 { (title) }
+    let content = html! {
         ul {
             @for p in procedures {
                 li {
@@ -15,13 +13,12 @@ pub fn root(procedures: &[PropagationProcedure]) -> Markup {
                 }
             }
         }
-    }
+    };
+    layout(title, content)
 }
 
 pub fn details(procedure: &PropagationProcedure) -> Markup {
-    html! {
-            (header(&procedure.name))
-            h1 { (procedure.name) }
+    let content = html! {
         dt { "ID" }
         dd { (procedure.id) }
         dt { "Name" }
@@ -73,5 +70,6 @@ pub fn details(procedure: &PropagationProcedure) -> Markup {
                 "None"
             }
         }
-    }
+    };
+    layout(&procedure.name, content)
 }

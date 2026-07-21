@@ -24,17 +24,30 @@ impl std::fmt::Display for Dimension {
     }
 }
 
-pub fn header(page_title: &str) -> Markup {
+pub fn layout(page_title: &str, content: Markup) -> Markup {
     html! {
         (DOCTYPE)
-        meta charset="utf-8";
-        link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" {}
-        script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" {}
-        title { (page_title) }
+        head {
+            meta charset="utf-8";
+            link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" {}
+            script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" {}
+            title { (page_title) }
+        }
+        body {
+            nav {
+                ul {
+                    li { a href="/taxa/" { "Taxonomy" }}
+                    li { a href="/regions/" { "Regions" }}
+                    li { a href="/propagation/" { "Propagation Protocols" }}
+                }
+            }
+            h1 { (page_title) }
+            (content)
+        }
     }
 }
 
-pub fn page_control(page_state: &PageState) -> Markup {
+pub fn pagination_control(page_state: &PageState) -> Markup {
     html! {
         nav {
             ul {

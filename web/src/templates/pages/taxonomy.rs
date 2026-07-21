@@ -6,29 +6,26 @@ use maud::{Markup, html};
 use tracing::trace;
 
 use crate::{
-    templates::{Path, header, page_control},
+    templates::{Path, layout, pagination_control},
     util::PageState,
 };
 
 pub fn root(taxa: &[Taxon], page_state: &PageState) -> Markup {
-    let title = "Taxon List";
-    html! {
-        (header(title))
-        h1 { (title) }
+    let content = html! {
         ul {
             @for taxon in taxa.iter() {
                 li { a href=(taxon.path()) {(taxon.complete_name)} }
             }
         }
-        (page_control(page_state))
-    }
+        (pagination_control(page_state))
+    };
+
+    layout("Taxon List", content)
 }
 
 pub fn details(taxon: &Taxon) -> Markup {
     trace!("rendering");
-    html! {
-        (header(&taxon.complete_name))
-        h1 { (taxon.complete_name) }
+    let content = html! {
         dt { "ID" }
         dd { (taxon.id) }
         dt { "Name" }
@@ -164,16 +161,16 @@ pub fn details(taxon: &Taxon) -> Markup {
 
             }
         }
-    }
+    };
+
+    layout(&taxon.complete_name, content)
 }
 
 pub fn propagation_details(tp: &TaxonPropagationProcedure) -> Markup {
     let proc = tp.propagation.get();
     let taxon = tp.taxon.get();
     let title = format!("{} for {}", proc.name, taxon.complete_name);
-    html! {
-            (header(&title))
-            h1 { (title) }
+    let content = html! {
         dt { "Procedure" }
         dd { a href=(tp.propagation.get().path()) { (tp.propagation.get().name) } }
         dt { "Taxon" }
@@ -198,15 +195,14 @@ pub fn propagation_details(tp: &TaxonPropagationProcedure) -> Markup {
                 }
             }
         }
-    }
+    };
+    layout(&title, content)
 }
 
 pub fn cleaning_details(proc: &CleaningProcedure) -> Markup {
     let taxon = proc.taxon.get();
     let title = format!("{} for {}", proc.name, taxon.complete_name);
-    html! {
-            (header(&title))
-            h1 { (title) }
+    let content = html! {
         dt { "Taxon" }
         dd { a href=(taxon.path()) { (taxon.complete_name) } }
         dt { "Instructions" }
@@ -229,5 +225,6 @@ pub fn cleaning_details(proc: &CleaningProcedure) -> Markup {
                 }
             }
         }
-    }
+    };
+    layout(&title, content)
 }
