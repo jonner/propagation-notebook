@@ -66,7 +66,7 @@ pub struct Region {
 
     #[index]
     pub name: String,
-    // FIXME: geojson??
+    #[column(type = "text")]
     pub geometry: Option<toasty::Json<geojson::Geometry>>,
     pub notes: Option<String>,
 
