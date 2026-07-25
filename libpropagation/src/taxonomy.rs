@@ -14,7 +14,7 @@ pub enum TaxonomicAuthority {
 
 use crate::{
     ImportProgressReporter,
-    citation::TaxonPropagationProcedureCitation,
+    citation::{Citation, TaxonNoteCitation, TaxonPropagationProcedureCitation},
     collecting::{CleaningProcedure, CollectingData},
     dto::ObjectReference,
     error::ImportExportError,
@@ -386,6 +386,11 @@ pub struct TaxonNote {
     pub created_at: jiff::Timestamp,
     #[auto]
     pub updated_at: jiff::Timestamp,
+
+    #[has_many(pair=note)]
+    pub citation_links: Deferred<Vec<TaxonNoteCitation>>,
+    #[has_many(via=citation_links.citation)]
+    pub citations: Deferred<Vec<Citation>>,
 }
 
 pub async fn import(

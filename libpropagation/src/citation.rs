@@ -1,8 +1,10 @@
 use toasty::{Db, Deferred};
 
 use crate::{
-    collecting::CleaningProcedure, dto::ObjectReference, propagation::PropagationProcedure,
-    taxonomy::TaxonPropagationProcedure,
+    collecting::CleaningProcedure,
+    dto::ObjectReference,
+    propagation::PropagationProcedure,
+    taxonomy::{TaxonNote, TaxonPropagationProcedure},
 };
 
 pub mod dto {
@@ -60,6 +62,8 @@ pub struct Citation {
     pub propagation_procedures: Deferred<Vec<PropagationProcedureCitation>>,
     #[has_many]
     pub taxon_propagation_procedures: Deferred<Vec<TaxonPropagationProcedureCitation>>,
+    #[has_many]
+    pub taxon_notes: Deferred<Vec<TaxonNoteCitation>>,
 }
 
 impl Citation {
@@ -68,12 +72,14 @@ impl Citation {
             .include(Self::fields().propagation_procedures())
             .include(Self::fields().taxon_propagation_procedures())
             .include(Self::fields().cleaning_procedures())
+            .include(Self::fields().taxon_notes())
             .one()
             .exec(db)
             .await?;
         if citation.propagation_procedures.get().is_empty()
             && citation.taxon_propagation_procedures.get().is_empty()
             && citation.cleaning_procedures.get().is_empty()
+            && citation.taxon_notes.get().is_empty()
         {
             Citation::delete_by_id(db, citation_id).await?;
         }
@@ -132,4 +138,18 @@ pub struct TaxonPropagationProcedureCitation {
     pub taxon_id: u64,
     #[belongs_to(key=[taxon_id, propagation_id], references=[taxon_id, propagation_id])]
     pub taxon_propagation: Deferred<TaxonPropagationProcedure>,
+}
+
+#[derive(Debug, Clone, toasty::Model)]
+pub struct TaxonNoteCitation {
+    #[key]
+    #[index]
+    pub citation_id: u64,
+    #[belongs_to(key=citation_id, references=id)]
+    pub citation: Deferred<Citation>,
+    #[key]
+    #[index]
+    pub note_id: u64,
+    #[belongs_to(key=note_id, references=id)]
+    pub note: Deferred<TaxonNote>,
 }

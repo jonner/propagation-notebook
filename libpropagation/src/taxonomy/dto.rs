@@ -140,12 +140,7 @@ impl From<super::TaxonNote> for TaxonNoteDetails {
     fn from(value: super::TaxonNote) -> Self {
         Self {
             taxon: ObjectReference::from_deferred(&value.taxon, value.taxon_id),
-            core: TaxonNoteNoTaxon {
-                id: value.id,
-                text: value.text,
-                created_at: value.created_at,
-                updated_at: value.updated_at,
-            },
+            core: TaxonNoteNoTaxon::from(value),
         }
     }
 }

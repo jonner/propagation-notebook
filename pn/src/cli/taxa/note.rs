@@ -1,14 +1,18 @@
-use libpropagation::taxonomy::{
-    TaxonNote,
-    dto::{TaxonNoteDetails, TaxonNoteNoTaxon},
+use libpropagation::{
+    citation::{Citation, TaxonNoteCitation, dto::CitationDetails},
+    taxonomy::{
+        TaxonNote,
+        dto::{TaxonNoteDetails, TaxonNoteNoTaxon},
+    },
 };
 use toasty::Db;
 
 use crate::{
-    cli::OutputFormat,
+    cli::{OutputFormat, citation::CitationCommands},
     util::dialog::confirm,
     views::{
         JsonView, YamlView,
+        citation::{CitationDetailsView, CitationListView},
         taxa::{TaxonNoteDetailsView, TaxonNotesListView},
     },
 };
@@ -45,6 +49,13 @@ pub enum TaxonNoteCommands {
         )]
         assumeyes: bool,
     },
+    #[command(about = "Manage citations for notes")]
+    Citations {
+        #[arg(help = "A taxon note ID")]
+        id: u64,
+        #[command(subcommand)]
+        command: CitationCommands,
+    },
 }
 
 impl TaxonNoteCommands {
@@ -57,6 +68,7 @@ impl TaxonNoteCommands {
         match self {
             TaxonNoteCommands::List => {
                 let notes: Vec<TaxonNoteNoTaxon> = TaxonNote::filter_by_taxon_id(taxon_id)
+                    .include(TaxonNote::fields().taxon())
                     .exec(db)
                     .await?
                     .into_iter()
@@ -70,18 +82,7 @@ impl TaxonNoteCommands {
                 println!("{output}");
             }
             TaxonNoteCommands::Show { note_id } => {
-                let note: TaxonNoteDetails = TaxonNote::filter_by_id(note_id)
-                    .include(TaxonNote::fields().taxon())
-                    .one()
-                    .exec(db)
-                    .await?
-                    .into();
-                let output = match format {
-                    OutputFormat::Text => TaxonNoteDetailsView::new(&note).render()?,
-                    OutputFormat::Json => JsonView::new(&note).render()?,
-                    OutputFormat::Yaml => YamlView::new(&note).render()?,
-                };
-                println!("{output}");
+                load_and_display_note_details(db, note_id, format).await?;
             }
             TaxonNoteCommands::Add { text } => {
                 let note: TaxonNoteDetails = TaxonNote::create()
@@ -115,7 +116,122 @@ impl TaxonNoteCommands {
                     }
                 }
             }
+            TaxonNoteCommands::Citations {
+                id: note_id,
+                command,
+            } => match command {
+                CitationCommands::List => {
+                    let note = TaxonNote::filter_by_id(note_id)
+                        .include(TaxonNote::fields().citation_links().citation())
+                        .one()
+                        .exec(db)
+                        .await?;
+                    let citations: Vec<CitationDetails> = note
+                        .citation_links
+                        .get()
+                        .iter()
+                        .map(|cl| cl.citation.get().into())
+                        .collect();
+                    let output = match format {
+                        OutputFormat::Text => CitationListView::new(&citations).render()?,
+                        OutputFormat::Json => JsonView::new(&citations).render()?,
+                        OutputFormat::Yaml => YamlView::new(&citations).render()?,
+                    };
+                    println!("{output}");
+                }
+                CitationCommands::Show { id } => {
+                    load_and_display_citation_details(db, id, note_id, format).await?;
+                }
+                CitationCommands::Add {
+                    title,
+                    url,
+                    author,
+                    date,
+                } => {
+                    TaxonNoteCitation::create()
+                        .citation(
+                            Citation::create()
+                                .title(title)
+                                .url(url)
+                                .author(author)
+                                .date(date)
+                                .exec(db)
+                                .await?,
+                        )
+                        .note_id(note_id)
+                        .exec(db)
+                        .await?;
+                }
+                CitationCommands::Remove {
+                    citation_id,
+                    assumeyes,
+                } => {
+                    if *assumeyes || {
+                        load_and_display_citation_details(
+                            db,
+                            citation_id,
+                            note_id,
+                            OutputFormat::Text,
+                        )
+                        .await?;
+                        confirm("Do you want to remove this citation?")
+                            .selected(false)
+                            .run()?
+                    } {
+                        TaxonNoteCitation::delete_by_citation_id_and_note_id(
+                            db,
+                            citation_id,
+                            note_id,
+                        )
+                        .await?;
+                        Citation::delete_if_unused(db, citation_id).await?;
+                        load_and_display_note_details(db, note_id, format).await?;
+                    }
+                }
+            },
         }
         Ok(())
     }
+}
+
+async fn load_and_display_note_details(
+    db: &mut Db,
+    note_id: &u64,
+    format: OutputFormat,
+) -> Result<(), anyhow::Error> {
+    let note: TaxonNoteDetails = TaxonNote::filter_by_id(note_id)
+        .include(TaxonNote::fields().taxon())
+        .one()
+        .exec(db)
+        .await?
+        .into();
+    let output = match format {
+        OutputFormat::Text => TaxonNoteDetailsView::new(&note).render()?,
+        OutputFormat::Json => JsonView::new(&note).render()?,
+        OutputFormat::Yaml => YamlView::new(&note).render()?,
+    };
+    println!("{output}");
+    Ok(())
+}
+
+async fn load_and_display_citation_details(
+    db: &mut Db,
+    id: &u64,
+    note_id: &u64,
+    format: OutputFormat,
+) -> Result<(), anyhow::Error> {
+    let tc = TaxonNoteCitation::filter_by_citation_id_and_note_id(id, note_id)
+        .include(TaxonNoteCitation::fields().citation())
+        .include(TaxonNoteCitation::fields().note())
+        .one()
+        .exec(db)
+        .await?;
+    let citation: CitationDetails = tc.citation.get().into();
+    let output = match format {
+        OutputFormat::Text => CitationDetailsView::new(&citation).render()?,
+        OutputFormat::Json => JsonView::new(&citation).render()?,
+        OutputFormat::Yaml => YamlView::new(&citation).render()?,
+    };
+    println!("{output}");
+    Ok(())
 }
