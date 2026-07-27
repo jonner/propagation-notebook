@@ -1,0 +1,37 @@
+use libpropagation::citation::Citation;
+use topcoat::{
+    context::Cx,
+    router::{page, path_param},
+    view::view,
+};
+
+use crate::util::{CitationId, db};
+
+#[page("/citation/{citation_id}")]
+pub async fn details(cx: &Cx) -> topcoat::Result {
+    let mut db = db(cx);
+    let id = path_param::<CitationId>(cx)?;
+    let citation = Citation::get_by_id(&mut db, id).await?;
+    view! {
+        <h1>
+            "Citation "
+            (citation.id)
+        </h1>
+        <dt>"Title"</dt>
+        <dd>(citation.title)</dd>
+        <dt>"Url"</dt>
+        <dd>
+            if let Some(url) = citation.url {
+                <a href=(&url)>(&url)</a>
+            }
+        </dd>
+        <dt>"Author"</dt>
+        <dd>(citation.author)</dd>
+        <dt>"Date"</dt>
+        <dd>
+            if let Some(date) = citation.date {
+                (date.to_string())
+            }
+        </dd>
+    }
+}

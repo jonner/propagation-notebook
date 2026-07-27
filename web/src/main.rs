@@ -3,6 +3,7 @@ use topcoat::{
     view::view,
 };
 
+mod citation;
 mod components;
 mod error;
 mod leaflet;
@@ -15,6 +16,7 @@ use crate::error::Error;
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
+    tracing_subscriber::fmt::init();
     topcoat::start(
         Router::builder()
             .discover()

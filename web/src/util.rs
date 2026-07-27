@@ -15,6 +15,9 @@ use topcoat::{
 pub(crate) struct TaxonId(u64);
 
 #[path_param(error = bad_request)]
+pub(crate) struct CitationId(u64);
+
+#[path_param(error = bad_request)]
 pub(crate) struct RegionId(u64);
 
 #[path_param(error= bad_request)]

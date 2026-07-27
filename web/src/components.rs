@@ -4,17 +4,12 @@ use topcoat::view::{component, view};
 #[component]
 pub async fn citation_list(citations: Vec<&Citation>) -> topcoat::Result {
     view! {
-        <table>
-            <tr>
-                <th>"ID"</th>
-                <th>"Name"</th>
-            </tr>
+        <ul>
             for citation in citations {
-                <tr>
-                    <td>(citation.id)</td>
-                    <td>(&citation.title)</td>
-                </tr>
+                <li>
+                    <a href=(format!("/citation/{}", citation.id))>(&citation.title)</a>
+                </li>
             }
-        </table>
+        </ul>
     }
 }
