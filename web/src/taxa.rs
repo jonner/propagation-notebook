@@ -168,39 +168,19 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
         }
         <dt>"Seed Cleaning"</dt>
         <dd>
-            if !taxon.cleaning_procedures.get().is_empty() {
-                <table>
-                    <tr>
-                        <th>"ID"</th>
-                        <th>"Name"</th>
-                    </tr>
-                    for procedure in taxon.cleaning_procedures.get() {
-                        <tr>
-                            <td>(procedure.id)</td>
-                            <td><a href=(procedure.path())>(&procedure.name)</a></td>
-                        </tr>
-                    }
-                </table>
-            }
+            <ul>
+                for procedure in taxon.cleaning_procedures.get() {
+                    <li><a href=(procedure.path())>(&procedure.name)</a></li>
+                }
+            </ul>
         </dd>
         <dt>"Propagation Procedures"</dt>
         <dd>
-            if !taxon.propagation_procedures.get().is_empty() {
-                <table>
-                    <tr>
-                        <th>"ID"</th>
-                        <th>"Name"</th>
-                    </tr>
-                    for tp in taxon.propagation_procedures.get() {
-                        <tr>
-                            <td>(tp.propagation.get().id)</td>
-                            <td>
-                                <a href=(tp.path())>(&tp.propagation.get().name)</a>
-                            </td>
-                        </tr>
-                    }
-                </table>
-            }
+            <ul>
+                for tp in taxon.propagation_procedures.get() {
+                    <li><a href=(tp.path())>(&tp.propagation.get().name)</a></li>
+                }
+            </ul>
         </dd>
         <dt>"Regions"</dt>
         <dd>
