@@ -28,7 +28,7 @@ async fn main() -> Result<(), Error> {
 }
 
 #[layout("/")]
-async fn layout(slot: Slot<'_>) -> topcoat::Result {
+async fn layout(slot: topcoat::Result) -> topcoat::Result {
     view! {
         <!DOCTYPE html>
         <html>
@@ -57,7 +57,7 @@ async fn layout(slot: Slot<'_>) -> topcoat::Result {
                         <li><a href="/propagation">"Propagation Protocols"</a></li>
                     </ul>
                 </nav>
-                (slot.await?)
+                (slot?)
             </body>
         </html>
     }
