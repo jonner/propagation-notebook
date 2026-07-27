@@ -187,14 +187,12 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
             if !taxon.regional_statuses.get().is_empty() {
                 <table>
                     <tr>
-                        <th>"ID"</th>
                         <th>"Name"</th>
                         <th>"Origin"</th>
                         <th>"Harvest Window"</th>
                     </tr>
                     for rs in taxon.regional_statuses.get() {
                         <tr>
-                            <td>(rs.region.get().id)</td>
                             <td><a href=(rs.path())>(&rs.region.get().name)</a></td>
                             <td>
                                 (rs
