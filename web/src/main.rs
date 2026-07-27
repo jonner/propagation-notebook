@@ -1,78 +1,67 @@
-use std::{net::SocketAddr, sync::Arc};
+use topcoat::{
+    router::{Router, RouterBuilderDiscoverExt, Slot, layout, page},
+    view::view,
+};
 
-use axum::{Router, response::IntoResponse, routing::get};
-use clap::Parser;
-use tracing_subscriber::{EnvFilter, layer::SubscriberExt, util::SubscriberInitExt};
-
-pub mod error;
-pub mod propagation;
-pub mod region;
-pub mod taxonomy;
-mod templates;
+mod components;
+mod error;
+mod leaflet;
+mod propagation;
+mod regions;
+mod taxa;
 mod util;
 
-#[derive(Debug, Clone, clap::Parser)]
-pub struct Cli {
-    #[arg(short, long, help = "Port to listen on")]
-    port: u16,
-}
+use crate::error::Error;
 
 #[tokio::main]
-async fn main() -> anyhow::Result<()> {
-    let filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::default());
-    tracing_subscriber::registry()
-        .with(tracing_subscriber::fmt::layer())
-        .with(filter)
-        .init();
-
-    let args = Cli::parse();
-    App::new().await?.serve(args.port).await
+async fn main() -> Result<(), Error> {
+    topcoat::start(
+        Router::builder()
+            .discover()
+            .app_context(libpropagation::db().await?)
+            .build(),
+    )
+    .await?;
+    Ok(())
 }
 
-#[derive(Debug, Clone)]
-pub struct App {
-    router: axum::Router,
-}
-
-pub struct AppState {
-    db: toasty::Db,
-}
-
-impl AppState {
-    pub async fn new() -> anyhow::Result<Self> {
-        Ok(Self {
-            db: libpropagation::db().await?,
-        })
+#[layout("/")]
+async fn layout(slot: Slot<'_>) -> topcoat::Result {
+    view! {
+        <!DOCTYPE html>
+        <html>
+            <head>
+                topcoat::dev::script()
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <meta charset="UTF-8">
+                <link
+                    rel="stylesheet"
+                    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+                    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+                    crossorigin=""
+                >
+                <script
+                    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+                    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+                    crossorigin=""
+                ></script>
+            </head>
+            <body>
+                <nav>
+                    <ul>
+                        <li><a href="/">"Home"</a></li>
+                        <li><a href="/taxa">"Taxonomy"</a></li>
+                        <li><a href="/regions">"Regions"</a></li>
+                        <li><a href="/propagation">"Propagation Protocols"</a></li>
+                    </ul>
+                </nav>
+                (slot.await?)
+            </body>
+        </html>
     }
 }
 
-#[axum::debug_handler]
-pub async fn get_index() -> impl IntoResponse {
-    templates::pages::index()
-}
-
-impl App {
-    pub async fn new() -> anyhow::Result<Self> {
-        Ok(Self {
-            router: Router::new()
-                .route("/", get(get_index))
-                .nest("/regions/", region::router())
-                .nest("/propagation/", propagation::router())
-                .nest("/taxa/", taxonomy::router())
-                .with_state(Arc::new(AppState::new().await?)),
-        })
-    }
-}
-
-impl App {
-    pub async fn serve(self, listen_port: u16) -> anyhow::Result<()> {
-        let listener = tokio::net::TcpListener::bind(("0.0.0.0", listen_port)).await?;
-        axum::serve(
-            listener,
-            self.router
-                .into_make_service_with_connect_info::<SocketAddr>(),
-        )
-        .await
-        .map_err(Into::into)
-    }
+#[page("/")]
+async fn home() -> topcoat::Result {
+    view! { <h1>"Home"</h1> }
 }
