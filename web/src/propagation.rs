@@ -10,7 +10,7 @@ use topcoat::{
 use tracing::trace;
 
 use crate::{
-    components::citation_list,
+    components::propagation_details,
     util::{Path, PropagationId, db},
 };
 
@@ -58,18 +58,9 @@ pub async fn get_propagation_details(cx: &Cx) -> topcoat::Result {
     trace!(?procedure);
     view! {
         <h1>(&procedure.name)</h1>
-        <dt>"ID"</dt>
-        <dd>(procedure.id)</dd>
-        <dt>"Name"</dt>
-        <dd>(procedure.name)</dd>
-        <dt>"Type"</dt>
-        <dd>(procedure.r#type.to_string())</dd>
-        <dt>"Notes"</dt>
-        <dd>(procedure.notes.as_deref().unwrap_or_default())</dd>
-        <dt>"Instructions"</dt>
-        <dd>(procedure.instructions)</dd>
-        <dt>"Taxa"</dt>
-        <dd>
+        propagation_details(procedure: &procedure)
+        <div>
+            <h2>"Taxa"</h2>
             if !taxa.is_empty() {
                 <table>
                     <tr>
@@ -81,9 +72,7 @@ pub async fn get_propagation_details(cx: &Cx) -> topcoat::Result {
                             <td>(taxon.id)</td>
                             <td>
                                 <span class="latin">
-                                    <a href=(taxon.path())>
-                                        (&taxon.complete_name)
-                                    </a>
+                                    <a href=(taxon.path())>(&taxon.complete_name)</a>
                                 </span>
                             </td>
                         </tr>
@@ -92,14 +81,6 @@ pub async fn get_propagation_details(cx: &Cx) -> topcoat::Result {
             } else {
                 "None"
             }
-        </dd>
-        <dt>"Citations"</dt>
-        <dd>
-            if !procedure.citations.get().is_empty() {
-                citation_list(citations: procedure.citations.get().iter().collect())
-            } else {
-                "None"
-            }
-        </dd>
+        </div>
     }
 }

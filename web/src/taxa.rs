@@ -10,7 +10,7 @@ use topcoat::{
 use tracing::trace;
 
 use crate::{
-    components::{citation_list, pagination_control},
+    components::{self, citation_list, pagination_control},
     util::{CleaningId, ModifyOffset, PageState, Path, PropagationId, TaxonId, db},
 };
 
@@ -241,7 +241,11 @@ pub async fn propagation_details(cx: &Cx) -> topcoat::Result {
     let propagation_id = path_param::<PropagationId>(cx)?;
     let tp =
         TaxonPropagationProcedure::filter_by_taxon_id_and_propagation_id(taxon_id, propagation_id)
-            .include(TaxonPropagationProcedure::fields().propagation())
+            .include(
+                TaxonPropagationProcedure::fields()
+                    .propagation()
+                    .citations(),
+            )
             .include(TaxonPropagationProcedure::fields().taxon())
             .include(
                 TaxonPropagationProcedure::fields()
@@ -261,27 +265,28 @@ pub async fn propagation_details(cx: &Cx) -> topcoat::Result {
             " for "
             <span class="latin">(&taxon.complete_name)</span>
         </h1>
-        <dt>"Procedure"</dt>
-        <dd><a href=(tp.propagation.get().path())>(&tp.propagation.get().name)</a></dd>
-        <dt>"Taxon"</dt>
-        <dd>
-            <span class="latin"><a href=(taxon.path())>(&taxon.complete_name)</a></span>
-        </dd>
-        <dt>"Confidence"</dt>
-        <dd>(tp.confidence.map(|v| v.to_string()).unwrap_or_default())</dd>
-        <dt>"Taxon-specific notes"</dt>
-        <dd>(tp.notes.as_deref().unwrap_or_default())</dd>
-        <dt>"Citations"</dt>
-        <dd>
-            citation_list(
-                citations: tp
-                    .citation_links
-                    .get()
-                    .iter()
-                    .map(|cl| cl.citation.get())
-                    .collect()
-            )
-        </dd>
+        <h2>"General procedure information"</h2>
+        <div class="ms-4">
+            components::propagation_details(procedure: tp.propagation.get())
+        </div>
+        <h2>"Taxon-specific information"</h2>
+        <div class="ms-4">
+            <h3>"Confidence"</h3>
+            <div>(tp.confidence.map(|v| v.to_string()).unwrap_or_default())</div>
+            <h3>"Taxon-specific notes"</h3>
+            <div>(tp.notes.as_deref().unwrap_or_default())</div>
+            <h3>"Citations"</h3>
+            <div>
+                citation_list(
+                    citations: tp
+                        .citation_links
+                        .get()
+                        .iter()
+                        .map(|cl| cl.citation.get())
+                        .collect()
+                )
+            </div>
+        </div>
     }
 }
 

@@ -1,4 +1,4 @@
-use libpropagation::citation::Citation;
+use libpropagation::{citation::Citation, propagation::PropagationProcedure};
 use topcoat::view::{component, view};
 
 use crate::util::{ModifyOffset, PageState};
@@ -54,5 +54,25 @@ pub async fn pagination_control<'p, T: ModifyOffset + Clone + Sync + Send + 'p>(
                 </li>
             </ul>
         </nav>
+    }
+}
+
+#[component]
+pub async fn propagation_details(procedure: &PropagationProcedure) -> topcoat::Result {
+    view! {
+        <h3>"Type"</h3>
+        <div>(procedure.r#type.to_string())</div>
+        <h3>"Notes"</h3>
+        <div>(procedure.notes.as_deref().unwrap_or_default())</div>
+        <h3>"Instructions"</h3>
+        <div>(&procedure.instructions)</div>
+        <h3>"Citations"</h3>
+        <div>
+            if !procedure.citations.get().is_empty() {
+                citation_list(citations: procedure.citations.get().iter().collect())
+            } else {
+                "None"
+            }
+        </div>
     }
 }
