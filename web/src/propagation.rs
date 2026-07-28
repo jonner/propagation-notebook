@@ -61,9 +61,11 @@ pub async fn get_propagation_details(cx: &Cx) -> topcoat::Result {
                         <tr>
                             <td>(tproc.taxon.get().id)</td>
                             <td>
-                                <a href=(tproc.taxon.get().path())>
-                                    (&tproc.taxon.get().complete_name)
-                                </a>
+                                <span class="latin">
+                                    <a href=(tproc.taxon.get().path())>
+                                        (&tproc.taxon.get().complete_name)
+                                    </a>
+                                </span>
                             </td>
                         </tr>
                     }

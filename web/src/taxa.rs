@@ -10,10 +10,8 @@ use topcoat::{
 use tracing::trace;
 
 use crate::{
-    components::citation_list,
-    util::{
-        CleaningId, ModifyOffset, PageState, Path, PropagationId, TaxonId, db, pagination_control,
-    },
+    components::{citation_list, pagination_control},
+    util::{CleaningId, ModifyOffset, PageState, Path, PropagationId, TaxonId, db},
 };
 
 #[derive(Debug, Clone, serde::Serialize)]
@@ -51,7 +49,7 @@ pub(crate) async fn list(cx: &Cx) -> topcoat::Result {
     trace!(?taxa);
     view! {
         <h1>"Taxon List"</h1>
-        <form method="get">
+        <form method="get" class="mb-6">
             <input
                 type="text"
                 name="q"
@@ -62,7 +60,11 @@ pub(crate) async fn list(cx: &Cx) -> topcoat::Result {
         </form>
         <ul>
             for taxon in taxa.iter() {
-                <li><a href=(taxon.path())>(&taxon.complete_name)</a></li>
+                <li>
+                    <span class="latin">
+                        <a href=(taxon.path())>(&taxon.complete_name)</a>
+                    </span>
+                </li>
             }
         </ul>
         pagination_control(state: &page_state, params: params)
@@ -89,7 +91,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
     trace!(?taxon);
 
     view! {
-        <h1>(&taxon.complete_name)</h1>
+        <h1><span class="latin">(&taxon.complete_name)</span></h1>
         <dt>"ID"</dt>
         <dd>(taxon.id)</dd>
         <dt>"Rank"</dt>
@@ -107,7 +109,9 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
         <dt>"Parent"</dt>
         <dd>
             match taxon.parent.get() {
-                Some(p) => <a href=(p.path())>(&p.complete_name)</a>,
+                Some(p) => <span class="latin">
+                    <a href=(p.path())>(&p.complete_name)</a>
+                </span>,
                 None => "",
             }
         </dd>
@@ -116,7 +120,11 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
         <dd>
             <ul>
                 for child in taxon.children.get() {
-                    <li><a href=(child.path())>(&child.complete_name)</a></li>
+                    <li>
+                        <span class="latin">
+                            <a href=(child.path())>(&child.complete_name)</a>
+                        </span>
+                    </li>
                 }
             </ul>
         </dd>
@@ -246,14 +254,19 @@ pub async fn propagation_details(cx: &Cx) -> topcoat::Result {
     trace!(?tp);
     let proc = tp.propagation.get();
     let taxon = tp.taxon.get();
-    let title = format!("{} for {}", proc.name, taxon.complete_name);
 
     view! {
-        <h1>(title)</h1>
+        <h1>
+            <span>(&proc.name)</span>
+            " for "
+            <span class="latin">(&taxon.complete_name)</span>
+        </h1>
         <dt>"Procedure"</dt>
         <dd><a href=(tp.propagation.get().path())>(&tp.propagation.get().name)</a></dd>
         <dt>"Taxon"</dt>
-        <dd><a href=(taxon.path())>(&taxon.complete_name)</a></dd>
+        <dd>
+            <span class="latin"><a href=(taxon.path())>(&taxon.complete_name)</a></span>
+        </dd>
         <dt>"Confidence"</dt>
         <dd>(tp.confidence.map(|v| v.to_string()).unwrap_or_default())</dd>
         <dt>"Taxon-specific notes"</dt>
@@ -290,11 +303,16 @@ pub async fn cleaning_details(cx: &Cx) -> topcoat::Result {
     .await?;
     trace!(?proc);
     let taxon = proc.taxon.get();
-    let title = format!("{} for {}", proc.name, taxon.complete_name);
     view! {
-        <h1>(title)</h1>
+        <h1>
+            <span>(&proc.name)</span>
+            " for "
+            <span class="latin">(&taxon.complete_name)</span>
+        </h1>
         <dt>"Taxon"</dt>
-        <dd><a href=(taxon.path())>(&taxon.complete_name)</a></dd>
+        <dd>
+            <span class="latin"><a href=(taxon.path())>(&taxon.complete_name)</a></span>
+        </dd>
         <dt>"Instructions"</dt>
         <dd>(proc.instructions)</dd>
         <dt>"Additional Notes"</dt>

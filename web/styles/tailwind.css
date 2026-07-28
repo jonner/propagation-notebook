@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+h1 {
+  @apply text-3xl font-bold text-orange-900 mb-4;
+}
+
+ul {
+  @apply ms-4;
+}
+
+dt {
+  @apply font-bold;
+}
+
+dd {
+  @apply ps-4;
+}
+
+a[href] {
+  @apply text-orange-700 underline font-bold;
+}
+
+header {
+  @apply text-lg
+}
+
+header a[href] {
+  @apply text-orange-100 no-underline hover:text-white;
+}
+
+form input[type=text] {
+  @apply px-3 py-2 text-slate-800 bg-white border border-slate-300 placeholder:text-slate-400 rounded-lg;
+}
+
+a.button, form button {
+  @apply px-3 py-2 text-white bg-orange-900 border rounded-lg no-underline;
+}
+
+.latin {
+  @apply italic
+}

@@ -10,8 +10,9 @@ use topcoat::{
 use tracing::trace;
 
 use crate::{
+    components::pagination_control,
     leaflet::Map,
-    util::{PageQueryParams, PageState, Path, RegionId, TaxonId, db, pagination_control},
+    util::{PageQueryParams, PageState, Path, RegionId, TaxonId, db},
 };
 
 #[page("/regions")]
@@ -41,7 +42,7 @@ pub(crate) async fn details(cx: &Cx) -> topcoat::Result {
         .await?;
     trace!(?region);
     view! {
-        <h1>(region.name)</h1>
+        <h1>(&region.name)</h1>
         <dl>
             <dt>"ID"</dt>
             <dd>(region.id)</dd>
@@ -94,7 +95,11 @@ pub async fn taxa_list(cx: &Cx) -> topcoat::Result {
             for taxon in taxa {
                 for rts in taxon.regional_statuses.get() {
                     if rts.region_id == region.id {
-                        <li><a href=(rts.path())>(&taxon.complete_name)</a></li>
+                        <li>
+                            <span class="latin">
+                                <a href=(rts.path())>(&taxon.complete_name)</a>
+                            </span>
+                        </li>
                     }
                 }
             }
@@ -116,12 +121,17 @@ pub async fn taxon_status(cx: &Cx) -> topcoat::Result {
         .await?;
     let region = rts.region.get();
     let taxon = rts.taxon.get();
-    let title = format!("{} in {}", taxon.complete_name, region.name);
 
     view! {
-        <h1>(title)</h1>
+        <h1>
+            <span class="latin">(&taxon.complete_name)</span>
+            " in "
+            <span>(&region.name)</span>
+        </h1>
         <dt>"Taxon"</dt>
-        <dd><a href=(taxon.path())>(&taxon.complete_name)</a></dd>
+        <dd>
+            <span class="latin"><a href=(taxon.path())>(&taxon.complete_name)</a></span>
+        </dd>
         <dt>"Region"</dt>
         <dd><a href=(region.path())>(&region.name)</a></dd>
         <dt>"Origin"</dt>
