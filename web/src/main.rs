@@ -1,8 +1,9 @@
 use topcoat::{
     asset::{AssetBundle, RouterBuilderAssetExt},
+    icon::{icon, iconify},
     router::{Router, RouterBuilderDiscoverExt, layout, page},
     tailwind,
-    view::view,
+    view::{attributes, view},
 };
 
 mod citation;
@@ -29,6 +30,8 @@ async fn main() -> Result<(), Error> {
     .await?;
     Ok(())
 }
+
+iconify::include!("mdi");
 
 #[layout("/")]
 async fn layout(slot: topcoat::Result) -> topcoat::Result {
@@ -58,7 +61,14 @@ async fn layout(slot: topcoat::Result) -> topcoat::Result {
                     class="flex items-center justify-between font-bold flex-wrap p-6"
                 >
                     <div class="flex items-center flex-shrink-0 text-white mr-8">
-                        <a href="/">"Propagation Notebook"</a>
+                        <a href="/">
+                            icon(
+                                data: mdi::FLOWER_POPPY,
+                                label: "Home",
+                                attrs: attributes! { class="icon" }
+                            )
+                            "Propagation Notebook"
+                        </a>
                     </div>
                     <nav class="w-full block flex-grow lg:w-auto">
                         <ul class="lg:flex gap-x-6">
@@ -67,6 +77,11 @@ async fn layout(slot: topcoat::Result) -> topcoat::Result {
                                     class="block mt-6 lg:mt-0 text-orange-100 hover:text-white"
                                     href="/taxa"
                                 >
+                                    icon(
+                                        data: mdi::FORMAT_LIST_BULLETED,
+                                        label: "list icon",
+                                        attrs: attributes! { class="icon" }
+                                    )
                                     "Taxonomy"
                                 </a>
                             </li>
@@ -75,6 +90,11 @@ async fn layout(slot: topcoat::Result) -> topcoat::Result {
                                     class="block mt-6 lg:mt-0 text-orange-100 hover:text-white"
                                     href="/regions"
                                 >
+                                    icon(
+                                        data: mdi::GLOBE,
+                                        label: "list icon",
+                                        attrs: attributes! { class="icon" }
+                                    )
                                     "Regions"
                                 </a>
                             </li>
@@ -83,6 +103,11 @@ async fn layout(slot: topcoat::Result) -> topcoat::Result {
                                     class="block mt-6 lg:mt-0 text-orange-100 hover:text-white"
                                     href="/propagation"
                                 >
+                                    icon(
+                                        data: mdi::SPROUT,
+                                        label: "list icon",
+                                        attrs: attributes! { class="icon" }
+                                    )
                                     "Propagation Protocols"
                                 </a>
                             </li>
