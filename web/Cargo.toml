@@ -5,6 +5,7 @@ edition.workspace = true
 
 [dependencies]
 geojson.workspace = true
+jiff.workspace = true
 libpropagation.workspace = true
 serde.workspace = true
 serde_urlencoded = "0.7.1"

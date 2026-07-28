@@ -39,3 +39,19 @@ a.button, form button {
 .latin {
   @apply italic
 }
+
+table {
+  @apply border-separate border-spacing-x-6;
+}
+
+td, th {
+  @apply text-start p-1;
+}
+
+.warning, .introduced {
+  @apply bg-red-200 text-red-600 py-1 px-2 rounded;
+}
+
+.success, .native {
+  @apply bg-green-200 text-green-600 py-1 px-2 rounded;
+}
