@@ -139,14 +139,14 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
         </dd>
 
         <dt>"ITIS taxon ID"</dt>
-        <dd>(taxon.itis_id)</dd>
+        <dd><a href=(format!("https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value={}", taxon.itis_id))>(taxon.itis_id)</a></dd>
 
         <dt>"iNaturalist taxon ID"</dt>
         <dd>
-            (taxon
-                .inaturalist_id
-                .map(|v| v.to_string())
-                .unwrap_or_default())
+        if let Some(id) = taxon.inaturalist_id {
+            <a href=(format!("Https://www.inaturalist.org/taxa/{id}"))>(taxon
+                .inaturalist_id)</a>
+        }
         </dd>
         if let Some(collecting_data) = &taxon.collecting_data.get() {
             <dt>"Ripening"</dt>
