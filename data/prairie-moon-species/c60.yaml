@@ -1,0 +1,667 @@
+propagation_id: 5
+citation:
+  title: Prairie Moon
+  url: https://www.prairiemoon.com/seeds#/?resultsPerPage=500&filter.ss_germination_code_facet=C(60)
+species:
+  - latin: Acorus americanus
+    common: Sweet Flag
+  - latin: Agalinis auriculata
+    common: Ear-leaf False Foxglove
+  - latin: Agalinis tenuifolia
+    common: Slender False Foxglove
+  - latin: Agastache nepetoides
+    common: Yellow Giant Hyssop
+  - latin: Agastache scrophulariifolia
+    common: Purple Giant Hyssop
+  - latin: Ageratina altissima
+    common: White Snakeroot
+  - latin: Allium canadense
+    common: Wild Garlic
+  - latin: Allium canadense var. lavendulare
+    common: Showy Wild Garlic
+  - latin: Allium cernuum
+    common: Nodding Onion
+  - latin: Allium stellatum
+    common: Prairie Onion
+  - latin: Alnus incana ssp. rugosa
+    common: Speckled Alder
+  - latin: Amsonia illustris
+    common: Ozark Bluestar
+  - latin: Amsonia tabernaemontana
+    common: Eastern Bluestar
+  - latin: Anemone cylindrica
+    common: Thimbleweed
+  - latin: Anemone virginiana
+    common: Tall Thimbleweed
+  - latin: Antennaria neglecta
+    common: Prairie Pussytoes
+  - latin: Antennaria plantaginifolia
+    common: Pussytoes
+  - latin: Aquilegia canadensis
+    common: Columbine
+  - latin: Aralia racemosa
+    common: Spikenard
+  - latin: Arnoglossum atriplicifolium
+    common: Pale Indian Plantain
+  - latin: Arnoglossum plantagineum
+    common: Prairie Indian Plantain
+  - latin: Arnoglossum reniforme
+    common: Great Indian Plantain
+  - latin: Asclepias arenaria
+    common: Western Sand Milkweed
+  - latin: Aureolaria flava
+    common: Smooth Yellow False Foxglove
+  - latin: Aureolaria grandiflora
+    common: Yellow False Foxglove
+  - latin: Aureolaria pedicularia
+    common: Fern-leaved Foxglove
+  - latin: Bidens aristosa
+    common: Swamp Marigold
+  - latin: Bidens cernua
+    common: Nodding Bur Marigold
+  - latin: Bidens connata
+    common: Purple-stemmed Tickseed
+  - latin: Bidens frondosa
+    common: Common Beggarticks
+  - latin: Bidens polylepis
+    common: Bearded Beggarticks
+  - latin: Blephilia ciliata
+    common: Downy Wood Mint
+  - latin: Blephilia hirsuta
+    common: Hairy Wood Mint
+  - latin: Boltonia asteroides
+    common: False Aster
+  - latin: Boltonia decurrens
+    common: Decurrent False Aster
+  - latin: Callirhoe triangulata
+    common: Clustered Poppy Mallow
+  - latin: Caltha palustris
+    common: Marsh Marigold
+  - latin: Camassia angusta
+    common: Southern Wild Hyacinth
+  - latin: Cardamine concatenata
+    common: Toothwort
+  - latin: Carex albursina
+    common: White Bear Sedge
+  - latin: Carex annectens
+    common: Small Yellow Fox Sedge
+  - latin: Carex aquatilis
+    common: Water Sedge
+  - latin: Carex atherodes
+    common: Hairy-leaved Lake Sedge
+  - latin: Carex bebbii
+    common: Bebb's Oval Sedge
+  - latin: Carex bicknellii
+    common: Copper-shouldered Oval Sedge
+  - latin: Carex blanda
+    common: Common Wood Sedge
+  - latin: Carex brevior
+    common: Plains Oval Sedge
+  - latin: Carex buxbaumii
+    common: Buxbaum's Sedge
+  - latin: Carex canescens
+    common: Gray Bog Sedge
+  - latin: Carex cephalophora
+    common: Short-headed Bracted Sedge
+  - latin: Carex comosa
+    common: Bristly Sedge
+  - latin: Carex crawfordii
+    common: Early Fen Sedge
+  - latin: Carex crinita
+    common: Fringed Sedge
+  - latin: Carex cristatella
+    common: Crested Oval Sedge
+  - latin: Carex crus-corvi
+    common: Crowfoot Fox Sedge
+  - latin: Carex cryptolepis
+    common: Northeastern Sedge
+  - latin: Carex davisii
+    common: Awned Graceful Sedge
+  - latin: Carex diandra
+    common: Bog Panicled Sedge
+  - latin: Carex eburnea
+    common: Ivory Sedge
+  - latin: Carex echinata
+    common: Large-fruited Star Sedge
+  - latin: Carex frankii
+    common: Bristly Cattail Sedge
+  - latin: Carex gracilescens
+    common: Slender Wood Sedge
+  - latin: Carex gracillima
+    common: Purple-sheathed Graceful Sedge
+  - latin: Carex granularis
+    common: Pale Sedge
+  - latin: Carex gravida
+    common: Long-awned Bracted Sedge
+  - latin: Carex grayi
+    common: Common Bur Sedge
+  - latin: Carex grisea
+    common: Wood Gray Sedge
+  - latin: Carex hirsutella
+    common: Hairy Green Sedge
+  - latin: Carex hystericina
+    common: Porcupine Sedge
+  - latin: Carex interior
+    common: Prairie Star Sedge
+  - latin: Carex intumescens
+    common: Shining Bur Sedge
+  - latin: Carex jamesii
+    common: James' Sedge
+  - latin: Carex lacustris
+    common: Common Lake Sedge
+  - latin: Carex laeviconica
+    common: Long-toothed Lake Sedge
+  - latin: Carex lasiocarpa
+    common: Narrow-leaved Woolly Sedge
+  - latin: Carex lupulina #lupilina
+    common: Common Hop Sedge
+  - latin: Carex lurida
+    common: Sallow Sedge
+  - latin: Carex meadii
+    common: Mead's Stiff Sedge
+  - latin: Carex molesta
+    common: Field Oval Sedge
+  - latin: Carex muehlenbergii
+    common: Sand Bracted Sedge
+  - latin: Carex normalis
+    common: Spreading Oval Sedge
+  - latin: Carex pellita
+    common: Broad-leaved Woolly Sedge
+  - latin: Carex pensylvanica
+    common: Pennsylvania Sedge
+  - latin: Carex prairea
+    common: Fen Panicled Sedge
+  - latin: Carex pseudocyperus
+    common: False Bristly Sedge
+  - latin: Carex radiata
+    common: Eastern Star Sedge
+  - latin: Carex retrorsa
+    common: Deflexed Bottle-brush Sedge
+  - latin: Carex rosea
+    common: Curly-styled Wood Sedge
+  - latin: Carex sartwellii
+    common: Running Marsh Sedge
+  - latin: Carex scoparia
+    common: Lance-fruited Oval Sedge
+  - latin: Carex shortiana
+    common: Short's Sedge
+  - latin: Carex sparganioides
+    common: Bur-reed Sedge
+  - latin: Carex sprengelii
+    common: Long-beaked Sedge
+  - latin: Carex squarrosa
+    common: Narrow-leaved Cattail Sedge
+  - latin: Carex sterilis
+    common: Fen Star Sedge
+  - latin: Carex stipata
+    common: Awl-fruited Sedge
+  - latin: Carex stricta
+    common: Common Tussock Sedge
+  - latin: Carex tenera
+    common: Narrow-leaved Oval Sedge
+  - latin: Carex tribuloides
+    common: Awl-fruited Oval Sedge
+  - latin: Carex trichocarpa
+    common: Hairy-fruited Lake Sedge
+  - latin: Carex typhina
+    common: Common Cattail Sedge
+  - latin: Carex utriculata
+    common: Common Yellow Lake Sedge
+  - latin: Carex vulpinoidea
+    common: Brown Fox Sedge
+  - latin: Castilleja coccinea
+    common: Indian Paintbrush
+  - latin: Castilleja sessiliflora
+    common: Downy Painted Cup
+  - latin: Ceanothus americanus
+    common: Ceanothus ovatus
+  - latin: Red Root
+    common: Chamaenerion angustifolium
+  - latin: Fireweed
+    common: Chasmanthium latifolium
+  - latin: River Oats
+    common: Cinna arundinacea
+  - latin: Wood Reed Grass
+    common: Cirsium discolor
+  - latin: Pasture Thistle
+    common: Conoclinium coelestinum
+  - latin: Mistflower
+    common: Coreopsis palmata
+  - latin: Prairie Coreopsis
+    common: Coreopsis tripteris
+  - latin: Tall Coreopsis
+    common: Cryptotaenia canadensis
+  - latin: Honewort
+    common: Cyperus schweinitzii
+  - latin: Rough Sand Sedge
+    common: Dasistoma macrophylla
+  - latin: Mullein-foxglove
+    common: Delphinium carolinianum
+  - latin: Wild Blue Larkspur
+    common: Delphinium virescens
+  - latin: Prairie Larkspur
+    common: Diarrhena americana
+  - latin: American Beak Grass
+    common: Diarrhena obovata
+  - latin: Beak Grass
+    common: Doellingeria umbellata
+  - latin: Flat-topped Aster
+    common: Drymocallis arguta
+  - latin: Prairie Cinquefoil
+    common: Dulichium arundinaceum
+  - latin: Three-way Sedge
+    common: Echinacea paradoxa
+  - latin: Bush's Coneflower
+    common: Echinacea simulata
+  - latin: Ozark Coneflower
+    common: Echinacea tennesseensis
+  - latin: Tennessee Coneflower
+    common: Echinocystis lobata
+  - latin: Wild Cucumber
+    common: Eleocharis acicularis
+  - latin: Spike Rush
+    common: Eleocharis erythropoda
+  - latin: Bald Spike Rush
+    common: Eleocharis obtusa
+  - latin: Blunt Spike Rush
+    common: Eleocharis palustris
+  - latin: Great Spike Rush
+    common: Enemion biternatum
+  - latin: False Rue Anemone
+    common: Epilobium coloratum
+  - latin: Cinnamon Willow Herb
+    common: Epilobium glandulosum
+  - latin: Northern Willow Herb
+    common: Erigeron pulchellus
+  - latin: Robin's Plantain
+    common: Eryngium yuccifolium
+  - latin: Rattlesnake Master
+    common: Euthamia gymnospermoides
+  - latin: Great Plains Goldenrod
+    common: Eupatorium altissimum
+  - latin: Tall Boneset
+    common: Eupatorium hyssopifolium
+  - latin: Hyssop-leaved Thoroughwort
+    common: Eupatorium serotinum
+  - latin: Late Boneset
+    common: Eurybia divaricata
+  - latin: White Wood Aster
+    common: Eurybia furcata
+  - latin: Forked Aster
+    common: Eurybia macrophylla
+  - latin: Big-leaved Aster
+    common: Eurybia schreberi
+  - latin: Schreber's Wood Aster
+    common: Euthamia graminifolia
+  - latin: Grass-leaved Goldenrod
+    common: Eutrochium fistulosum
+  - latin: Hollow Joe Pye Weed
+    common: Festuca paradoxa
+  - latin: Clustered Fescue
+    common: Festuca subverticillata
+  - latin: Nodding Fescue
+    common: Fragaria virginiana
+  - latin: Wild Strawberry
+    common: Froelichia floridana
+  - latin: Cottonweed
+    common: Gentiana andrewsii
+  - latin: Bottle Gentian
+    common: Gentiana flavida
+  - latin: Cream Gentian
+    common: Gentiana puberulenta
+  - latin: Downy Gentian
+    common: Gentiana quinquefolia
+  - latin: Stiff Gentian
+    common: Gentianopsis crinita
+  - latin: Fringed Gentian
+    common: Geranium maculatum
+  - latin: Wild Geranium
+    common: Geum aleppicum
+  - latin: Yellow Avens
+    common: Geum canadense
+  - latin: White Avens
+    common: Geum triflorum
+  - latin: Prairie Smoke
+    common: Hasteola suaveolens
+  - latin: Sweet Indian Plantain
+    common: Hibiscus laevis
+  - latin: Rose Mallow
+    common: Hibiscus lasiocarpos
+  - latin: Hairy Rose Mallow
+    common: Hibiscus moscheutos
+  - latin: Swamp Rose Mallow
+    common: Hydrophyllum virginianum
+  - latin: Virginia Waterleaf
+    common: Hypericum majus
+  - latin: Great Canada St. John's Wort
+    common: Hypericum punctatum
+  - latin: Dotted St. John's Wort
+    common: Hypericum pyramidatum
+  - latin: Great St. John's Wort
+    common: Hypericum sphaerocarpum
+  - latin: Round-fruited St. John's Wort
+    common: Iliamna remota
+  - latin: Kankakee Mallow
+    common: Juncus canadensis
+  - latin: Canada Rush
+    common: Juncus dudleyi
+  - latin: Dudley's Rush
+    common: Juncus effusus
+  - latin: Common Rush
+    common: Juncus greenei
+  - latin: Greene's Rush
+    common: Juncus interior
+  - latin: Inland Rush
+    common: Juncus nodosus
+  - latin: Knotted Rush
+    common: Juncus tenuis
+  - latin: Path Rush
+    common: Juncus torreyi
+  - latin: Torrey's Rush
+    common: Krigia biflora
+  - latin: Cynthia
+    common: Liatris aspera
+  - latin: Button Blazing Star
+    common: Liatris cylindracea
+  - latin: Dwarf Blazing Star
+    common: Liatris ligulistylis
+  - latin: Meadow Blazing Star
+    common: Liatris pycnostachya
+  - latin: Prairie Blazing Star
+    common: Liatris scariosa var. nieuwlandii
+  - latin: Northern Blazing Star
+    common: Liatris spicata
+  - latin: Dense Blazing Star
+    common: Liatris squarrosa
+  - latin: Scaly Blazing Star
+    common: Lilium philadelphicum
+  - latin: Prairie Lily
+    common: Lobelia cardinalis
+  - latin: Cardinal Flower
+    common: Lobelia inflata
+  - latin: Indian Tobacco
+    common: Lobelia siphilitica
+  - latin: Great Blue Lobelia
+    common: Lobelia spicata
+  - latin: Pale Spiked Lobelia
+    common: Ludwigia alternifolia
+  - latin: Seedbox
+    common: Lysimachia ciliata
+  - latin: Fringed Loosestrife
+    common: Lysimachia hybrida
+  - latin: River Loosestrife
+    common: Lysimachia quadriflora
+  - latin: Prairie Loosestrife
+    common: Lythrum alatum
+  - latin: Winged Loosestrife
+    common: Menispermum canadense
+  - latin: Moonseed
+    common: Mertensia virginica
+  - latin: Virginia Bluebells
+    common: Mimulus ringens
+  - latin: Monkey Flower
+    common: Monarda bradburiana
+  - latin: Bradbury's Monarda
+    common: Napaea dioica
+  - latin: Glade Mallow
+    common: Oenothera filiformis
+  - latin: Large-flowered Gaura
+    common: Oenothera gaura
+  - latin: Biennial Gaura
+    common: Oenothera macrocarpa
+  - latin: Missouri Evening Primrose
+    common: Oligoneuron riddellii
+  - latin: Riddell's Goldenrod
+    common: Oligoneuron rigidum
+  - latin: Stiff Goldenrod
+    common: Osmorhiza claytonii
+  - latin: Sweet Cicely
+    common: Osmorhiza longistylis
+  - latin: Aniseroot
+    common: Oxalis violacea
+  - latin: Violet Wood Sorrel
+    common: Packera aurea
+  - latin: Golden Ragwort
+    common: Packera plattensis
+  - latin: Prairie Ragwort
+    common: Parthenium integrifolium
+  - latin: Wild Quinine
+    common: Passiflora incarnata
+  - latin: Purple Passion Flower
+    common: Penstemon hirsutus
+  - latin: Hairy Beardtongue
+    common: Penstemon laevigatus
+  - latin: Eastern Beardtongue
+    common: Penthorum sedoides
+  - latin: Ditch Stonecrop
+    common: Perideridia americana
+  - latin: Wild Dill
+    common: Persicaria amphibia
+  - latin: Marsh Smartweed
+    common: Persicaria pensylvanica
+  - latin: Pinkweed
+    common: Persicaria punctata
+  - latin: Smartweed
+    common: Persicaria virginiana
+  - latin: Woodland Knotweed
+    common: Phemeranthus rugospermus
+  - latin: Fame Flower
+    common: Phlox divaricata
+  - latin: Wild Blue Phlox
+    common: Phlox glaberrima ssp. interior
+  - latin: Smooth Phlox
+    common: Phlox maculata
+  - latin: Wild Sweet William
+    common: Phlox paniculata
+  - latin: Garden Phlox
+    common: Phlox pilosa
+  - latin: Prairie Phlox
+    common: Phryma leptostachya
+  - latin: Lopseed
+    common: Physocarpus opulifolius
+  - latin: Prairie Ninebark
+    common: Physostegia angustifolia
+  - latin: Narrow-leaved Obedient Plant
+    common: Physostegia virginiana
+  - latin: Obedient Plant
+    common: Polemonium reptans
+  - latin: Jacob's Ladder
+    common: Polygala senega
+  - latin: Seneca Snakeroot
+    common: Polymnia canadensis
+  - latin: Small-flowered Leafcup
+    common: Polymnia uvedalia
+  - latin: Bearsfoot
+    common: Pontederia cordata
+  - latin: Pickerelweed
+    common: Porteranthus stipulatus
+  - latin: Western Indian Physic
+    common: Potentilla palustris
+  - latin: Marsh Cinquefoil
+    common: Prenanthes alba
+  - latin: Lion's Foot
+    common: Primula fassettii
+  - latin: Amethyst Shooting Star
+    common: Pseudognaphalium obtusifolium
+  - latin: Sweet Everlasting
+    common: Ptelea trifoliata
+  - latin: Wafer Ash
+    common: Ranunculus fascicularis
+  - latin: Early Buttercup
+    common: Ranunculus hispidus
+  - latin: Swamp Buttercup
+    common: Ranunculus pensylvanicus
+  - latin: Bristly Buttercup
+    common: Ranunculus rhomboideus
+  - latin: Prairie Buttercup
+    common: Rhexia virginica
+  - latin: Meadow Beauty
+    common: Rudbeckia fulgida var. sullivantii
+  - latin: Orange Coneflower
+    common: Ruellia humilis
+  - latin: Wild Petunia
+    common: Ruellia strepens
+  - latin: Smooth Wild Petunia
+    common: Rumex orbiculatus
+  - latin: Great Water Dock
+    common: Sagittaria brevirostra
+  - latin: Short-beaked Arrowhead
+    common: Sagittaria cuneata
+  - latin: Arumleaf Arrowhead
+    common: Sagittaria latifolia
+  - latin: Common Arrowhead
+    common: Saururus cernuus
+  - latin: Lizard's Tail
+    common: Saxifraga pensylvanica
+  - latin: Swamp Saxifrage
+    common: Schoenoplectus acutus var. acutus
+  - latin: Hardstem Bulrush
+    common: Schoenoplectus pungens
+  - latin: Chairmaker's Rush
+    common: Schoenoplectus tabernaemontani
+  - latin: Great Bulrush
+    common: Scirpus atrovirens
+  - latin: Dark-green Bulrush
+    common: Scirpus cyperinus
+  - latin: Wool Grass
+    common: Scirpus microcarpus
+  - latin: Barberpole Sedge
+    common: Scirpus pendulus
+  - latin: Rufous Bulrush
+    common: Scrophularia lanceolata
+  - latin: Early Figwort
+    common: Scrophularia marilandica
+  - latin: Late Figwort
+    common: Scutellaria incana
+  - latin: Hoary Skullcap
+    common: Scutellaria lateriflora
+  - latin: Mad-dog Skullcap
+    common: Scutellaria leonardii
+  - latin: Small Skullcap
+    common: Sicyos angulatus
+  - latin: Bur Cucumber
+    common: Silene nivea
+  - latin: Snowy Campion
+    common: Silene regia
+  - latin: Royal Catchfly
+    common: Silene stellata
+  - latin: Starry Campion
+    common: Silene virginica
+  - latin: Fire Pink
+    common: Silphium integrifolium
+  - latin: Rosin Weed
+    common: Silphium laciniatum
+  - latin: Compass Plant
+    common: Silphium perfoliatum
+  - latin: Cup Plant
+    common: Silphium terebinthinaceum
+  - latin: Prairie Dock
+    common: Silphium trifoliatum
+  - latin: Whorled Rosin Weed
+    common: Sisyrinchium albidum
+  - latin: Common Blue-eyed Grass
+    common: Sisyrinchium angustifolium
+  - latin: Stout Blue-eyed Grass
+    common: Sisyrinchium campestre
+  - latin: Prairie Blue-eyed Grass
+    common: Sium suave
+  - latin: Tall Water Parsnip
+    common: Solidago caesia
+  - latin: Blue-stemmed Goldenrod
+    common: Solidago flexicaulis
+  - latin: Zig Zag Goldenrod
+    common: Solidago gigantea
+  - latin: Late Goldenrod
+    common: Solidago juncea
+  - latin: Early Goldenrod
+    common: Solidago missouriensis
+  - latin: Missouri Goldenrod
+    common: Solidago nemoralis
+  - latin: Old Field Goldenrod
+    common: Solidago odora
+  - latin: Sweet Goldenrod
+    common: Solidago patula
+  - latin: Round-leaved Goldenrod
+    common: Solidago rugosa
+  - latin: Wrinkle-leaf Goldenrod
+    common: Solidago sciaphila
+  - latin: Cliff Goldenrod
+    common: Solidago sempervirens
+  - latin: Seaside Goldenrod
+    common: Solidago speciosa
+  - latin: Showy Goldenrod
+    common: Solidago uliginosa
+  - latin: Bog Goldenrod
+    common: Solidago ulmifolia
+  - latin: Elm-leaved Goldenrod
+    common: Spiraea alba
+  - latin: Meadowsweet
+    common: Spiraea tomentosa
+  - latin: Steeplebush
+    common: Symphyotrichum cordifolium
+  - latin: Heart-leaved Aster
+    common: Symphyotrichum firmum
+  - latin: Shining Aster
+    common: Symphyotrichum novae-angliae
+  - latin: Symphyotrichum novi-belgii
+    common: Symphyotrichum pilosum
+  - latin: Frost Aster
+    common: Symphyotrichum prenanthoides
+  - latin: Crooked-stemmed Aster
+    common: Symphyotrichum puniceum
+  - latin: Swamp Aster
+    common: Symphyotrichum sericeum
+  - latin: Silky Aster
+    common: Symphyotrichum urophyllum
+  - latin: Arrow-leaved Aster
+    common: Taenidia integerrima
+  - latin: Yellow Pimpernel
+    common: Tephroseris palustris
+  - latin: Marsh Fleabane
+    common: Teucrium canadense
+  - latin: Germander
+    common: Thalictrum dasycarpum
+  - latin: Purple Meadow Rue
+    common: Thalictrum dioicum
+  - latin: Early Meadow Rue
+    common: Tridens flavus
+  - latin: Purpletop
+    common: Triodanis perfoliata
+  - latin: Venus' Looking Glass
+    common: Turritis glabra
+  - latin: Tower Mustard
+    common: Valeriana edulis var. ciliata
+  - latin: Hairy Valerian
+    common: Veratrum virginicum
+  - latin: Bunch Flower
+    common: Verbena stricta
+  - latin: Hoary Vervain
+    common: Verbesina helianthoides
+  - latin: Yellow Crownbeard
+    common: Vernonia baldwinii
+  - latin: Western Ironweed
+    common: Vernonia fasciculata
+  - latin: Common Ironweed
+    common: Vernonia gigantea
+  - latin: Tall Ironweed
+    common: Vernonia missurica
+  - latin: Missouri Ironweed
+    common: Vernonia noveboracensis
+  - latin: Viola eriocarpa
+    common: Smooth Yellow Violet
+  - latin: Viola pedata
+    common: Bird's Foot Violet
+  - latin: Viola pedatifida
+    common: Prairie Violet
+  - latin: Viola sororia
+    common: Common Blue Violet
+  # - latin: Viola sororia f. priceana
+  #   common: Common Blue Violet, Bi-Colored Form
+  # - latin: Viola sororia f. rubra
+  #   common: Common Blue Violet, pink form
+  - latin: Zigadenus elegans
+    common: White Camass
+  - latin: Zizia aptera
+    common: Heart-leaf Golden Alexanders
+  - latin: Zizia aurea
+    common: Golden Alexanders

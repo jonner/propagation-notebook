@@ -1,0 +1,53 @@
+propagation_id: 3
+citation:
+  title: Prairie Moon
+  url: https://www.prairiemoon.com/seeds#/?resultsPerPage=500&filter.ss_germination_code_facet=C(10)
+species:
+  - latin: Amorpha canescens
+    common: Lead Plant
+  - latin: Amorpha fruticosa
+    common: False Indigo
+  - latin: Amorpha nana
+    common: Fragrant False Indigo
+  - latin: Astragalus canadensis
+    common: Canada Milk Vetch
+  - latin: Astragalus crassicarpus
+    common: Ground Plum
+  - latin: Astragalus racemosus
+    common: Creamy Milk Vetch
+  - latin: Baptisia alba
+    common: White Wild Indigo
+  - latin: Baptisia australis
+    common: Blue Wild Indigo
+  - latin: Baptisia australis var. minor
+    common: Dwarf Blue Indigo
+  - latin: Baptisia bracteata
+    common: Cream Wild Indigo
+  - latin: Baptisia sphaerocarpa
+    common: Large Yellow Wild Indigo
+  - latin: Baptisia tinctoria
+    common: Small Yellow Wild Indigo
+  - latin: Chamaecrista fasciculata
+    common: Partridge Pea
+  - latin: Desmodium glutinosum
+    common: Pointed-leaved Tick Trefoil
+  - latin: Lespedeza capitata
+    common: Round-headed Bush Clover
+  - latin: Lespedeza virginica
+    common: Slender Bush Clover
+  - latin: Lupinus perennis ssp. perennis
+    common: Sundial Lupine
+  - latin: Mimosa quadrivalvis var. nuttallii
+    common: Sensitive Plant
+  - latin: Orbexilum onobrychis
+    common: French Grass
+  - latin: Orbexilum pedunculatum
+    common: Sampson's Snakeroot
+  - latin: Psoralidium tenuiflorum #Pediomelum tenuiflorum
+    common: Scurfy Pea
+  - latin: Senna hebecarpa
+    common: Wild Senna
+  - latin: Senna marilandica
+    common: Maryland Senna
+  - latin: Tephrosia virginiana
+    common: Goat's Rue

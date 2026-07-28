@@ -1,0 +1,203 @@
+propagation_id: 1
+citation:
+  title: Prairie Moon
+  url: "https://www.prairiemoon.com/seeds#/?resultsPerPage=500&filter.ss_germination_code_facet=A"
+species:
+  - latin: Agrimonia gryposepala
+    common: Tall Hairy Agrimony
+  - latin: Agrimonia striata
+    common: Roadside Agrimony
+  - latin: Ammannia coccinea
+    common: Scarlet Toothcup
+  - latin: Andropogon gerardii
+    common: Big Bluestem
+  - latin: Apocynum cannabinum
+    common: Dogbane
+  # - latin: Apocynum sibiricum
+  #   common: Clasping Dogbane
+  - latin: Beckmannia syzigachne
+    common: American Slough Grass
+  - latin: Boehmeria cylindrica
+    common: Smallspike False Nettle
+  - latin: Bouteloua curtipendula
+    common: Side-oats Grama
+  - latin: Bouteloua gracilis
+    common: Blue Grama
+  - latin: Brickellia eupatorioides
+    common: False Boneset
+  - latin: Bromus ciliatus
+    common: Fringed Brome
+  - latin: Bromus kalmii
+    common: Prairie Brome
+  - latin: Buchloe dactyloides
+    common: Buffalo Grass - Cultivar
+  - latin: Calamagrostis canadensis
+    common: Blue Joint Grass
+  - latin: Calamovilfa longifolia
+    common: Sand Reed Grass
+  - latin: Carex muskingumensis
+    common: Palm Sedge
+  - latin: Cephalanthus occidentalis
+    common: Buttonbush
+  - latin: Crotalaria sagittalis
+    common: Rattlebox
+  - latin: Dalea candida
+    common: White Prairie Clover
+  - latin: Dalea foliosa
+    common: Leafy Prairie Clover
+  - latin: Dalea leporina
+    common: Foxtail Prairie Clover
+  - latin: Dalea purpurea
+    common: Purple Prairie Clover
+  - latin: Dalea villosa
+    common: Silky Prairie Clover
+  - latin: Danthonia spicata
+    common: Poverty Oat Grass
+  - latin: Desmanthus illinoensis
+    common: Illinois Bundle Flower
+  - latin: Desmodium canadense
+    common: Showy Tick Trefoil
+  - latin: Desmodium illinoense
+    common: Illinois Tick Trefoil
+  - latin: Desmodium paniculatum
+    common: Panicled Tick Trefoil
+  - latin: Dichanthelium oligosanthes var. scribnerianum
+    common: Scribner's Panic Grass
+  - latin: Echinacea purpurea
+    common: Purple Coneflower
+  - latin: Elymus canadensis
+    common: Canada Wild Rye
+  - latin: Elymus hystrix
+    common: Bottlebrush Grass
+  - latin: Elymus riparius
+    common: Riverbank Wild Rye
+  - latin: Elymus trachycaulus
+    common: Slender Wheat Grass
+  - latin: Elymus villosus
+    common: Silky Wild Rye
+  - latin: Elymus virginicus
+    common: Virginia Wild Rye
+  - latin: Eragrostis spectabilis
+    common: Purple Love Grass
+  - latin: Euphorbia cyathophora
+    common: Fire-on-the-Mountain
+  - latin: Glyceria canadensis
+    common: Rattlesnake Grass
+  - latin: Glyceria grandis
+    common: Reed Manna Grass
+  - latin: Glyceria striata
+    common: Fowl Manna Grass
+  - latin: Glycyrrhiza lepidota
+    common: Wild Licorice
+  - latin: Helenium autumnale
+    common: Sneezeweed
+  - latin: Helenium flexuosum
+    common: Purple-headed Sneezeweed
+  - latin: Houstonia longifolia
+    common: Longleaf Bluets
+  - latin: Hypericum kalmianum
+    common: Kalm's St. John's Wort
+  - latin: Hypericum prolificum
+    common: Shrubby St. John's Wort
+  - latin: Ipomoea leptophylla
+    common: Bush Morning Glory
+  - latin: Juncus balticus
+    common: Baltic Rush
+  - latin: Koeleria macrantha
+    common: June Grass
+  - latin: Leersia lenticularis
+    common: Catchfly Grass
+  - latin: Linaria canadensis
+    common: Blue Toadflax
+  - latin: Annual Rye Grass
+    common: Lycopus americanus
+  - latin: Water Horehound
+    common: Lycopus asper
+  - latin: Rough Bugleweed
+    common: Mentha arvensis
+  - latin: Wild Mint
+    common: Mirabilis nyctaginea
+  - latin: Wild Four O'Clock
+    common: Monarda citriodora
+  - latin: Lemon Mint
+    common: Monarda fistulosa
+  - latin: Wild Bergamot
+    common: Monarda punctata
+  - latin: Muhlenbergia mexicana
+    common: Leafy Satin Grass
+  - latin: Muhlenbergia racemosa
+    common: Upland Wild Timothy
+  - latin: Nicotiana rustica
+    common: Midewiwan Sacred Tobacco
+  - latin: Oenothera biennis
+    common: Common Evening Primrose
+  - latin: Oenothera pilosella
+    common: Prairie Sundrops
+  - latin: Oligoneuron album
+    common: Upland White Goldenrod
+  - latin: Opuntia humifusa #cespitosa
+    common: Eastern Prickly Pear Cactus
+  - latin: Oryzopsis asperifolia
+    common: Rough-leaved Rice Grass
+  - latin: Oxytropis lambertii
+    common: Purple Locoweed
+  - latin: Panicum acuminatum
+    common: Hairy Panic Grass
+  - latin: Panicum virgatum
+    common: Switch Grass
+  - latin: Paspalum setaceum
+    common: Hairy Lens Grass
+  - latin: Poa palustris
+    common: Fowl Bluegrass
+  - latin: Pycnanthemum incanum
+    common: Hoary Mountain Mint
+  - latin: Pycnanthemum muticum
+    common: Clustered Mountain Mint
+  - latin: Pycnanthemum tenuifolium
+    common: Slender Mountain Mint
+  - latin: Pycnanthemum verticillatum var. pilosum
+    common: Hairy Mountain Mint
+  - latin: Pycnanthemum virginianum
+    common: Mountain Mint
+  - latin: Rudbeckia maxima
+    common: Great Coneflower
+  - latin: Rumex altissimus
+    common: Pale Dock
+  - latin: Salvia azurea
+    common: Blue Sage
+  - latin: Salvia lyrata
+    common: Lyre-leaved Sage
+  - latin: Schizachyrium scoparium
+    common: Little Bluestem
+  - latin: Sorghastrum nutans
+    common: Indian Grass
+  - latin: Spartina pectinata
+    common: Cord Grass
+  - latin: Sphenopholis obtusata
+    common: Prairie Wedgegrass
+  - latin: Sporobolus compositus
+    common: Rough Dropseed
+  - latin: Sporobolus cryptandrus
+    common: Sand Dropseed
+  - latin: Sporobolus heterolepis
+    common: Prairie Dropseed
+  - latin: Symphyotrichum drummondii
+    common: Drummond's Aster
+  - latin: Symphyotrichum ericoides
+    common: Heath Aster
+  - latin: Symphyotrichum laeve
+    common: Smooth Blue Aster
+  - latin: Symphyotrichum lanceolatum
+    common: Panicled Aster
+  - latin: Symphyotrichum lateriflorum
+    common: Calico Aster
+  - latin: Symphyotrichum oblongifolium
+    common: Aromatic Aster
+  - latin: Symphyotrichum oolentangiense
+    common: Sky Blue Aster
+  - latin: Thermopsis caroliniana
+    common: Blue Ridge Buckbean
+  - latin: Veronicastrum virginicum
+    common: Culver's Root
+  - latin: Yucca glauca
+    common: Soapweed

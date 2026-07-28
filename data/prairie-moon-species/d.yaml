@@ -1,0 +1,263 @@
+propagation_id: 8
+citation:
+  title: Prairie Moon
+  url: https://www.prairiemoon.com/seeds#/?resultsPerPage=500&filter.ss_germination_code_facet=D
+species:
+  - latin: Agalinis purpurea
+    common: Purple False Foxglove
+  - latin: Agalinis tenuifolia
+    common: Slender False Foxglove
+  - latin: Agastache foeniculum
+    common: Anise Hyssop
+  - latin: Agastache nepetoides
+    common: Yellow Giant Hyssop
+  - latin: Agastache scrophulariifolia
+    common: Purple Giant Hyssop
+  - latin: Ageratina altissima
+    common: White Snakeroot
+  - latin: Antennaria neglecta
+    common: Prairie Pussytoes
+  - latin: Antennaria plantaginifolia
+    common: Pussytoes
+  - latin: Artemisia ludoviciana
+    common: Prairie Sage
+  - latin: Aureolaria flava
+    common: Smooth Yellow False Foxglove
+  - latin: Aureolaria grandiflora
+    common: Yellow False Foxglove
+  - latin: Blephilia ciliata
+    common: Downy Wood Mint
+  - latin: Boltonia asteroides
+    common: False Aster
+  - latin: Boltonia decurrens
+    common: Decurrent False Aster
+  - latin: Calamagrostis canadensis
+    common: Blue Joint Grass
+  - latin: Campanula rotundifolia
+    common: Harebell
+  - latin: Carex canescens
+    common: Gray Bog Sedge
+  - latin: Carex gracillima
+    common: Purple-sheathed Graceful Sedge
+  - latin: Carex vulpinoidea
+    common: Brown Fox Sedge
+  - latin: Castilleja coccinea
+    common: Indian Paintbrush
+  - latin: Castilleja sessiliflora
+    common: Downy Painted Cup
+  - latin: Chamaenerion angustifolium
+    common: Fireweed
+  - latin: Conoclinium coelestinum
+    common: Mistflower
+  - latin: Drymocallis arguta
+    common: Prairie Cinquefoil
+  - latin: Eleocharis acicularis
+    common: Spike Rush
+  - latin: Eleocharis erythropoda
+    common: Bald Spike Rush
+  - latin: Eleocharis obtusa
+    common: Blunt Spike Rush
+  - latin: Eleocharis palustris
+    common: Great Spike Rush
+  - latin: Epilobium coloratum
+    common: Cinnamon Willow Herb
+  - latin: Epilobium glandulosum
+    common: Northern Willow Herb
+  - latin: Eragrostis spectabilis
+    common: Purple Love Grass
+  - latin: Euthamia gymnospermoides
+    common: Great Plains Goldenrod
+  - latin: Eupatorium perfoliatum
+    common: Boneset
+  - latin: Euthamia graminifolia
+    common: Grass-leaved Goldenrod
+  - latin: Eutrochium maculatum
+    common: Joe Pye Weed
+  - latin: Gentiana andrewsii
+    common: Bottle Gentian
+  - latin: Gentiana flavida
+    common: Cream Gentian
+  - latin: Gentiana puberulenta
+    common: Downy Gentian
+  - latin: Gentiana quinquefolia
+    common: Stiff Gentian
+  - latin: Gentianopsis crinita
+    common: Fringed Gentian
+  - latin: Glyceria canadensis
+    common: Rattlesnake Grass
+  - latin: Glyceria grandis
+    common: Reed Manna Grass
+  - latin: Glyceria striata
+    common: Fowl Manna Grass
+  - latin: Helenium autumnale
+    common: Sneezeweed
+  - latin: Heuchera richardsonii
+    common: Prairie Alumroot
+  - latin: Houstonia longifolia
+    common: Longleaf Bluets
+  - latin: Hypericum prolificum
+    common: Shrubby St. John's Wort
+  - latin: Hypericum punctatum
+    common: Dotted St. John's Wort
+  - latin: Hypericum pyramidatum
+    common: Great St. John's Wort
+  - latin: Juncus canadensis
+    common: Canada Rush
+  - latin: Juncus dudleyi
+    common: Dudley's Rush
+  - latin: Juncus effusus
+    common: Common Rush
+  - latin: Juncus interior
+    common: Inland Rush
+  - latin: Juncus nodosus
+    common: Knotted Rush
+  - latin: Juncus tenuis
+    common: Path Rush
+  - latin: Juncus torreyi
+    common: Torrey's Rush
+  - latin: Koeleria macrantha
+    common: June Grass
+  - latin: Lobelia cardinalis
+    common: Cardinal Flower
+  - latin: Lobelia inflata
+    common: Indian Tobacco
+  - latin: Lobelia siphilitica
+    common: Great Blue Lobelia
+  - latin: Lobelia spicata
+    common: Pale Spiked Lobelia
+  - latin: Lycopus americanus
+    common: Water Horehound
+  - latin: Lysimachia quadriflora
+    common: Prairie Loosestrife
+  - latin: Lythrum alatum
+    common: Winged Loosestrife
+  - latin: Mentha arvensis
+    common: Wild Mint
+  - latin: Mimulus ringens
+    common: Monkey Flower
+  - latin: Monarda punctata
+    common: Spotted Bee Balm
+  - latin: Muhlenbergia mexicana
+    common: Leafy Satin Grass
+  - latin: Muhlenbergia racemosa
+    common: Upland Wild Timothy
+  - latin: Nicotiana rustica
+    common: Midewiwan Sacred Tobacco
+  - latin: Oenothera biennis
+    common: Common Evening Primrose
+  - latin: Oenothera rhombipetala
+    common: Sand Evening Primrose
+  - latin: Oligoneuron ohioense
+    common: Ohio Goldenrod
+  - latin: Oligoneuron riddellii
+    common: Riddell's Goldenrod
+  - latin: Packera plattensis
+    common: Prairie Ragwort
+  - latin: Penstemon hirsutus
+    common: Hairy Beardtongue
+  - latin: Penstemon pallidus
+    common: Pale Beardtongue
+  - latin: Penstemon tubiflorus #tubeaflorus
+    common: Tube Beardtongue
+  - latin: Penthorum sedoides
+    common: Ditch Stonecrop
+  - latin: Persicaria pensylvanica
+    common: Pinkweed
+  - latin: Persicaria punctata
+    common: Smartweed
+  - latin: Phemeranthus rugospermus
+    common: Fame Flower
+  - latin: Poa palustris
+    common: Fowl Bluegrass
+  - latin: Potentilla palustris
+    common: Marsh Cinquefoil
+  - latin: Primula fassettii
+    common: Amethyst Shooting Star
+  - latin: Primula meadia
+    common: Midland Shooting Star
+  - latin: Pseudognaphalium obtusifolium
+    common: Sweet Everlasting
+  - latin: Pycnanthemum incanum
+    common: Hoary Mountain Mint
+  - latin: Pycnanthemum muticum
+    common: Clustered Mountain Mint
+  - latin: Pycnanthemum tenuifolium
+    common: Slender Mountain Mint
+  - latin: Pycnanthemum verticillatum var. pilosum
+    common: Hairy Mountain Mint
+  - latin: Pycnanthemum virginianum
+    common: Mountain Mint
+  - latin: Rhexia virginica
+    common: Meadow Beauty
+  - latin: Sabatia angularis
+    common: Rosepink
+  - latin: Saxifraga pensylvanica
+    common: Swamp Saxifrage
+  - latin: Schoenoplectus pungens
+    common: Chairmaker's Rush
+  - latin: Schoenoplectus tabernaemontani
+    common: Great Bulrush
+  - latin: Scirpus cyperinus
+    common: Wool Grass
+  - latin: Scirpus microcarpus
+    common: Barberpole Sedge
+  - latin: Scrophularia lanceolata
+    common: Early Figwort
+  - latin: Scrophularia marilandica
+    common: Late Figwort
+  - latin: Sedum pulchellum
+    common: Widow's Cross
+  - latin: Solidago caesia
+    common: Blue-stemmed Goldenrod
+  - latin: Solidago flexicaulis
+    common: Zig Zag Goldenrod
+  - latin: Solidago gigantea
+    common: Late Goldenrod
+  - latin: Solidago juncea
+    common: Early Goldenrod
+  - latin: Solidago nemoralis
+    common: Old Field Goldenrod
+  - latin: Solidago odora
+    common: Sweet Goldenrod
+  - latin: Solidago patula
+    common: Round-leaved Goldenrod
+  - latin: Solidago rugosa
+    common: Wrinkle-leaf Goldenrod
+  - latin: Solidago speciosa
+    common: Showy Goldenrod
+  - latin: Solidago uliginosa
+    common: Bog Goldenrod
+  - latin: Solidago ulmifolia
+    common: Elm-leaved Goldenrod
+  - latin: Spiraea tomentosa
+    common: Steeplebush
+  - latin: Symphyotrichum ericoides
+    common: Heath Aster
+  - latin: Symphyotrichum praealtum
+    common: Willow Aster
+  - latin: Symphyotrichum prenanthoides
+    common: Crooked-stemmed Aster
+  - latin: Symphyotrichum urophyllum
+    common: Arrow-leaved Aster
+  - latin: Triadenum virginicum
+    common: Marsh St. John's Wort
+  - latin: Turritis glabra
+    common: Tower Mustard
+  - latin: Verbena hastata
+    common: Blue Vervain
+  - latin: Verbena stricta
+    common: Hoary Vervain
+  - latin: Verbena urticifolia
+    common: White Vervain
+  - latin: Veronicastrum virginicum
+    common: Culver's Root
+  - latin: Viola eriocarpa
+    common: Smooth Yellow Violet
+  - latin: Viola pedata
+    common: Bird's Foot Violet
+  - latin: Viola sororia
+    common: Common Blue Violet
+  # - latin: Viola sororia f. priceana
+  #   common: Common Blue Violet, Bi-Colored Form
+  # - latin: Viola sororia f. rubra
+  #   common: Common Blue Violet, pink form
