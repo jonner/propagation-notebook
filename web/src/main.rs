@@ -115,10 +115,18 @@ async fn layout(slot: topcoat::Result) -> topcoat::Result {
                     </nav>
                 </header>
                 <main class="m-6 flex-grow">(slot?)</main>
-                <footer
-                    class="flex items-center justify-between font-bold flex-wrap p-6"
-                >
+                <footer class="p-6">
                     "Developed by Jonathon Jongsma"
+                    <div class="text-sm text-white/50">
+                        <div>
+                            "Taxonomy based on "
+                            <a href="https://www.itis.gov">"ITIS"</a>
+                        </div>
+                        <div>
+                            "Harvest data provided by "
+                            <a href="https://inaturalist.org">"iNaturalist.org"</a>
+                        </div>
+                    </div>
                 </footer>
             </body>
         </html>
