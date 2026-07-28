@@ -154,14 +154,17 @@ pub async fn taxa_list(cx: &Cx) -> topcoat::Result {
                             </span>
                         </td>
                         <td>
-                        if let Some(origin) = rts.origin {
-                            let attrs =  attributes!{
-                                match origin {Origin::Introduced  => class="introduced",
-                                    Origin::Native => class="native",
-                                    _ => class="" }
-                            };
-                            <span (attrs)>(origin.to_string())</span>
-                        }</td>
+                            if let Some(origin) = rts.origin {
+                                let attrs = attributes! {
+                                    match origin {
+                                        Origin::Introduced => class="introduced",
+                                        Origin::Native => class="native",
+                                        _ => class="",
+                                    }
+                                };
+                                <span (attrs)>(origin.to_string())</span>
+                            }
+                        </td>
                         <td>(rts.harvest_window.to_string())</td>
                     </tr>
                 }
