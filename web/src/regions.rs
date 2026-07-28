@@ -150,7 +150,7 @@ pub async fn taxa_list(cx: &Cx) -> topcoat::Result {
                     <tr>
                         <td>
                             <span class="latin">
-                                <a href=(rts.path())>(&taxon.complete_name)</a>
+                                <a href=(taxon.path())>(&taxon.complete_name)</a>
                             </span>
                         </td>
                         <td>
