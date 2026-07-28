@@ -1,4 +1,7 @@
-use libpropagation::propagation::PropagationProcedure;
+use libpropagation::{
+    propagation::PropagationProcedure,
+    taxonomy::{Taxon, TaxonPropagationProcedure},
+};
 use topcoat::{
     context::Cx,
     router::{page, path_param},
@@ -31,11 +34,27 @@ pub async fn get_propagation_details(cx: &Cx) -> topcoat::Result {
     let mut db = db(cx);
     let propagation_id = path_param::<PropagationId>(cx)?;
     let procedure = PropagationProcedure::filter_by_id(propagation_id)
-        .include(PropagationProcedure::fields().taxa().taxon())
         .include(PropagationProcedure::fields().citations())
         .one()
         .exec(&mut db)
         .await?;
+    // including the Taxa in the PropagationProcedure query is very slow, so fetch them separately
+    let taxa = Taxon::filter(
+        Taxon::fields().propagation_procedures().any(
+            TaxonPropagationProcedure::fields()
+                .propagation_id()
+                .eq(propagation_id),
+        ),
+    )
+    .include(
+        Taxon::fields().propagation_procedures().filter(
+            TaxonPropagationProcedure::fields()
+                .propagation_id()
+                .eq(propagation_id),
+        ),
+    )
+    .exec(&mut db)
+    .await?;
     trace!(?procedure);
     view! {
         <h1>(&procedure.name)</h1>
@@ -51,19 +70,19 @@ pub async fn get_propagation_details(cx: &Cx) -> topcoat::Result {
         <dd>(procedure.instructions)</dd>
         <dt>"Taxa"</dt>
         <dd>
-            if !procedure.taxa.get().is_empty() {
+            if !taxa.is_empty() {
                 <table>
                     <tr>
                         <th>"ID"</th>
                         <th>"Name"</th>
                     </tr>
-                    for tproc in procedure.taxa.get() {
+                    for taxon in taxa {
                         <tr>
-                            <td>(tproc.taxon.get().id)</td>
+                            <td>(taxon.id)</td>
                             <td>
                                 <span class="latin">
-                                    <a href=(tproc.taxon.get().path())>
-                                        (&tproc.taxon.get().complete_name)
+                                    <a href=(taxon.path())>
+                                        (&taxon.complete_name)
                                     </a>
                                 </span>
                             </td>
