@@ -85,7 +85,7 @@ td, th {
 }
 
 .success, .native {
-  @apply bg-mallard/10 text-mallard py-1 px-2 rounded;
+  @apply bg-leaf/30 text-mallard py-1 px-2 rounded;
 }
 
 .icon {

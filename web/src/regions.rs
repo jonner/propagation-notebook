@@ -75,6 +75,7 @@ pub(crate) async fn details(cx: &Cx) -> topcoat::Result {
 pub struct RegionalTaxaListParams {
     pub offset: Option<usize>,
     pub ready: Option<bool>,
+    pub native: Option<bool>,
 }
 
 impl ModifyOffset for RegionalTaxaListParams {
@@ -121,6 +122,9 @@ pub async fn taxa_list(cx: &Cx) -> topcoat::Result {
                                 .ge(end)),
                     )),
         );
+    }
+    if params.native == Some(true) {
+        rts_filter = rts_filter.and(RegionalTaxonStatus::fields().origin().eq(Origin::Native));
     }
     let filter = Taxon::filter(Taxon::fields().regional_statuses().any(rts_filter));
     let total = filter.clone().count().exec(&mut db).await? as usize;
