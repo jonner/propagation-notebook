@@ -55,7 +55,7 @@ async fn layout(slot: topcoat::Result) -> topcoat::Result {
             </head>
             <body class="flex flex-col min-h-screen">
                 <header
-                    class="flex items-center justify-between font-bold flex-wrap bg-orange-900 p-6"
+                    class="flex items-center justify-between font-bold flex-wrap p-6"
                 >
                     <div class="flex items-center flex-shrink-0 text-white mr-8">
                         <a href="/">"Propagation Notebook"</a>
@@ -91,7 +91,7 @@ async fn layout(slot: topcoat::Result) -> topcoat::Result {
                 </header>
                 <main class="m-6 flex-grow">(slot?)</main>
                 <footer
-                    class="flex items-center justify-between font-bold flex-wrap bg-orange-900 p-6 text-white"
+                    class="flex items-center justify-between font-bold flex-wrap p-6"
                 >
                     "Developed by Jonathon Jongsma"
                 </footer>

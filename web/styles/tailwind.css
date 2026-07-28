@@ -1,7 +1,35 @@
 @import "tailwindcss";
 
+@theme {
+  --color-sail: #BAE5F9;
+  --color-jaggery: #C56C39;
+  --color-brown: #6F4930;
+  --color-leaf: #56903A;
+  --color-mallard: #213A1B;
+}
+
+body {
+  @apply bg-white;
+}
+
+header, footer {
+  @apply text-white text-lg bg-brown shadow-xl;
+}
+
+h1, h2, h3, h4, h5 {
+  @apply font-bold text-jaggery;
+}
+
 h1 {
-  @apply text-3xl font-bold text-orange-900 mb-4;
+  @apply text-3xl mb-4;
+}
+
+h2 {
+  @apply text-2xl my-2;
+}
+
+h3 {
+  @apply text-xl my-2;
 }
 
 ul {
@@ -17,23 +45,19 @@ dd {
 }
 
 a[href] {
-  @apply text-orange-700 underline font-bold;
-}
-
-header {
-  @apply text-lg
+  @apply text-mallard underline font-bold;
 }
 
 header a[href] {
-  @apply text-orange-100 no-underline hover:text-white;
+  @apply text-white no-underline;
 }
 
 form input[type=text] {
-  @apply px-3 py-2 text-slate-800 bg-white border border-slate-300 placeholder:text-slate-400 rounded-lg;
+  @apply px-3 py-2 text-slate-800 bg-white ring-mallard ring placeholder:text-slate-400 rounded-lg;
 }
 
 a.button, form button {
-  @apply px-3 py-2 text-white bg-orange-900 border rounded-lg no-underline;
+  @apply px-3 py-2 text-white bg-leaf rounded-lg no-underline ring ring-mallard;
 }
 
 .latin {
@@ -49,9 +73,9 @@ td, th {
 }
 
 .warning, .introduced {
-  @apply bg-red-200 text-red-600 py-1 px-2 rounded;
+  @apply bg-red-200 text-red-800 py-1 px-2 rounded;
 }
 
 .success, .native {
-  @apply bg-green-200 text-green-600 py-1 px-2 rounded;
+  @apply bg-mallard/10 text-mallard py-1 px-2 rounded;
 }

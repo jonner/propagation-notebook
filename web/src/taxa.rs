@@ -55,6 +55,7 @@ pub(crate) async fn list(cx: &Cx) -> topcoat::Result {
                 name="q"
                 placeholder="Search for a taxon"
                 value=(params.q.as_deref().unwrap_or_default())
+                class="me-2"
             >
             <button type="submit">"Search"</button>
         </form>
