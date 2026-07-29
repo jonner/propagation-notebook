@@ -158,26 +158,6 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
             </ul>
         </dd>
 
-        <dt>"ITIS taxon ID"</dt>
-        <dd>
-            <a
-                href=(format!(
-                    "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value={}",
-                    taxon.itis_id
-                ))
-            >
-                (taxon.itis_id)
-            </a>
-        </dd>
-
-        <dt>"iNaturalist taxon ID"</dt>
-        <dd>
-            if let Some(id) = taxon.inaturalist_id {
-                <a href=(format!("Https://www.inaturalist.org/taxa/{id}"))>
-                    (taxon.inaturalist_id)
-                </a>
-            }
-        </dd>
         if let Some(collecting_data) = &taxon.collecting_data.get() {
             <dt>"Ripening"</dt>
             <dd>
@@ -273,6 +253,32 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
                     }
                 </table>
             }
+        </dd>
+        <dt>"External Resources"</dt>
+        <dd>
+            <ul>
+                <li>
+                    <a
+                        href=(format!(
+                            "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value={}",
+                            taxon.itis_id
+                        ))
+                    >
+                        "ITIS taxon info"
+                    </a>
+                </li>
+                <li>
+                    if let Some(id) = taxon.inaturalist_id {
+                        <a
+                            href=(format!(
+                                "Https://www.inaturalist.org/taxa/{id}"
+                            ))
+                        >
+                            "iNaturalist taxon info"
+                        </a>
+                    }
+                </li>
+            </ul>
         </dd>
     }
 }
