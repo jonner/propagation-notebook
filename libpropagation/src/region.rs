@@ -66,7 +66,7 @@ pub struct Region {
 
     #[index]
     pub name: String,
-    #[column(type = "text")]
+    #[column(type = "TEXT")]
     pub geometry: Option<toasty::Json<geojson::Geometry>>,
     pub notes: Option<String>,
 
