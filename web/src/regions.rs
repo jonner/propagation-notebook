@@ -11,7 +11,7 @@ use topcoat::{
 use tracing::trace;
 
 use crate::{
-    components::{harvest_timeline, pagination_control},
+    components::{harvest_timeline, origin_badge, pagination_control},
     leaflet::Map,
     util::{ModifyOffset, PageState, Path, RegionId, TaxonId, db},
 };
@@ -159,14 +159,7 @@ pub async fn taxa_list(cx: &Cx) -> topcoat::Result {
                         </td>
                         <td>
                             if let Some(origin) = rts.origin {
-                                let attrs = attributes! {
-                                    match origin {
-                                        Origin::Introduced => class="introduced",
-                                        Origin::Native => class="native",
-                                        _ => class="",
-                                    }
-                                };
-                                <span (attrs)>(origin.to_string())</span>
+                                origin_badge(origin: origin)
                             }
                         </td>
                         <td>

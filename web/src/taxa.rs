@@ -11,7 +11,7 @@ use topcoat::{
 use tracing::trace;
 
 use crate::{
-    components::{self, citation_list, harvest_timeline, pagination_control},
+    components::{self, citation_list, harvest_timeline, origin_badge, pagination_control},
     util::{CleaningId, ModifyOffset, PageState, Path, PropagationId, TaxonId, db},
 };
 
@@ -97,7 +97,11 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
         <h1><span class="latin">(&taxon.complete_name)</span></h1>
         if let Some(photo) = taxon.photo.get() {
             if let Some(medium_url) = photo.medium_url.as_ref() {
-                <img src=(medium_url) alt=(photo.attribution.as_ref()) class="border shadow-xl">
+                <img
+                    src=(medium_url)
+                    alt=(photo.attribution.as_ref())
+                    class="border shadow-xl"
+                >
             }
         }
         <dt>"ID"</dt>
@@ -222,14 +226,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
                             <td><a href=(rs.path())>(&rs.region.get().name)</a></td>
                             <td>
                                 if let Some(origin) = rs.origin {
-                                    let attrs = attributes! {
-                                        match origin {
-                                            Origin::Introduced => class="introduced",
-                                            Origin::Native => class="native",
-                                            _ => class="",
-                                        }
-                                    };
-                                    <span (attrs)>(origin.to_string())</span>
+                                    origin_badge(origin: origin)
                                 }
                             </td>
                             <td>

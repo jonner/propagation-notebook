@@ -1,7 +1,9 @@
 use libpropagation::{
-    citation::Citation, propagation::PropagationProcedure, region::RegionalHarvestWindow,
+    citation::Citation,
+    propagation::PropagationProcedure,
+    region::{Origin, RegionalHarvestWindow},
 };
-use topcoat::view::{component, view};
+use topcoat::view::{attributes, component, view};
 
 use crate::util::{ModifyOffset, PageState};
 
@@ -131,4 +133,16 @@ pub async fn harvest_timeline(
             </div>
         </div>
     }
+}
+
+#[component]
+pub async fn origin_badge(origin: Origin) -> topcoat::Result {
+    let attrs = attributes! {
+        match origin {
+            Origin::Introduced => class="introduced",
+            Origin::Native => class="native",
+            _ => class="",
+        }
+    };
+    view! { <span (attrs)>(origin.to_string())</span> }
 }
