@@ -182,6 +182,21 @@ impl From<Taxon> for crate::dto::ObjectReference {
 }
 
 #[derive(Debug, Clone, toasty::Model)]
+pub struct TaxonPhoto {
+    #[key]
+    pub taxon_id: u64,
+    #[belongs_to(key=taxon_id, references=id)]
+    pub taxon: Deferred<Taxon>,
+
+    pub square_url: Option<String>,
+    pub medium_url: Option<String>,
+    pub large_url: Option<String>,
+
+    pub is_default: bool,
+    pub attribution: Option<String>,
+}
+
+#[derive(Debug, Clone, toasty::Model)]
 #[table = "taxa"]
 pub struct Taxon {
     #[auto]
@@ -230,6 +245,8 @@ pub struct Taxon {
     pub propagation_procedures: Deferred<Vec<TaxonPropagationProcedure>>,
     #[has_many]
     pub notes: Deferred<Vec<TaxonNote>>,
+    #[has_one]
+    pub photo: Deferred<Option<TaxonPhoto>>,
 }
 
 #[derive(Debug, Clone)]
