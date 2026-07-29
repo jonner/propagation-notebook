@@ -89,7 +89,7 @@ td, th {
 }
 
 .warning, .specialconcern{
-  @apply bg-amber-200 text-amber-800 py-1 px-2 rounded;
+  @apply bg-amber-100 text-amber-800 py-1 px-2 rounded;
 }
 
 .success {
