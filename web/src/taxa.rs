@@ -100,11 +100,16 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
         <h1><span class="latin">(&taxon.complete_name)</span></h1>
         if let Some(photo) = taxon.photo.get() {
             if let Some(medium_url) = photo.medium_url.as_ref() {
-                <img
-                    src=(medium_url)
-                    alt=(photo.attribution.as_ref())
-                    class="border shadow-xl"
-                >
+                <figure class="mb-4">
+                    <img
+                        src=(medium_url)
+                        alt=(&taxon.complete_name)
+                        class="border shadow-xl"
+                    >
+                    <figcaption class="text-slate-500">
+                        (photo.attribution.as_ref())
+                    </figcaption>
+                </figure>
             }
         }
         <dt>"ID"</dt>
