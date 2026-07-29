@@ -4,7 +4,7 @@ use std::path::PathBuf;
 
 use crate::cli::OutputFormat;
 use crate::util::dialog::{confirm, input, select};
-use crate::util::{IndicatifImportProgress, inat_taxon_for_taxon};
+use crate::util::{IndicatifImportProgress, find_exact_inat_taxon, inat_taxon_for_taxon};
 use crate::views::regions::{
     RegionDetailsView, RegionalHarvestDateListView, RegionalTaxonStatusDetailsView,
     RegionalTaxonStatusHarvestView, RegionsListView,
@@ -347,25 +347,12 @@ impl RegionCommands {
                                 let taxon = inat.taxon_info(id).await?;
                                 Some(taxon)
                             } else {
-                                let mut found = None;
-                                let possible_taxa = inat
-                                    .taxon_search(&taxon.names())
-                                    .await?
-                                    .into_iter()
-                                    .filter(|t| t.is_active)
-                                    .collect::<Vec<_>>();
-                                if !possible_taxa.is_empty() {
-                                    for possibility in possible_taxa {
-                                        if taxon.matches(&possibility) {
-                                            debug!(
-                                                "Using {} for {}",
-                                                possibility.name,
-                                                taxon.reference()
-                                            );
-                                            found = Some(possibility);
-                                            break;
-                                        }
-                                    }
+                                let found = find_exact_inat_taxon(taxon, &inat).await?;
+                                if let Some(t) = found.as_ref() {
+                                    Taxon::update_by_id(taxon.id)
+                                        .inaturalist_id(t.id)
+                                        .exec(db)
+                                        .await?;
                                 }
                                 found
                             };

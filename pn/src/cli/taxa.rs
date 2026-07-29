@@ -1,10 +1,12 @@
+use anyhow::anyhow;
+use indicatif::ProgressIterator;
 use libpropagation::{
     collecting::CleaningProcedure,
     dto::ObjectReference,
     region::{RegionalTaxonStatus, dto::RegionalTaxonStatusDetailsNoRegion},
     taxonomy::{
-        Taxon, TaxonIdentifier, TaxonNote, TaxonPropagationProcedure, TaxonomicAuthority,
-        dto::TaxonDetails,
+        Taxon, TaxonIdentifier, TaxonNote, TaxonPhoto, TaxonPropagationProcedure,
+        TaxonomicAuthority, dto::TaxonDetails,
     },
 };
 use serde::Serialize;
@@ -12,7 +14,7 @@ use toasty::Db;
 
 use crate::{
     cli::OutputFormat,
-    util::IndicatifImportProgress,
+    util::{IndicatifImportProgress, find_exact_inat_taxon, inat_taxon_for_taxon},
     views::{
         JsonView, YamlView,
         taxa::{RegionalTaxaListView, TaxaListView, TaxaSearchResultsView, TaxonDetailsView},
@@ -91,6 +93,11 @@ pub enum TaxonCommands {
 
         #[command(subcommand)]
         command: link::TaxonLinkCommands,
+    },
+    #[command(about = "Update images for taxa")]
+    UpdateImages {
+        #[arg(help = "A taxon name or ID")]
+        taxon: Option<TaxonIdentifier>,
     },
 }
 
@@ -322,7 +329,56 @@ impl TaxonCommands {
                 };
                 command.run(db, taxon_id, *authority, format).await?
             }
+            Self::UpdateImages { taxon } => {
+                if let Some(name_or_id) = taxon {
+                    let taxon_id = match name_or_id {
+                        TaxonIdentifier::Id(id) => *id,
+                        TaxonIdentifier::Name(name) => {
+                            Taxon::get_by_complete_name_ignore_case(db, name).await?.id
+                        }
+                    };
+                    let taxon = Taxon::get_by_id(db, taxon_id).await?;
+                    update_photo_for_taxon(db, taxon).await?;
+                } else {
+                    //update all
+                    let taxa = Taxon::all()
+                        .order_by(Taxon::fields().sequence().asc())
+                        .exec(db)
+                        .await?;
+                    for taxon in taxa.into_iter().progress() {
+                        // ignore errors and continue
+                        _ = update_photo_for_taxon(db, taxon).await;
+                    }
+                }
+            }
         }
         Ok(())
     }
+}
+
+async fn update_photo_for_taxon(db: &mut Db, taxon: Taxon) -> Result<(), anyhow::Error> {
+    let inat = inaturalist::Client::new()?;
+    let inat_id = match taxon.inaturalist_id {
+        Some(id) => Ok(id),
+        None => match find_exact_inat_taxon(&taxon, &inat).await? {
+            Some(itaxon) => {
+                Taxon::update_by_id(taxon.id)
+                    .inaturalist_id(Some(itaxon.id))
+                    .exec(db)
+                    .await?;
+                Ok(itaxon.id)
+            }
+            None => Err(anyhow!("Unable to find inaturalist ID")),
+        },
+    }?;
+    let default_photo = inat.taxon_default_photo(inat_id).await?;
+    TaxonPhoto::upsert_by_taxon_id(taxon.id)
+        .large_url(default_photo.large_url)
+        .square_url(default_photo.square_url)
+        .medium_url(default_photo.medium_url)
+        .attribution(default_photo.attribution)
+        .is_default(true)
+        .exec(db)
+        .await?;
+    Ok(())
 }
