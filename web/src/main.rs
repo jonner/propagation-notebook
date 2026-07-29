@@ -123,7 +123,7 @@ async fn layout(slot: topcoat::Result) -> topcoat::Result {
                             <a href="https://www.itis.gov">"ITIS"</a>
                         </div>
                         <div>
-                            "Harvest data provided by "
+                            "Phenology data provided by "
                             <a href="https://inaturalist.org">"iNaturalist.org"</a>
                         </div>
                     </div>

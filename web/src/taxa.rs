@@ -228,7 +228,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
                         <th>"Name"</th>
                         <th>"Origin"</th>
                         <th>"Status"</th>
-                        <th>"Harvest Window"</th>
+                        <th>"Fruiting Window"</th>
                     </tr>
                     for rs in taxon.regional_statuses.get() {
                         <tr>

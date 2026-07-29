@@ -148,7 +148,7 @@ pub async fn taxa_list(cx: &Cx) -> topcoat::Result {
                 <th>"Taxon"</th>
                 <th>"Origin"</th>
                 <th>"Status"</th>
-                <th>"Harvest Dates"</th>
+                <th>"Fruiting window"</th>
             </tr>
             for taxon in taxa {
                 if let Some(rts) = taxon.regional_statuses.get().first() {
@@ -232,7 +232,7 @@ pub async fn taxon_status(cx: &Cx) -> topcoat::Result {
                 .map(|v| v.to_string())
                 .unwrap_or_default())
         </dd>
-        <dt>"Harvest Window"</dt>
+        <dt>"Fruiting window"</dt>
         <dd>
             <div class="flex items-center gap-x-6">
                 harvest_timeline(
