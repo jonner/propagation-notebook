@@ -1,11 +1,12 @@
 use libpropagation::{
     collecting::CleaningProcedure,
+    region::Origin,
     taxonomy::{Taxon, TaxonPropagationProcedure},
 };
 use topcoat::{
     context::Cx,
     router::{page, path_param, query_params},
-    view::view,
+    view::{attributes, view},
 };
 use tracing::trace;
 
@@ -214,10 +215,16 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
                         <tr>
                             <td><a href=(rs.path())>(&rs.region.get().name)</a></td>
                             <td>
-                                (rs
-                                    .origin
-                                    .map(|v| v.to_string())
-                                    .unwrap_or_default())
+                                if let Some(origin) = rs.origin {
+                                    let attrs = attributes! {
+                                        match origin {
+                                            Origin::Introduced => class="introduced",
+                                            Origin::Native => class="native",
+                                            _ => class="",
+                                        }
+                                    };
+                                    <span (attrs)>(origin.to_string())</span>
+                                }
                             </td>
                             <td>
                                 <div class="flex items-center gap-x-6">
