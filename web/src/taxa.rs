@@ -87,6 +87,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
         .include(Taxon::fields().propagation_procedures().propagation())
         .include(Taxon::fields().regional_statuses().region())
         .include(Taxon::fields().notes())
+        .include(Taxon::fields().photo())
         .one()
         .exec(&mut db)
         .await?;
@@ -94,6 +95,11 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
 
     view! {
         <h1><span class="latin">(&taxon.complete_name)</span></h1>
+        if let Some(photo) = taxon.photo.get() {
+            if let Some(medium_url) = photo.medium_url.as_ref() {
+                <img src=(medium_url) alt=(photo.attribution.as_ref()) class="border shadow-xl">
+            }
+        }
         <dt>"ID"</dt>
         <dd>(taxon.id)</dd>
         <dt>"Rank"</dt>
