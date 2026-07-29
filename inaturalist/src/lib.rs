@@ -113,6 +113,21 @@ impl Observation {
     }
 }
 
+#[derive(Debug, Deserialize)]
+pub struct TaxonDefaultPhoto {
+    pub id: u64,
+    default_photo: DefaultPhoto,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct DefaultPhoto {
+    pub id: u64,
+    pub square_url: Option<String>,
+    pub medium_url: Option<String>,
+    pub large_url: Option<String>,
+    pub attribution: Option<String>,
+}
+
 const PLANT_PHENOLOGY: &str = "12";
 const FRUITING: &str = "14";
 static API_BASE_URL: LazyLock<reqwest::Url> = LazyLock::new(|| {
@@ -177,6 +192,31 @@ impl Client {
             }
             Response::Failure(error_response) => Err(Error::Response(error_response)),
         }
+    }
+
+    pub async fn taxon_default_photo(&self, taxon_id: u64) -> Result<DefaultPhoto, Error> {
+        tracing::trace!(?taxon_id, "getting taxon default photo");
+        let taxa_endpoint = API_BASE_URL.join("taxa/")?.join(&taxon_id.to_string())?;
+        let res: Response<TaxonDefaultPhoto> = self
+            .0
+            .get(taxa_endpoint)
+            .query(&[("fields", "(id:!t,default_photo:(id:!t,square_url:!t,medium_url:!t,large_url:!t,attribution:!t))")])
+            .send()
+            .await?
+            .json()
+            .await?;
+
+        let mut val = match res {
+            Response::Success(results_response) => {
+                if results_response.results.is_empty() {
+                    Err(Error::TaxonNotFound(taxon_id.to_string()))
+                } else {
+                    Ok(results_response.results)
+                }
+            }
+            Response::Failure(error_response) => Err(Error::Response(error_response)),
+        }?;
+        Ok(val.pop().unwrap().default_photo)
     }
 
     pub async fn taxon_info(&self, taxon_id: u64) -> Result<Taxon, Error> {
