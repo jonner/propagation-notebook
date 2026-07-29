@@ -147,6 +147,7 @@ pub async fn taxa_list(cx: &Cx) -> topcoat::Result {
             <tr>
                 <th>"Taxon"</th>
                 <th>"Origin"</th>
+                <th>"Status"</th>
                 <th>"Harvest Dates"</th>
             </tr>
             for taxon in taxa {
@@ -160,6 +161,11 @@ pub async fn taxa_list(cx: &Cx) -> topcoat::Result {
                         <td>
                             if let Some(origin) = rts.origin {
                                 origin_badge(origin: origin)
+                            }
+                        </td>
+                        <td>
+                            if let Some(status) = rts.conservation_status {
+                                conservation_status_badge(status: status)
                             }
                         </td>
                         <td>
@@ -213,7 +219,11 @@ pub async fn taxon_status(cx: &Cx) -> topcoat::Result {
         <dt>"C-value"</dt>
         <dd>(rts.c_value.map(|v| v.to_string()).unwrap_or_default())</dd>
         <dt>"Conservation Status"</dt>
-        <dd>conservation_status_badge(status: rts.conservation_status)</dd>
+        <dd>
+            if let Some(status) = rts.conservation_status {
+                conservation_status_badge(status: status)
+            }
+        </dd>
         <dt>"Wetland Indicator"</dt>
         <dd>
             (rts

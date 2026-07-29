@@ -11,7 +11,10 @@ use topcoat::{
 use tracing::trace;
 
 use crate::{
-    components::{self, citation_list, harvest_timeline, origin_badge, pagination_control},
+    components::{
+        self, citation_list, conservation_status_badge, harvest_timeline, origin_badge,
+        pagination_control,
+    },
     util::{CleaningId, ModifyOffset, PageState, Path, PropagationId, TaxonId, db},
 };
 
@@ -219,6 +222,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
                     <tr>
                         <th>"Name"</th>
                         <th>"Origin"</th>
+                        <th>"Status"</th>
                         <th>"Harvest Window"</th>
                     </tr>
                     for rs in taxon.regional_statuses.get() {
@@ -227,6 +231,11 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
                             <td>
                                 if let Some(origin) = rs.origin {
                                     origin_badge(origin: origin)
+                                }
+                            </td>
+                            <td>
+                                if let Some(status) = rs.conservation_status {
+                                    conservation_status_badge(status: status)
                                 }
                             </td>
                             <td>

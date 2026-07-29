@@ -148,20 +148,13 @@ pub async fn origin_badge(origin: Origin) -> topcoat::Result {
 }
 
 #[component]
-pub async fn conservation_status_badge(status: Option<ConservationStatus>) -> topcoat::Result {
+pub async fn conservation_status_badge(status: ConservationStatus) -> topcoat::Result {
     let attrs = attributes! {
         match status {
-            Some(ConservationStatus::Endangered) => class="endangered",
-            Some(ConservationStatus::Threatened) => class="threatened",
-            Some(ConservationStatus::SpecialConcern) => class="specialconcern",
-            None => class="unlisted",
+            ConservationStatus::Endangered => class="endangered",
+            ConservationStatus::Threatened => class="threatened",
+            ConservationStatus::SpecialConcern => class="specialconcern",
         }
     };
-    view! {
-        <span (attrs)>
-            (status
-                .map(|v| v.to_string())
-                .unwrap_or_else(|| "Unlisted".to_string()))
-        </span>
-    }
+    view! { <span (attrs)>(status.to_string())</span> }
 }
