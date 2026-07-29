@@ -200,6 +200,30 @@ impl RegionalHarvestWindow {
     pub fn is_empty(&self) -> bool {
         self.start_doy.is_none() && self.end_doy.is_none()
     }
+
+    fn start_date(&self) -> Option<String> {
+        self.start_doy.and_then(|d| {
+            jiff::civil::Date::default()
+                .with()
+                .year(2000)
+                .day_of_year(d)
+                .build()
+                .map(|d| d.strftime("%b %d").to_string())
+                .ok()
+        })
+    }
+
+    fn end_date(&self) -> Option<String> {
+        self.end_doy.and_then(|d| {
+            jiff::civil::Date::default()
+                .with()
+                .year(2000)
+                .day_of_year(d)
+                .build()
+                .map(|d| d.strftime("%b %d").to_string())
+                .ok()
+        })
+    }
 }
 
 impl Display for RegionalHarvestWindow {
@@ -207,30 +231,8 @@ impl Display for RegionalHarvestWindow {
         write!(
             f,
             "{} - {}",
-            self.start_doy
-                .and_then(|d| {
-                    jiff::civil::Date::default()
-                        .with()
-                        .year(2000)
-                        .day_of_year(d)
-                        .build()
-                        .map(|d| d.strftime("%b %d").to_string())
-                        .ok()
-                })
-                .as_deref()
-                .unwrap_or("?"),
-            self.end_doy
-                .and_then(|d| {
-                    jiff::civil::Date::default()
-                        .with()
-                        .year(2000)
-                        .day_of_year(d)
-                        .build()
-                        .map(|d| d.strftime("%b %d").to_string())
-                        .ok()
-                })
-                .as_deref()
-                .unwrap_or("?"),
+            self.start_date().as_deref().unwrap_or("?"),
+            self.end_date().as_deref().unwrap_or("?"),
         )
     }
 }
