@@ -245,9 +245,10 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
                             </td>
                             <td>
                                 <div class="flex items-center gap-x-6">
-                                    <div class="w-120">
-                                        harvest_timeline(window: &rs.harvest_window)
-                                    </div>
+                                    harvest_timeline(
+                                        window: &rs.harvest_window,
+                                        attrs: attributes! { class="w-120" }
+                                    )
                                     (rs.harvest_window.to_string())
                                 </div>
                             </td>

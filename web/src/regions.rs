@@ -170,9 +170,10 @@ pub async fn taxa_list(cx: &Cx) -> topcoat::Result {
                         </td>
                         <td>
                             <div class="flex items-center gap-x-6">
-                                <div class="w-120">
-                                    harvest_timeline(window: &rts.harvest_window)
-                                </div>
+                                harvest_timeline(
+                                    window: &rts.harvest_window,
+                                    attrs: attributes! { class="w-120" }
+                                )
                                 <div>(rts.harvest_window.to_string())</div>
                             </div>
                         </td>
@@ -232,6 +233,14 @@ pub async fn taxon_status(cx: &Cx) -> topcoat::Result {
                 .unwrap_or_default())
         </dd>
         <dt>"Harvest Window"</dt>
-        <dd>(rts.harvest_window.to_string())</dd>
+        <dd>
+            <div class="flex items-center gap-x-6">
+                harvest_timeline(
+                    window: &rts.harvest_window,
+                    attrs: attributes! { class="w-md" }
+                )
+                (rts.harvest_window.to_string())
+            </div>
+        </dd>
     }
 }

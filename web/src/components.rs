@@ -3,7 +3,7 @@ use libpropagation::{
     propagation::PropagationProcedure,
     region::{ConservationStatus, Origin, RegionalHarvestWindow},
 };
-use topcoat::view::{attributes, component, view};
+use topcoat::view::{Attributes, attributes, component, view};
 
 use crate::util::{ModifyOffset, PageState};
 
@@ -88,6 +88,7 @@ pub async fn propagation_details(procedure: &PropagationProcedure) -> topcoat::R
 pub async fn harvest_timeline(
     window: &RegionalHarvestWindow,
     #[default] current_week: Option<i16>,
+    #[default] attrs: Attributes,
 ) -> topcoat::Result {
     let (Some(start_week), Some(end_week)) = (window.start_week(), window.end_week()) else {
         return view! {};
@@ -100,36 +101,38 @@ pub async fn harvest_timeline(
     let marker_left_pct = ((cw as f32 - 0.5) / 52.0) * 100.0;
 
     view! {
-        <div class="relative w-full select-none text-xs font-sans">
-            <div class="relative w-full">
-                // <!-- 52 Week Blocks Grid -->
-                <div
-                    class="grid grid-cols-[repeat(52,minmax(0,1fr))] gap-[1px] min-h-[1em]"
-                >
-                    for w in 1..=52 {
-                        {
-                            let in_window = if start_week <= end_week {
-                                w >= start_week && w <= end_week
-                            } else {
-                                w >= start_week || w <= end_week
-                            };
+        <div (attrs)>
+            <div class="relative w-full select-none text-xs font-sans">
+                <div class="relative w-full">
+                    // <!-- 52 Week Blocks Grid -->
+                    <div
+                        class="grid grid-cols-[repeat(52,minmax(0,1fr))] gap-[1px] min-h-[1em]"
+                    >
+                        for w in 1..=52 {
+                            {
+                                let in_window = if start_week <= end_week {
+                                    w >= start_week && w <= end_week
+                                } else {
+                                    w >= start_week || w <= end_week
+                                };
 
-                            let bg_class = if in_window {
-                                "bg-leaf/50 border border-leaf/60"
-                            } else {
-                                "bg-brown/20 border border-brown/22"
-                            };
+                                let bg_class = if in_window {
+                                    "bg-leaf/50 border border-leaf/60"
+                                } else {
+                                    "bg-brown/20 border border-brown/22"
+                                };
 
-                            <div class=(format!("h-full rounded-[2px] {}", bg_class))></div>
+                                <div class=(format!("h-full rounded-[2px] {}", bg_class))></div>
+                            }
                         }
-                    }
-                </div>
+                    </div>
 
-                // <!-- Current Week Vertical Indicator Marker -->
-                <div
-                    class="absolute -top-1 -bottom-1 w-[2px] bg-brown z-20"
-                    style=(format!("left: {:.2}%;", marker_left_pct))
-                ></div>
+                    // <!-- Current Week Vertical Indicator Marker -->
+                    <div
+                        class="absolute -top-1 -bottom-1 w-[2px] bg-brown z-20"
+                        style=(format!("left: {:.2}%;", marker_left_pct))
+                    ></div>
+                </div>
             </div>
         </div>
     }
