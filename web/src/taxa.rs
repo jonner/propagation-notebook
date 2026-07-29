@@ -10,7 +10,7 @@ use topcoat::{
 use tracing::trace;
 
 use crate::{
-    components::{self, citation_list, pagination_control},
+    components::{self, citation_list, harvest_timeline, pagination_control},
     util::{CleaningId, ModifyOffset, PageState, Path, PropagationId, TaxonId, db},
 };
 
@@ -219,7 +219,14 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
                                     .map(|v| v.to_string())
                                     .unwrap_or_default())
                             </td>
-                            <td>(rs.harvest_window.to_string())</td>
+                            <td>
+                                <div class="flex items-center gap-x-6">
+                                    <div class="w-120">
+                                        harvest_timeline(window: &rs.harvest_window)
+                                    </div>
+                                    (rs.harvest_window.to_string())
+                                </div>
+                            </td>
                         </tr>
                     }
                 </table>

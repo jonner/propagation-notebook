@@ -11,7 +11,7 @@ use topcoat::{
 use tracing::trace;
 
 use crate::{
-    components::pagination_control,
+    components::{harvest_timeline, pagination_control},
     leaflet::Map,
     util::{ModifyOffset, PageState, Path, RegionId, TaxonId, db},
 };
@@ -169,7 +169,14 @@ pub async fn taxa_list(cx: &Cx) -> topcoat::Result {
                                 <span (attrs)>(origin.to_string())</span>
                             }
                         </td>
-                        <td>(rts.harvest_window.to_string())</td>
+                        <td>
+                            <div class="flex items-center gap-x-6">
+                                <div class="w-120">
+                                    harvest_timeline(window: &rts.harvest_window)
+                                </div>
+                                <div>(rts.harvest_window.to_string())</div>
+                            </div>
+                        </td>
                     </tr>
                 }
             }

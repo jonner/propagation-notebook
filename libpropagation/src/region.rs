@@ -201,6 +201,14 @@ impl RegionalHarvestWindow {
         self.start_doy.is_none() && self.end_doy.is_none()
     }
 
+    pub fn start_week(&self) -> Option<i16> {
+        self.start_doy.map(|doy| doy.div_euclid(7))
+    }
+
+    pub fn end_week(&self) -> Option<i16> {
+        self.end_doy.map(|doy| (doy + 6).div_euclid(7))
+    }
+
     fn start_date(&self) -> Option<String> {
         self.start_doy.and_then(|d| {
             jiff::civil::Date::default()
