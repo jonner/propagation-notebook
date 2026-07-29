@@ -1,7 +1,7 @@
 use libpropagation::{
     citation::Citation,
     propagation::PropagationProcedure,
-    region::{Origin, RegionalHarvestWindow},
+    region::{ConservationStatus, Origin, RegionalHarvestWindow},
 };
 use topcoat::view::{attributes, component, view};
 
@@ -145,4 +145,23 @@ pub async fn origin_badge(origin: Origin) -> topcoat::Result {
         }
     };
     view! { <span (attrs)>(origin.to_string())</span> }
+}
+
+#[component]
+pub async fn conservation_status_badge(status: Option<ConservationStatus>) -> topcoat::Result {
+    let attrs = attributes! {
+        match status {
+            Some(ConservationStatus::Endangered) => class="endangered",
+            Some(ConservationStatus::Threatened) => class="threatened",
+            Some(ConservationStatus::SpecialConcern) => class="specialconcern",
+            None => class="unlisted",
+        }
+    };
+    view! {
+        <span (attrs)>
+            (status
+                .map(|v| v.to_string())
+                .unwrap_or_else(|| "Unlisted".to_string()))
+        </span>
+    }
 }

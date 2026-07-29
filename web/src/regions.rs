@@ -11,7 +11,7 @@ use topcoat::{
 use tracing::trace;
 
 use crate::{
-    components::{harvest_timeline, origin_badge, pagination_control},
+    components::{conservation_status_badge, harvest_timeline, origin_badge, pagination_control},
     leaflet::Map,
     util::{ModifyOffset, PageState, Path, RegionId, TaxonId, db},
 };
@@ -205,16 +205,15 @@ pub async fn taxon_status(cx: &Cx) -> topcoat::Result {
         <dt>"Region"</dt>
         <dd><a href=(region.path())>(&region.name)</a></dd>
         <dt>"Origin"</dt>
-        <dd>(rts.origin.map(|v| v.to_string()).unwrap_or_default())</dd>
+        <dd>
+            if let Some(origin) = rts.origin {
+                origin_badge(origin: origin)
+            }
+        </dd>
         <dt>"C-value"</dt>
         <dd>(rts.c_value.map(|v| v.to_string()).unwrap_or_default())</dd>
         <dt>"Conservation Status"</dt>
-        <dd>
-            (rts
-                .conservation_status
-                .map(|v| v.to_string())
-                .unwrap_or_default())
-        </dd>
+        <dd>conservation_status_badge(status: rts.conservation_status)</dd>
         <dt>"Wetland Indicator"</dt>
         <dd>
             (rts
