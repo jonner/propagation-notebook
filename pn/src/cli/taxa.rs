@@ -86,7 +86,7 @@ pub enum TaxonCommands {
     },
     #[command(about = "Manage links to external taxonomies")]
     Link {
-        #[arg(short, long, help = "A taxon name or ID")]
+        #[arg(help = "A taxon name or ID")]
         taxon: TaxonIdentifier,
         #[arg(short = 'a', long, help = "An external taxonomic authority", value_enum, default_value_t=TaxonomicAuthority::Inaturalist)]
         authority: TaxonomicAuthority,
