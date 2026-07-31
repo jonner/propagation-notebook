@@ -11,6 +11,7 @@ use libpropagation::{
 };
 use serde::Serialize;
 use toasty::Db;
+use tracing::trace;
 
 use crate::{
     cli::OutputFormat,
@@ -98,6 +99,8 @@ pub enum TaxonCommands {
     UpdateImages {
         #[arg(help = "A taxon name or ID")]
         taxon: Option<TaxonIdentifier>,
+        #[arg(long, help = "Only update image if missing")]
+        missing: bool,
     },
 }
 
@@ -329,7 +332,7 @@ impl TaxonCommands {
                 };
                 command.run(db, taxon_id, *authority, format).await?
             }
-            Self::UpdateImages { taxon } => {
+            Self::UpdateImages { taxon, missing } => {
                 if let Some(name_or_id) = taxon {
                     let taxon_id = match name_or_id {
                         TaxonIdentifier::Id(id) => *id,
@@ -337,8 +340,17 @@ impl TaxonCommands {
                             Taxon::get_by_complete_name_ignore_case(db, name).await?.id
                         }
                     };
-                    let taxon = Taxon::get_by_id(db, taxon_id).await?;
-                    update_photo_for_taxon(db, taxon).await?;
+                    let taxon = Taxon::filter_by_id(taxon_id)
+                        .include(Taxon::fields().photo())
+                        .one()
+                        .exec(db)
+                        .await?;
+                    trace!(?taxon);
+                    if !missing || taxon.photo.get().is_none() {
+                        update_photo_for_taxon(db, taxon).await?;
+                    } else {
+                        println!("Not updating ")
+                    }
                 } else {
                     //update all
                     let taxa = Taxon::all()
@@ -346,8 +358,21 @@ impl TaxonCommands {
                         .exec(db)
                         .await?;
                     for taxon in taxa.into_iter().progress() {
-                        // ignore errors and continue
-                        _ = update_photo_for_taxon(db, taxon).await;
+                        // check if photo exists
+                        let update = if *missing {
+                            let photo = TaxonPhoto::get_by_taxon_id(db, taxon.id).await;
+                            trace!(?photo);
+                            !photo.is_ok()
+                        } else {
+                            true
+                        };
+                        if update {
+                            tracing::trace!(?taxon.complete_name, "Updating");
+                            // ignore errors and continue
+                            _ = update_photo_for_taxon(db, taxon).await;
+                        } else {
+                            trace!("Not updating {}", taxon.complete_name)
+                        }
                     }
                 }
             }
@@ -362,6 +387,7 @@ async fn update_photo_for_taxon(db: &mut Db, taxon: Taxon) -> Result<(), anyhow:
         Some(id) => Ok(id),
         None => match find_exact_inat_taxon(&taxon, &inat).await? {
             Some(itaxon) => {
+                trace!(?taxon.complete_name, ?itaxon, "Updating inaturalist ID");
                 Taxon::update_by_id(taxon.id)
                     .inaturalist_id(Some(itaxon.id))
                     .exec(db)
@@ -372,6 +398,7 @@ async fn update_photo_for_taxon(db: &mut Db, taxon: Taxon) -> Result<(), anyhow:
         },
     }?;
     let default_photo = inat.taxon_default_photo(inat_id).await?;
+    trace!(?default_photo);
     TaxonPhoto::upsert_by_taxon_id(taxon.id)
         .large_url(default_photo.large_url)
         .square_url(default_photo.square_url)
