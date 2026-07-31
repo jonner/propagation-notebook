@@ -84,18 +84,36 @@ pub enum Rank {
     Subform,
 }
 
-impl std::str::FromStr for Rank {
-    type Err = Infallible;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(match s.to_ascii_lowercase().trim() {
-            "subspecies" | "ssp" => Rank::Subspecies,
-            "variety" | "var" => Rank::Variety,
-            "species" => Rank::Species,
-            "genus" => Rank::Genus,
+impl Rank {
+    pub fn from_inaturalist(s: &str) -> Self {
+        match s.to_ascii_lowercase().trim() {
+            "kingdom" => Rank::Kingdom,
+            "subkingdom" => Rank::Subkingdom,
+            "phylum" => Rank::Division,
+            "subphylum" => Rank::Subdivision,
+            "superclass" => Rank::Superclass,
+            "class" => Rank::Class,
+            "subclass" => Rank::Subclass,
+            "infraclass" => Rank::Infraclass,
+            "superorder" => Rank::Superorder,
+            "order" => Rank::Order,
+            "suborder" => Rank::Suborder,
+            "section" => Rank::Section,
+            "subsection" => Rank::Subsection,
             "family" => Rank::Family,
+            "subfamily" => Rank::Subfamily,
+            "tribe" => Rank::Tribe,
+            "subtribe" => Rank::Subtribe,
+            "genus" => Rank::Genus,
+            "genushybrid" => Rank::Genus,
+            "subgenus" => Rank::Subgenus,
+            "species" => Rank::Species,
+            "hybrid" => Rank::Species,
+            "subspecies" => Rank::Subspecies,
+            "variety" => Rank::Variety,
+            "form" => Rank::Form,
             _ => Rank::Unknown,
-        })
+        }
     }
 }
 
@@ -308,8 +326,8 @@ impl Taxon {
     }
 
     pub fn matches(&self, inat_taxon: &inaturalist::Taxon) -> bool {
-        let rank = inat_taxon.rank.parse::<Rank>();
-        rank == Ok(self.rank)
+        let rank = Rank::from_inaturalist(&inat_taxon.rank);
+        rank == self.rank
             && (self.complete_name.eq_ignore_ascii_case(&inat_taxon.name)
                 || self.names().eq_ignore_ascii_case(&inat_taxon.name))
     }
