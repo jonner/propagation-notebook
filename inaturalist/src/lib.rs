@@ -128,6 +128,7 @@ pub struct DefaultPhoto {
     pub attribution: Option<String>,
 }
 
+const PLANTAE_ID: &str = "47126";
 const PLANT_PHENOLOGY: &str = "12";
 const FRUITING: &str = "14";
 static API_BASE_URL: LazyLock<reqwest::Url> = LazyLock::new(|| {
@@ -234,6 +235,8 @@ impl Client {
             .0
             .get(taxa_endpoint)
             .query(&[
+                // limit any results to plant taxa
+                ("taxon_id", PLANTAE_ID),
                 ("q", taxon_name),
                 ("per_page", "25"),
                 ("fields", Taxon::fields()),
