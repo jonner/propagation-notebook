@@ -2,11 +2,14 @@ use std::{collections::HashMap, fmt::Display};
 
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
-use toasty::Deferred;
+use toasty::{Db, Deferred};
 
 use crate::{
-    ImportProgressReporter, dto::ObjectReference, error::ImportExportError,
-    region::file::RegionInfo, taxonomy::Taxon,
+    ImportProgressReporter,
+    dto::ObjectReference,
+    error::{Error, ImportExportError},
+    region::file::RegionInfo,
+    taxonomy::Taxon,
 };
 
 pub mod dto;
@@ -183,6 +186,66 @@ impl Region {
         reporter.finish_step();
 
         Ok(region)
+    }
+
+    pub async fn get_taxa(
+        &self,
+        db: &mut Db,
+        only_native: bool,
+        only_ready: bool,
+        offset: Option<usize>,
+        limit: Option<usize>,
+    ) -> Result<Vec<Taxon>, toasty::Error> {
+        let mut rts_filter = RegionalTaxonStatus::fields().region_id().eq(self.id);
+        if only_ready {
+            let day = jiff::Zoned::now().date().day_of_year();
+            let start = day;
+            let end = day;
+            rts_filter = rts_filter.and(
+                RegionalTaxonStatus::fields()
+                    .harvest_window()
+                    .start_doy()
+                    .le(start)
+                    .and(
+                        RegionalTaxonStatus::fields()
+                            .harvest_window()
+                            .end_doy()
+                            .ge(end),
+                    )
+                    .or(RegionalTaxonStatus::fields()
+                        .harvest_window()
+                        .start_doy()
+                        .gt(RegionalTaxonStatus::fields().harvest_window().end_doy())
+                        .and(
+                            RegionalTaxonStatus::fields()
+                                .harvest_window()
+                                .start_doy()
+                                .le(start)
+                                .or(RegionalTaxonStatus::fields()
+                                    .harvest_window()
+                                    .end_doy()
+                                    .ge(end)),
+                        )),
+            );
+        }
+        if only_native {
+            rts_filter = rts_filter.and(RegionalTaxonStatus::fields().origin().eq(Origin::Native));
+        }
+        let mut filter = Taxon::filter(Taxon::fields().regional_statuses().any(rts_filter));
+        filter = filter
+            .include(
+                Taxon::fields()
+                    .regional_statuses()
+                    .filter(RegionalTaxonStatus::fields().region_id().eq(self.id)),
+            )
+            .order_by(Taxon::fields().sequence().asc());
+        if let Some(limit) = limit {
+            filter = filter.limit(limit)
+        }
+        if let Some(offset) = offset {
+            filter = filter.offset(offset)
+        }
+        filter.exec(db).await
     }
 }
 

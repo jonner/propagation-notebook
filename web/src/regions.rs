@@ -1,7 +1,4 @@
-use libpropagation::{
-    region::{Origin, Region, RegionalTaxonStatus},
-    taxonomy::Taxon,
-};
+use libpropagation::region::{Region, RegionalTaxonStatus};
 use serde::Serialize;
 use topcoat::{
     context::Cx,
@@ -91,58 +88,22 @@ pub async fn taxa_list(cx: &Cx) -> topcoat::Result {
     let mut db = db(cx);
     let region_id = path_param::<RegionId>(cx)?;
     let params = query_params::<RegionalTaxaListParams>(cx)?;
-    let mut rts_filter = RegionalTaxonStatus::fields().region_id().eq(region_id);
-    if params.ready == Some(true) {
-        let day = jiff::Zoned::now().date().day_of_year();
-        // include species that start harvesting in the next week
-        let start = day;
-        // include species that finished harvesting a week ago
-        let end = day;
-        rts_filter = rts_filter.and(
-            RegionalTaxonStatus::fields()
-                .harvest_window()
-                .start_doy()
-                .le(start)
-                .and(
-                    RegionalTaxonStatus::fields()
-                        .harvest_window()
-                        .end_doy()
-                        .ge(end),
-                )
-                .or(RegionalTaxonStatus::fields()
-                    .harvest_window()
-                    .start_doy()
-                    .gt(RegionalTaxonStatus::fields().harvest_window().end_doy())
-                    .and(
-                        RegionalTaxonStatus::fields()
-                            .harvest_window()
-                            .start_doy()
-                            .le(start)
-                            .or(RegionalTaxonStatus::fields()
-                                .harvest_window()
-                                .end_doy()
-                                .ge(end)),
-                    )),
-        );
-    }
-    if params.native == Some(true) {
-        rts_filter = rts_filter.and(RegionalTaxonStatus::fields().origin().eq(Origin::Native));
-    }
-    let filter = Taxon::filter(Taxon::fields().regional_statuses().any(rts_filter));
-    let total = filter.clone().count().exec(&mut db).await? as usize;
-    let page_state = PageState::new(params.offset, total);
-    let taxa = filter
-        .include(
-            Taxon::fields()
-                .regional_statuses()
-                .filter(RegionalTaxonStatus::fields().region_id().eq(region_id)),
-        )
-        .order_by(Taxon::fields().sequence().asc())
-        .limit(page_state.per_page)
-        .offset(page_state.offset)
+    let region = Region::filter_by_id(region_id)
+        .include(Region::fields().taxon_statuses())
+        .one()
         .exec(&mut db)
         .await?;
-    let region = Region::get_by_id(&mut db, region_id).await?;
+    let total = region.taxon_statuses.get().len();
+    let page_state = PageState::new(params.offset, total);
+    let taxa = region
+        .get_taxa(
+            &mut db,
+            params.native.unwrap_or_default(),
+            params.ready.unwrap_or_default(),
+            Some(page_state.offset),
+            Some(page_state.per_page),
+        )
+        .await?;
     view! {
         <h1>(&region.name)</h1>
         <table>
