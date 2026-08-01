@@ -291,6 +291,9 @@ pub struct RegionalTaxonStatus {
     pub native_plant_community_id: Option<u64>,
     #[belongs_to(key=native_plant_community_id, references=id)]
     pub native_plant_community: Deferred<NativePlantCommunity>,
+
+    pub created_at: Option<jiff::Timestamp>,
+    pub updated_at: Option<jiff::Timestamp>,
 }
 
 #[derive(Debug, Clone, toasty::Model)]

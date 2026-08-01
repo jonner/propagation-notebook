@@ -55,6 +55,8 @@ pub struct Citation {
     pub url: Option<String>,
     pub author: Option<String>,
     pub date: Option<jiff::civil::Date>,
+    pub created_at: Option<jiff::Timestamp>,
+    pub updated_at: Option<jiff::Timestamp>,
 
     #[has_many]
     pub cleaning_procedures: Deferred<Vec<CleaningProcedureCitation>>,
@@ -108,6 +110,8 @@ pub struct CleaningProcedureCitation {
     pub cleaning_id: u64,
     #[belongs_to(key=cleaning_id, references=id)]
     pub cleaning: Deferred<CleaningProcedure>,
+    pub created_at: Option<jiff::Timestamp>,
+    pub updated_at: Option<jiff::Timestamp>,
 }
 
 #[derive(Debug, Clone, toasty::Model)]
@@ -122,6 +126,8 @@ pub struct PropagationProcedureCitation {
     pub propagation_id: u64,
     #[belongs_to(key=propagation_id, references=id)]
     pub propagation: Deferred<PropagationProcedure>,
+    pub created_at: Option<jiff::Timestamp>,
+    pub updated_at: Option<jiff::Timestamp>,
 }
 
 #[derive(Debug, Clone, toasty::Model)]
@@ -138,6 +144,8 @@ pub struct TaxonPropagationProcedureCitation {
     pub taxon_id: u64,
     #[belongs_to(key=[taxon_id, propagation_id], references=[taxon_id, propagation_id])]
     pub taxon_propagation: Deferred<TaxonPropagationProcedure>,
+    pub created_at: Option<jiff::Timestamp>,
+    pub updated_at: Option<jiff::Timestamp>,
 }
 
 #[derive(Debug, Clone, toasty::Model)]
@@ -152,4 +160,6 @@ pub struct TaxonNoteCitation {
     pub note_id: u64,
     #[belongs_to(key=note_id, references=id)]
     pub note: Deferred<TaxonNote>,
+    pub created_at: Option<jiff::Timestamp>,
+    pub updated_at: Option<jiff::Timestamp>,
 }
