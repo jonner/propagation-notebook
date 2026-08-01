@@ -1,4 +1,5 @@
 name: Minnesota
+category: Province
 geometry:
   type: Polygon
   coordinates:

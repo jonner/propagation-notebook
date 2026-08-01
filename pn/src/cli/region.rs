@@ -17,6 +17,7 @@ use geo::BoundingRect;
 use geo::ChamberlainDuquetteArea;
 use indicatif::{ProgressBar, ProgressIterator, ProgressStyle};
 use jiff::civil::Date;
+use libpropagation::region::RegionCategory;
 use libpropagation::region::dto::{
     CompactRegion, FullRegion, RegionalTaxonHarvestInfo, RegionalTaxonStatusDetails,
     RegionalTaxonStatusDetailsNoRegion, RegionalTaxonStatusHarvest,
@@ -70,7 +71,10 @@ impl GeometryArg {
 #[derive(Debug, clap::Subcommand)]
 pub enum RegionCommands {
     #[command(about = "Print a list of regions", alias = "ls")]
-    List,
+    List {
+        #[arg(short, long, value_enum, help = "Show regions of the given category")]
+        category: Option<RegionCategory>,
+    },
     #[command(about = "Show detailed information about a region")]
     Show { id: u64 },
     #[command(about = "Add a new region to the database", alias = "new")]
@@ -78,6 +82,8 @@ pub enum RegionCommands {
         region_name: String,
         #[clap(flatten)]
         geometry: GeometryArg,
+        #[arg(short, long, value_enum, help = "The category of this region")]
+        category: RegionCategory,
         #[arg(long, help = "Free-form notes about the region")]
         notes: Option<String>,
     },
@@ -93,7 +99,7 @@ pub enum RegionCommands {
         #[arg(short, long, help = "A path to save the file describing the region")]
         output_file: Option<PathBuf>,
     },
-    #[command(about = "Modify information about a region", group(clap::ArgGroup::new("modify_fields").args(["name", "geometry_string", "geometry_file", "notes"]).required(true).multiple(true)), alias="edit")]
+    #[command(about = "Modify information about a region", group(clap::ArgGroup::new("modify_fields").args(["name", "geometry_string", "geometry_file", "notes", "category"]).required(true).multiple(true)), alias="edit")]
     Modify {
         id: u64,
         #[command(flatten)]
@@ -102,6 +108,8 @@ pub enum RegionCommands {
         name: Option<String>,
         #[arg(long, help = "Set notes for a region")]
         notes: Option<String>,
+        #[arg(short, long, value_enum, help = "The category of this region")]
+        category: Option<RegionCategory>,
     },
     #[command(about = "Remove a region from the database")]
     Remove {
@@ -144,14 +152,17 @@ pub enum RegionCommands {
 impl RegionCommands {
     pub async fn run(&self, db: &mut Db, format: OutputFormat) -> anyhow::Result<()> {
         match self {
-            RegionCommands::List => {
-                let regions: Vec<CompactRegion> = Region::all()
-                    .include(Region::fields().taxon_statuses())
-                    .exec(db)
-                    .await?
-                    .into_iter()
-                    .map(|region| region.into())
-                    .collect();
+            RegionCommands::List { category } => {
+                let regions: Vec<CompactRegion> = match category {
+                    Some(category) => Region::filter(Region::fields().category().eq(category)),
+                    None => Region::all(),
+                }
+                .include(Region::fields().taxon_statuses())
+                .exec(db)
+                .await?
+                .into_iter()
+                .map(|region| region.into())
+                .collect();
                 let output = match format {
                     OutputFormat::Text => RegionsListView::new(&regions).render()?,
                     OutputFormat::Json => JsonView::new(&regions).render()?,
@@ -178,6 +189,7 @@ impl RegionCommands {
                 geometry,
                 name,
                 notes,
+                category,
             } => {
                 let mut update_query = Region::update_by_id(id);
                 let geometry = geometry.resolve().await?;
@@ -189,6 +201,9 @@ impl RegionCommands {
                 }
                 if let Some(notes) = notes {
                     update_query = update_query.notes(notes);
+                }
+                if let Some(category) = category {
+                    update_query = update_query.category(category);
                 }
                 update_query.exec(db).await?;
                 let region: FullRegion = Region::filter_by_id(id)
@@ -206,11 +221,13 @@ impl RegionCommands {
             }
             RegionCommands::Add {
                 region_name,
+                category,
                 geometry,
                 notes,
             } => {
                 let new_region: FullRegion = Region::create()
                     .name(region_name)
+                    .category(category)
                     .geometry(geometry.resolve().await?.map(|v| v.into()))
                     .notes(notes)
                     .exec(db)

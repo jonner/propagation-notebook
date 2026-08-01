@@ -49,6 +49,7 @@ impl<'a> RegionDetailsView<'a> {
         let mut tbuilder = tabled::builder::Builder::default();
         tbuilder.push_record(["ID", &self.region.id.to_string()]);
         tbuilder.push_record(["Name", &self.region.name]);
+        tbuilder.push_record(["Category", &self.region.category.to_string()]);
         tbuilder.push_record(["Notes", self.region.notes.as_deref().unwrap_or("-")]);
         tbuilder.push_record([
             "Taxa",
