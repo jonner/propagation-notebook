@@ -69,6 +69,8 @@ pub struct Region {
     #[column(type = "TEXT")]
     pub geometry: Option<toasty::Json<geojson::Geometry>>,
     pub notes: Option<String>,
+    pub created_at: Option<jiff::Timestamp>,
+    pub updated_at: Option<jiff::Timestamp>,
 
     #[has_many]
     pub taxon_statuses: Deferred<Vec<RegionalTaxonStatus>>,
