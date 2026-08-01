@@ -2,10 +2,11 @@ use libpropagation::{
     citation::Citation,
     propagation::PropagationProcedure,
     region::{ConservationStatus, Origin, RegionalHarvestWindow},
+    taxonomy::Taxon,
 };
 use topcoat::view::{Attributes, attributes, component, view};
 
-use crate::util::{ModifyOffset, PageState};
+use crate::util::{ModifyOffset, PageState, Path};
 
 #[component]
 pub async fn citation_list(citations: Vec<&Citation>) -> topcoat::Result {
@@ -160,4 +161,48 @@ pub async fn conservation_status_badge(status: ConservationStatus) -> topcoat::R
         }
     };
     view! { <span (attrs)>(status.to_string())</span> }
+}
+
+#[component]
+pub async fn taxa_table(taxa: Vec<Taxon>) -> topcoat::Result {
+    view! {
+        <table>
+            <tr>
+                <th>"Taxon"</th>
+                <th>"Origin"</th>
+                <th>"Status"</th>
+                <th>"Fruiting window"</th>
+            </tr>
+            for taxon in taxa {
+                if let Some(rts) = taxon.regional_statuses.get().first() {
+                    <tr>
+                        <td>
+                            <span class="latin">
+                                <a href=(taxon.path())>(&taxon.complete_name)</a>
+                            </span>
+                        </td>
+                        <td>
+                            if let Some(origin) = rts.origin {
+                                origin_badge(origin: origin)
+                            }
+                        </td>
+                        <td>
+                            if let Some(status) = rts.conservation_status {
+                                conservation_status_badge(status: status)
+                            }
+                        </td>
+                        <td>
+                            <div class="flex items-center gap-x-6">
+                                harvest_timeline(
+                                    window: &rts.harvest_window,
+                                    attrs: attributes! { class="w-120" }
+                                )
+                                <div>(rts.harvest_window.to_string())</div>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+        </table>
+    }
 }

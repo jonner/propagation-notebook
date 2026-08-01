@@ -150,7 +150,9 @@ async fn layout(slot: topcoat::Result) -> topcoat::Result {
 async fn home() -> topcoat::Result {
     view! {
         <h1>"Native Plant Propagation Notebook"</h1>
-        <div>"A reference for collecting and propagating native plants for ecological restoration"</div>
+        <div>
+            "A reference for collecting and propagating native plants for ecological restoration"
+        </div>
         <div class="card">
             <h2>"Propagation"</h2>
             <div>"Search for information about propagating a particular species"</div>
@@ -167,7 +169,9 @@ async fn home() -> topcoat::Result {
         <div class="card">
             <h2>"Collect Seeds"</h2>
             <div>
-                "Find out when plants are bearing seed in your "<a href="/regions">"region"</a>"."
+                "Find out when plants are bearing seed in your "
+                <a href="/regions">"region"</a>
+                "."
             </div>
         </div>
     }

@@ -5,11 +5,8 @@ use serde_with::skip_serializing_none;
 use toasty::{Db, Deferred};
 
 use crate::{
-    ImportProgressReporter,
-    dto::ObjectReference,
-    error::{Error, ImportExportError},
-    region::file::RegionInfo,
-    taxonomy::Taxon,
+    ImportProgressReporter, dto::ObjectReference, error::ImportExportError,
+    region::file::RegionInfo, taxonomy::Taxon,
 };
 
 pub mod dto;
@@ -191,45 +188,48 @@ impl Region {
     pub async fn get_taxa(
         &self,
         db: &mut Db,
-        only_native: bool,
-        only_ready: bool,
+        origin: Option<OriginFilter>,
+        harvest: Option<HarvestFilter>,
         offset: Option<usize>,
         limit: Option<usize>,
     ) -> Result<Vec<Taxon>, toasty::Error> {
         let mut rts_filter = RegionalTaxonStatus::fields().region_id().eq(self.id);
-        if only_ready {
-            let day = jiff::Zoned::now().date().day_of_year();
-            let start = day;
-            let end = day;
-            rts_filter = rts_filter.and(
-                RegionalTaxonStatus::fields()
+        let today = jiff::Zoned::now().date().day_of_year();
+        if let Some(f) = harvest {
+            rts_filter = rts_filter.and(match f {
+                HarvestFilter::ReadyNow => window_includes(today),
+                HarvestFilter::ReadyOnDoy(doy) => window_includes(doy),
+                HarvestFilter::EndingSoon(days) => RegionalTaxonStatus::fields()
                     .harvest_window()
-                    .start_doy()
-                    .le(start)
+                    .end_doy()
+                    .gt(today)
                     .and(
                         RegionalTaxonStatus::fields()
                             .harvest_window()
                             .end_doy()
-                            .ge(end),
-                    )
-                    .or(RegionalTaxonStatus::fields()
-                        .harvest_window()
-                        .start_doy()
-                        .gt(RegionalTaxonStatus::fields().harvest_window().end_doy())
-                        .and(
-                            RegionalTaxonStatus::fields()
-                                .harvest_window()
-                                .start_doy()
-                                .le(start)
-                                .or(RegionalTaxonStatus::fields()
-                                    .harvest_window()
-                                    .end_doy()
-                                    .ge(end)),
-                        )),
-            );
+                            .lt(today + days),
+                    ),
+                HarvestFilter::StartingSoon(days) => RegionalTaxonStatus::fields()
+                    .harvest_window()
+                    .start_doy()
+                    .gt(today)
+                    .and(
+                        RegionalTaxonStatus::fields()
+                            .harvest_window()
+                            .start_doy()
+                            .lt(today + days),
+                    ),
+            });
         }
-        if only_native {
-            rts_filter = rts_filter.and(RegionalTaxonStatus::fields().origin().eq(Origin::Native));
+        if let Some(f) = origin {
+            rts_filter = rts_filter.and(match f {
+                OriginFilter::NativeOnly => {
+                    RegionalTaxonStatus::fields().origin().eq(Origin::Native)
+                }
+                OriginFilter::NonNativeOnly => {
+                    RegionalTaxonStatus::fields().origin().ne(Origin::Native)
+                }
+            })
         }
         let mut filter = Taxon::filter(Taxon::fields().regional_statuses().any(rts_filter));
         filter = filter
@@ -247,6 +247,33 @@ impl Region {
         }
         filter.exec(db).await
     }
+}
+
+fn window_includes(doy: i16) -> toasty::stmt::Expr<bool> {
+    RegionalTaxonStatus::fields()
+        .harvest_window()
+        .start_doy()
+        .le(doy)
+        .and(
+            RegionalTaxonStatus::fields()
+                .harvest_window()
+                .end_doy()
+                .ge(doy),
+        )
+        .or(RegionalTaxonStatus::fields()
+            .harvest_window()
+            .start_doy()
+            .gt(RegionalTaxonStatus::fields().harvest_window().end_doy())
+            .and(
+                RegionalTaxonStatus::fields()
+                    .harvest_window()
+                    .start_doy()
+                    .le(doy)
+                    .or(RegionalTaxonStatus::fields()
+                        .harvest_window()
+                        .end_doy()
+                        .ge(doy)),
+            ))
 }
 
 #[derive(
@@ -271,11 +298,23 @@ pub enum Origin {
     Unknown,
 }
 
+pub enum OriginFilter {
+    NativeOnly,
+    NonNativeOnly,
+}
+
 #[skip_serializing_none]
 #[derive(Debug, Clone, Default, toasty::Embed, Serialize, PartialEq)]
 pub struct RegionalHarvestWindow {
     pub start_doy: Option<i16>,
     pub end_doy: Option<i16>,
+}
+
+pub enum HarvestFilter {
+    ReadyNow,
+    ReadyOnDoy(i16),
+    EndingSoon(i16),
+    StartingSoon(i16),
 }
 
 impl RegionalHarvestWindow {

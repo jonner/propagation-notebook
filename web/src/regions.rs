@@ -1,4 +1,4 @@
-use libpropagation::region::{Region, RegionalTaxonStatus};
+use libpropagation::region::{OriginFilter, Region, RegionalTaxonStatus};
 use serde::Serialize;
 use topcoat::{
     context::Cx,
@@ -8,7 +8,9 @@ use topcoat::{
 use tracing::trace;
 
 use crate::{
-    components::{conservation_status_badge, harvest_timeline, origin_badge, pagination_control},
+    components::{
+        conservation_status_badge, harvest_timeline, origin_badge, pagination_control, taxa_table,
+    },
     leaflet::Map,
     util::{ModifyOffset, PageState, Path, RegionId, TaxonId, db},
 };
@@ -30,6 +32,101 @@ pub async fn list(cx: &Cx) -> topcoat::Result {
 }
 
 #[page("/regions/{region_id}")]
+pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
+    let id = path_param::<RegionId>(cx)?;
+    let mut db = db(cx);
+    let region = Region::filter_by_id(id)
+        .include(Region::fields().taxon_statuses())
+        .one()
+        .exec(&mut db)
+        .await?;
+    let ending = region
+        .get_taxa(
+            &mut db,
+            Some(OriginFilter::NativeOnly),
+            Some(libpropagation::region::HarvestFilter::EndingSoon(10)),
+            None,
+            Some(10),
+        )
+        .await?;
+    let starting_soon = region
+        .get_taxa(
+            &mut db,
+            Some(OriginFilter::NativeOnly),
+            Some(libpropagation::region::HarvestFilter::StartingSoon(10)),
+            None,
+            Some(10),
+        )
+        .await?;
+    view! {
+        <h1>(&region.name)</h1>
+        <div>(region.notes.as_deref().unwrap_or_default())</div>
+        <ul>
+            <li><a href=(format!("/regions/{id}/details"))>"Additional details"</a></li>
+            <li><a href=(format!("/regions/{id}/taxa"))>"Full taxa list"</a></li>
+        </ul>
+        <h2>"Taxa nearing the end of harvest season"</h2>
+        taxa_table(taxa: ending)
+        <div><a href=(format!("/regions/{id}/ending"))>"Full list"</a></div>
+        <h2>"Taxa coming into harvest season"</h2>
+        taxa_table(taxa: starting_soon)
+        <div><a href=(format!("/regions/{id}/starting"))>"Full list"</a></div>
+    }
+}
+
+#[page("/regions/{region_id}/starting")]
+pub(crate) async fn harvest_starting(cx: &Cx) -> topcoat::Result {
+    let id = path_param::<RegionId>(cx)?;
+    let mut db = db(cx);
+    let region = Region::filter_by_id(id)
+        .include(Region::fields().taxon_statuses())
+        .one()
+        .exec(&mut db)
+        .await?;
+    // FIXME: pagination
+    let starting_soon = region
+        .get_taxa(
+            &mut db,
+            Some(OriginFilter::NativeOnly),
+            Some(libpropagation::region::HarvestFilter::StartingSoon(10)),
+            None,
+            None,
+        )
+        .await?;
+    view! {
+        <h1>(&region.name)</h1>
+        <h2>"Taxa coming into harvest season"</h2>
+        taxa_table(taxa: starting_soon)
+    }
+}
+
+#[page("/regions/{region_id}/ending")]
+pub(crate) async fn harvest_ending(cx: &Cx) -> topcoat::Result {
+    let id = path_param::<RegionId>(cx)?;
+    let mut db = db(cx);
+    let region = Region::filter_by_id(id)
+        .include(Region::fields().taxon_statuses())
+        .one()
+        .exec(&mut db)
+        .await?;
+    // FIXME: pagination
+    let ending = region
+        .get_taxa(
+            &mut db,
+            Some(OriginFilter::NativeOnly),
+            Some(libpropagation::region::HarvestFilter::EndingSoon(10)),
+            None,
+            Some(10),
+        )
+        .await?;
+    view! {
+        <h1>(&region.name)</h1>
+        <h2>"Taxa nearing the end of harvest season"</h2>
+        taxa_table(taxa: ending)
+    }
+}
+
+#[page("/regions/{region_id}/details")]
 pub(crate) async fn details(cx: &Cx) -> topcoat::Result {
     let id = path_param::<RegionId>(cx)?;
     let mut db = db(cx);
@@ -98,52 +195,23 @@ pub async fn taxa_list(cx: &Cx) -> topcoat::Result {
     let taxa = region
         .get_taxa(
             &mut db,
-            params.native.unwrap_or_default(),
-            params.ready.unwrap_or_default(),
+            if Some(true) == params.native {
+                Some(OriginFilter::NativeOnly)
+            } else {
+                None
+            },
+            if Some(true) == params.ready {
+                Some(libpropagation::region::HarvestFilter::ReadyNow)
+            } else {
+                None
+            },
             Some(page_state.offset),
             Some(page_state.per_page),
         )
         .await?;
     view! {
         <h1>(&region.name)</h1>
-        <table>
-            <tr>
-                <th>"Taxon"</th>
-                <th>"Origin"</th>
-                <th>"Status"</th>
-                <th>"Fruiting window"</th>
-            </tr>
-            for taxon in taxa {
-                if let Some(rts) = taxon.regional_statuses.get().first() {
-                    <tr>
-                        <td>
-                            <span class="latin">
-                                <a href=(taxon.path())>(&taxon.complete_name)</a>
-                            </span>
-                        </td>
-                        <td>
-                            if let Some(origin) = rts.origin {
-                                origin_badge(origin: origin)
-                            }
-                        </td>
-                        <td>
-                            if let Some(status) = rts.conservation_status {
-                                conservation_status_badge(status: status)
-                            }
-                        </td>
-                        <td>
-                            <div class="flex items-center gap-x-6">
-                                harvest_timeline(
-                                    window: &rts.harvest_window,
-                                    attrs: attributes! { class="w-120" }
-                                )
-                                <div>(rts.harvest_window.to_string())</div>
-                            </div>
-                        </td>
-                    </tr>
-                }
-            }
-        </table>
+        taxa_table(taxa: taxa)
         pagination_control(state: &page_state, params: params)
     }
 }
