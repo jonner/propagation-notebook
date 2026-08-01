@@ -47,6 +47,8 @@ pub(crate) async fn details(cx: &Cx) -> topcoat::Result {
         <dl>
             <dt>"ID"</dt>
             <dd>(region.id)</dd>
+            <dt>"Category"</dt>
+            <dd>(region.category.to_string())</dd>
             <dt>"Notes"</dt>
             <dd>(region.notes.as_deref().unwrap_or_default())</dd>
             <dt>"Taxa"</dt>
