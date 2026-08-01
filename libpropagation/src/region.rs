@@ -58,6 +58,15 @@ impl From<&Region> for crate::dto::ObjectReference {
     }
 }
 
+#[derive(Debug, Clone, Copy, toasty::Embed, Serialize, strum::Display)]
+pub enum RegionCategory {
+    Nation,
+    Province,
+    County,
+    Municipality,
+    Other,
+}
+
 #[derive(Debug, Clone, toasty::Model)]
 pub struct Region {
     #[auto]
@@ -69,6 +78,9 @@ pub struct Region {
     #[column(type = "TEXT")]
     pub geometry: Option<toasty::Json<geojson::Geometry>>,
     pub notes: Option<String>,
+    #[index]
+    pub category: Option<RegionCategory>,
+
     #[auto]
     pub created_at: jiff::Timestamp,
     #[auto]

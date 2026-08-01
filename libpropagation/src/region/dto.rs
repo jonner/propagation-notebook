@@ -1,7 +1,7 @@
 use serde::Serialize;
 use serde_with::skip_serializing_none;
 
-use crate::dto::ObjectReference;
+use crate::{dto::ObjectReference, region::RegionCategory};
 
 #[skip_serializing_none]
 #[derive(Debug, Serialize)]
@@ -32,6 +32,7 @@ pub struct FullRegion {
     pub notes: Option<String>,
     pub n_taxa: Option<usize>,
     pub geometry: Option<geojson::Geometry>,
+    pub category: Option<RegionCategory>,
 }
 
 impl From<super::Region> for FullRegion {
@@ -41,6 +42,7 @@ impl From<super::Region> for FullRegion {
             name: region.name,
             notes: region.notes,
             geometry: region.geometry.map(|inner| inner.0),
+            category: region.category,
             n_taxa: match region.taxon_statuses.is_unloaded() {
                 true => None,
                 false => Some(region.taxon_statuses.get().len()),
