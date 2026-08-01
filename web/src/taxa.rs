@@ -1,6 +1,5 @@
 use libpropagation::{
     collecting::CleaningProcedure,
-    region::Origin,
     taxonomy::{Taxon, TaxonPropagationProcedure},
 };
 use topcoat::{

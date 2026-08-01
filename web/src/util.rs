@@ -7,7 +7,7 @@ use libpropagation::{
 use serde::Serialize;
 use topcoat::{
     context::{Cx, app_context},
-    router::{path_param, query_params},
+    router::path_param,
 };
 
 #[path_param(error = bad_request)]
@@ -80,18 +80,6 @@ impl std::fmt::Display for Dimension {
             Dimension::Pixels(v) => write!(f, "{v}px"),
             Dimension::Percent(v) => write!(f, "{v}%"),
         }
-    }
-}
-
-#[derive(Debug, Clone, Serialize)]
-#[query_params(error = bad_request)]
-pub struct PageQueryParams {
-    pub offset: Option<usize>,
-}
-
-impl ModifyOffset for PageQueryParams {
-    fn modify_offset(&mut self, new_offset: usize) {
-        self.offset = Some(new_offset);
     }
 }
 
