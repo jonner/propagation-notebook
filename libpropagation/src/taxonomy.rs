@@ -247,6 +247,9 @@ pub struct Taxon {
     pub life_form: Option<LifeForm>,
     pub life_cycle: Option<LifeCycle>,
 
+    pub created_at: Option<jiff::Timestamp>,
+    pub updated_at: Option<jiff::Timestamp>,
+
     #[has_many(pair=parent)]
     pub children: Deferred<Vec<Taxon>>,
     #[has_many]
