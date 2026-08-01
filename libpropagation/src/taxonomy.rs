@@ -212,6 +212,9 @@ pub struct TaxonPhoto {
 
     pub is_default: bool,
     pub attribution: Option<String>,
+
+    pub created_at: Option<jiff::Timestamp>,
+    pub updated_at: Option<jiff::Timestamp>,
 }
 
 #[derive(Debug, Clone, toasty::Model)]
@@ -363,6 +366,9 @@ pub struct VernacularName {
     pub taxon: Deferred<Taxon>,
 
     pub name: String,
+
+    pub created_at: Option<jiff::Timestamp>,
+    pub updated_at: Option<jiff::Timestamp>,
 }
 
 #[derive(Debug, Clone, toasty::Model)]
@@ -385,6 +391,8 @@ pub struct Synonym {
     #[index]
     pub complete_name: String,
     // is_accepted: bool,
+    pub created_at: Option<jiff::Timestamp>,
+    pub updated_at: Option<jiff::Timestamp>,
 }
 
 // TODO: if procedures become parametrized, we'd need to add the parameters to
@@ -407,6 +415,9 @@ pub struct TaxonPropagationProcedure {
     pub notes: Option<String>,
     #[has_many(pair=taxon_propagation)]
     pub citation_links: Deferred<Vec<TaxonPropagationProcedureCitation>>,
+
+    pub created_at: Option<jiff::Timestamp>,
+    pub updated_at: Option<jiff::Timestamp>,
 }
 
 #[derive(Debug, Clone, toasty::Model)]
