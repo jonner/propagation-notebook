@@ -15,7 +15,7 @@ use tracing::trace;
 
 use crate::{
     cli::OutputFormat,
-    util::{IndicatifImportProgress, find_exact_inat_taxon, inat_taxon_for_taxon},
+    util::{IndicatifImportProgress, find_exact_inat_taxon},
     views::{
         JsonView, YamlView,
         taxa::{RegionalTaxaListView, TaxaListView, TaxaSearchResultsView, TaxonDetailsView},
