@@ -58,7 +58,9 @@ impl From<&Region> for crate::dto::ObjectReference {
     }
 }
 
-#[derive(Debug, Clone, Copy, toasty::Embed, Serialize, strum::Display)]
+#[derive(
+    Debug, Clone, Copy, toasty::Embed, Serialize, Deserialize, strum::Display, clap::ValueEnum,
+)]
 pub enum RegionCategory {
     Nation,
     Province,
@@ -79,7 +81,7 @@ pub struct Region {
     pub geometry: Option<toasty::Json<geojson::Geometry>>,
     pub notes: Option<String>,
     #[index]
-    pub category: Option<RegionCategory>,
+    pub category: RegionCategory,
 
     #[auto]
     pub created_at: jiff::Timestamp,
@@ -171,6 +173,7 @@ impl Region {
         let region = Self::create()
             .name(info.name)
             .geometry(info.geometry.map(|v| v.into()))
+            .category(info.category)
             .notes(info.notes)
             .taxon_statuses(taxa_create)
             .exec(&mut txn)
@@ -313,7 +316,7 @@ mod file {
     use serde_with::skip_serializing_none;
 
     use crate::region::{
-        ConservationStatus, Origin, Region, RegionalTaxonStatus, WetlandIndicator,
+        ConservationStatus, Origin, Region, RegionCategory, RegionalTaxonStatus, WetlandIndicator,
     };
 
     #[skip_serializing_none]
@@ -346,6 +349,7 @@ mod file {
         pub(crate) notes: Option<String>,
         #[serde(skip_serializing_if = "Option::is_none")]
         pub(crate) geometry: Option<geojson::Geometry>,
+        pub(crate) category: RegionCategory,
         pub(crate) taxa: Vec<TaxonInfo>,
         // npcs: Vec<NativePlantCommunityInfo>,
     }
@@ -358,6 +362,7 @@ mod file {
             Self {
                 name: value.name.clone(),
                 geometry: value.geometry.as_ref().map(|val| val.0.clone()),
+                category: value.category,
                 taxa,
                 notes: value.notes.clone(),
             }

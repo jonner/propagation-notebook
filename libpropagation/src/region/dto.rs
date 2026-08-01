@@ -32,7 +32,7 @@ pub struct FullRegion {
     pub notes: Option<String>,
     pub n_taxa: Option<usize>,
     pub geometry: Option<geojson::Geometry>,
-    pub category: Option<RegionCategory>,
+    pub category: RegionCategory,
 }
 
 impl From<super::Region> for FullRegion {
