@@ -111,6 +111,19 @@ async fn layout(slot: topcoat::Result) -> topcoat::Result {
                                     "Propagation Protocols"
                                 </a>
                             </li>
+                            <li>
+                                <a
+                                    class="block mt-6 lg:mt-0 text-orange-100 hover:text-white"
+                                    href="/about"
+                                >
+                                    icon(
+                                        data: mdi::ABOUT,
+                                        label: "about icon",
+                                        attrs: attributes! { class="icon" }
+                                    )
+                                    "About"
+                                </a>
+                            </li>
                         </ul>
                     </nav>
                 </header>
@@ -136,22 +149,34 @@ async fn layout(slot: topcoat::Result) -> topcoat::Result {
 #[page("/")]
 async fn home() -> topcoat::Result {
     view! {
-        <h1>"Home"</h1>
-        <div>
-            <div class="my-4">
-                "To get started, look up information about a particular taxon: "
-            </div>
-            <form method="get" action="/taxa" class="flex my-4">
+        <h1>"Native Plant Propagation Notebook"</h1>
+        <div>"A reference for collecting and propagating native plants for ecological restoration"</div>
+        <div class="card">
+            <h2>"Propagation"</h2>
+            <div>"Search for information about propagating a particular species"</div>
+            <form method="get" action="/taxa" class="flex-grow mb-6">
                 <input
                     type="text"
                     name="q"
                     placeholder="Search for a taxon"
-                    class="me-2 flex-grow"
+                    class="me-2"
                 >
                 <button type="submit">"Search"</button>
             </form>
         </div>
-        <h2>"About This Site"</h2>
+        <div class="card">
+            <h2>"Collect Seeds"</h2>
+            <div>
+                "Find out when plants are bearing seed in your "<a href="/regions">"region"</a>"."
+            </div>
+        </div>
+    }
+}
+
+#[page("/about")]
+async fn about() -> topcoat::Result {
+    view! {
+        <h1>"About This Site"</h1>
         <div id="content" class="flex flex-col gap-4 text-lg">
             <div>
                 <h3>"The Problem"</h3>
