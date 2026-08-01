@@ -40,8 +40,10 @@ pub struct PropagationProcedure {
     pub notes: Option<String>,
     pub r#type: ProcedureType,
 
-    pub created_at: Option<jiff::Timestamp>,
-    pub updated_at: Option<jiff::Timestamp>,
+    #[auto]
+    pub created_at: jiff::Timestamp,
+    #[auto]
+    pub updated_at: jiff::Timestamp,
 
     #[has_many(pair=propagation)]
     pub taxa: Deferred<Vec<TaxonPropagationProcedure>>,

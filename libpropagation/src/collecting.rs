@@ -44,8 +44,10 @@ pub struct CleaningProcedure {
     #[belongs_to(key=taxon_id, references=id)]
     pub taxon: Deferred<Taxon>,
 
-    pub created_at: Option<jiff::Timestamp>,
-    pub updated_at: Option<jiff::Timestamp>,
+    #[auto]
+    pub created_at: jiff::Timestamp,
+    #[auto]
+    pub updated_at: jiff::Timestamp,
 }
 
 impl From<CleaningProcedure> for ObjectReference {
