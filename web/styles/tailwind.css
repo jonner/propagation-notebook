@@ -53,7 +53,7 @@ dd {
 }
 
 a[href] {
-  @apply text-mallard underline font-bold;
+  @apply text-brown underline font-bold;
 }
 
 header a[href], footer a[href] {
@@ -102,4 +102,20 @@ td, th {
 
 header .icon {
   @apply text-leaf;
+}
+
+nav.breadcrumbs {
+  @apply flex mx-0 px-0 text-brown/80
+}
+
+nav.breadcrumbs ol {
+  @apply inline-flex items-center font-medium gap-x-3
+}
+
+nav.breadcrumbs ol li {
+  @apply inline-block
+}
+
+nav.breadcrumbs ol li a {
+  @apply no-underline text-brown
 }

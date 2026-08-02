@@ -4,6 +4,7 @@ use libpropagation::{
 };
 use topcoat::{
     context::Cx,
+    icon::icon,
     router::{page, path_param, query_params},
     view::{attributes, view},
 };
@@ -14,6 +15,7 @@ use crate::{
         self, citation_list, conservation_status_badge, harvest_timeline, origin_badge,
         pagination_control,
     },
+    mdi,
     util::{CleaningId, ModifyOffset, PageState, Path, PropagationId, TaxonId, db},
 };
 
@@ -94,9 +96,53 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
         .exec(&mut db)
         .await?;
     trace!(?taxon);
+    // for now, just manually traverse the ancestry. Maybe eventually use a CTE or something
+    let mut ancestors = Vec::default();
+    let mut next_parent = taxon.parent_id;
+    while let Some(id) = next_parent {
+        let t = Taxon::filter_by_id(id).one().exec(&mut db).await?;
+        next_parent = t.parent_id;
+        ancestors.push(t);
+    }
 
     view! {
-        <h1><span class="latin">(&taxon.complete_name)</span></h1>
+        <nav class="breadcrumbs">
+            <ol>
+            // FIXME: handle corner cases, extract into component
+                if ancestors.len() > 5 {
+                    <li>
+                        let root = ancestors.last().unwrap();
+                        <a href=(format!("/taxa/{}", root.id))>(&root.complete_name)</a>
+                    </li>
+                    <li>
+                        icon(
+                            data: mdi::NAVIGATE_NEXT,
+                            label: "separator",
+                            attrs: attributes! { class="icon" }
+                        )
+                        "..."
+                    </li>
+                }
+                for ancestor in ancestors.iter().take(4).rev() {
+                    icon(
+                        data: mdi::NAVIGATE_NEXT,
+                        label: "separator",
+                        attrs: attributes! { class="icon" }
+                    )
+                    <li>
+                        <a href=(format!("/taxa/{}", ancestor.id))>
+                            (&ancestor.complete_name)
+                        </a>
+                    </li>
+                }
+            </ol>
+        </nav>
+        <h1>
+            <span class="latin">(&taxon.complete_name)</span>
+            " ("
+            (taxon.rank.to_string())
+            ")"
+        </h1>
         if let Some(photo) = taxon.photo.get() {
             if let Some(medium_url) = photo.medium_url.as_ref() {
                 <figure class="mb-4">
@@ -111,51 +157,42 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
                 </figure>
             }
         }
-        <dt>"ID"</dt>
-        <dd>(taxon.id)</dd>
-        <dt>"Rank"</dt>
-        <dd>(taxon.rank.to_string())</dd>
+        if !taxon.vernaculars.get().is_empty() {
+            <dt>"Common Name(s)"</dt>
+            <dd>
+                <ul>
+                    for cn in taxon.vernaculars.get() {
+                        <li>(&cn.name)</li>
+                    }
+                </ul>
+            </dd>
+        }
 
-        <dt>"Common Name(s)"</dt>
-        <dd>
-            <ul>
-                for cn in taxon.vernaculars.get() {
-                    <li>(&cn.name)</li>
-                }
-            </ul>
-        </dd>
+        if !taxon.children.get().is_empty() {
+            <dt>"Child taxa"</dt>
+            <dd>
+                <ul>
+                    for child in taxon.children.get() {
+                        <li>
+                            <span class="latin">
+                                <a href=(child.path())>(&child.complete_name)</a>
+                            </span>
+                        </li>
+                    }
+                </ul>
+            </dd>
+        }
 
-        <dt>"Parent"</dt>
-        <dd>
-            match taxon.parent.get() {
-                Some(p) => <span class="latin">
-                    <a href=(p.path())>(&p.complete_name)</a>
-                </span>,
-                None => "",
-            }
-        </dd>
-
-        <dt>"Child taxa"</dt>
-        <dd>
-            <ul>
-                for child in taxon.children.get() {
-                    <li>
-                        <span class="latin">
-                            <a href=(child.path())>(&child.complete_name)</a>
-                        </span>
-                    </li>
-                }
-            </ul>
-        </dd>
-
-        <dt>"Synonyms"</dt>
-        <dd>
-            <ul>
-                for syn in taxon.synonyms.get() {
-                    <li>(&syn.complete_name)</li>
-                }
-            </ul>
-        </dd>
+        if !taxon.synonyms.get().is_empty() {
+            <dt>"Synonyms"</dt>
+            <dd>
+                <ul>
+                    for syn in taxon.synonyms.get() {
+                        <li>(&syn.complete_name)</li>
+                    }
+                </ul>
+            </dd>
+        }
 
         if let Some(collecting_data) = &taxon.collecting_data.get() {
             <dt>"Ripening"</dt>
@@ -183,25 +220,29 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
                     .unwrap_or_default())
             </dd>
         }
-        <dt>"Seed Cleaning"</dt>
-        <dd>
-            <ul>
-                for procedure in taxon.cleaning_procedures.get() {
-                    <li><a href=(procedure.path())>(&procedure.name)</a></li>
-                }
-            </ul>
-        </dd>
-        <dt>"Propagation Procedures"</dt>
-        <dd>
-            <ul>
-                for tp in taxon.propagation_procedures.get() {
-                    <li><a href=(tp.path())>(&tp.propagation.get().name)</a></li>
-                }
-            </ul>
-        </dd>
-        <dt>"Regions"</dt>
-        <dd>
-            if !taxon.regional_statuses.get().is_empty() {
+        if !taxon.cleaning_procedures.get().is_empty() {
+            <dt>"Seed Cleaning"</dt>
+            <dd>
+                <ul>
+                    for procedure in taxon.cleaning_procedures.get() {
+                        <li><a href=(procedure.path())>(&procedure.name)</a></li>
+                    }
+                </ul>
+            </dd>
+        }
+        if !taxon.propagation_procedures.get().is_empty() {
+            <dt>"Propagation Procedures"</dt>
+            <dd>
+                <ul>
+                    for tp in taxon.propagation_procedures.get() {
+                        <li><a href=(tp.path())>(&tp.propagation.get().name)</a></li>
+                    }
+                </ul>
+            </dd>
+        }
+        if !taxon.regional_statuses.get().is_empty() {
+            <dt>"Regions"</dt>
+            <dd>
                 <table>
                     <tr>
                         <th>"Name"</th>
@@ -234,25 +275,27 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
                         </tr>
                     }
                 </table>
-            }
-        </dd>
-        <dt>"Notes"</dt>
-        <dd>
-            if !taxon.notes.get().is_empty() {
-                <table>
-                    <tr>
-                        <th>"ID"</th>
-                        <th>"Name"</th>
-                    </tr>
-                    for note in taxon.notes.get() {
+            </dd>
+        }
+        if !taxon.notes.get().is_empty() {
+            <dt>"Notes"</dt>
+            <dd>
+                if !taxon.notes.get().is_empty() {
+                    <table>
                         <tr>
-                            <td>(note.id)</td>
-                            <td>(&note.text)</td>
+                            <th>"ID"</th>
+                            <th>"Name"</th>
                         </tr>
-                    }
-                </table>
-            }
-        </dd>
+                        for note in taxon.notes.get() {
+                            <tr>
+                                <td>(note.id)</td>
+                                <td>(&note.text)</td>
+                            </tr>
+                        }
+                    </table>
+                }
+            </dd>
+        }
         <dt>"External Resources"</dt>
         <dd>
             <ul>
