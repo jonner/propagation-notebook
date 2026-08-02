@@ -202,22 +202,22 @@ impl Region {
                 HarvestFilter::EndingSoon(days) => RegionalTaxonStatus::fields()
                     .harvest_window()
                     .end_doy()
-                    .gt(today)
+                    .ge(today)
                     .and(
                         RegionalTaxonStatus::fields()
                             .harvest_window()
                             .end_doy()
-                            .lt(today + days),
+                            .le(today + days),
                     ),
                 HarvestFilter::StartingSoon(days) => RegionalTaxonStatus::fields()
                     .harvest_window()
                     .start_doy()
-                    .gt(today)
+                    .ge(today)
                     .and(
                         RegionalTaxonStatus::fields()
                             .harvest_window()
                             .start_doy()
-                            .lt(today + days),
+                            .le(today + days),
                     ),
             });
         }

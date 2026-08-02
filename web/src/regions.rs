@@ -62,15 +62,19 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
         <h1>(&region.name)</h1>
         <div>(region.notes.as_deref().unwrap_or_default())</div>
         <ul>
-            <li><a href=(format!("/regions/{id}/details"))>"Additional details"</a></li>
-            <li><a href=(format!("/regions/{id}/taxa"))>"Full taxa list"</a></li>
+            <li><a href=(format!("/regions/{id}/details"))>"Region details"</a></li>
+            <li><a href=(format!("/regions/{id}/taxa"))>"Full taxon list"</a></li>
         </ul>
-        <h2>"Taxa nearing the end of harvest season"</h2>
-        taxa_table(taxa: ending)
-        <div><a href=(format!("/regions/{id}/ending"))>"Full list"</a></div>
-        <h2>"Taxa coming into harvest season"</h2>
-        taxa_table(taxa: starting_soon)
-        <div><a href=(format!("/regions/{id}/starting"))>"Full list"</a></div>
+        <div>
+            <h2>"Last chance to harvest"</h2>
+            taxa_table(taxa: ending)
+            <div><a href=(format!("/regions/{id}/ending"))>"Full list"</a></div>
+        </div>
+        <div>
+            <h2>"Beginning to bear fruit"</h2>
+            taxa_table(taxa: starting_soon)
+            <div><a href=(format!("/regions/{id}/starting"))>"Full list"</a></div>
+        </div>
     }
 }
 
