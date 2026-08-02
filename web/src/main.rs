@@ -23,7 +23,7 @@ async fn main() -> Result<(), Error> {
     topcoat::start(
         Router::builder()
             .discover()
-            .assets(AssetBundle::load_dir("target/assets")?)
+            .assets(AssetBundle::load()?)
             .app_context(libpropagation::db().await?)
             .build(),
     )
