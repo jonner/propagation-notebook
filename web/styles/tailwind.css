@@ -113,7 +113,7 @@ nav.breadcrumbs ol {
 }
 
 nav.breadcrumbs ol li {
-  @apply inline-block
+  @apply inline-block text-nowrap
 }
 
 nav.breadcrumbs ol li a {

@@ -4,9 +4,15 @@ use libpropagation::{
     region::{ConservationStatus, Origin, RegionalHarvestWindow},
     taxonomy::Taxon,
 };
-use topcoat::view::{Attributes, attributes, component, view};
+use topcoat::{
+    icon::icon,
+    view::{Attributes, attributes, component, view},
+};
 
-use crate::util::{ModifyOffset, PageState, Path};
+use crate::{
+    mdi,
+    util::{ModifyOffset, PageState, Path},
+};
 
 #[component]
 pub async fn citation_list(citations: Vec<&Citation>) -> topcoat::Result {
@@ -204,5 +210,51 @@ pub async fn taxa_table(taxa: Vec<Taxon>) -> topcoat::Result {
                 }
             }
         </table>
+    }
+}
+
+pub struct Breadcrumb {
+    pub url: Option<String>,
+    pub text: String,
+}
+
+#[component]
+pub async fn breadcrumbs(
+    items: Vec<Breadcrumb>,
+    #[default] ellipsize: Option<usize>,
+) -> topcoat::Result {
+    let do_ellipsize = ellipsize.map(|n| items.len() > n + 1) == Some(true);
+    let mut breadcrumb_iter = items.into_iter().rev();
+    let root = breadcrumb_iter.next().unwrap();
+    let rest: Vec<_> = if let Some(ellipsize) = ellipsize {
+        breadcrumb_iter.rev().take(ellipsize).rev().collect()
+    } else {
+        breadcrumb_iter.collect()
+    };
+    view! {
+        <nav class="breadcrumbs">
+            <ol>
+                <li><a href=(root.url)>(&root.text)</a></li>
+                if do_ellipsize {
+                    <li>
+                        icon(
+                            data: mdi::NAVIGATE_NEXT,
+                            label: "separator",
+                            attrs: attributes! { class="icon" }
+                        )
+                        <a>"..."</a>
+                    </li>
+                }
+                for item in rest {
+                    <li>
+                    icon(
+                        data: mdi::NAVIGATE_NEXT,
+                        label: "separator",
+                        attrs: attributes! { class="icon" }
+                    )
+                    <a href=(item.url)>(&item.text)</a></li>
+                }
+            </ol>
+        </nav>
     }
 }

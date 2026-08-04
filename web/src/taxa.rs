@@ -4,7 +4,6 @@ use libpropagation::{
 };
 use topcoat::{
     context::Cx,
-    icon::icon,
     router::{page, path_param, query_params},
     view::{attributes, view},
 };
@@ -12,10 +11,9 @@ use tracing::trace;
 
 use crate::{
     components::{
-        self, citation_list, conservation_status_badge, harvest_timeline, origin_badge,
-        pagination_control,
+        self, Breadcrumb, breadcrumbs, citation_list, conservation_status_badge, harvest_timeline,
+        origin_badge, pagination_control,
     },
-    mdi,
     util::{CleaningId, ModifyOffset, PageState, Path, PropagationId, TaxonId, db},
 };
 
@@ -102,41 +100,14 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
     while let Some(id) = next_parent {
         let t = Taxon::filter_by_id(id).one().exec(&mut db).await?;
         next_parent = t.parent_id;
-        ancestors.push(t);
+        ancestors.push(Breadcrumb {
+            url: Some(t.path()),
+            text: t.complete_name,
+        });
     }
 
     view! {
-        <nav class="breadcrumbs">
-            <ol>
-            // FIXME: handle corner cases, extract into component
-                if ancestors.len() > 5 {
-                    <li>
-                        let root = ancestors.last().unwrap();
-                        <a href=(format!("/taxa/{}", root.id))>(&root.complete_name)</a>
-                    </li>
-                    <li>
-                        icon(
-                            data: mdi::NAVIGATE_NEXT,
-                            label: "separator",
-                            attrs: attributes! { class="icon" }
-                        )
-                        "..."
-                    </li>
-                }
-                for ancestor in ancestors.iter().take(4).rev() {
-                    icon(
-                        data: mdi::NAVIGATE_NEXT,
-                        label: "separator",
-                        attrs: attributes! { class="icon" }
-                    )
-                    <li>
-                        <a href=(format!("/taxa/{}", ancestor.id))>
-                            (&ancestor.complete_name)
-                        </a>
-                    </li>
-                }
-            </ol>
-        </nav>
+        breadcrumbs(items: ancestors, ellipsize: Some(3))
         <h1>
             <span class="latin">(&taxon.complete_name)</span>
             " ("
