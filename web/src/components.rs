@@ -227,7 +227,9 @@ pub async fn breadcrumbs(
 ) -> topcoat::Result {
     let do_ellipsize = ellipsize.map(|n| items.len() > n + 1) == Some(true);
     let mut breadcrumb_iter = items.into_iter().rev();
-    let root = breadcrumb_iter.next().unwrap();
+    let Some(root) = breadcrumb_iter.next() else {
+        return view! {};
+    };
     let rest: Vec<_> = if let Some(ellipsize) = ellipsize {
         breadcrumb_iter.rev().take(ellipsize).rev().collect()
     } else {
