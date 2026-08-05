@@ -12,7 +12,7 @@ serde_urlencoded = "0.7.1"
 thiserror.workspace = true
 toasty.workspace = true
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
-topcoat = { version = "0.5.0", features = ["icon-iconify", "tailwind"] }
+topcoat = { version = "0.5.0", features = ["font-fontsource", "icon-iconify", "tailwind"] }
 tracing.workspace = true
 tracing-subscriber.workspace = true
 

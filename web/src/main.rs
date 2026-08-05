@@ -1,5 +1,6 @@
 use topcoat::{
     asset::{AssetBundle, RouterBuilderAssetExt},
+    font::{Font, fontsource::fontsource_font},
     icon::{icon, iconify},
     router::{Router, RouterBuilderDiscoverExt, layout, page},
     tailwind,
@@ -32,6 +33,8 @@ async fn main() -> Result<(), Error> {
 }
 
 iconify::include!("mdi");
+const FONT_HEAD: Font = fontsource_font!(AVERIA_SERIF_LIBRE, host: Asset);
+const FONT_BODY: Font = fontsource_font!(AVERIA_SANS_LIBRE, host: Asset);
 
 #[layout("/")]
 async fn layout(slot: topcoat::Result) -> topcoat::Result {
@@ -55,6 +58,8 @@ async fn layout(slot: topcoat::Result) -> topcoat::Result {
                     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
                     crossorigin=""
                 ></script>
+                topcoat::font::link(font: FONT_HEAD)
+                topcoat::font::link(font: FONT_BODY)
             </head>
             <body class="flex flex-col min-h-screen">
                 <header
