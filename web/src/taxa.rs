@@ -154,17 +154,6 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
             </dd>
         }
 
-        if !taxon.synonyms.get().is_empty() {
-            <dt>"Synonyms"</dt>
-            <dd>
-                <ul>
-                    for syn in taxon.synonyms.get() {
-                        <li>(&syn.complete_name)</li>
-                    }
-                </ul>
-            </dd>
-        }
-
         if let Some(collecting_data) = &taxon.collecting_data.get() {
             <dt>"Ripening"</dt>
             <dd>
@@ -271,6 +260,18 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
                 }
             </dd>
         }
+
+        if !taxon.synonyms.get().is_empty() {
+            <dt>"Synonyms"</dt>
+            <dd>
+                <ul>
+                    for syn in taxon.synonyms.get() {
+                        <li>(&syn.complete_name)</li>
+                    }
+                </ul>
+            </dd>
+        }
+
         <dt>"External Resources"</dt>
         <dd>
             <ul>
