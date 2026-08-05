@@ -63,10 +63,12 @@ pub async fn get_propagation_details(cx: &Cx) -> topcoat::Result {
             <h2>"Taxa"</h2>
             if !taxa.is_empty() {
                 <table>
-                    <tr>
-                        <th>"ID"</th>
-                        <th>"Name"</th>
-                    </tr>
+                    <thead>
+                        <tr>
+                            <th>"ID"</th>
+                            <th>"Name"</th>
+                        </tr>
+                    </thead>
                     for taxon in taxa {
                         <tr>
                             <td>(taxon.id)</td>

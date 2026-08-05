@@ -173,12 +173,14 @@ pub async fn conservation_status_badge(status: ConservationStatus) -> topcoat::R
 pub async fn taxa_table(taxa: Vec<Taxon>) -> topcoat::Result {
     view! {
         <table>
-            <tr>
-                <th>"Taxon"</th>
-                <th>"Origin"</th>
-                <th>"Status"</th>
-                <th>"Fruiting window"</th>
-            </tr>
+            <thead>
+                <tr>
+                    <th>"Taxon"</th>
+                    <th>"Origin"</th>
+                    <th>"Status"</th>
+                    <th>"Fruiting window"</th>
+                </tr>
+            </thead>
             for taxon in taxa {
                 if let Some(rts) = taxon.regional_statuses.get().first() {
                     <tr>

@@ -215,12 +215,14 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
             <dt>"Regions"</dt>
             <dd>
                 <table>
-                    <tr>
-                        <th>"Name"</th>
-                        <th>"Origin"</th>
-                        <th>"Status"</th>
-                        <th>"Fruiting Window"</th>
-                    </tr>
+                    <thead>
+                        <tr>
+                            <th>"Name"</th>
+                            <th>"Origin"</th>
+                            <th>"Status"</th>
+                            <th>"Fruiting Window"</th>
+                        </tr>
+                    </thead>
                     for rs in taxon.regional_statuses.get() {
                         <tr>
                             <td><a href=(rs.path())>(&rs.region.get().name)</a></td>
@@ -253,10 +255,12 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
             <dd>
                 if !taxon.notes.get().is_empty() {
                     <table>
-                        <tr>
-                            <th>"ID"</th>
-                            <th>"Name"</th>
-                        </tr>
+                        <thead>
+                            <tr>
+                                <th>"ID"</th>
+                                <th>"Name"</th>
+                            </tr>
+                        </thead>
                         for note in taxon.notes.get() {
                             <tr>
                                 <td>(note.id)</td>
