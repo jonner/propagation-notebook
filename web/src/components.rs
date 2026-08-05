@@ -249,12 +249,13 @@ pub async fn breadcrumbs(
                 }
                 for item in rest {
                     <li>
-                    icon(
-                        data: mdi::NAVIGATE_NEXT,
-                        label: "separator",
-                        attrs: attributes! { class="icon" }
-                    )
-                    <a href=(item.url)>(&item.text)</a></li>
+                        icon(
+                            data: mdi::NAVIGATE_NEXT,
+                            label: "separator",
+                            attrs: attributes! { class="icon" }
+                        )
+                        <a href=(item.url)>(&item.text)</a>
+                    </li>
                 }
             </ol>
         </nav>
