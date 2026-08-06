@@ -17,11 +17,19 @@ use crate::{
     util::{CleaningId, ModifyOffset, PageState, Path, PropagationId, TaxonId, db},
 };
 
+#[derive(Debug, Clone, Copy, serde::Deserialize, serde::Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum ResultsFormat {
+    List,
+    Grid,
+}
+
 #[derive(Debug, Clone, serde::Serialize)]
 #[query_params(error = bad_request)]
 pub struct TaxaListParams {
     pub offset: Option<usize>,
     pub q: Option<String>,
+    pub fmt: Option<ResultsFormat>,
 }
 
 impl ModifyOffset for TaxaListParams {
@@ -38,6 +46,7 @@ pub(crate) async fn list(cx: &Cx) -> topcoat::Result {
         Some(q) => Taxon::filter(Taxon::search_filter(q)),
         None => Taxon::all(),
     }
+    .include(Taxon::fields().photo())
     .order_by((
         Taxon::fields().sequence().asc(),
         Taxon::fields().complete_name().asc(),
@@ -62,15 +71,40 @@ pub(crate) async fn list(cx: &Cx) -> topcoat::Result {
             >
             <button type="submit">"Search"</button>
         </form>
-        <ul>
-            for taxon in taxa.iter() {
-                <li>
-                    <span class="latin">
-                        <a href=(taxon.path())>(&taxon.complete_name)</a>
-                    </span>
-                </li>
+        match params.fmt {
+            Some(ResultsFormat::Grid) => {
+                <div
+                    class="grid items-center gap-6 grid-cols-2 sm:grid-cols-5 xl:grid-cols-10"
+                >
+                    for taxon in taxa.iter() {
+                        <div class="p-4 bg-jaggery/5 rounded h-full">
+                            <a
+                                href=(taxon.path())
+                                class="flex flex-col items-center text-center"
+                            >
+                                if let Some(photo) = taxon.photo.get() {
+                                    if let Some(url) = photo.square_url.as_ref() {
+                                        <img class="block" src=(url)>
+                                    }
+                                }
+                                <div>(&taxon.complete_name)</div>
+                            </a>
+                        </div>
+                    }
+                </div>
             }
-        </ul>
+            _ => {
+                <ul>
+                    for taxon in taxa.iter() {
+                        <li>
+                            <span class="latin">
+                                <a href=(taxon.path())>(&taxon.complete_name)</a>
+                            </span>
+                        </li>
+                    }
+                </ul>
+            }
+        }
         pagination_control(state: &page_state, params: params)
     }
 }
