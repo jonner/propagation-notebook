@@ -111,7 +111,7 @@ td, th {
 }
 
 header .icon {
-  @apply text-leaf;
+  @apply text-white sm:text-leaf;
 }
 
 nav.breadcrumbs {

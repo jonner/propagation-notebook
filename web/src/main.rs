@@ -65,68 +65,62 @@ async fn layout(slot: topcoat::Result) -> topcoat::Result {
                 <header
                     class="flex items-center justify-between font-bold flex-wrap p-6"
                 >
-                    <div class="flex items-center flex-shrink-0 text-white mr-8">
-                        <a href="/">
-                            icon(
-                                data: mdi::FLOWER_POPPY,
-                                label: "Home",
-                                attrs: attributes! { class="icon" }
-                            )
-                            "Propagation Notebook"
-                        </a>
-                    </div>
                     <nav class="w-full block flex-grow lg:w-auto">
-                        <ul class="lg:flex gap-x-6">
+                        <ul
+                            class="flex items-center flex-shrink-0 gap-6 text-white mr-8"
+                        >
                             <li>
-                                <a
-                                    class="block mt-6 lg:mt-0 text-orange-100 hover:text-white"
-                                    href="/taxa"
-                                >
+                                <a class="block" href="/">
+                                    icon(
+                                        data: mdi::FLOWER_POPPY,
+                                        label: "Home",
+                                        attrs: attributes! { class="icon" }
+                                    )
+                                    <span class="hidden sm:inline">
+                                        "Propagation Notebook"
+                                    </span>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="block" href="/taxa">
                                     icon(
                                         data: mdi::FORMAT_LIST_BULLETED,
                                         label: "list icon",
                                         attrs: attributes! { class="icon" }
                                     )
-                                    "Taxonomy"
+                                    <span class="hidden sm:inline">"Taxonomy"</span>
                                 </a>
                             </li>
                             <li>
-                                <a
-                                    class="block mt-6 lg:mt-0 text-orange-100 hover:text-white"
-                                    href="/regions"
-                                >
+                                <a class="block" href="/regions">
                                     icon(
                                         data: mdi::GLOBE,
                                         label: "list icon",
                                         attrs: attributes! { class="icon" }
                                     )
-                                    "Regions"
+                                    <span class="hidden sm:inline">"Regions"</span>
                                 </a>
                             </li>
                             <li>
-                                <a
-                                    class="block mt-6 lg:mt-0 text-orange-100 hover:text-white"
-                                    href="/propagation"
-                                >
+                                <a class="block" href="/propagation">
                                     icon(
                                         data: mdi::SPROUT,
                                         label: "list icon",
                                         attrs: attributes! { class="icon" }
                                     )
-                                    "Propagation Protocols"
+                                    <span class="hidden sm:inline">
+                                        "Propagation Protocols"
+                                    </span>
                                 </a>
                             </li>
                             <li>
-                                <a
-                                    class="block mt-6 lg:mt-0 text-orange-100 hover:text-white"
-                                    href="/about"
-                                >
+                                <a class="block" href="/about">
                                     icon(
                                         data: mdi::ABOUT,
                                         label: "about icon",
                                         attrs: attributes! { class="icon" }
                                     )
-                                    "About"
+                                    <span class="hidden sm:inline">"About"</span>
                                 </a>
                             </li>
                         </ul>
