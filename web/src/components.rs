@@ -27,42 +27,108 @@ pub async fn citation_list(citations: Vec<&Citation>) -> topcoat::Result {
     }
 }
 
+enum PageLinkType {
+    Ellipsis,
+    Page(usize),
+    Icon(usize, View),
+}
+
 #[component]
 pub async fn pagination_control<'p, T: ModifyOffset + Clone + Sync + Send + 'p>(
     state: &PageState,
     params: &'p T,
+    #[default(3)] context: usize,
 ) -> topcoat::Result {
+    let mut links = Vec::with_capacity(context * 2 + 5);
+    let cur = state.current_page();
+    let first = cur.saturating_sub(context).max(1);
+    let last = (cur + context).min(state.total_pages());
+    if cur > 1 {
+        links.push(PageLinkType::Icon(
+            cur - 1,
+            view! {
+                icon(
+                    data: mdi::NAVIGATE_BEFORE,
+                    label: "Previous",
+                    attrs: attributes! { class="icon" }
+                )
+            }
+            .unwrap(),
+        ));
+    }
+    if first > 1 {
+        links.push(PageLinkType::Page(1));
+    }
+    if first > 2 {
+        links.push(PageLinkType::Ellipsis)
+    }
+    for n in first..=last {
+        links.push(PageLinkType::Page(n));
+    }
+    if last < (state.total_pages() - 1) {
+        links.push(PageLinkType::Ellipsis)
+    }
+    if last < state.total_pages() {
+        links.push(PageLinkType::Page(state.total_pages()));
+    }
+    if cur < last {
+        links.push(PageLinkType::Icon(
+            cur + 1,
+            view! {
+                icon(
+                    data: mdi::NAVIGATE_NEXT,
+                    label: "Next",
+                    attrs: attributes! { class="icon" }
+                )
+            }
+            .unwrap(),
+        ));
+    }
     view! {
         <nav class="mt-4">
-            <ul class="flex gap-x-2">
-                <li>
-                    if let Some(offset) = state
-                        .offset_for_page(state.current_page() - 1) {
-                        <a
-                            class="button"
-                            href=(state
-                                .query_with_offset(offset, params.clone()))
-                        >
-                            "< Prev"
-                        </a>
-                    } else {
-                        "< Prev"
-                    }
-                </li>
-                <li>
-                    if let Some(offset) = state
-                        .offset_for_page(state.current_page() + 1) {
-                        <a
-                            class="button"
-                            href=(state
-                                .query_with_offset(offset, params.clone()))
-                        >
-                            "Next >"
-                        </a>
-                    } else {
-                        "Next >"
-                    }
-                </li>
+            <ul class="flex gap-3 items-center">
+                for item in links {
+                    <li>
+                        match item {
+                            PageLinkType::Ellipsis => {
+                                icon(
+                                    data: mdi::ELLIPSIS_HORIZONTAL,
+                                    label: "skipped",
+                                    attrs: attributes! { class="icon" }
+                                )
+                            }
+                            PageLinkType::Page(n) => {
+                                if n == state.current_page() {
+                                    <span class="inline-block font-bold self-center">
+                                        (n.to_string())
+                                    </span>
+                                } else {
+                                    <a
+                                        href=(state
+                                            .query_with_offset(
+                                                state.offset_for_page(n).unwrap_or_default(),
+                                                params.clone(),
+                                            ))
+                                    >
+                                        (n.to_string())
+                                    </a>
+                                }
+                            }
+                            PageLinkType::Icon(n, view) => {
+                                <a
+                                    class="button"
+                                    href=(state
+                                        .query_with_offset(
+                                            state.offset_for_page(n).unwrap_or_default(),
+                                            params.clone(),
+                                        ))
+                                >
+                                    (view)
+                                </a>
+                            }
+                        }
+                    </li>
+                }
             </ul>
         </nav>
     }

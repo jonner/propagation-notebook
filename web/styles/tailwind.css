@@ -67,11 +67,23 @@ header a[href], footer a[href] {
 }
 
 form input[type=text] {
-  @apply px-3 py-2 text-slate-800 bg-white ring-mallard ring placeholder:text-slate-400 rounded-lg;
+  @apply text-slate-800 bg-white placeholder:text-slate-400 ;
+}
+
+form input[type=text], a.button, form button {
+  @apply rounded-lg no-underline ring ring-mallard;
 }
 
 a.button, form button {
-  @apply px-3 py-2 text-white bg-leaf rounded-lg no-underline ring ring-mallard;
+  @apply text-white bg-leaf;
+}
+
+form input[type=text], form button {
+  @apply px-3 py-2;
+}
+
+a.button {
+  @apply px-2 py-1;
 }
 
 .latin {
