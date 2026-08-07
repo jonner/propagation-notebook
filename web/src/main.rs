@@ -65,10 +65,8 @@ async fn layout(slot: topcoat::Result) -> topcoat::Result {
                 <header
                     class="flex items-center justify-between font-bold flex-wrap p-6"
                 >
-                    <nav class="w-full block flex-grow lg:w-auto">
-                        <ul
-                            class="flex items-center flex-shrink-0 gap-6 text-white mr-8"
-                        >
+                    <nav class="w-full block flex-grow lg:w-auto flex items-center gap-6 text-white">
+                        <ul class="contents">
                             <li>
                                 <a class="block" href="/">
                                     icon(
@@ -76,7 +74,7 @@ async fn layout(slot: topcoat::Result) -> topcoat::Result {
                                         label: "Home",
                                         attrs: attributes! { class="icon" }
                                     )
-                                    <span class="hidden sm:inline">
+                                    <span class="caption">
                                         "Propagation Notebook"
                                     </span>
                                 </a>
@@ -88,7 +86,7 @@ async fn layout(slot: topcoat::Result) -> topcoat::Result {
                                         label: "list icon",
                                         attrs: attributes! { class="icon" }
                                     )
-                                    <span class="hidden sm:inline">"Taxonomy"</span>
+                                    <span class="caption">"Taxonomy"</span>
                                 </a>
                             </li>
                             <li>
@@ -98,7 +96,7 @@ async fn layout(slot: topcoat::Result) -> topcoat::Result {
                                         label: "list icon",
                                         attrs: attributes! { class="icon" }
                                     )
-                                    <span class="hidden sm:inline">"Regions"</span>
+                                    <span class="caption">"Regions"</span>
                                 </a>
                             </li>
                             <li>
@@ -108,7 +106,7 @@ async fn layout(slot: topcoat::Result) -> topcoat::Result {
                                         label: "list icon",
                                         attrs: attributes! { class="icon" }
                                     )
-                                    <span class="hidden sm:inline">
+                                    <span class="caption">
                                         "Propagation Protocols"
                                     </span>
                                 </a>
@@ -120,7 +118,7 @@ async fn layout(slot: topcoat::Result) -> topcoat::Result {
                                         label: "about icon",
                                         attrs: attributes! { class="icon" }
                                     )
-                                    <span class="hidden sm:inline">"About"</span>
+                                    <span class="caption">"About"</span>
                                 </a>
                             </li>
                         </ul>

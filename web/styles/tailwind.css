@@ -130,8 +130,12 @@ td, th {
   @apply inline-block;
 }
 
-header .icon {
-  @apply text-white sm:text-leaf;
+header nav li .icon {
+  @apply text-white sm:opacity-60 mr-0 sm:mr-2;
+}
+
+header nav li span.caption {
+  @apply hidden sm:inline;
 }
 
 nav.breadcrumbs {
