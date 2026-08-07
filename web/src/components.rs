@@ -153,7 +153,7 @@ pub async fn origin_badge(origin: Origin, #[default] mut attrs: Attributes) -> t
     if let Some((klass, text)) = vals {
         view! {
             <div
-                class=(class!(klass, attrs.remove("class")))
+                class=(class!(klass, "badge", attrs.remove("class")))
                 (attrs)
                 title=(origin.to_string())
             >
@@ -177,7 +177,7 @@ pub async fn conservation_status_badge(
     };
     view! {
         <div
-            class=(class!(klass, attrs.remove("class")))
+            class=(class!(klass, "badge", attrs.remove("class")))
             (attrs)
             title=(status.to_string())
         >

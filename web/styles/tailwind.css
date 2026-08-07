@@ -90,20 +90,28 @@ td, th {
   @apply text-start p-1;
 }
 
-.error, .introduced, .endangered {
-  @apply bg-red-200 text-red-800 py-1 px-2 rounded;
+.badge {
+  @apply px-2 rounded-full text-sm font-bold;
+}
+
+.error, .endangered {
+  @apply bg-red-200 text-red-800;
+}
+
+.introduced {
+  @apply text-red-200 bg-red-800;
 }
 
 .threatened {
-  @apply bg-orange-200 text-orange-800 py-1 px-2 rounded;
+  @apply bg-orange-200 text-orange-800;
 }
 
 .warning, .specialconcern{
-  @apply bg-amber-100 text-amber-800 py-1 px-2 rounded;
+  @apply bg-amber-100 text-amber-800;
 }
 
-.success {
-  @apply bg-leaf/30 text-mallard py-1 px-2 rounded;
+.success, .native {
+  @apply bg-leaf/30 text-mallard;
 }
 
 .icon {
