@@ -37,7 +37,7 @@ enum PageLinkType {
 pub async fn pagination_control<'p, T: ModifyOffset + Clone + Sync + Send + 'p>(
     state: &PageState,
     params: &'p T,
-    #[default(3)] context: usize,
+    #[default(2)] context: usize,
 ) -> topcoat::Result {
     let mut links = Vec::with_capacity(context * 2 + 5);
     let cur = state.current_page();
