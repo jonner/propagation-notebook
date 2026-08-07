@@ -115,7 +115,7 @@ td, th {
 }
 
 .icon {
-  @apply inline-block me-2
+  @apply inline-block;
 }
 
 header .icon {
@@ -123,15 +123,15 @@ header .icon {
 }
 
 nav.breadcrumbs {
-  @apply flex mx-0 px-0 text-brown/80
+  @apply flex mx-0 px-0 text-brown/80 items-center;
 }
 
 nav.breadcrumbs ol {
-  @apply inline-flex items-center text-sm font-light gap-x-3
+  @apply inline-flex items-center text-sm font-light gap-x-2;
 }
 
 nav.breadcrumbs ol li {
-  @apply inline-block text-nowrap
+  @apply inline-flex items-center text-nowrap gap-x-2
 }
 
 nav.breadcrumbs ol li a {

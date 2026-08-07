@@ -297,7 +297,13 @@ pub async fn breadcrumbs(
                             label: "separator",
                             attrs: attributes! { class="icon" }
                         )
-                        <a>"..."</a>
+                        <a>
+                        icon(
+                            data: mdi::ELLIPSIS_HORIZONTAL,
+                            label: "skipped",
+                            attrs: attributes! { class="icon" }
+                        )
+                        </a>
                     </li>
                 }
                 for item in rest {
