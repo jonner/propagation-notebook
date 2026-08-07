@@ -9,6 +9,7 @@ jiff.workspace = true
 libpropagation.workspace = true
 serde.workspace = true
 serde_urlencoded = "0.7.1"
+serde_json.workspace = true
 thiserror.workspace = true
 toasty.workspace = true
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }

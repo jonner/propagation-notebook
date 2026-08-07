@@ -132,3 +132,12 @@ impl PageState {
 pub fn db(cx: &Cx) -> toasty::Db {
     app_context::<toasty::Db>(cx).clone()
 }
+
+pub fn enum_to_string<T: Serialize>(variant: &T) -> String {
+    let json_value = serde_json::to_value(variant).expect("Enum variant failed serialization");
+
+    match json_value {
+        serde_json::Value::String(s) => s,
+        other => other.to_string(),
+    }
+}
