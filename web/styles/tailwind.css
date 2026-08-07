@@ -46,10 +46,6 @@ h4 {
   @apply text-xl mb-2;
 }
 
-ul {
-  @apply ms-4;
-}
-
 dt {
   @apply font-bold;
 }

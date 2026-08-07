@@ -93,7 +93,7 @@ pub(crate) async fn list(cx: &Cx) -> topcoat::Result {
                 </div>
             }
             _ => {
-                <ul>
+                <ul class="contents">
                     for taxon in taxa.iter() {
                         <li>
                             <span class="latin">
