@@ -7,6 +7,8 @@ use topcoat::{
     view::{attributes, view},
 };
 
+use crate::error::Error;
+
 mod citation;
 mod components;
 mod error;
@@ -15,8 +17,6 @@ mod propagation;
 mod regions;
 mod taxa;
 mod util;
-
-use crate::error::Error;
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
