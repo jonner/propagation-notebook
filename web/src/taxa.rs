@@ -140,162 +140,196 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
     }
 
     view! {
-        breadcrumbs(items: ancestors, ellipsize: Some(3))
+        breadcrumbs(items: ancestors, ellipsize: Some(2))
         <h1>
             <span class="latin">(&taxon.complete_name)</span>
             " ("
             (taxon.rank.to_string())
             ")"
         </h1>
-        if let Some(photo) = taxon.photo.get() {
-            if let Some(medium_url) = photo.medium_url.as_ref() {
-                <figure class="mb-4">
-                    <img
-                        src=(medium_url)
-                        alt=(&taxon.complete_name)
-                        class="border shadow-xl"
-                    >
-                    <figcaption class="text-slate-500">
-                        (photo.attribution.as_ref())
-                    </figcaption>
-                </figure>
-            }
-        }
-        if !taxon.vernaculars.get().is_empty() {
-            <dt>"Common Name(s)"</dt>
-            <dd>
-                <ul>
-                    for cn in taxon.vernaculars.get() {
-                        <li>(&cn.name)</li>
-                    }
-                </ul>
-            </dd>
-        }
-
-        if !taxon.children.get().is_empty() {
-            <dt>"Child taxa"</dt>
-            <dd>
-                <ul>
-                    for child in taxon.children.get() {
-                        <li>
-                            <span class="latin">
-                                <a href=(child.path())>(&child.complete_name)</a>
-                            </span>
-                        </li>
-                    }
-                </ul>
-            </dd>
-        }
-
-        if let Some(collecting_data) = &taxon.collecting_data.get() {
-            <dt>"Ripening"</dt>
-            <dd>
-                (collecting_data
-                    .ripening_indicators
-                    .as_deref()
-                    .unwrap_or_default())
-            </dd>
-            <dt>"Harvesting Notes"</dt>
-            <dd>
-                (collecting_data
-                    .harvesting_notes
-                    .as_deref()
-                    .unwrap_or_default())
-            </dd>
-            <dt>"Storage Conditions"</dt>
-            <dd>(collecting_data.storage.as_deref().unwrap_or_default())</dd>
-
-            <dt>"Storage Life"</dt>
-            <dd>
-                (collecting_data
-                    .storage_life
-                    .as_deref()
-                    .unwrap_or_default())
-            </dd>
-        }
-        if !taxon.cleaning_procedures.get().is_empty() {
-            <dt>"Seed Cleaning"</dt>
-            <dd>
-                <ul>
-                    for procedure in taxon.cleaning_procedures.get() {
-                        <li><a href=(procedure.path())>(&procedure.name)</a></li>
-                    }
-                </ul>
-            </dd>
-        }
-        if !taxon.propagation_procedures.get().is_empty() {
-            <dt>"Propagation Procedures"</dt>
-            <dd>
-                <ul>
-                    for tp in taxon.propagation_procedures.get() {
-                        <li><a href=(tp.path())>(&tp.propagation.get().name)</a></li>
-                    }
-                </ul>
-            </dd>
-        }
-        if !taxon.regional_statuses.get().is_empty() {
-            <dt>"Regions"</dt>
-            <dd>taxon_regional_table(regions: taxon.regional_statuses.get())</dd>
-        }
-        if !taxon.notes.get().is_empty() {
-            <dt>"Notes"</dt>
-            <dd>
-                if !taxon.notes.get().is_empty() {
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>"ID"</th>
-                                <th>"Name"</th>
-                            </tr>
-                        </thead>
-                        for note in taxon.notes.get() {
-                            <tr>
-                                <td>(note.id)</td>
-                                <td>(&note.text)</td>
-                            </tr>
-                        }
-                    </table>
-                }
-            </dd>
-        }
-
-        if !taxon.synonyms.get().is_empty() {
-            <dt>"Synonyms"</dt>
-            <dd>
-                <ul>
-                    for syn in taxon.synonyms.get() {
-                        <li>(&syn.complete_name)</li>
-                    }
-                </ul>
-            </dd>
-        }
-
-        <dt>"External Resources"</dt>
-        <dd>
-            <ul>
-                <li>
-                    <a
-                        href=(format!(
-                            "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value={}",
-                            taxon.itis_id
-                        ))
-                    >
-                        "ITIS taxon info"
-                    </a>
-                </li>
-                <li>
-                    if let Some(id) = taxon.inaturalist_id {
-                        <a
-                            href=(format!(
-                                "Https://www.inaturalist.org/taxa/{id}"
-                            ))
+        <div class="flex flex-col gap-4">
+            if let Some(photo) = taxon.photo.get() {
+                if let Some(medium_url) = photo.medium_url.as_ref() {
+                    <figure>
+                        <img
+                            src=(medium_url)
+                            alt=(&taxon.complete_name)
+                            class="border shadow-xl"
                         >
-                            "iNaturalist taxon info"
-                        </a>
-                    }
-                </li>
-            </ul>
-        </dd>
+                        <figcaption class="text-slate-500">
+                            (photo.attribution.as_ref())
+                        </figcaption>
+                    </figure>
+                }
+            }
+            if !taxon.vernaculars.get().is_empty() {
+                <section>
+                    <h2>"Common Name(s)"</h2>
+                    <div>
+                        <ul>
+                            for cn in taxon.vernaculars.get() {
+                                <li>(&cn.name)</li>
+                            }
+                        </ul>
+                    </div>
+                </section>
+            }
+
+            if !taxon.children.get().is_empty() {
+                <section>
+                    <h2>"Child taxa"</h2>
+                    <div>
+                        <ul>
+                            for child in taxon.children.get() {
+                                <li>
+                                    <span class="latin">
+                                        <a href=(child.path())>(&child.complete_name)</a>
+                                    </span>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </section>
+            }
+
+            if let Some(collecting_data) = &taxon.collecting_data.get() {
+                <section>
+                    <h2>"Ripening"</h2>
+                    <div>
+                        (collecting_data
+                            .ripening_indicators
+                            .as_deref()
+                            .unwrap_or_default())
+                    </div>
+                </section>
+                <section>
+                    <h2>"Harvesting Notes"</h2>
+                    <div>
+                        (collecting_data
+                            .harvesting_notes
+                            .as_deref()
+                            .unwrap_or_default())
+                    </div>
+                </section>
+                <section>
+                    <h2>"Storage Conditions"</h2>
+                    <div>
+                        (collecting_data
+                            .storage
+                            .as_deref()
+                            .unwrap_or_default())
+                    </div>
+                </section>
+                <section>
+                    <h2>"Storage Life"</h2>
+                    <div>
+                        (collecting_data
+                            .storage_life
+                            .as_deref()
+                            .unwrap_or_default())
+                    </div>
+                </section>
+            }
+            if !taxon.cleaning_procedures.get().is_empty() {
+                <section>
+                    <h2>"Seed Cleaning"</h2>
+                    <div>
+                        <ul>
+                            for procedure in taxon.cleaning_procedures.get() {
+                                <li><a href=(procedure.path())>(&procedure.name)</a></li>
+                            }
+                        </ul>
+                    </div>
+                </section>
+            }
+            if !taxon.propagation_procedures.get().is_empty() {
+                <section>
+                    <h2>"Propagation Procedures"</h2>
+                    <div>
+                        <ul>
+                            for tp in taxon.propagation_procedures.get() {
+                                <li>
+                                    <a href=(tp.path())>(&tp.propagation.get().name)</a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </section>
+            }
+            if !taxon.regional_statuses.get().is_empty() {
+                <section>
+                    <h2>"Regions"</h2>
+                    <div>
+                        taxon_regional_table(regions: taxon.regional_statuses.get())
+                    </div>
+                </section>
+            }
+            if !taxon.notes.get().is_empty() {
+                <section>
+                    <h2>"Notes"</h2>
+                    <div>
+                        if !taxon.notes.get().is_empty() {
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>"ID"</th>
+                                        <th>"Name"</th>
+                                    </tr>
+                                </thead>
+                                for note in taxon.notes.get() {
+                                    <tr>
+                                        <td>(note.id)</td>
+                                        <td>(&note.text)</td>
+                                    </tr>
+                                }
+                            </table>
+                        }
+                    </div>
+                </section>
+            }
+
+            if !taxon.synonyms.get().is_empty() {
+                <section>
+                    <h2>"Synonyms"</h2>
+                    <div>
+                        <ul>
+                            for syn in taxon.synonyms.get() {
+                                <li>(&syn.complete_name)</li>
+                            }
+                        </ul>
+                    </div>
+                </section>
+            }
+
+            <section>
+                <h2>"External Resources"</h2>
+                <div>
+                    <ul>
+                        <li>
+                            <a
+                                href=(format!(
+                                    "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value={}",
+                                    taxon.itis_id
+                                ))
+                            >
+                                "ITIS taxon info"
+                            </a>
+                        </li>
+                        <li>
+                            if let Some(id) = taxon.inaturalist_id {
+                                <a
+                                    href=(format!(
+                                        "Https://www.inaturalist.org/taxa/{id}"
+                                    ))
+                                >
+                                    "iNaturalist taxon info"
+                                </a>
+                            }
+                        </li>
+                    </ul>
+                </div>
+            </section>
+        </div>
     }
 }
 
