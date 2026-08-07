@@ -1,4 +1,4 @@
-use libpropagation::region::{OriginFilter, Region, RegionalTaxonStatus};
+use libpropagation::region::{OriginFilter, Region, RegionCategory, RegionalTaxonStatus};
 use serde::Serialize;
 use topcoat::{
     context::Cx,
@@ -20,15 +20,68 @@ use crate::{
 pub async fn list(cx: &Cx) -> topcoat::Result {
     let db = db(cx);
     let mut db = db;
-    let regions = Region::all().exec(&mut db).await?;
-    trace!(?regions);
+    let mut region_types = Vec::default();
+    Region::filter(Region::fields().category().eq(RegionCategory::Nation))
+        .order_by(Region::fields().name().asc())
+        .exec(&mut db)
+        .await
+        .map(|r| {
+            if !r.is_empty() {
+                region_types.push(("Countries", r))
+            }
+        })?;
+    Region::filter(Region::fields().category().eq(RegionCategory::Province))
+        .order_by(Region::fields().name().asc())
+        .exec(&mut db)
+        .await
+        .map(|r| {
+            if !r.is_empty() {
+                region_types.push(("States and Provinces", r))
+            }
+        })?;
+    Region::filter(Region::fields().category().eq(RegionCategory::County))
+        .order_by(Region::fields().name().asc())
+        .exec(&mut db)
+        .await
+        .map(|r| {
+            if !r.is_empty() {
+                region_types.push(("Counties or Districts", r))
+            }
+        })?;
+    Region::filter(Region::fields().category().eq(RegionCategory::Municipality))
+        .order_by(Region::fields().name().asc())
+        .exec(&mut db)
+        .await
+        .map(|r| {
+            if !r.is_empty() {
+                region_types.push(("Cities or Municipalities", r))
+            }
+        })?;
+    Region::filter(Region::fields().category().eq(RegionCategory::Other))
+        .order_by(Region::fields().name().asc())
+        .exec(&mut db)
+        .await
+        .map(|r| {
+            if !r.is_empty() {
+                region_types.push(("Other", r))
+            }
+        })?;
+    trace!(?region_types);
     view! {
         <h1>"Regions"</h1>
-        <ul>
-            for region in regions {
-                <li><a href=(region.path())>(region.name)</a></li>
+        <div class="flex flex-col gap-4">
+            for t in region_types {
+                let regions = t.1;
+                <section>
+                    <h2>(t.0)</h2>
+                    <ul>
+                        for region in regions {
+                            <li><a href=(region.path())>(region.name)</a></li>
+                        }
+                    </ul>
+                </section>
             }
-        </ul>
+        </div>
     }
 }
 
