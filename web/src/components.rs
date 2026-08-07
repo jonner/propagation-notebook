@@ -6,7 +6,7 @@ use libpropagation::{
 };
 use topcoat::{
     icon::icon,
-    view::{Attributes, attributes, component, view},
+    view::{Attributes, View, attributes, class, component, view},
 };
 
 use crate::{
@@ -144,27 +144,46 @@ pub async fn harvest_timeline(
 }
 
 #[component]
-pub async fn origin_badge(origin: Origin) -> topcoat::Result {
-    let attrs = attributes! {
-        match origin {
-            Origin::Introduced => class="introduced",
-            Origin::Native => class="native",
-            _ => class="",
-        }
+pub async fn origin_badge(origin: Origin, #[default] mut attrs: Attributes) -> topcoat::Result {
+    let vals = match origin {
+        Origin::Introduced => Some(("introduced", "Introduced")),
+        Origin::Native => None,
+        _ => None,
     };
-    view! { <span (attrs)>(origin.to_string())</span> }
+    if let Some((klass, text)) = vals {
+        view! {
+            <div
+                class=(class!(klass, attrs.remove("class")))
+                (attrs)
+                title=(origin.to_string())
+            >
+                (text)
+            </div>
+        }
+    } else {
+        view! {}
+    }
 }
 
 #[component]
-pub async fn conservation_status_badge(status: ConservationStatus) -> topcoat::Result {
-    let attrs = attributes! {
-        match status {
-            ConservationStatus::Endangered => class="endangered",
-            ConservationStatus::Threatened => class="threatened",
-            ConservationStatus::SpecialConcern => class="specialconcern",
-        }
+pub async fn conservation_status_badge(
+    status: ConservationStatus,
+    #[default] mut attrs: Attributes,
+) -> topcoat::Result {
+    let (klass, text) = match status {
+        ConservationStatus::Endangered => ("endangered", "EN"),
+        ConservationStatus::Threatened => ("threatened", "TH"),
+        ConservationStatus::SpecialConcern => ("specialconcern", "SC"),
     };
-    view! { <span (attrs)>(status.to_string())</span> }
+    view! {
+        <div
+            class=(class!(klass, attrs.remove("class")))
+            (attrs)
+            title=(status.to_string())
+        >
+            (text)
+        </div>
+    }
 }
 
 #[component]
