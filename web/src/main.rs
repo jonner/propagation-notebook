@@ -65,7 +65,9 @@ async fn layout(slot: topcoat::Result) -> topcoat::Result {
                 <header
                     class="flex items-center justify-between font-bold flex-wrap p-6"
                 >
-                    <nav class="w-full block flex-grow lg:w-auto flex items-center gap-6 text-white">
+                    <nav
+                        class="w-full block flex-grow lg:w-auto flex items-center gap-6 text-white"
+                    >
                         <ul class="contents">
                             <li>
                                 <a class="block" href="/">
@@ -74,9 +76,7 @@ async fn layout(slot: topcoat::Result) -> topcoat::Result {
                                         label: "Home",
                                         attrs: attributes! { class="icon" }
                                     )
-                                    <span class="caption">
-                                        "Propagation Notebook"
-                                    </span>
+                                    <span class="caption">"Propagation Notebook"</span>
                                 </a>
                             </li>
                             <li>
@@ -106,9 +106,7 @@ async fn layout(slot: topcoat::Result) -> topcoat::Result {
                                         label: "list icon",
                                         attrs: attributes! { class="icon" }
                                     )
-                                    <span class="caption">
-                                        "Propagation Protocols"
-                                    </span>
+                                    <span class="caption">"Propagation Protocols"</span>
                                 </a>
                             </li>
                             <li>
