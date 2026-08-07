@@ -85,8 +85,8 @@ pub async fn pagination_control<'p, T: ModifyOffset + Clone + Sync + Send + 'p>(
         ));
     }
     view! {
-        <nav class="mt-4">
-            <ul class="flex gap-3 items-center">
+        <nav class="flex gap-3 items-center my-4">
+            <ul class="contents">
                 for item in links {
                     <li>
                         match item {
