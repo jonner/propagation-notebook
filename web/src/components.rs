@@ -364,11 +364,11 @@ pub async fn breadcrumbs(
                             attrs: attributes! { class="icon" }
                         )
                         <a>
-                        icon(
-                            data: mdi::ELLIPSIS_HORIZONTAL,
-                            label: "skipped",
-                            attrs: attributes! { class="icon" }
-                        )
+                            icon(
+                                data: mdi::ELLIPSIS_HORIZONTAL,
+                                label: "skipped",
+                                attrs: attributes! { class="icon" }
+                            )
                         </a>
                     </li>
                 }
