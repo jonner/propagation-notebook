@@ -60,13 +60,13 @@ pub(crate) async fn list(cx: &Cx) -> topcoat::Result {
     trace!(?taxa);
     view! {
         <h1>"Taxon List"</h1>
-        <form method="get" class="mb-6">
+        <form method="get" action="/taxa" class="flex my-6 w-full md:w-xl">
             <input
                 type="text"
                 name="q"
                 placeholder="Search for a taxon"
                 value=(params.q.as_deref().unwrap_or_default())
-                class="me-2"
+                class="me-2 flex-grow"
             >
             <button type="submit">"Search"</button>
         </form>
