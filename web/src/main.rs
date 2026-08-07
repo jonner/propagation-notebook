@@ -148,30 +148,34 @@ async fn layout(slot: topcoat::Result) -> topcoat::Result {
 #[page("/")]
 async fn home() -> topcoat::Result {
     view! {
-        <h1>"Native Plant Propagation Notebook"</h1>
-        <div>
-            "A reference for collecting and propagating native plants for ecological restoration"
-        </div>
-        <div class="card">
-            <h2>"Propagation"</h2>
-            <div>"Search for information about propagating a particular species"</div>
-            <form method="get" action="/taxa" class="flex-grow mb-6">
-                <input
-                    type="text"
-                    name="q"
-                    placeholder="Search for a taxon"
-                    class="me-2"
-                >
-                <button type="submit">"Search"</button>
-            </form>
-        </div>
-        <div class="card">
-            <h2>"Collect Seeds"</h2>
-            <div>
-                "Find out when plants are bearing seed in your "
-                <a href="/regions">"region"</a>
-                "."
-            </div>
+        <div class="flex flex-col gap-4">
+            <hgroup>
+                <h1>"Propagation Notebook"</h1>
+                <p>
+                    "A comprehensive reference guide for growing and collecting native plants for ecological restoration."
+                </p>
+            </hgroup>
+            <section>
+                <h2>"Growing Native Plants"</h2>
+                <p>"Find propagation information for a particular species:"</p>
+                <form method="get" action="/taxa" class="my-6">
+                    <input
+                        type="text"
+                        name="q"
+                        placeholder="Search for a taxon"
+                        class="me-2"
+                    >
+                    <button type="submit">"Search"</button>
+                </form>
+            </section>
+            <section>
+                <h2>"Regional Information"</h2>
+                <p>
+                    "Find out which plants are in your "
+                    <a href="/regions">"region"</a>
+                    " and when they are bearing fruit."
+                </p>
+            </section>
         </div>
     }
 }
