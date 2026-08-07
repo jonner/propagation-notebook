@@ -5,14 +5,13 @@ use libpropagation::{
 use topcoat::{
     context::Cx,
     router::{page, path_param, query_params},
-    view::{attributes, view},
+    view::view,
 };
 use tracing::trace;
 
 use crate::{
     components::{
-        self, Breadcrumb, breadcrumbs, citation_list, conservation_status_badge, harvest_timeline,
-        origin_badge, pagination_control,
+        self, Breadcrumb, breadcrumbs, citation_list, pagination_control, taxon_regional_table,
     },
     util::{CleaningId, ModifyOffset, PageState, Path, PropagationId, TaxonId, db},
 };
@@ -236,42 +235,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
         }
         if !taxon.regional_statuses.get().is_empty() {
             <dt>"Regions"</dt>
-            <dd>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>"Name"</th>
-                            <th>"Origin"</th>
-                            <th>"Status"</th>
-                            <th>"Fruiting Window"</th>
-                        </tr>
-                    </thead>
-                    for rs in taxon.regional_statuses.get() {
-                        <tr>
-                            <td><a href=(rs.path())>(&rs.region.get().name)</a></td>
-                            <td>
-                                if let Some(origin) = rs.origin {
-                                    origin_badge(origin: origin)
-                                }
-                            </td>
-                            <td>
-                                if let Some(status) = rs.conservation_status {
-                                    conservation_status_badge(status: status)
-                                }
-                            </td>
-                            <td>
-                                <div class="flex items-center gap-x-6">
-                                    harvest_timeline(
-                                        window: &rs.harvest_window,
-                                        attrs: attributes! { class="w-120" }
-                                    )
-                                    (rs.harvest_window.to_string())
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                </table>
-            </dd>
+            <dd>taxon_regional_table(regions: taxon.regional_statuses.get())</dd>
         }
         if !taxon.notes.get().is_empty() {
             <dt>"Notes"</dt>
