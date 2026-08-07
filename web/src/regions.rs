@@ -113,7 +113,7 @@ pub(crate) async fn harvest_starting(cx: &Cx) -> topcoat::Result {
         .await?;
     view! {
         <h1>(&region.name)</h1>
-        <h2>"Taxa coming into harvest season"</h2>
+        <h2>"Taxa beginning to bear fruit"</h2>
         taxa_table(taxa: starting_soon)
     }
 }
@@ -139,7 +139,7 @@ pub(crate) async fn harvest_ending(cx: &Cx) -> topcoat::Result {
         .await?;
     view! {
         <h1>(&region.name)</h1>
-        <h2>"Taxa nearing the end of harvest season"</h2>
+        <h2>"Last chance to harvest"</h2>
         taxa_table(taxa: ending)
     }
 }
