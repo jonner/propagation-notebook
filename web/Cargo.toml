@@ -16,6 +16,7 @@ tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
 topcoat = { version = "0.5.0", features = ["font-fontsource", "icon-iconify", "tailwind"] }
 tracing.workspace = true
 tracing-subscriber.workspace = true
+uuid = "1.24.0"
 
 [build-dependencies]
 topcoat = { version = "0.5.0", default-features= false, features = ["tailwind", "icon-iconify"] }

@@ -9,10 +9,9 @@ use tracing::trace;
 
 use crate::{
     components::{
-        conservation_status_badge, harvest_timeline, origin_badge, pagination_control,
+        conservation_status_badge, harvest_timeline, leaflet_map, origin_badge, pagination_control,
         regional_taxa_table,
     },
-    leaflet::Map,
     util::{ModifyOffset, PageState, Path, RegionId, TaxonId, db},
 };
 
@@ -74,7 +73,7 @@ pub async fn list(cx: &Cx) -> topcoat::Result {
                 let regions = t.1;
                 <section>
                     <h2>(t.0)</h2>
-                    <ul>
+                    <ul class="contents">
                         for region in regions {
                             <li><a href=(region.path())>(region.name)</a></li>
                         }
@@ -212,32 +211,39 @@ pub(crate) async fn details(cx: &Cx) -> topcoat::Result {
         .await?;
     trace!(?region);
     view! {
-        <h1>(&region.name)</h1>
-        <dl>
-            <dt>"ID"</dt>
-            <dd>(region.id)</dd>
-            <dt>"Category"</dt>
-            <dd>(region.category.to_string())</dd>
-            <dt>"Notes"</dt>
-            <dd>(region.notes.as_deref().unwrap_or_default())</dd>
-            <dt>"Taxa"</dt>
-            <dd>
-                <a href=(format!("./{}/taxa", region.id))>
-                    (region.taxon_statuses.get().len())
-                </a>
-            </dd>
-            <dt>"Geometry"</dt>
-            <dd>
-                match region.geometry.as_ref() {
-                    Some(value) => (Map {
-                        geometry: value,
-                        width: None,
-                        height: None,
-                    }),
-                    None => "",
-                }
-            </dd>
-        </dl>
+        <div class="flex flex-col gap-6">
+            <hgroup>
+                <h1>
+                    (&region.name)
+                </h1>
+                <p>(region.notes.as_deref().unwrap_or_default())</p>
+            </hgroup>
+            <section>
+                <h2>"Category"</h2>
+                <div>
+                    (region.category.to_string())
+                </div>
+            </section>
+            <section>
+                <h2>"Taxa"</h2>
+                <div>
+                    <a href=(format!("./{}/taxa", region.id))>
+                        (region.taxon_statuses.get().len())
+                    </a>
+                </div>
+            </section>
+            if let Some(value) = region.geometry.as_ref() {
+                <section>
+                    <h2>"Geometry"</h2>
+                    <div>
+                    leaflet_map(
+                            geometry: value,
+                            attrs: attributes!(class="w-full aspect-square max-h-[50dvh]"),
+                        )
+                    </div>
+                </section>
+            }
+        </div>
     }
 }
 

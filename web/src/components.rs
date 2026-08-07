@@ -10,6 +10,7 @@ use topcoat::{
 };
 
 use crate::{
+    leaflet::Map,
     mdi,
     util::{ModifyOffset, PageState, Path},
 };
@@ -384,5 +385,17 @@ pub async fn breadcrumbs(
                 }
             </ol>
         </nav>
+    }
+}
+
+#[component]
+pub async fn leaflet_map(
+    geometry: &geojson::Geometry,
+    #[default] attrs: Attributes,
+) -> topcoat::Result {
+    let leaflet_script = Map::new(geometry);
+    view! {
+        <div id=(&leaflet_script.id) (attrs)></div>
+        (leaflet_script)
     }
 }

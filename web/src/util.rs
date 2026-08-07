@@ -68,21 +68,6 @@ impl Path for RegionalTaxonStatus {
     }
 }
 
-#[derive(Debug)]
-pub enum Dimension {
-    Pixels(u64),
-    Percent(u64),
-}
-
-impl std::fmt::Display for Dimension {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Dimension::Pixels(v) => write!(f, "{v}px"),
-            Dimension::Percent(v) => write!(f, "{v}%"),
-        }
-    }
-}
-
 pub const PER_PAGE: usize = 50;
 
 pub trait ModifyOffset: Serialize + std::fmt::Debug {
