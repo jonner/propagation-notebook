@@ -187,36 +187,34 @@ pub async fn conservation_status_badge(
 }
 
 #[component]
-pub async fn taxa_table(taxa: Vec<Taxon>) -> topcoat::Result {
+pub async fn regional_taxa_table(
+    taxa: Vec<Taxon>,
+    #[default] mut attrs: Attributes,
+    #[default] child: View,
+) -> topcoat::Result {
     view! {
-        <table>
-            <thead>
-                <tr>
-                    <th>"Taxon"</th>
-                    <th>"Origin"</th>
-                    <th>"Status"</th>
-                    <th>"Fruiting window"</th>
-                </tr>
-            </thead>
+        <div
+            class=(class!("flex flex-col gap-6 md:gap-2", attrs.remove("class")))
+            (attrs)
+        >
             for taxon in taxa {
                 if let Some(rts) = taxon.regional_statuses.get().first() {
-                    <tr>
-                        <td>
+                    <div class="flex flex-col md:flex-row md:gap-4 w-full">
+                        <div class="flex gap-4 items-center w-full md:w-1/4">
                             <span class="latin">
                                 <a href=(taxon.path())>(&taxon.complete_name)</a>
                             </span>
-                        </td>
-                        <td>
-                            if let Some(origin) = rts.origin {
-                                origin_badge(origin: origin)
-                            }
-                        </td>
-                        <td>
-                            if let Some(status) = rts.conservation_status {
-                                conservation_status_badge(status: status)
-                            }
-                        </td>
-                        <td>
+                            <div class="flex items-center gap-4">
+                                if let Some(origin) = rts.origin {
+                                    origin_badge(origin: origin)
+                                }
+                                if let Some(status) = rts.conservation_status {
+                                    conservation_status_badge(status: status)
+                                }
+                            </div>
+                        </div>
+                        if rts.harvest_window.start_doy.is_some()
+                            && rts.harvest_window.end_doy.is_some() {
                             <div class="flex items-center gap-x-6">
                                 <div class="w-120">
                                     harvest_timeline(window: &rts.harvest_window)
@@ -225,11 +223,12 @@ pub async fn taxa_table(taxa: Vec<Taxon>) -> topcoat::Result {
                                     (rts.harvest_window.to_string())
                                 </div>
                             </div>
-                        </td>
-                    </tr>
+                        }
+                    </div>
                 }
             }
-        </table>
+            (child)
+        </div>
     }
 }
 

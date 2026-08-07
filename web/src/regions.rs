@@ -9,7 +9,8 @@ use tracing::trace;
 
 use crate::{
     components::{
-        conservation_status_badge, harvest_timeline, origin_badge, pagination_control, taxa_table,
+        conservation_status_badge, harvest_timeline, origin_badge, pagination_control,
+        regional_taxa_table,
     },
     leaflet::Map,
     util::{ModifyOffset, PageState, Path, RegionId, TaxonId, db},
@@ -74,14 +75,14 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
             </nav>
             <div>
                 <h2>"Last chance to harvest"</h2>
-                taxa_table(
+                regional_taxa_table(
                     taxa: ending,
                     <div><a href=(format!("/regions/{id}/ending"))>"Full list"</a></div>
                 )
             </div>
             <div>
                 <h2>"Beginning to bear fruit"</h2>
-                taxa_table(
+                regional_taxa_table(
                     taxa: starting_soon,
                     <div>
                         <a href=(format!("/regions/{id}/starting"))>"Full list"</a>
@@ -114,7 +115,7 @@ pub(crate) async fn harvest_starting(cx: &Cx) -> topcoat::Result {
     view! {
         <h1>(&region.name)</h1>
         <h2>"Taxa beginning to bear fruit"</h2>
-        taxa_table(taxa: starting_soon)
+        regional_taxa_table(taxa: starting_soon)
     }
 }
 
@@ -140,7 +141,7 @@ pub(crate) async fn harvest_ending(cx: &Cx) -> topcoat::Result {
     view! {
         <h1>(&region.name)</h1>
         <h2>"Last chance to harvest"</h2>
-        taxa_table(taxa: ending)
+        regional_taxa_table(taxa: ending)
     }
 }
 
@@ -229,7 +230,7 @@ pub async fn taxa_list(cx: &Cx) -> topcoat::Result {
         .await?;
     view! {
         <h1>(&region.name)</h1>
-        taxa_table(taxa: taxa)
+        regional_taxa_table(taxa: taxa)
         pagination_control(state: &page_state, params: params)
     }
 }
