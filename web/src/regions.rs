@@ -69,7 +69,7 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
                         <a href=(format!("/regions/{id}/details"))>"Region details"</a>
                     </li>
                     <li>
-                        <a href=(format!("/regions/{id}/taxa"))>"Full taxon list"</a>
+                        <a href=(format!("/regions/{id}/taxa"))>"Full taxon list"</a>" (" (region.taxon_statuses.get().len()) " taxa)"
                     </li>
                 </ul>
             </nav>
