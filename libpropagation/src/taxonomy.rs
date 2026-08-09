@@ -275,6 +275,27 @@ pub struct Taxon {
     pub notes: Deferred<Vec<TaxonNote>>,
     #[has_one]
     pub photo: Deferred<Option<TaxonPhoto>>,
+
+    #[has_many(pair=descendant)]
+    pub ancestor_links: Deferred<Vec<TaxonHierarchy>>,
+    #[has_many(pair=ancestor)]
+    pub descendant_links: Deferred<Vec<TaxonHierarchy>>,
+}
+
+#[derive(Debug, Clone, toasty::Model)]
+pub struct TaxonHierarchy {
+    #[index]
+    #[key]
+    pub ancestor_id: u64,
+    #[index]
+    #[key]
+    pub descendant_id: u64,
+    pub depth: u64,
+
+    #[belongs_to(key=ancestor_id, references=id)]
+    pub ancestor: Deferred<Taxon>,
+    #[belongs_to(key=descendant_id, references=id)]
+    pub descendant: Deferred<Taxon>,
 }
 
 #[derive(Debug, Clone)]
@@ -665,6 +686,37 @@ mod itisdb {
                 toasty::batch(creates).exec(ourtxn).await?;
             }
         }
+        reporter.finish_step();
+
+        reporter.begin_step("Populating hierarchy...", 1);
+        let _ = toasty::sql::statement(
+            "WITH RECURSIVE hierarchy(ancestor_id, descendant_id, depth) AS (
+    SELECT
+        id,
+        id,
+        0
+    FROM taxa
+
+    UNION ALL
+
+    SELECT
+        h.ancestor_id,
+        t.parent_id,
+        h.depth + 1
+    FROM hierarchy h
+    JOIN taxa t
+      ON t.id = h.descendant_id
+    WHERE t.parent_id IS NOT NULL
+)
+INSERT INTO taxon_hierarchies(ancestor_id, descendant_id, depth)
+SELECT
+    descendant_id,
+    ancestor_id,
+    depth
+FROM hierarchy;",
+        )
+        .exec(ourtxn)
+        .await?;
         reporter.finish_step();
         Ok(())
     }
