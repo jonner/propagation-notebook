@@ -114,28 +114,50 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
     view! {
         <h1>(&region.name)</h1>
         <div class="flex flex-col gap-6">
-            <div>(region.notes.as_deref().unwrap_or_default())</div>
-            <nav>
-                <ul>
-                    <li>
-                        <a href=(format!("/regions/{id}/details"))>"Region details"</a>
-                    </li>
-                    <li>
-                        <a href=(format!("/regions/{id}/taxa"))>"Full taxon list"</a>
-                        " ("
-                        (region.taxon_statuses.get().len())
-                        " taxa)"
-                    </li>
-                </ul>
-            </nav>
-            <div>
+            <section>
+                <p>(region.notes.as_deref().unwrap_or_default())</p>
+                <nav>
+                    <ul>
+                        <li>
+                            <a href=(format!("/regions/{id}/details"))>
+                                "Region details"
+                            </a>
+                        </li>
+                        <li>
+                            <a href=(format!("/regions/{id}/taxa"))>
+                                "Full taxon list"
+                            </a>
+                            " ("
+                            (region.taxon_statuses.get().len())
+                            " taxa)"
+                        </li>
+                    </ul>
+                </nav>
+            </section>
+            <section>
+                <h2>"Search"</h2>
+                <form
+                    method="get"
+                    action=(format!("/regions/{id}/taxa"))
+                    class="flex w-full md:w-xl"
+                >
+                    <input
+                        type="text"
+                        name="q"
+                        placeholder="Search for a taxon"
+                        class="me-2 flex-grow"
+                    >
+                    <button type="submit">"Search"</button>
+                </form>
+            </section>
+            <section>
                 <h2>"Last chance to harvest"</h2>
                 regional_taxa_table(
                     taxa: &ending,
                     <div><a href=(format!("/regions/{id}/ending"))>"Full list"</a></div>
                 )
-            </div>
-            <div>
+            </section>
+            <section>
                 <h2>"Beginning to bear fruit"</h2>
                 regional_taxa_table(
                     taxa: &starting_soon,
@@ -143,7 +165,7 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
                         <a href=(format!("/regions/{id}/starting"))>"Full list"</a>
                     </div>
                 )
-            </div>
+            </section>
         </div>
     }
 }
