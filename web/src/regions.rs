@@ -235,16 +235,12 @@ pub(crate) async fn details(cx: &Cx) -> topcoat::Result {
     view! {
         <div class="flex flex-col gap-6">
             <hgroup>
-                <h1>
-                    (&region.name)
-                </h1>
+                <h1>(&region.name)</h1>
                 <p>(region.notes.as_deref().unwrap_or_default())</p>
             </hgroup>
             <section>
                 <h2>"Category"</h2>
-                <div>
-                    (region.category.to_string())
-                </div>
+                <div>(region.category.to_string())</div>
             </section>
             <section>
                 <h2>"Taxa"</h2>
@@ -258,9 +254,9 @@ pub(crate) async fn details(cx: &Cx) -> topcoat::Result {
                 <section>
                     <h2>"Geometry"</h2>
                     <div>
-                    leaflet_map(
+                        leaflet_map(
                             geometry: value,
-                            attrs: attributes!(class="w-full aspect-square max-h-[50dvh]"),
+                            attrs: attributes!(class="w-full aspect-square max-h-[50dvh]")
                         )
                     </div>
                 </section>
