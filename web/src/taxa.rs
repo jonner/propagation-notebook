@@ -123,21 +123,26 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
         .include(Taxon::fields().regional_statuses().region())
         .include(Taxon::fields().notes())
         .include(Taxon::fields().photo())
+        .include(Taxon::fields().ancestor_links().ancestor())
         .one()
         .exec(&mut db)
         .await?;
     trace!(?taxon);
-    // for now, just manually traverse the ancestry. Maybe eventually use a CTE or something
-    let mut ancestors = Vec::default();
-    let mut next_parent = taxon.parent_id;
-    while let Some(id) = next_parent {
-        let t = Taxon::filter_by_id(id).one().exec(&mut db).await?;
-        next_parent = t.parent_id;
-        ancestors.push(Breadcrumb {
-            url: Some(t.path()),
-            text: t.complete_name,
-        });
-    }
+    let ancestors = taxon
+        .ancestor_links
+        .get()
+        .iter()
+        .filter_map(|l| {
+            if l.depth == 0 {
+                None
+            } else {
+                Some(Breadcrumb {
+                    url: Some(l.ancestor.get().path()),
+                    text: l.ancestor.get().complete_name.clone(),
+                })
+            }
+        })
+        .collect::<Vec<_>>();
 
     view! {
         breadcrumbs(items: ancestors, ellipsize: Some(2))
