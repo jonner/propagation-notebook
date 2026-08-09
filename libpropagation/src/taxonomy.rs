@@ -483,6 +483,7 @@ mod itisdb {
     use std::collections::HashMap;
 
     use itertools::Itertools;
+    use toasty::stmt;
 
     use super::*;
 
@@ -497,14 +498,37 @@ mod itisdb {
         let plant_kingdom = itis::Kingdom::get_by_kingdom_name(&mut itisdb, "Plantae").await?;
         let mut tsn_to_id: HashMap<u64, u64> = HashMap::default();
         let mut tsn_to_seq: HashMap<u64, _> = HashMap::default();
-        let records = itis::Hierarchy::all()
-            .order_by(itis::Hierarchy::fields().hierarchy_string().asc())
-            .exec(&mut itisdb)
-            .await?;
+        let records = toasty::sql::query(
+            "SELECT H.tsn FROM hierarchy H
+    INNER JOIN taxonomic_units T ON H.tsn=T.tsn ORDER BY
+    substr(
+        H.hierarchy_string,
+        1,
+        length(hierarchy_string) - length('-' || H.tsn)
+    ) ASC,
+        T.unit_ind1 ASC,
+        T.unit_name1 ASC,
+        T.unit_ind2 ASC,
+        T.unit_name2 ASC,
+        T.unit_ind3 ASC,
+        T.unit_name3 ASC,
+        T.unit_ind4 ASC,
+        T.unit_name4 ASC",
+        )
+        .column_types([stmt::Type::U64])
+        .exec(&mut itisdb)
+        .await?;
+
         reporter.begin_step("Building hierarchy sequence...", records.len());
         for (seq, record) in records.into_iter().enumerate() {
+            let toasty::stmt::Value::Record(row) = record else {
+                unreachable!("raw SQL queries should return record rows");
+            };
             reporter.increment();
-            tsn_to_seq.insert(record.tsn, seq);
+            let toasty::stmt::Value::U64(tsn) = row[0] else {
+                unreachable!("tsn should be a u64");
+            };
+            tsn_to_seq.insert(tsn, seq);
         }
         reporter.finish_step();
 
