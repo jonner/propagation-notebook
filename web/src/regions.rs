@@ -12,7 +12,7 @@ use crate::{
         conservation_status_badge, harvest_timeline, leaflet_map, origin_badge, pagination_control,
         regional_taxa_table,
     },
-    util::{ModifyOffset, PageState, Path, RegionId, TaxonId, db},
+    util::{ModifyOffset, PER_PAGE, PageState, Path, RegionId, TaxonId, db},
 };
 
 #[page("/regions")]
@@ -88,27 +88,28 @@ pub async fn list(cx: &Cx) -> topcoat::Result {
 pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
     let id = path_param::<RegionId>(cx)?;
     let mut db = db(cx);
+    const N: usize = 10;
     let region = Region::filter_by_id(id)
         .include(Region::fields().taxon_statuses())
         .one()
         .exec(&mut db)
         .await?;
-    let ending = region
+    let (total_ending, ending) = region
         .get_taxa(
             &mut db,
             Some(OriginFilter::NativeOnly),
             Some(libpropagation::region::HarvestFilter::EndingSoon(10)),
             None,
-            Some(10),
+            Some(N),
         )
         .await?;
-    let starting_soon = region
+    let (total_starting, starting_soon) = region
         .get_taxa(
             &mut db,
             Some(OriginFilter::NativeOnly),
             Some(libpropagation::region::HarvestFilter::StartingSoon(10)),
             None,
-            Some(10),
+            Some(N),
         )
         .await?;
     view! {
@@ -154,16 +155,20 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
                 <h2>"Last chance to harvest"</h2>
                 regional_taxa_table(
                     taxa: &ending,
-                    <div><a href=(format!("/regions/{id}/ending"))>"Full list"</a></div>
+                    if total_ending > N.try_into().unwrap_or_default() {
+                        <div><a href=(format!("/regions/{id}/ending"))>"Full list"</a></div>
+                    }
                 )
             </section>
             <section>
                 <h2>"Beginning to bear fruit"</h2>
                 regional_taxa_table(
                     taxa: &starting_soon,
-                    <div>
-                        <a href=(format!("/regions/{id}/starting"))>"Full list"</a>
-                    </div>
+                    if total_starting > N.try_into().unwrap_or_default() {
+                        <div>
+                            <a href=(format!("/regions/{id}/starting"))>"Full list"</a>
+                        </div>
+                    }
                 )
             </section>
         </div>
@@ -180,7 +185,7 @@ pub(crate) async fn harvest_starting(cx: &Cx) -> topcoat::Result {
         .exec(&mut db)
         .await?;
     // FIXME: pagination
-    let starting_soon = region
+    let (_total, starting_soon) = region
         .get_taxa(
             &mut db,
             Some(OriginFilter::NativeOnly),
@@ -206,7 +211,7 @@ pub(crate) async fn harvest_ending(cx: &Cx) -> topcoat::Result {
         .exec(&mut db)
         .await?;
     // FIXME: pagination
-    let ending = region
+    let (_total, ending) = region
         .get_taxa(
             &mut db,
             Some(OriginFilter::NativeOnly),
@@ -284,14 +289,8 @@ pub async fn taxa_list(cx: &Cx) -> topcoat::Result {
     let mut db = db(cx);
     let region_id = path_param::<RegionId>(cx)?;
     let params = query_params::<RegionalTaxaListParams>(cx)?;
-    let region = Region::filter_by_id(region_id)
-        .include(Region::fields().taxon_statuses())
-        .one()
-        .exec(&mut db)
-        .await?;
-    let total = region.taxon_statuses.get().len();
-    let page_state = PageState::new(params.offset, total);
-    let taxa = region
+    let region = Region::get_by_id(&mut db, region_id).await?;
+    let (total, taxa) = region
         .get_taxa(
             &mut db,
             if Some(true) == params.native {
@@ -304,10 +303,11 @@ pub async fn taxa_list(cx: &Cx) -> topcoat::Result {
             } else {
                 None
             },
-            Some(page_state.offset),
-            Some(page_state.per_page),
+            params.offset,
+            Some(PER_PAGE),
         )
         .await?;
+    let page_state = PageState::new(params.offset, PER_PAGE, total.try_into().unwrap());
     view! {
         <h1>(&region.name)</h1>
         regional_taxa_table(taxa: &taxa)

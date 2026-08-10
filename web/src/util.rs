@@ -82,9 +82,9 @@ pub struct PageState {
 }
 
 impl PageState {
-    pub fn new(offset: Option<usize>, total: usize) -> Self {
+    pub fn new(offset: Option<usize>, per_page: usize, total: usize) -> Self {
         Self {
-            per_page: PER_PAGE,
+            per_page,
             offset: offset.unwrap_or_default(),
             total,
         }

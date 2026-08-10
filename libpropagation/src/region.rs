@@ -192,7 +192,7 @@ impl Region {
         harvest: Option<HarvestFilter>,
         offset: Option<usize>,
         limit: Option<usize>,
-    ) -> Result<Vec<Taxon>, toasty::Error> {
+    ) -> Result<(u64, Vec<Taxon>), toasty::Error> {
         let mut rts_filter = RegionalTaxonStatus::fields().region_id().eq(self.id);
         let today = jiff::Zoned::now().date().day_of_year();
         if let Some(f) = harvest {
@@ -231,8 +231,9 @@ impl Region {
                 }
             })
         }
-        let mut filter = Taxon::filter(Taxon::fields().regional_statuses().any(rts_filter));
-        filter = filter
+        let mut query = Taxon::filter(Taxon::fields().regional_statuses().any(rts_filter));
+        let total = query.clone().count().exec(db).await?;
+        query = query
             .include(
                 Taxon::fields()
                     .regional_statuses()
@@ -240,12 +241,12 @@ impl Region {
             )
             .order_by(Taxon::fields().sequence().asc());
         if let Some(limit) = limit {
-            filter = filter.limit(limit)
+            query = query.limit(limit)
         }
         if let Some(offset) = offset {
-            filter = filter.offset(offset)
+            query = query.offset(offset)
         }
-        filter.exec(db).await
+        Ok((total, query.exec(db).await?))
     }
 }
 

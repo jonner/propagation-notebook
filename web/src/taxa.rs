@@ -13,7 +13,7 @@ use crate::{
     components::{
         self, Breadcrumb, breadcrumbs, citation_list, pagination_control, taxon_regional_table,
     },
-    util::{CleaningId, ModifyOffset, PageState, Path, PropagationId, TaxonId, db},
+    util::{CleaningId, ModifyOffset, PER_PAGE, PageState, Path, PropagationId, TaxonId, db},
 };
 
 #[derive(Debug, Clone, Copy, serde::Deserialize, serde::Serialize)]
@@ -51,7 +51,7 @@ pub(crate) async fn list(cx: &Cx) -> topcoat::Result {
         Taxon::fields().complete_name().asc(),
     ));
     let total = query.clone().count().exec(&mut db).await? as usize;
-    let page_state = PageState::new(params.offset, total);
+    let page_state = PageState::new(params.offset, PER_PAGE, total);
     let taxa = query
         .limit(page_state.per_page)
         .offset(page_state.offset)
