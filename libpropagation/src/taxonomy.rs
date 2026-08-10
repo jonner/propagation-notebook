@@ -364,10 +364,15 @@ impl Taxon {
             .await
     }
 
+    #[tracing::instrument(ret)]
     pub fn matches(&self, inat_taxon: &inaturalist::Taxon) -> bool {
         let rank = Rank::from_inaturalist(&inat_taxon.rank);
         rank == self.rank
-            && (self.complete_name.eq_ignore_ascii_case(&inat_taxon.name)
+            && (self
+                .complete_name
+                // iNaturalist uses the '×' character for a hybrid indicator.
+                // Normalize the names before comparing
+                .eq_ignore_ascii_case(&inat_taxon.name.replace("×", "X"))
                 || self.names().eq_ignore_ascii_case(&inat_taxon.name))
     }
 
