@@ -387,6 +387,12 @@ impl Taxon {
             .or(Self::fields()
                 .synonyms()
                 .any(Synonym::fields().complete_name().like(&wildcard)))
+            .or(Self::fields().ancestor_links().any(
+                TaxonHierarchy::fields()
+                    .ancestor()
+                    .complete_name()
+                    .like(search_string),
+            ))
     }
 }
 
