@@ -219,6 +219,13 @@ pub struct TaxonPhoto {
     pub updated_at: jiff::Timestamp,
 }
 
+#[derive(Debug, Clone, Copy, toasty::Embed)]
+pub enum HybridType {
+    #[column(variant = 1)]
+    Species,
+    #[column(variant = 2)]
+    Genus,
+}
 #[derive(Debug, Clone, toasty::Model)]
 #[table = "taxa"]
 pub struct Taxon {
@@ -248,6 +255,7 @@ pub struct Taxon {
 
     // #[index]
     pub rank: Rank,
+    pub hybrid: bool,
 
     pub life_form: Option<LifeForm>,
     pub life_cycle: Option<LifeCycle>,
@@ -571,6 +579,8 @@ mod itisdb {
         for chunk in &taxa
             .iter()
             .map(|theirs| {
+                let hybrid = theirs.unit_ind1 == Some("X".to_string())
+                    || theirs.unit_ind2 == Some("X".to_string());
                 reporter.increment();
                 let sequence = tsn_to_seq.get(&theirs.tsn).copied().unwrap();
                 let rank: Rank = theirs.rank_id.into();
@@ -582,6 +592,7 @@ mod itisdb {
                     .complete_name(&theirs.complete_name)
                     .rank(rank)
                     .sequence(sequence as u64)
+                    .hybrid(hybrid)
             })
             .chunks(CHUNK_SIZE)
         {
