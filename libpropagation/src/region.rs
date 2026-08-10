@@ -188,6 +188,7 @@ impl Region {
     pub async fn get_taxa(
         &self,
         db: &mut Db,
+        query: Option<&String>,
         origin: Option<OriginFilter>,
         harvest: Option<HarvestFilter>,
         offset: Option<usize>,
@@ -231,7 +232,12 @@ impl Region {
                 }
             })
         }
-        let mut query = Taxon::filter(Taxon::fields().regional_statuses().any(rts_filter));
+
+        let mut filter = Taxon::fields().regional_statuses().any(rts_filter);
+        if let Some(q) = query {
+            filter = filter.and(Taxon::search_filter(q));
+        }
+        let mut query = Taxon::filter(filter);
         let total = query.clone().count().exec(db).await?;
         query = query
             .include(

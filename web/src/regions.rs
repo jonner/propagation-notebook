@@ -97,6 +97,7 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
     let (total_ending, ending) = region
         .get_taxa(
             &mut db,
+            None,
             Some(OriginFilter::NativeOnly),
             Some(libpropagation::region::HarvestFilter::EndingSoon(10)),
             None,
@@ -106,6 +107,7 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
     let (total_starting, starting_soon) = region
         .get_taxa(
             &mut db,
+            None,
             Some(OriginFilter::NativeOnly),
             Some(libpropagation::region::HarvestFilter::StartingSoon(10)),
             None,
@@ -188,6 +190,7 @@ pub(crate) async fn harvest_starting(cx: &Cx) -> topcoat::Result {
     let (_total, starting_soon) = region
         .get_taxa(
             &mut db,
+            None,
             Some(OriginFilter::NativeOnly),
             Some(libpropagation::region::HarvestFilter::StartingSoon(10)),
             None,
@@ -214,6 +217,7 @@ pub(crate) async fn harvest_ending(cx: &Cx) -> topcoat::Result {
     let (_total, ending) = region
         .get_taxa(
             &mut db,
+            None,
             Some(OriginFilter::NativeOnly),
             Some(libpropagation::region::HarvestFilter::EndingSoon(10)),
             None,
@@ -276,6 +280,7 @@ pub struct RegionalTaxaListParams {
     pub offset: Option<usize>,
     pub ready: Option<bool>,
     pub native: Option<bool>,
+    pub q: Option<String>,
 }
 
 impl ModifyOffset for RegionalTaxaListParams {
@@ -293,6 +298,7 @@ pub async fn taxa_list(cx: &Cx) -> topcoat::Result {
     let (total, taxa) = region
         .get_taxa(
             &mut db,
+            params.q.as_ref(),
             if Some(true) == params.native {
                 Some(OriginFilter::NativeOnly)
             } else {
@@ -310,8 +316,28 @@ pub async fn taxa_list(cx: &Cx) -> topcoat::Result {
     let page_state = PageState::new(params.offset, PER_PAGE, total.try_into().unwrap());
     view! {
         <h1>(&region.name)</h1>
-        regional_taxa_table(taxa: &taxa)
-        pagination_control(state: &page_state, params: params)
+        <section>
+            <h2>"Search"</h2>
+            <form method="get" class="flex w-full md:w-xl">
+                <input
+                    type="text"
+                    name="q"
+                    value=(params.q.as_ref())
+                    placeholder="Search for a taxon"
+                    class="me-2 flex-grow"
+                >
+                <button type="submit">"Search"</button>
+            </form>
+        </section>
+        <section>
+            if page_state.total_pages() > 1 {
+                pagination_control(state: &page_state, params: params)
+            }
+            regional_taxa_table(taxa: &taxa)
+            if page_state.total_pages() > 1 {
+                pagination_control(state: &page_state, params: params)
+            }
+        </section>
     }
 }
 
