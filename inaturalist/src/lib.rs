@@ -116,7 +116,7 @@ impl Observation {
 #[derive(Debug, Deserialize)]
 pub struct TaxonDefaultPhoto {
     pub id: u64,
-    default_photo: DefaultPhoto,
+    default_photo: Option<DefaultPhoto>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -195,7 +195,7 @@ impl Client {
         }
     }
 
-    pub async fn taxon_default_photo(&self, taxon_id: u64) -> Result<DefaultPhoto, Error> {
+    pub async fn taxon_default_photo(&self, taxon_id: u64) -> Result<Option<DefaultPhoto>, Error> {
         tracing::trace!(?taxon_id, "getting taxon default photo");
         let taxa_endpoint = API_BASE_URL.join("taxa/")?.join(&taxon_id.to_string())?;
         let res: Response<TaxonDefaultPhoto> = self

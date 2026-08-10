@@ -402,14 +402,16 @@ async fn update_photo_for_taxon(db: &mut Db, taxon: Taxon) -> Result<(), anyhow:
         },
     }?;
     let default_photo = inat.taxon_default_photo(inat_id).await?;
-    trace!(?default_photo);
-    TaxonPhoto::upsert_by_taxon_id(taxon.id)
-        .large_url(default_photo.large_url)
-        .square_url(default_photo.square_url)
-        .medium_url(default_photo.medium_url)
-        .attribution(default_photo.attribution)
-        .is_default(true)
-        .exec(db)
-        .await?;
+    if let Some(default_photo) = default_photo {
+        trace!(?default_photo);
+        TaxonPhoto::upsert_by_taxon_id(taxon.id)
+            .large_url(default_photo.large_url)
+            .square_url(default_photo.square_url)
+            .medium_url(default_photo.medium_url)
+            .attribution(default_photo.attribution)
+            .is_default(true)
+            .exec(db)
+            .await?;
+    }
     Ok(())
 }
