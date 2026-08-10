@@ -70,6 +70,9 @@ pub(crate) async fn list(cx: &Cx) -> topcoat::Result {
             >
             <button type="submit">"Search"</button>
         </form>
+        if page_state.total_pages() > 1 {
+            pagination_control(state: &page_state, params: params)
+        }
         match params.fmt {
             Some(ResultsFormat::Grid) => {
                 <div
@@ -104,7 +107,9 @@ pub(crate) async fn list(cx: &Cx) -> topcoat::Result {
                 </ul>
             }
         }
-        pagination_control(state: &page_state, params: params)
+        if page_state.total_pages() > 1 {
+            pagination_control(state: &page_state, params: params)
+        }
     }
 }
 
