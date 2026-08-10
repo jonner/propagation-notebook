@@ -168,7 +168,11 @@ impl TaxonCommands {
                     TaxonIdentifier::Name(name) => Taxon::fields().complete_name().like(name),
                 })
                 .include(Taxon::fields().parent())
-                .include(Taxon::fields().children())
+                .include(
+                    Taxon::fields()
+                        .children()
+                        .order_by(Taxon::fields().sequence().asc()),
+                )
                 .include(Taxon::fields().vernaculars())
                 .include(Taxon::fields().synonyms())
                 .include(Taxon::fields().regional_statuses().region())

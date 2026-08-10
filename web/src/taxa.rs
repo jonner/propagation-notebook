@@ -116,7 +116,11 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
         .include(Taxon::fields().vernaculars())
         .include(Taxon::fields().parent())
         .include(Taxon::fields().synonyms())
-        .include(Taxon::fields().children())
+        .include(
+            Taxon::fields()
+                .children()
+                .order_by(Taxon::fields().sequence().asc()),
+        )
         .include(Taxon::fields().collecting_data())
         .include(Taxon::fields().cleaning_procedures())
         .include(Taxon::fields().propagation_procedures().propagation())
