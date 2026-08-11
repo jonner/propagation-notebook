@@ -151,6 +151,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
                 })
             }
         })
+        .rev()
         .collect::<Vec<_>>();
 
     view! {

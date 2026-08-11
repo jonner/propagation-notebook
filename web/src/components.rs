@@ -344,7 +344,7 @@ pub async fn breadcrumbs(
     #[default] ellipsize: Option<usize>,
 ) -> topcoat::Result {
     let do_ellipsize = ellipsize.map(|n| items.len() > n + 1) == Some(true);
-    let mut breadcrumb_iter = items.into_iter().rev();
+    let mut breadcrumb_iter = items.into_iter();
     let Some(root) = breadcrumb_iter.next() else {
         return view! {};
     };
