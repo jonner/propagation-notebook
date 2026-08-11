@@ -29,10 +29,36 @@ pub enum Response<T> {
     Success(ResultsResponse<T>),
     Failure(ErrorResponse),
 }
+
+#[derive(Debug, Deserialize)]
+#[serde(untagged)]
+pub enum ResultValue<T> {
+    Vec(Vec<T>),
+    Object(T),
+}
+
+impl<T> ResultValue<T> {
+    // panics if value is not a vec
+    pub fn vec(self) -> Vec<T> {
+        match self {
+            ResultValue::Vec(items) => items,
+            ResultValue::Object(_) => panic!(),
+        }
+    }
+
+    // panics if value is not an object
+    pub fn object(self) -> T {
+        match self {
+            ResultValue::Vec(_) => panic!(),
+            ResultValue::Object(obj) => obj,
+        }
+    }
+}
+
 #[derive(Debug, Deserialize)]
 pub struct ResultsResponse<T> {
     total_results: u64,
-    results: Vec<T>,
+    results: ResultValue<T>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -180,7 +206,8 @@ impl Client {
 
         match res {
             Response::Success(results_response) => {
-                if results_response.results.is_empty() {
+                let results = results_response.results.vec();
+                if results.is_empty() {
                     Err(Error::TaxonNotFound(
                         ids.iter()
                             .map(|i| i.to_string())
@@ -188,7 +215,7 @@ impl Client {
                             .join(","),
                     ))
                 } else {
-                    Ok(results_response.results)
+                    Ok(results)
                 }
             }
             Response::Failure(error_response) => Err(Error::Response(error_response)),
@@ -209,10 +236,11 @@ impl Client {
 
         let mut val = match res {
             Response::Success(results_response) => {
-                if results_response.results.is_empty() {
+                let results = results_response.results.vec();
+                if results.is_empty() {
                     Err(Error::TaxonNotFound(taxon_id.to_string()))
                 } else {
-                    Ok(results_response.results)
+                    Ok(results)
                 }
             }
             Response::Failure(error_response) => Err(Error::Response(error_response)),
@@ -247,7 +275,7 @@ impl Client {
             .await?;
 
         match res {
-            Response::Success(res) => Ok(res.results),
+            Response::Success(res) => Ok(res.results.vec()),
             Response::Failure(res) => Err(Error::Response(res)),
         }
     }
@@ -290,11 +318,12 @@ impl Client {
 
             match res {
                 Response::Success(res) => {
-                    if res.results.is_empty() {
+                    let results = res.results.vec();
+                    if results.is_empty() {
                         break;
                     }
 
-                    observations.extend(res.results);
+                    observations.extend(results);
 
                     if page * per_page >= res.total_results as usize {
                         break;
@@ -320,7 +349,7 @@ impl Client {
             .await?;
 
         match res {
-            Response::Success(results_response) => Ok(results_response.results),
+            Response::Success(results_response) => Ok(results_response.results.vec()),
             Response::Failure(error_response) => Err(Error::Response(error_response)),
         }
     }
