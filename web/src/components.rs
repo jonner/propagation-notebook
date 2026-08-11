@@ -164,10 +164,6 @@ pub async fn harvest_timeline(
     #[default] current_week: Option<i16>,
     #[default] attrs: Attributes,
 ) -> topcoat::Result {
-    let (Some(start_week), Some(end_week)) = (window.start_week(), window.end_week()) else {
-        return view! {};
-    };
-
     let cw =
         current_week.unwrap_or_else(|| jiff::Zoned::now().date().iso_week_date().week().into());
 
@@ -183,10 +179,17 @@ pub async fn harvest_timeline(
                 >
                     for w in 1..=52 {
                         {
-                            let in_window = if start_week <= end_week {
-                                w >= start_week && w <= end_week
+                            let in_window = if let (Some(start_week), Some(end_week)) = (
+                                window.start_week(),
+                                window.end_week(),
+                            ) {
+                                if start_week <= end_week {
+                                    w >= start_week && w <= end_week
+                                } else {
+                                    w >= start_week || w <= end_week
+                                }
                             } else {
-                                w >= start_week || w <= end_week
+                                false
                             };
 
                             let bg_class = if in_window {
@@ -315,17 +318,17 @@ pub async fn harvest_table(
                             }
                         </div>
                     </div>
-                    if rts.harvest_window.start_doy.is_some()
-                        && rts.harvest_window.end_doy.is_some() {
-                        <div class="flex items-center gap-x-6">
-                            <div class="w-120">
-                                harvest_timeline(window: &rts.harvest_window)
-                            </div>
-                            <div class="text-nowrap">
-                                (rts.harvest_window.to_string())
-                            </div>
+                    <div class="flex items-center gap-x-6">
+                        <div class="w-120">
+                            harvest_timeline(window: &rts.harvest_window)
                         </div>
-                    }
+                        <div class="text-nowrap">
+                            if rts.harvest_window.start_doy.is_some()
+                                && rts.harvest_window.end_doy.is_some() {
+                                (rts.harvest_window.to_string())
+                            }
+                        </div>
+                    </div>
                 </div>
             }
             (child)
