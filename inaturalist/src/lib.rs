@@ -1,4 +1,4 @@
-use std::{fmt::Display, sync::LazyLock, time::Duration};
+use std::{collections::BTreeMap, fmt::Display, sync::LazyLock, time::Duration};
 
 use jiff::civil::Date;
 use reqwest::header::{HeaderMap, HeaderValue};
@@ -136,6 +136,19 @@ pub struct Observation {
 impl Observation {
     fn fields() -> &'static str {
         "id,observed_on"
+    }
+}
+
+#[derive(Deserialize, Debug)]
+pub struct Histogram {
+    week_of_year: BTreeMap<String, u64>,
+}
+
+impl Histogram {
+    pub fn weeks(&self) -> Vec<u64> {
+        let mut entries: Vec<(_, _)> = self.week_of_year.iter().collect();
+        entries.sort_by_key(|(key, _)| key.parse::<u64>().unwrap_or_default());
+        entries.into_iter().map(|(_, val)| *val).collect()
     }
 }
 
@@ -337,6 +350,52 @@ impl Client {
         Ok(observations)
     }
 
+    pub async fn seed_histogram(
+        &self,
+        taxon_id: u64,
+        location: &SearchArea,
+    ) -> Result<(usize, Vec<u64>), Error> {
+        let obs_endpoint = API_BASE_URL.join("observations/")?.join("histogram")?;
+
+        let mut builder = self.0.get(obs_endpoint.clone()).query(&[
+            ("taxon_id", taxon_id.to_string().as_str()),
+            ("term_id", PLANT_PHENOLOGY),
+            ("term_value_id", FRUITING),
+            ("identifications", "most_agree"),
+            ("per_page", "100"),
+            ("interval", "week_of_year"),
+            ("fields", "all"),
+        ]);
+
+        match location {
+            SearchArea::Place(place_id) => {
+                builder = builder.query(&[("place_id", &place_id.to_string())])
+            }
+            SearchArea::BoundingBox(rect) => {
+                builder = builder.query(&[
+                    ("swlat", rect.min().y),
+                    ("swlng", rect.min().x),
+                    ("nelat", rect.max().y),
+                    ("nelng", rect.max().x),
+                ])
+            }
+        }
+
+        let res: Response<Histogram> = builder.send().await?.json().await?;
+        let weeks = match res {
+            Response::Success(res) => {
+                let histogram = res.results.object();
+                histogram.weeks()
+            }
+            Response::Failure(error_response) => {
+                println!("{error_response}");
+                Vec::default()
+            }
+        };
+        let total: u64 = weeks.iter().sum();
+        Ok((total as usize, weeks))
+    }
+
     pub async fn place_search(&self, q: &str) -> Result<Vec<Place>, Error> {
         let taxa_endpoint = API_BASE_URL.join("places")?;
         let res: Response<Place> = self
@@ -397,7 +456,7 @@ impl Display for Place {
 
 #[cfg(test)]
 mod test {
-    use crate::{Response, Taxon};
+    use crate::{Histogram, Response, Taxon};
 
     #[test]
     fn test_deserialization() {
@@ -408,5 +467,22 @@ mod test {
             serde_json::from_str(GOOD).expect("Failed to parse GOOD");
         let _bad_response: Response<Taxon> =
             serde_json::from_str(BAD).expect("Failed to parse BAD");
+    }
+
+    #[test]
+    fn test_histogram() {
+        const RESPONSE: &str = r#"{"total_results":53,"page":1,"per_page":53,"results":{"week_of_year":{"1":0,"2":0,"3":0,"4":0,"5":0,"6":0,"7":0,"8":0,"9":0,"10":0,"11":0,"12":0,"13":0,"14":0,"15":0,"16":0,"17":0,"18":0,"19":0,"20":0,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0,"31":0,"32":1,"33":4,"34":5,"35":7,"36":5,"37":6,"38":6,"39":4,"40":1,"41":1,"42":1,"43":0,"44":0,"45":0,"46":0,"47":0,"48":0,"49":0,"50":0,"51":0,"52":0,"53":0}}}"#;
+        const EXPECTED: &[u64] = &[
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 1, 4, 5, 7, 5, 6, 6, 4, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        ];
+        let resp: Response<Histogram> =
+            serde_json::from_str(RESPONSE).expect("Failed to parse json");
+        let Response::Success(msg) = resp else {
+            panic!("Expected success");
+        };
+        let obj = msg.results.object();
+        let actual = obj.weeks();
+        assert_eq!(actual, EXPECTED);
     }
 }
