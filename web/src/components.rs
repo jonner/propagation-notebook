@@ -217,8 +217,8 @@ pub async fn harvest_timeline(
 pub async fn origin_badge(origin: Origin, #[default] mut attrs: Attributes) -> topcoat::Result {
     let vals = match origin {
         Origin::Introduced => Some(("introduced", "Introduced")),
+        Origin::Unknown => Some(("unknown", "Unknown origin")),
         Origin::Native => None,
-        _ => None,
     };
     if let Some((klass, text)) = vals {
         view! {
