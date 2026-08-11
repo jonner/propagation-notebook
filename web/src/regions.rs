@@ -9,8 +9,8 @@ use tracing::trace;
 
 use crate::{
     components::{
-        conservation_status_badge, harvest_timeline, leaflet_map, origin_badge, pagination_control,
-        regional_taxa_table,
+        Breadcrumb, breadcrumbs, conservation_status_badge, harvest_timeline, leaflet_map,
+        origin_badge, pagination_control, regional_taxa_table,
     },
     util::{ModifyOffset, PER_PAGE, PageState, Path, RegionId, TaxonId, db},
 };
@@ -114,10 +114,21 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
             Some(N),
         )
         .await?;
+    let items = vec![
+        Breadcrumb {
+            url: Some("/regions".to_string()),
+            text: "Regions".to_string(),
+        },
+        Breadcrumb {
+            url: None,
+            text: region.name.clone(),
+        },
+    ];
     view! {
-        <h1>(&region.name)</h1>
         <div class="flex flex-col gap-6">
-            <section>
+            <hgroup>
+                breadcrumbs(items: items)
+                <h1>"Overview"</h1>
                 <p>(region.notes.as_deref().unwrap_or_default())</p>
                 <nav>
                     <ul>
@@ -136,7 +147,7 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
                         </li>
                     </ul>
                 </nav>
-            </section>
+            </hgroup>
             <section>
                 <h2>"Search"</h2>
                 <form
@@ -203,10 +214,28 @@ pub(crate) async fn harvest_starting(cx: &Cx) -> topcoat::Result {
             None,
         )
         .await?;
+    let items = vec![
+        Breadcrumb {
+            url: Some("/regions".to_string()),
+            text: "Regions".to_string(),
+        },
+        Breadcrumb {
+            url: Some(region.path()),
+            text: region.name,
+        },
+        Breadcrumb {
+            url: None,
+            text: "Starting".to_string(),
+        },
+    ];
     view! {
-        <h1>(&region.name)</h1>
-        <h2>"Taxa beginning to bear fruit"</h2>
-        regional_taxa_table(taxa: &starting_soon)
+        <div class="flex flex-col gap-6">
+            <hgroup>
+                breadcrumbs(items: items)
+                <h1>"Taxa beginning to bear fruit"</h1>
+            </hgroup>
+            regional_taxa_table(taxa: &starting_soon)
+        </div>
     }
 }
 
@@ -230,10 +259,28 @@ pub(crate) async fn harvest_ending(cx: &Cx) -> topcoat::Result {
             Some(10),
         )
         .await?;
+    let items = vec![
+        Breadcrumb {
+            url: Some("/regions".to_string()),
+            text: "Regions".to_string(),
+        },
+        Breadcrumb {
+            url: Some(region.path()),
+            text: region.name,
+        },
+        Breadcrumb {
+            url: None,
+            text: "Ending".to_string(),
+        },
+    ];
     view! {
-        <h1>(&region.name)</h1>
-        <h2>"Last chance to harvest"</h2>
-        regional_taxa_table(taxa: &ending)
+        <div class="flex flex-col gap-6">
+            <hgroup>
+                breadcrumbs(items: items)
+                <h1>"Last chance to harvest"</h1>
+            </hgroup>
+            regional_taxa_table(taxa: &ending)
+        </div>
     }
 }
 
@@ -246,10 +293,24 @@ pub(crate) async fn details(cx: &Cx) -> topcoat::Result {
         .one()
         .exec(&mut db)
         .await?;
-    trace!(?region);
+    let items = vec![
+        Breadcrumb {
+            url: Some("/regions".to_string()),
+            text: "Regions".to_string(),
+        },
+        Breadcrumb {
+            url: Some(region.path()),
+            text: region.name.clone(),
+        },
+        Breadcrumb {
+            url: None,
+            text: "Details".to_string(),
+        },
+    ];
     view! {
         <div class="flex flex-col gap-6">
             <hgroup>
+                breadcrumbs(items: items)
                 <h1>(&region.name)</h1>
                 <p>(region.notes.as_deref().unwrap_or_default())</p>
             </hgroup>
@@ -320,30 +381,51 @@ pub async fn taxa_list(cx: &Cx) -> topcoat::Result {
         )
         .await?;
     let page_state = PageState::new(params.offset, PER_PAGE, total.try_into().unwrap());
+    let items = vec![
+        Breadcrumb {
+            url: Some("/regions".to_string()),
+            text: "Regions".to_string(),
+        },
+        Breadcrumb {
+            url: Some(region.path()),
+            text: region.name.clone(),
+        },
+        Breadcrumb {
+            url: None,
+            text: "Taxa".to_string(),
+        },
+    ];
     view! {
-        <h1>(&region.name)</h1>
-        <section>
-            <h2>"Search"</h2>
-            <form method="get" class="flex w-full md:w-xl">
-                <input
-                    type="text"
-                    name="q"
-                    value=(params.q.as_ref())
-                    placeholder="Search for a taxon"
-                    class="me-2 flex-grow"
-                >
-                <button type="submit">"Search"</button>
-            </form>
-        </section>
-        <section>
-            if page_state.total_pages() > 1 {
-                pagination_control(state: &page_state, params: params)
-            }
-            regional_taxa_table(taxa: &taxa)
-            if page_state.total_pages() > 1 {
-                pagination_control(state: &page_state, params: params)
-            }
-        </section>
+        <div class="flex flex-col gap-6">
+            <hgroup>
+                breadcrumbs(items: items)
+                <h1>(&region.name)</h1>
+            </hgroup>
+            <section>
+                <form method="get" class="flex w-full md:w-xl">
+                    <input
+                        type="text"
+                        name="q"
+                        value=(params.q.as_ref())
+                        placeholder="Search for a taxon"
+                        class="me-2 flex-grow"
+                    >
+                    <button type="submit">"Search"</button>
+                </form>
+            </section>
+            <section>
+                if let Some(q) = params.q.as_ref() && !q.is_empty() {
+                    <h2>(format!("Results for '{q}'"))</h2>
+                }
+                if page_state.total_pages() > 1 {
+                    pagination_control(state: &page_state, params: params)
+                }
+                regional_taxa_table(taxa: &taxa)
+                if page_state.total_pages() > 1 {
+                    pagination_control(state: &page_state, params: params)
+                }
+            </section>
+        </div>
     }
 }
 
