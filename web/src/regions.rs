@@ -122,12 +122,12 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
                 <nav>
                     <ul>
                         <li>
-                            <a href=(format!("/regions/{id}/details"))>
+                            <a href=(format!("/{}/details", region.path()))>
                                 "Region details"
                             </a>
                         </li>
                         <li>
-                            <a href=(format!("/regions/{id}/taxa"))>
+                            <a href=(format!("{}/taxa", region.path()))>
                                 "Full taxon list"
                             </a>
                             " ("
@@ -141,7 +141,7 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
                 <h2>"Search"</h2>
                 <form
                     method="get"
-                    action=(format!("/regions/{id}/taxa"))
+                    action=(format!("/{}/taxa", region.path()))
                     class="flex w-full md:w-xl"
                 >
                     <input
@@ -158,7 +158,11 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
                 regional_taxa_table(
                     taxa: &ending,
                     if total_ending > N.try_into().unwrap_or_default() {
-                        <div><a href=(format!("/regions/{id}/ending"))>"Full list"</a></div>
+                        <div>
+                            <a href=(format!("/{}/ending", region.path()))>
+                                "Full list"
+                            </a>
+                        </div>
                     }
                 )
             </section>
@@ -168,7 +172,9 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
                     taxa: &starting_soon,
                     if total_starting > N.try_into().unwrap_or_default() {
                         <div>
-                            <a href=(format!("/regions/{id}/starting"))>"Full list"</a>
+                            <a href=(format!("/{}/starting", region.path()))>
+                                "Full list"
+                            </a>
                         </div>
                     }
                 )
@@ -254,7 +260,7 @@ pub(crate) async fn details(cx: &Cx) -> topcoat::Result {
             <section>
                 <h2>"Taxa"</h2>
                 <div>
-                    <a href=(format!("./{}/taxa", region.id))>
+                    <a href=(format!("{}/taxa", region.path()))>
                         (region.taxon_statuses.get().len())
                     </a>
                 </div>
