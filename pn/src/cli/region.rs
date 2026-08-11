@@ -98,6 +98,7 @@ pub enum RegionCommands {
     },
     #[command(about = "Modify information about a region", group(clap::ArgGroup::new("modify_fields").args(["name", "geometry_string", "geometry_file", "notes", "category"]).required(true).multiple(true)), alias="edit")]
     Modify {
+        #[arg(help = "A region ID")]
         id: u64,
         #[command(flatten)]
         geometry: GeometryArg,
@@ -110,6 +111,7 @@ pub enum RegionCommands {
     },
     #[command(about = "Remove a region from the database")]
     Remove {
+        #[arg(help = "A region ID")]
         id: u64,
         #[arg(
             short = 'y',
@@ -120,6 +122,7 @@ pub enum RegionCommands {
     },
     #[command(about = "Look up harvest dates from iNaturalist")]
     LookupHarvestDates {
+        #[arg(help = "A region ID")]
         id: u64,
         #[arg(
             short,
@@ -139,7 +142,7 @@ pub enum RegionCommands {
     },
     #[command(about = "Manage taxa for a region")]
     Taxa {
-        #[arg(short, long, help = "ID of a region")]
+        #[arg(short, long, help = "A region ID")]
         region_id: u64,
         #[command(subcommand)]
         command: RegionTaxaCommands,
