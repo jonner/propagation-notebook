@@ -1,4 +1,3 @@
-use std::f64::consts::PI;
 use std::fmt::Display;
 use std::path::PathBuf;
 
@@ -16,7 +15,6 @@ use demand::DemandOption;
 use geo::BoundingRect;
 use geo::ChamberlainDuquetteArea;
 use indicatif::{ProgressBar, ProgressIterator, ProgressStyle};
-use jiff::civil::Date;
 use libpropagation::region::RegionCategory;
 use libpropagation::region::dto::{
     CompactRegion, FullRegion, RegionalTaxonHarvestInfo, RegionalTaxonStatusDetails,
@@ -32,7 +30,6 @@ use libpropagation::{
 };
 use toasty::Db;
 use tracing::debug;
-use tracing::trace;
 
 #[derive(clap::Args, Debug)]
 #[group(required = false, multiple = false)]
@@ -385,11 +382,7 @@ impl RegionCommands {
                             )
                             .await
                             {
-                                Ok(obs_window) => {
-                                    let harvest_window = RegionalHarvestWindow {
-                                        start_doy: Some(obs_window.start_doy),
-                                        end_doy: Some(obs_window.end_doy),
-                                    };
+                                Ok((_total, harvest_window)) => {
                                     RegionalTaxonStatus::update_by_id(fullrts.id)
                                         .harvest_window(&harvest_window)
                                         .exec(db)
@@ -781,16 +774,12 @@ async fn lookup_harvest_dates_interactive(
             .await?;
         inat_taxon
     };
-    let observation_window =
+    let (nsamples, window) =
         query_harvest_window_for_taxon(min_samples, inat_taxon, region, true).await?;
-    let window = RegionalHarvestWindow {
-        start_doy: Some(observation_window.start_doy),
-        end_doy: Some(observation_window.end_doy),
-    };
     if window != rts.harvest_window {
         println!(
             "Based on {} samples, the harvest window for '{}' in region '{}' is [{}]. ",
-            observation_window.nsamples,
+            nsamples,
             taxon.reference(),
             region.reference(),
             window
@@ -840,7 +829,7 @@ async fn query_harvest_window_for_taxon(
     inat_taxon: inaturalist::Taxon,
     region: &Region,
     allow_expansion: bool,
-) -> Result<ObservationWindow, anyhow::Error> {
+) -> Result<(usize, RegionalHarvestWindow), anyhow::Error> {
     let inat = inaturalist::Client::new()?;
     let bounding_box = match &region.geometry {
         Some(value) => {
@@ -867,105 +856,16 @@ async fn query_harvest_window_for_taxon(
     let observation_window = if allow_expansion {
         seed_observation_window_with_expansion(&inat, inat_taxon, loc, *min_samples).await?
     } else {
-        let observations_doy = inat
-            .seed_observations(inat_taxon.id, &loc)
-            .await?
-            .into_iter()
-            .filter_map(|ob| ob.observed_on.map(|d| d.day_of_year()))
-            .collect::<Vec<_>>();
-        if observations_doy.len() < *min_samples {
+        let (total, histogram) = inat.seed_histogram(inat_taxon.id, &loc).await?;
+        if total < *min_samples {
             return Err(anyhow!(
                 "Not enough observations to calculate a harvest window"
             ));
         }
-        let (start, end) = calculate_harvest_window(&observations_doy).await?;
-        ObservationWindow {
-            start_doy: start,
-            end_doy: end,
-            nsamples: observations_doy.len(),
-        }
+        let harvest_window = RegionalHarvestWindow::from_histogram(&histogram).unwrap_or_default();
+        (total, harvest_window)
     };
     Ok(observation_window)
-}
-
-async fn calculate_harvest_window(
-    observations_doy: &[i16],
-) -> Result<(i16, i16), inaturalist::Error> {
-    if observations_doy.is_empty() {
-        return Err(inaturalist::Error::InsufficientObservations(0));
-    }
-
-    let total_count = observations_doy.len();
-    // 2. CALCULATE CIRCULAR MEAN
-    let mut sum_sin = 0.0;
-    let mut sum_cos = 0.0;
-
-    for &day in observations_doy {
-        let angle = (day as f64 / 365.25) * 2.0 * PI;
-        sum_sin += angle.sin();
-        sum_cos += angle.cos();
-    }
-
-    let avg_sin = sum_sin / total_count as f64;
-    let avg_cos = sum_cos / total_count as f64;
-
-    // REPAIRED DIRECTIONAL ANGLE CALCULATION
-    let mut mean_angle = avg_sin.atan2(avg_cos);
-    if mean_angle < 0.0 {
-        mean_angle += 2.0 * PI; // Safely normalizes standard negative radians to 0..2*PI range
-    }
-    let mean_day = ((mean_angle / (2.0 * PI)) * 365.25).round() as i16 % 365;
-
-    let r = (avg_sin.powi(2) + avg_cos.powi(2)).sqrt();
-    let r_clamped = r.clamp(0.001, 1.0);
-    let circ_std_dev_radians = (-2.0 * r_clamped.ln()).sqrt();
-    let std_dev_days = (circ_std_dev_radians / (2.0 * PI)) * 365.25;
-
-    // Use a conservative threshold factor (1.25 to 1.5 dev standard bounds)
-    let threshold_days = (std_dev_days * 1.25).max(14.0);
-
-    trace!("Data Center: Day {}", mean_day);
-    trace!("Data Clustering Strength (R): {:.2}", r);
-    trace!("Calculated Standard Deviation: {:.1} days", std_dev_days);
-    trace!(
-        "Filtering out entries further than {:.1} days from center...",
-        threshold_days
-    );
-
-    // 4. FILTER OUTLIERS USING CIRCULAR DISTANCE
-    let mut valid_days: Vec<i16> = observations_doy
-        .iter()
-        .copied()
-        .filter(|&day| {
-            let diff = (day - mean_day).abs();
-            let circular_distance = diff.min(365 - diff) as f64;
-            circular_distance <= threshold_days
-        })
-        .collect();
-
-    if valid_days.is_empty() {
-        debug!("All observations filtered out as statistical noise.");
-        return Err(inaturalist::Error::InsufficientObservations(0));
-    }
-
-    // 5. CORRECT CHRONOLOGICAL SORTING (WINTER-SAFE)
-    let anchor_day = (mean_day + 182) % 365;
-
-    valid_days.sort_by_key(|&day| {
-        if day > anchor_day {
-            day - anchor_day
-        } else {
-            (day + 365) - anchor_day
-        }
-    });
-
-    Ok((valid_days[0], valid_days[valid_days.len() - 1]))
-}
-
-struct ObservationWindow {
-    pub start_doy: i16,
-    pub end_doy: i16,
-    pub nsamples: usize,
 }
 
 enum MinimumObservationsAction {
@@ -1018,19 +918,14 @@ async fn seed_observation_window_with_expansion(
     taxon: inaturalist::Taxon,
     mut loc: inaturalist::SearchArea,
     min_samples: usize,
-) -> anyhow::Result<ObservationWindow> {
+) -> anyhow::Result<(usize, RegionalHarvestWindow)> {
     tracing::debug!(?taxon, "getting seed observations with expansion");
     let mut taxon = taxon;
     loop {
-        let observations_doy = client
-            .seed_observations(taxon.id, &loc)
-            .await?
-            .into_iter()
-            .filter_map(|ob| ob.observed_on.map(|d| d.day_of_year()))
-            .collect::<Vec<_>>();
+        let (total, histogram) = client.seed_histogram(taxon.id, &loc).await?;
 
-        if observations_doy.len() < min_samples {
-            let (msg, options) = match observations_doy.len() {
+        if total < min_samples {
+            let (msg, options) = match total {
                 0 => (
                     "No observations with seeds found in the current search area.".to_string(),
                     if taxon.parent_id.is_some() {
@@ -1117,25 +1012,8 @@ async fn seed_observation_window_with_expansion(
                 ));
             }
         }
-        let (start, end) = calculate_harvest_window(&observations_doy).await?;
-        debug!(
-            "Harvest dates for {}: {} - {}",
-            taxon.id,
-            Date::default()
-                .with()
-                .day_of_year(start)
-                .build()?
-                .strftime("%b-%d"),
-            Date::default()
-                .with()
-                .day_of_year(end)
-                .build()?
-                .strftime("%b-%d")
-        );
-        break Ok(ObservationWindow {
-            start_doy: start,
-            end_doy: end,
-            nsamples: observations_doy.len(),
-        });
+        let harvest_window = RegionalHarvestWindow::from_histogram(&histogram).unwrap_or_default();
+        debug!("Harvest dates for {}: {}", taxon.id, harvest_window);
+        break Ok((total, harvest_window));
     }
 }
