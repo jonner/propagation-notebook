@@ -354,7 +354,7 @@ impl RegionCommands {
                 } else {
                     let pb = ProgressBar::new(taxa.len() as u64);
                     pb.set_style(ProgressStyle::with_template(
-                        "{wide_bar} {percent}%\nQuerying '{msg}'",
+                        "{wide_bar} {pos}/{len} ({percent})%\nQuerying '{msg}'",
                     )?);
                     pb.set_message("Preparing...");
                     for taxon in taxon_iter.progress_with(pb.clone()) {
