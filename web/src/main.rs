@@ -99,26 +99,26 @@ async fn layout(slot: topcoat::Result) -> topcoat::Result {
                                     <span class="caption">"Regions"</span>
                                 </a>
                             </li>
-                            <li>
-                                <a class="block" href="/propagation">
-                                    icon(
-                                        data: mdi::SPROUT,
-                                        label: "list icon",
-                                        attrs: attributes! { class="icon" }
-                                    )
-                                    <span class="caption">"Propagation Protocols"</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a class="block" href="/about">
-                                    icon(
-                                        data: mdi::ABOUT,
-                                        label: "about icon",
-                                        attrs: attributes! { class="icon" }
-                                    )
-                                    <span class="caption">"About"</span>
-                                </a>
-                            </li>
+                            // <li>
+                            //     <a class="block" href="/propagation">
+                            //         icon(
+                            //             data: mdi::SPROUT,
+                            //             label: "list icon",
+                            //             attrs: attributes! { class="icon" }
+                            //         )
+                            //         <span class="caption">"Propagation Protocols"</span>
+                            //     </a>
+                            // </li>
+                            // <li>
+                            //     <a class="block" href="/about">
+                            //         icon(
+                            //             data: mdi::ABOUT,
+                            //             label: "about icon",
+                            //             attrs: attributes! { class="icon" }
+                            //         )
+                            //         <span class="caption">"About"</span>
+                            //     </a>
+                            // </li>
                         </ul>
                     </nav>
                 </header>
