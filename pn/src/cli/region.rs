@@ -137,6 +137,8 @@ pub enum RegionCommands {
             long_help = "In interactive mode, you may be prompted to update values. In non-interactive mode it only updates taxa that don't yet have a value set."
         )]
         interactive: bool,
+        #[arg(long, help = "Only update taxa with missing harvest dates")]
+        missing: bool,
         #[arg(long, help = "skip the first N taxa")]
         skip: Option<usize>,
     },
@@ -303,20 +305,30 @@ impl RegionCommands {
                 id: region_id,
                 min_samples,
                 interactive,
+                missing,
                 skip,
             } => {
                 let region = Region::filter_by_id(region_id).one().exec(db).await?;
                 // the db querying is such a small part of this overall
                 // algorithm, so get a full list quickly by not including any
                 // child fields and then fetch the full object within the loop
-                let taxa = Taxon::filter(
-                    Taxon::fields()
-                        .regional_statuses()
-                        .any(RegionalTaxonStatus::fields().region_id().eq(region_id)),
-                )
-                .order_by(Taxon::fields().sequence().asc())
-                .exec(db)
-                .await?;
+                let mut filter = RegionalTaxonStatus::fields().region_id().eq(region_id);
+                if *missing {
+                    filter = filter.and(
+                        RegionalTaxonStatus::fields()
+                            .harvest_window()
+                            .end_doy()
+                            .is_none()
+                            .or(RegionalTaxonStatus::fields()
+                                .harvest_window()
+                                .start_doy()
+                                .is_none()),
+                    );
+                }
+                let taxa = Taxon::filter(Taxon::fields().regional_statuses().any(filter))
+                    .order_by(Taxon::fields().sequence().asc())
+                    .exec(db)
+                    .await?;
                 let mut n_updates = 0;
                 let total = taxa.len();
                 let taxon_iter = taxa.iter().skip(skip.unwrap_or_default());
@@ -355,54 +367,45 @@ impl RegionCommands {
                         .exec(db)
                         .await?;
                         let taxon = fullrts.taxon.get();
-                        if fullrts.harvest_window.start_doy.is_none()
-                            && fullrts.harvest_window.end_doy.is_none()
-                        {
-                            pb.set_message(taxon.complete_name.clone());
-                            let inat = inaturalist::Client::new()?;
-                            let inat_taxon = if let Some(id) = taxon.inaturalist_id {
-                                let taxon = inat.taxon_info(id).await?;
-                                Some(taxon)
-                            } else {
-                                let found = find_exact_inat_taxon(taxon, &inat).await?;
-                                if let Some(t) = found.as_ref() {
-                                    Taxon::update_by_id(taxon.id)
-                                        .inaturalist_id(t.id)
-                                        .exec(db)
-                                        .await?;
-                                }
-                                found
-                            };
-                            let Some(inat_taxon) = inat_taxon else {
-                                continue;
-                            };
-
-                            match query_harvest_window_for_taxon(
-                                min_samples,
-                                inat_taxon,
-                                &region,
-                                false,
-                            )
-                            .await
-                            {
-                                Ok((_total, harvest_window)) => {
-                                    RegionalTaxonStatus::update_by_id(fullrts.id)
-                                        .harvest_window(&harvest_window)
-                                        .exec(db)
-                                        .await?;
-                                    n_updates += 1;
-                                    debug!("Updated {} to {}", taxon.reference(), harvest_window)
-                                }
-                                Err(e) => debug!(
-                                    "Failed to calculate a harvest window for {}: {e}",
-                                    fullrts.taxon_id
-                                ),
-                            };
+                        pb.set_message(taxon.complete_name.clone());
+                        let inat = inaturalist::Client::new()?;
+                        let inat_taxon = if let Some(id) = taxon.inaturalist_id {
+                            let taxon = inat.taxon_info(id).await?;
+                            Some(taxon)
                         } else {
-                            debug!(
-                                "Skipping taxon {} as it already has harvest data",
-                                fullrts.taxon_id,
-                            )
+                            let found = find_exact_inat_taxon(taxon, &inat).await?;
+                            if let Some(t) = found.as_ref() {
+                                Taxon::update_by_id(taxon.id)
+                                    .inaturalist_id(t.id)
+                                    .exec(db)
+                                    .await?;
+                            }
+                            found
+                        };
+                        let Some(inat_taxon) = inat_taxon else {
+                            continue;
+                        };
+
+                        match query_harvest_window_for_taxon(
+                            min_samples,
+                            inat_taxon,
+                            &region,
+                            false,
+                        )
+                        .await
+                        {
+                            Ok((_total, harvest_window)) => {
+                                RegionalTaxonStatus::update_by_id(fullrts.id)
+                                    .harvest_window(&harvest_window)
+                                    .exec(db)
+                                    .await?;
+                                n_updates += 1;
+                                debug!("Updated {} to {}", taxon.reference(), harvest_window)
+                            }
+                            Err(e) => debug!(
+                                "Failed to calculate a harvest window for {}: {e}",
+                                fullrts.taxon_id
+                            ),
                         };
                     }
                 }
