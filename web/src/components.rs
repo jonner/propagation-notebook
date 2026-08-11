@@ -325,7 +325,7 @@ pub async fn harvest_table(
                         <div class="w-120">
                             harvest_timeline(window: &rts.harvest_window)
                         </div>
-                        <div class="text-nowrap">
+                        <div class="text-nowrap hidden md:block">
                             if rts.harvest_window.start_doy.is_some()
                                 && rts.harvest_window.end_doy.is_some() {
                                 (rts.harvest_window.to_string())
