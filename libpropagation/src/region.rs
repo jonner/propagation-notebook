@@ -360,6 +360,110 @@ impl RegionalHarvestWindow {
                 .ok()
         })
     }
+
+    // FIXME: error handling
+    pub fn from_histogram(weeks: &[u64]) -> Option<Self> {
+        if weeks.len() < 52 || weeks.len() > 53 {
+            return None;
+        }
+
+        /// Circular Gaussian smoothing.
+        ///
+        /// sigma is measured in weeks. A sigma around 1.0–1.5 works well.
+        fn gaussian_smooth(hist: &[u64], sigma: f64) -> Vec<f64> {
+            let n = hist.len();
+            let radius = (sigma * 3.0).ceil() as isize;
+
+            let mut kernel = Vec::new();
+            let mut norm = 0.0;
+
+            for x in -radius..=radius {
+                let w = (-0.5 * (x as f64 / sigma).powi(2)).exp();
+                kernel.push(w);
+                norm += w;
+            }
+
+            for w in &mut kernel {
+                *w /= norm;
+            }
+
+            (0..n)
+                .map(|i| {
+                    let mut value = 0.0;
+
+                    for (k, &weight) in kernel.iter().enumerate() {
+                        let offset = k as isize - radius;
+
+                        let j = ((i as isize + offset).rem_euclid(n as isize)) as usize;
+
+                        value += hist[j] as f64 * weight;
+                    }
+
+                    value
+                })
+                .collect()
+        }
+
+        /// Finds the shortest contiguous interval containing at least `fraction`
+        /// of the total histogram weight.
+        ///
+        /// The histogram is treated as circular (weeks of the year), so harvest
+        /// seasons that span New Year's are handled correctly.
+        fn harvest_window(weights: &[f64], fraction: f64) -> Option<RegionalHarvestWindow> {
+            assert!(!weights.is_empty());
+            assert!((0.0..=1.0).contains(&fraction));
+
+            let n = weights.len();
+
+            let total: f64 = weights.iter().sum();
+            if total <= 0.0 {
+                return None;
+            }
+
+            let target = total * fraction;
+
+            // Duplicate the histogram so circular windows become linear.
+            let doubled: Vec<f64> = weights.iter().chain(weights.iter()).copied().collect();
+
+            let mut best_start = 0;
+            let mut best_end = 0;
+            let mut best_len = usize::MAX;
+
+            let mut start = 0;
+            let mut sum = 0.0;
+
+            for end in 0..doubled.len() {
+                sum += doubled[end];
+
+                // Never consider windows longer than one full year.
+                while end - start + 1 > n {
+                    sum -= doubled[start];
+                    start += 1;
+                }
+
+                while sum >= target {
+                    let len = end - start;
+
+                    if len < best_len {
+                        best_len = len;
+                        best_start = start;
+                        best_end = end;
+                    }
+
+                    sum -= doubled[start];
+                    start += 1;
+                }
+            }
+
+            Some(RegionalHarvestWindow {
+                start_doy: Some(((best_start % n + 1) as i16) * 7),
+                end_doy: Some(((best_end % n + 1) as i16) * 7),
+            })
+        }
+
+        let smoothed = gaussian_smooth(weeks, 1.2);
+        harvest_window(&smoothed, 0.9)
+    }
 }
 
 impl Display for RegionalHarvestWindow {
