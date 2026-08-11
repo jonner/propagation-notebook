@@ -122,7 +122,7 @@ async fn layout(slot: topcoat::Result) -> topcoat::Result {
                         </ul>
                     </nav>
                 </header>
-                <main class="m-6 flex-grow">(slot?)</main>
+                <main class="m-3 md:m-6 flex-grow">(slot?)</main>
                 <footer class="p-6">
                     "Developed by Jonathon Jongsma"
                     <div class="text-sm text-white/50">

@@ -299,15 +299,18 @@ pub async fn harvest_table(
 ) -> topcoat::Result {
     view! {
         <div
-            class=(class!("flex flex-col gap-6 md:gap-2", attrs.remove("class")))
+            class=(class!(
+                "flex flex-col gap-3 md:grid md:grid-cols-[max-content_auto] md:gap-x-6 md:gap-y-2 md:items-center",
+                attrs.remove("class"),
+            ))
             (attrs)
         >
             for item in items {
                 let name = item.0;
                 let path = &item.1;
                 let rts = item.2;
-                <div class="flex flex-col md:flex-row md:gap-4 w-full">
-                    <div class="flex gap-4 items-center w-full md:w-1/4">
+                <div class="flex flex-col gap-1 md:contents">
+                    <div class="flex gap-3 items-center w-full">
                         <span class="latin"><a href=(path)>(name)</a></span>
                         <div class="flex items-center gap-4">
                             if let Some(origin) = rts.origin {
@@ -331,7 +334,7 @@ pub async fn harvest_table(
                     </div>
                 </div>
             }
-            (child)
+            <div class="md:col-span-2">(child)</div>
         </div>
     }
 }
