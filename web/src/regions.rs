@@ -133,7 +133,7 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
                 <nav>
                     <ul>
                         <li>
-                            <a href=(format!("/{}/details", region.path()))>
+                            <a href=(format!("{}/details", region.path()))>
                                 "Region details"
                             </a>
                         </li>
@@ -152,7 +152,7 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
                 <h2>"Search"</h2>
                 <form
                     method="get"
-                    action=(format!("/{}/taxa", region.path()))
+                    action=(format!("{}/taxa", region.path()))
                     class="flex w-full md:w-xl"
                 >
                     <input
@@ -170,7 +170,7 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
                     taxa: &ending,
                     if total_ending > N.try_into().unwrap_or_default() {
                         <div>
-                            <a href=(format!("/{}/ending", region.path()))>
+                            <a href=(format!("{}/ending", region.path()))>
                                 "Full list"
                             </a>
                         </div>
@@ -183,7 +183,7 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
                     taxa: &starting_soon,
                     if total_starting > N.try_into().unwrap_or_default() {
                         <div>
-                            <a href=(format!("/{}/starting", region.path()))>
+                            <a href=(format!("{}/starting", region.path()))>
                                 "Full list"
                             </a>
                         </div>
