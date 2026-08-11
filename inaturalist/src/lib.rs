@@ -365,6 +365,7 @@ impl Client {
             ("per_page", "100"),
             ("interval", "week_of_year"),
             ("fields", "all"),
+            ("date_field", "observed"),
         ]);
 
         match location {
