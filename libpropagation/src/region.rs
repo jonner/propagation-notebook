@@ -339,9 +339,9 @@ impl RegionalHarvestWindow {
 
     fn start_date(&self) -> Option<String> {
         self.start_doy.and_then(|d| {
-            jiff::civil::Date::default()
+            jiff::Zoned::now()
+                .date()
                 .with()
-                .year(2000)
                 .day_of_year(d)
                 .build()
                 .map(|d| d.strftime("%b %d").to_string())
@@ -351,9 +351,9 @@ impl RegionalHarvestWindow {
 
     fn end_date(&self) -> Option<String> {
         self.end_doy.and_then(|d| {
-            jiff::civil::Date::default()
+            jiff::Zoned::now()
+                .date()
                 .with()
-                .year(2000)
                 .day_of_year(d)
                 .build()
                 .map(|d| d.strftime("%b %d").to_string())
