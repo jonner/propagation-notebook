@@ -456,8 +456,11 @@ impl RegionalHarvestWindow {
             }
 
             Some(RegionalHarvestWindow {
-                start_doy: Some(((best_start % n + 1) as i16) * 7),
-                end_doy: Some(((best_end % n + 1) as i16) * 7),
+                // after finding the best start week and best end week, use the
+                // beginning of the week for the start, and the end of the week
+                // for the end
+                start_doy: Some((((best_start % n) as i16) * 7 + 1).clamp(1, 365)),
+                end_doy: Some((((best_end % n + 1) as i16) * 7).clamp(1, 365)),
             })
         }
 
