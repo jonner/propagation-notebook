@@ -19,8 +19,8 @@ pub enum Error {
     Url(#[from] url::ParseError),
     #[error(transparent)]
     Date(#[from] jiff::Error),
-    #[error("Got an error response from iNaturalist: {0}")]
-    Response(ErrorResponse),
+    #[error(transparent)]
+    Response(#[from] ErrorResponse),
 }
 
 #[derive(Debug, Deserialize)]
@@ -30,18 +30,27 @@ pub enum Response<T> {
     Failure(ErrorResponse),
 }
 
+impl<T> Response<T> {
+    fn into_result(self) -> std::result::Result<ResultsResponse<T>, ErrorResponse> {
+        match self {
+            Response::Success(val) => Ok(val),
+            Response::Failure(val) => Err(val),
+        }
+    }
+}
+
 #[derive(Debug, Deserialize)]
 #[serde(untagged)]
 pub enum ResultValue<T> {
-    Vec(Vec<T>),
+    List(Vec<T>),
     Object(T),
 }
 
 impl<T> ResultValue<T> {
     // panics if value is not a vec
-    pub fn vec(self) -> Vec<T> {
+    pub fn list(self) -> Vec<T> {
         match self {
-            ResultValue::Vec(items) => items,
+            ResultValue::List(items) => items,
             ResultValue::Object(_) => panic!(),
         }
     }
@@ -49,7 +58,7 @@ impl<T> ResultValue<T> {
     // panics if value is not an object
     pub fn object(self) -> T {
         match self {
-            ResultValue::Vec(_) => panic!(),
+            ResultValue::List(_) => panic!(),
             ResultValue::Object(obj) => obj,
         }
     }
@@ -69,16 +78,13 @@ pub struct ErrorResponse {
 
 impl Display for ErrorResponse {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "Error {}:\n{}",
-            self.status,
-            self.errors
-                .iter()
-                .map(|e| e.to_string())
-                .collect::<Vec<_>>()
-                .join("\n")
-        )
+        write!(f, "iNaturalist Error response: {}", self.status,)
+    }
+}
+
+impl std::error::Error for ErrorResponse {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        self.errors.first().map(|e| e as &dyn std::error::Error)
     }
 }
 
@@ -94,6 +100,8 @@ impl Display for ErrorObj {
         write!(f, "{}: {}", self.error_code, self.message)
     }
 }
+
+impl std::error::Error for ErrorObj {}
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct Taxon {
@@ -217,21 +225,16 @@ impl Client {
             .json()
             .await?;
 
-        match res {
-            Response::Success(results_response) => {
-                let results = results_response.results.vec();
-                if results.is_empty() {
-                    Err(Error::TaxonNotFound(
-                        ids.iter()
-                            .map(|i| i.to_string())
-                            .collect::<Vec<_>>()
-                            .join(","),
-                    ))
-                } else {
-                    Ok(results)
-                }
-            }
-            Response::Failure(error_response) => Err(Error::Response(error_response)),
+        let results = res.into_result()?.results.list();
+        if results.is_empty() {
+            Err(Error::TaxonNotFound(
+                ids.iter()
+                    .map(|i| i.to_string())
+                    .collect::<Vec<_>>()
+                    .join(","),
+            ))
+        } else {
+            Ok(results)
         }
     }
 
@@ -247,18 +250,11 @@ impl Client {
             .json()
             .await?;
 
-        let mut val = match res {
-            Response::Success(results_response) => {
-                let results = results_response.results.vec();
-                if results.is_empty() {
-                    Err(Error::TaxonNotFound(taxon_id.to_string()))
-                } else {
-                    Ok(results)
-                }
-            }
-            Response::Failure(error_response) => Err(Error::Response(error_response)),
-        }?;
-        Ok(val.pop().unwrap().default_photo)
+        let mut photos = res.into_result()?.results.list();
+        if photos.is_empty() {
+            return Err(Error::TaxonNotFound(taxon_id.to_string()));
+        }
+        Ok(photos.pop().unwrap().default_photo)
     }
 
     pub async fn taxon_info(&self, taxon_id: u64) -> Result<Taxon, Error> {
@@ -287,10 +283,7 @@ impl Client {
             .json()
             .await?;
 
-        match res {
-            Response::Success(res) => Ok(res.results.vec()),
-            Response::Failure(res) => Err(Error::Response(res)),
-        }
+        Ok(res.into_result()?.results.list())
     }
 
     pub async fn seed_observations(
@@ -329,22 +322,18 @@ impl Client {
 
             let res: Response<Observation> = builder.send().await?.json().await?;
 
-            match res {
-                Response::Success(res) => {
-                    let results = res.results.vec();
-                    if results.is_empty() {
-                        break;
-                    }
-
-                    observations.extend(results);
-
-                    if page * per_page >= res.total_results as usize {
-                        break;
-                    }
-                    page += 1;
-                }
-                Response::Failure(error_response) => println!("{error_response}"),
+            let res = res.into_result()?;
+            let new_obs = res.results.list();
+            if new_obs.is_empty() {
+                break;
             }
+
+            observations.extend(new_obs);
+
+            if page * per_page >= res.total_results as usize {
+                break;
+            }
+            page += 1;
         }
 
         Ok(observations)
@@ -383,16 +372,7 @@ impl Client {
         }
 
         let res: Response<Histogram> = builder.send().await?.json().await?;
-        let weeks = match res {
-            Response::Success(res) => {
-                let histogram = res.results.object();
-                histogram.weeks()
-            }
-            Response::Failure(error_response) => {
-                println!("{error_response}");
-                Vec::default()
-            }
-        };
+        let weeks = res.into_result()?.results.object().weeks();
         let total: u64 = weeks.iter().sum();
         Ok((total as usize, weeks))
     }
@@ -408,10 +388,7 @@ impl Client {
             .json()
             .await?;
 
-        match res {
-            Response::Success(results_response) => Ok(results_response.results.vec()),
-            Response::Failure(error_response) => Err(Error::Response(error_response)),
-        }
+        Ok(res.into_result()?.results.list())
     }
 }
 
