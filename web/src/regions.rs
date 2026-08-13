@@ -258,7 +258,7 @@ pub(crate) async fn harvest_ending(cx: &Cx) -> topcoat::Result {
             Some(OriginFilter::NativeOnly),
             Some(libpropagation::region::HarvestFilter::EndingSoon(10)),
             None,
-            Some(10),
+            None,
         )
         .await?;
     let items = vec![
