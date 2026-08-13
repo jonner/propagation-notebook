@@ -99,7 +99,7 @@ td, th {
 }
 
 .badge {
-  @apply px-1 rounded-lg text-sm font-bold;
+  @apply px-1 rounded-lg text-xs font-bold;
 }
 
 .error, .endangered {
