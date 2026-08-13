@@ -352,7 +352,7 @@ impl RegionCommands {
                         println!();
                     }
                 } else {
-                    let pb = ProgressBar::new(taxa.len() as u64);
+                    let pb = ProgressBar::new(taxon_iter.clone().count() as u64);
                     pb.set_style(ProgressStyle::with_template(
                         "{wide_bar} {pos}/{len} ({percent})%\nQuerying '{msg}'",
                     )?);
