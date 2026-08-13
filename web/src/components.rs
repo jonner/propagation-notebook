@@ -155,60 +155,53 @@ pub async fn propagation_details(procedure: &PropagationProcedure) -> topcoat::R
     }
 }
 
-/// Renders a 52-week harvest window timeline component with week blocks,
-/// active harvest window highlight (and optional peak window), month headers,
-/// and a vertical line showing the current day/week.
+/// Renders a 52-week harvest window timeline component with week blocks, active
+/// harvest window highlight and a vertical line showing the current day/week.
 #[component]
 pub async fn harvest_timeline(
     window: &RegionalHarvestWindow,
-    #[default] current_week: Option<i16>,
+    #[default] current_doy: Option<i16>,
     #[default] attrs: Attributes,
 ) -> topcoat::Result {
-    let cw =
-        current_week.unwrap_or_else(|| jiff::Zoned::now().date().iso_week_date().week().into());
+    let cdoy = current_doy.unwrap_or_else(|| jiff::Zoned::now().date().day_of_year());
+    let inactive_class = window.is_empty().then_some("inactive");
 
-    // Compute left offset percentage for current week marker
-    let marker_left_pct = ((cw as f32 - 0.5) / 52.0) * 100.0;
+    // Compute left offset percentage for current date marker ignoring leap days
+    let marker_left_pct = (f32::from(cdoy - 1) / 365.0) * 100.0;
 
     view! {
-        <div class="relative w-full select-none text-xs font-sans" (attrs)>
-            <div class="relative w-full">
-                // <!-- 52 Week Blocks Grid -->
-                <div
-                    class="grid grid-cols-[repeat(52,minmax(0,1fr))] gap-[1px] min-h-[1em]"
-                >
-                    for w in 1..=52 {
-                        {
-                            let in_window = if let (Some(start_week), Some(end_week)) = (
-                                window.start_week(),
-                                window.end_week(),
-                            ) {
-                                if start_week <= end_week {
-                                    w >= start_week && w <= end_week
-                                } else {
-                                    w >= start_week || w <= end_week
-                                }
-                            } else {
-                                false
-                            };
-
-                            let bg_class = if in_window {
-                                "bg-leaf/50 border border-leaf/60"
-                            } else {
-                                "bg-brown/20 border border-brown/22"
-                            };
-
-                            <div class=(format!("h-full rounded-[2px] {}", bg_class))></div>
+        <div
+            class=(class!(
+                "relative flex items-center gap-0 items-stretch w-full h-full select-none min-h-[1em]",
+                inactive_class,
+            ))
+            (attrs)
+        >
+            for w in 1..=52 {
+                {
+                    let in_window = if let (Some(start_week), Some(end_week)) = (
+                        window.start_week(),
+                        window.end_week(),
+                    ) {
+                        if start_week <= end_week {
+                            w >= start_week && w <= end_week
+                        } else {
+                            w >= start_week || w <= end_week
                         }
-                    }
-                </div>
+                    } else {
+                        false
+                    };
 
-                // <!-- Current Week Vertical Indicator Marker -->
-                <div
-                    class="absolute -top-1 -bottom-1 w-[2px] bg-brown z-20"
-                    style=(format!("left: {:.2}%;", marker_left_pct))
-                ></div>
-            </div>
+                    let bg_class = if in_window { "bg-leaf/50" } else { "bg-brown/20" };
+
+                    <div class=(class!("flex-grow", bg_class))></div>
+                }
+            }
+            // Current date vertical indicator
+            <div
+                class="absolute top-0 bottom-0 w-[2px] bg-mallard z-20"
+                style=(format!("left: {:.2}%;", marker_left_pct))
+            ></div>
         </div>
     }
 }
@@ -321,8 +314,8 @@ pub async fn harvest_table(
                             }
                         </div>
                     </div>
-                    <div class="flex items-center gap-x-6">
-                        <div class="w-120">
+                    <div class="flex h-full items-center gap-x-6">
+                        <div class="h-full w-120">
                             harvest_timeline(window: &rts.harvest_window)
                         </div>
                         <div class="text-nowrap hidden md:block">
