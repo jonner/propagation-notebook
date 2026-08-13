@@ -166,12 +166,13 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
             </section>
             <section>
                 <h2>"Last chance to harvest"</h2>
+                let remaining = total_ending.saturating_sub(N.try_into().unwrap_or_default());
                 regional_taxa_table(
                     taxa: &ending,
-                    if total_ending > N.try_into().unwrap_or_default() {
+                    if remaining > 0 {
                         <div>
                             <a href=(format!("{}/ending", region.path()))>
-                                "Full list"
+                                (format!("... and {} more", remaining))
                             </a>
                         </div>
                     }
@@ -179,12 +180,13 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
             </section>
             <section>
                 <h2>"Beginning to bear fruit"</h2>
+                let remaining = total_starting.saturating_sub(N.try_into().unwrap_or_default());
                 regional_taxa_table(
                     taxa: &starting_soon,
-                    if total_starting > N.try_into().unwrap_or_default() {
+                    if remaining > 0 {
                         <div>
                             <a href=(format!("{}/starting", region.path()))>
-                                "Full list"
+                                (format!("... and {} more", remaining))
                             </a>
                         </div>
                     }
