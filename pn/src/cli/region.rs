@@ -20,7 +20,7 @@ use libpropagation::region::dto::{
     CompactRegion, FullRegion, RegionalTaxonHarvestInfo, RegionalTaxonStatusDetails,
     RegionalTaxonStatusDetailsNoRegion, RegionalTaxonStatusHarvest,
 };
-use libpropagation::taxonomy::TaxonIdentifier;
+use libpropagation::taxonomy::{Rank, TaxonIdentifier};
 use libpropagation::{
     region::{
         ConservationStatus, Origin, Region, RegionalHarvestWindow, RegionalTaxonStatus,
@@ -474,6 +474,8 @@ pub enum RegionTaxaCommands {
         ready_to_harvest: bool,
         #[arg(long, help = "Show only native species")]
         native: bool,
+        #[arg(long, value_enum, help = "Show only species of the given rank")]
+        rank: Option<Rank>,
     },
     #[command(about = "Show regional information about a taxon")]
     Show {
@@ -608,6 +610,7 @@ impl RegionTaxaCommands {
                 missing_dates,
                 ready_to_harvest,
                 native,
+                rank,
             } => {
                 let day = jiff::Zoned::now().date().day_of_year();
                 // include species that start harvesting in the next week
@@ -664,6 +667,9 @@ impl RegionTaxaCommands {
                 } else {
                     filter
                 };
+                if let Some(rank) = rank {
+                    filter = filter.and(RegionalTaxonStatus::fields().taxon().rank().eq(rank));
+                }
                 let taxa = Taxon::filter(Taxon::fields().regional_statuses().any(filter))
                     .include(Taxon::fields().regional_statuses())
                     .order_by(Taxon::fields().sequence().asc())

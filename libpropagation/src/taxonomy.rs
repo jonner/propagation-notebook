@@ -22,7 +22,9 @@ use crate::{
     region::RegionalTaxonStatus,
 };
 
-#[derive(Debug, Clone, Copy, toasty::Embed, strum::Display, PartialEq, Serialize)]
+#[derive(
+    Debug, Clone, Copy, toasty::Embed, strum::Display, PartialEq, Serialize, clap::ValueEnum,
+)]
 pub enum Rank {
     #[column(variant = 0)]
     Unknown,
