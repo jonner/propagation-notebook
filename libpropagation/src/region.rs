@@ -542,7 +542,7 @@ pub struct RegionalTaxonStatus {
 }
 
 #[derive(thiserror::Error, Debug)]
-pub enum UpdateHarvestInfoError {
+pub enum QueryHarvestError {
     #[error(transparent)]
     Inaturalist(#[from] inaturalist::Error),
     #[error(transparent)]
@@ -559,7 +559,7 @@ impl RegionalTaxonStatus {
     pub async fn query_harvest_info(
         &self,
         db: &mut toasty::Db,
-    ) -> Result<(usize, RegionalHarvestWindow), UpdateHarvestInfoError> {
+    ) -> Result<(usize, RegionalHarvestWindow), QueryHarvestError> {
         let taxon = self.taxon.get();
         let inat = inaturalist::Client::new()?;
         let inat_taxon = if let Some(id) = taxon.inaturalist_id {
@@ -576,7 +576,7 @@ impl RegionalTaxonStatus {
             found
         };
         let Some(inat_taxon) = inat_taxon else {
-            return Err(UpdateHarvestInfoError::NoInaturalistTaxon);
+            return Err(QueryHarvestError::NoInaturalistTaxon);
         };
 
         self.query_harvest_window_internal(inat_taxon).await
@@ -585,14 +585,14 @@ impl RegionalTaxonStatus {
     async fn query_harvest_window_internal(
         &self,
         inat_taxon: inaturalist::Taxon,
-    ) -> Result<(usize, RegionalHarvestWindow), UpdateHarvestInfoError> {
+    ) -> Result<(usize, RegionalHarvestWindow), QueryHarvestError> {
         let inat = inaturalist::Client::new()?;
         let rect = self.region.get().bounding_box()?;
         let loc = inaturalist::SearchArea::BoundingBox(rect);
         let observation_window = {
             let (total, histogram) = inat.seed_histogram(inat_taxon.id, &loc).await?;
             if total < 2 {
-                return Err(UpdateHarvestInfoError::InsufficientSamples);
+                return Err(QueryHarvestError::InsufficientSamples);
             }
             let harvest_window =
                 RegionalHarvestWindow::from_histogram(&histogram).unwrap_or_default();
