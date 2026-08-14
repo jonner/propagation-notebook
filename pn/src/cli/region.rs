@@ -2,7 +2,7 @@ use std::fmt::Display;
 use std::path::PathBuf;
 
 use crate::cli::OutputFormat;
-use crate::util::dialog::{confirm, input, select};
+use crate::util::dialog::{confirm, select};
 use crate::util::{IndicatifImportProgress, interactive_select_inaturalist_taxon};
 use crate::views::regions::{
     RegionDetailsView, RegionalHarvestDateListView, RegionalTaxonStatusDetailsView,
@@ -12,8 +12,8 @@ use crate::views::taxa::RegionalTaxaListView;
 use crate::views::{JsonView, YamlView};
 use anyhow::anyhow;
 use demand::DemandOption;
-use geo::BoundingRect;
 use geo::ChamberlainDuquetteArea;
+use inaturalist::SearchArea;
 use indicatif::{ProgressBar, ProgressIterator, ProgressStyle};
 use libpropagation::region::RegionCategory;
 use libpropagation::region::dto::{
@@ -343,7 +343,7 @@ impl RegionCommands {
                         .exec(db)
                         .await?;
                         println!("{}/{total}", i + 1 + skip.unwrap_or_default());
-                        if lookup_harvest_dates_interactive(db, &mut fullrts, min_samples)
+                        if interactive_harvest_window(db, &mut fullrts, min_samples)
                             .await
                             .is_ok()
                         {
@@ -743,14 +743,14 @@ impl RegionTaxaCommands {
                         .one()
                         .exec(db)
                         .await?;
-                lookup_harvest_dates_interactive(db, &mut rts, min_samples).await?;
+                interactive_harvest_window(db, &mut rts, min_samples).await?;
             }
         }
         Ok(())
     }
 }
 
-async fn lookup_harvest_dates_interactive(
+async fn interactive_harvest_window(
     db: &mut Db,
     rts: &mut RegionalTaxonStatus,
     min_samples: &usize,
@@ -773,8 +773,18 @@ async fn lookup_harvest_dates_interactive(
             .await?;
         inat_taxon
     };
-    let (nsamples, window) =
-        query_harvest_window_for_taxon(min_samples, inat_taxon, region, true).await?;
+
+    let (nsamples, window) = {
+        let inat = inaturalist::Client::new()?;
+        interactive_harvest_window_with_expansion(
+            &inat,
+            inat_taxon,
+            SearchArea::BoundingBox(region.bounding_box()?),
+            *min_samples,
+        )
+        .await?
+    };
+
     if window != rts.harvest_window {
         println!(
             "Based on {} samples, the harvest window for '{}' in region '{}' is [{}]. ",
@@ -823,50 +833,6 @@ async fn load_and_show_regional_taxon_details(
     Ok(())
 }
 
-async fn query_harvest_window_for_taxon(
-    min_samples: &usize,
-    inat_taxon: inaturalist::Taxon,
-    region: &Region,
-    allow_expansion: bool,
-) -> Result<(usize, RegionalHarvestWindow), anyhow::Error> {
-    let inat = inaturalist::Client::new()?;
-    let bounding_box = match &region.geometry {
-        Some(value) => {
-            let geom: geo::Geometry = value.value.clone().try_into()?;
-            geom.bounding_rect()
-        }
-        None => None,
-    };
-    let loc = match bounding_box {
-        Some(rect) => inaturalist::SearchArea::BoundingBox(rect),
-        None => {
-            let options = inat
-                .place_search(
-                    &input("Search for a place on inaturalist that represents this region:")
-                        .run()?,
-                )
-                .await?;
-            let selected = select("Please select one of the following iNaturalist places:")
-                .options(options.into_iter().map(DemandOption::new).collect())
-                .run()?;
-            inaturalist::SearchArea::Place(selected.id)
-        }
-    };
-    let observation_window = if allow_expansion {
-        seed_observation_window_with_expansion(&inat, inat_taxon, loc, *min_samples).await?
-    } else {
-        let (total, histogram) = inat.seed_histogram(inat_taxon.id, &loc).await?;
-        if total < *min_samples {
-            return Err(anyhow!(
-                "Not enough observations to calculate a harvest window"
-            ));
-        }
-        let harvest_window = RegionalHarvestWindow::from_histogram(&histogram).unwrap_or_default();
-        (total, harvest_window)
-    };
-    Ok(observation_window)
-}
-
 enum MinimumObservationsAction {
     ExpandSearch,
     UseParentTaxon,
@@ -904,20 +870,20 @@ async fn test_seed_observation_window_with_expansion() {
         geo::coord! { x: -97.239651, y: 43.499269 }, // Southwest corner
         geo::coord! { x: -89.490365, y: 49.384687 }, // Northeast corner
     );
-    let _obs = seed_observation_window_with_expansion(
+    let _obs = interactive_harvest_window_with_expansion(
         &client,
         inat_taxon,
-        inaturalist::SearchArea::BoundingBox(mn_bbox),
+        SearchArea::BoundingBox(mn_bbox),
         10,
     )
     .await
     .unwrap();
 }
 
-async fn seed_observation_window_with_expansion(
+async fn interactive_harvest_window_with_expansion(
     client: &inaturalist::Client,
     taxon: inaturalist::Taxon,
-    mut loc: inaturalist::SearchArea,
+    mut loc: SearchArea,
     min_samples: usize,
 ) -> anyhow::Result<(usize, RegionalHarvestWindow)> {
     tracing::debug!(?taxon, "getting seed observations with expansion");
@@ -970,8 +936,8 @@ async fn seed_observation_window_with_expansion(
                 match selected {
                     MinimumObservationsAction::ExpandSearch => {
                         let newloc = match &loc {
-                            inaturalist::SearchArea::Place(_) => todo!(),
-                            inaturalist::SearchArea::BoundingBox(rect) => {
+                            SearchArea::Place(_) => todo!(),
+                            SearchArea::BoundingBox(rect) => {
                                 let mut newrect = *rect;
                                 newrect.set_min(geo::Coord {
                                     x: rect.min().x - rect.width() / 10.0,
@@ -990,7 +956,7 @@ async fn seed_observation_window_with_expansion(
                                 println!(
                                     "Expanding search area from {old_area:.1} km^2 to {new_area:.2} km^2",
                                 );
-                                inaturalist::SearchArea::BoundingBox(newrect)
+                                SearchArea::BoundingBox(newrect)
                             }
                         };
                         loc = newloc;
