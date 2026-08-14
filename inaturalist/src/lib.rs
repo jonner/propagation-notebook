@@ -185,7 +185,7 @@ static API_BASE_URL: LazyLock<reqwest::Url> = LazyLock::new(|| {
 pub struct Client(reqwest_middleware::ClientWithMiddleware);
 
 impl Client {
-    pub fn new() -> Result<Self, reqwest::Error> {
+    pub fn new() -> Result<Self, Error> {
         let mut default_headers = HeaderMap::new();
         default_headers.insert(
             "User-Agent",
