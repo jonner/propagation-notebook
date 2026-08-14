@@ -308,7 +308,6 @@ impl RegionCommands {
                 missing,
                 skip,
             } => {
-                let region = Region::filter_by_id(region_id).one().exec(db).await?;
                 // the db querying is such a small part of this overall
                 // algorithm, so get a full list quickly by not including any
                 // child fields and then fetch the full object within the loop
