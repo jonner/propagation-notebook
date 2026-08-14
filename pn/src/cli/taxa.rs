@@ -15,7 +15,7 @@ use tracing::trace;
 
 use crate::{
     cli::OutputFormat,
-    util::{IndicatifImportProgress, find_exact_inat_taxon},
+    util::IndicatifImportProgress,
     views::{
         JsonView, YamlView,
         taxa::{RegionalTaxaListView, TaxaListView, TaxaSearchResultsView, TaxonDetailsView},
@@ -389,7 +389,7 @@ async fn update_photo_for_taxon(db: &mut Db, taxon: Taxon) -> Result<(), anyhow:
     let inat = inaturalist::Client::new()?;
     let inat_id = match taxon.inaturalist_id {
         Some(id) => Ok(id),
-        None => match find_exact_inat_taxon(&taxon, &inat).await? {
+        None => match taxon.find_exact_inat_taxon(&inat).await? {
             Some(itaxon) => {
                 trace!(?taxon.complete_name, ?itaxon, "Updating inaturalist ID");
                 Taxon::update_by_id(taxon.id)

@@ -3,7 +3,7 @@ use std::path::PathBuf;
 
 use crate::cli::OutputFormat;
 use crate::util::dialog::{confirm, input, select};
-use crate::util::{IndicatifImportProgress, find_exact_inat_taxon, inat_taxon_for_taxon};
+use crate::util::{IndicatifImportProgress, inat_taxon_for_taxon};
 use crate::views::regions::{
     RegionDetailsView, RegionalHarvestDateListView, RegionalTaxonStatusDetailsView,
     RegionalTaxonStatusHarvestView, RegionsListView,
