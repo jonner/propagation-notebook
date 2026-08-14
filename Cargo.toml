@@ -36,7 +36,7 @@ tabled = "0.21.0"
 thiserror = "2.0.18"
 toasty = { version = "0.10.0", features = ["jiff", "sqlite", "serde"] }
 toasty-cli = "0.10.0"
-tokio = { version = "1.52.1", features = ["rt-multi-thread"] }
+tokio = { version = "1.52.1", features = ["rt-multi-thread", "fs"] }
 tracing = "0.1.44"
 tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
 url = { version = "2.5.8", features = ["serde"] }
