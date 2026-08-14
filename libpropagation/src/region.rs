@@ -1,5 +1,6 @@
 use std::{collections::HashMap, fmt::Display};
 
+use geo::BoundingRect;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 use toasty::{Db, Deferred};
@@ -512,6 +513,80 @@ pub struct RegionalTaxonStatus {
     pub created_at: jiff::Timestamp,
     #[auto]
     pub updated_at: jiff::Timestamp,
+}
+
+#[derive(thiserror::Error, Debug)]
+pub enum UpdateHarvestInfoError {
+    #[error(transparent)]
+    Inaturalist(#[from] inaturalist::Error),
+    #[error(transparent)]
+    Db(#[from] toasty::Error),
+    #[error("Unable to find an iNaturalist Taxon")]
+    NoInaturalistTaxon,
+    #[error("Insufficient observations to calculate a harvest window")]
+    InsufficientSamples,
+    #[error("Region has no defined geometry")]
+    RegionGeometry,
+}
+
+impl RegionalTaxonStatus {
+    pub async fn query_harvest_info(
+        &self,
+        db: &mut toasty::Db,
+    ) -> Result<(usize, RegionalHarvestWindow), UpdateHarvestInfoError> {
+        let taxon = self.taxon.get();
+        let inat = inaturalist::Client::new()?;
+        let inat_taxon = if let Some(id) = taxon.inaturalist_id {
+            let taxon = inat.taxon_info(id).await?;
+            Some(taxon)
+        } else {
+            let found = taxon.find_exact_inat_taxon(&inat).await?;
+            if let Some(t) = found.as_ref() {
+                Taxon::update_by_id(taxon.id)
+                    .inaturalist_id(t.id)
+                    .exec(db)
+                    .await?;
+            }
+            found
+        };
+        let Some(inat_taxon) = inat_taxon else {
+            return Err(UpdateHarvestInfoError::NoInaturalistTaxon);
+        };
+
+        self.query_harvest_window_internal(inat_taxon).await
+    }
+
+    async fn query_harvest_window_internal(
+        &self,
+        inat_taxon: inaturalist::Taxon,
+    ) -> Result<(usize, RegionalHarvestWindow), UpdateHarvestInfoError> {
+        let inat = inaturalist::Client::new()?;
+        let bb = match &self.region.get().geometry {
+            Some(value) => {
+                let geom: geo::Geometry = value
+                    .value
+                    .clone()
+                    .try_into()
+                    .map_err(|_| UpdateHarvestInfoError::RegionGeometry)?;
+                Ok(geom.bounding_rect())
+            }
+            None => Err(UpdateHarvestInfoError::RegionGeometry),
+        }?;
+        let Some(rect) = bb else {
+            return Err(UpdateHarvestInfoError::RegionGeometry);
+        };
+        let loc = inaturalist::SearchArea::BoundingBox(rect);
+        let observation_window = {
+            let (total, histogram) = inat.seed_histogram(inat_taxon.id, &loc).await?;
+            if total < 2 {
+                return Err(UpdateHarvestInfoError::InsufficientSamples);
+            }
+            let harvest_window =
+                RegionalHarvestWindow::from_histogram(&histogram).unwrap_or_default();
+            (total, harvest_window)
+        };
+        Ok(observation_window)
+    }
 }
 
 #[derive(Debug, Clone, toasty::Model)]
