@@ -3,7 +3,7 @@ use std::path::PathBuf;
 
 use crate::cli::OutputFormat;
 use crate::util::dialog::{confirm, input, select};
-use crate::util::{IndicatifImportProgress, inat_taxon_for_taxon};
+use crate::util::{IndicatifImportProgress, interactive_select_inaturalist_taxon};
 use crate::views::regions::{
     RegionDetailsView, RegionalHarvestDateListView, RegionalTaxonStatusDetailsView,
     RegionalTaxonStatusHarvestView, RegionsListView,
@@ -766,7 +766,7 @@ async fn lookup_harvest_dates_interactive(
         println!("Using iNaturalist taxon '{}'", taxon);
         taxon
     } else {
-        let inat_taxon = inat_taxon_for_taxon(taxon, &inat).await?;
+        let inat_taxon = interactive_select_inaturalist_taxon(taxon, &inat).await?;
         Taxon::update_by_id(taxon.id)
             .inaturalist_id(inat_taxon.id)
             .exec(db)
@@ -897,7 +897,9 @@ async fn test_seed_observation_window_with_expansion() {
         .await
         .unwrap();
     let client = inaturalist::Client::new().unwrap();
-    let inat_taxon = inat_taxon_for_taxon(&taxon, &client).await.unwrap();
+    let inat_taxon = interactive_select_inaturalist_taxon(&taxon, &client)
+        .await
+        .unwrap();
     let mn_bbox = geo::Rect::new(
         geo::coord! { x: -97.239651, y: 43.499269 }, // Southwest corner
         geo::coord! { x: -89.490365, y: 49.384687 }, // Northeast corner

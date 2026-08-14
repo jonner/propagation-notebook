@@ -41,7 +41,7 @@ impl ImportProgressReporter for IndicatifImportProgress {
 }
 
 // assumes loaded vernacular names
-pub async fn inat_taxon_for_taxon(
+pub async fn interactive_select_inaturalist_taxon(
     taxon: &Taxon,
     client: &inaturalist::Client,
 ) -> anyhow::Result<inaturalist::Taxon> {
@@ -164,7 +164,7 @@ pub mod dialog {
 mod test {
     use libpropagation::taxonomy::Taxon;
 
-    use crate::util::inat_taxon_for_taxon;
+    use crate::util::interactive_select_inaturalist_taxon;
 
     #[tokio::test]
     async fn test_inat_taxon() {
@@ -177,7 +177,7 @@ mod test {
             .await
             .unwrap();
         let client = inaturalist::Client::new().unwrap();
-        let inat_taxon = inat_taxon_for_taxon(&taxon, &client).await.unwrap();
+        let inat_taxon = interactive_select_inaturalist_taxon(&taxon, &client).await.unwrap();
         tracing::debug!(?inat_taxon);
     }
 }
