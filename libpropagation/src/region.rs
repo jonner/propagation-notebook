@@ -255,6 +255,10 @@ impl Region {
         }
         Ok((total, query.exec(db).await?))
     }
+
+    fn geometry(&self) -> Option<geojson::Geometry> {
+        self.geometry.as_ref().map(|jsonvalue| jsonvalue.0.clone())
+    }
 }
 
 fn window_includes(doy: i16) -> toasty::stmt::Expr<bool> {
@@ -561,20 +565,12 @@ impl RegionalTaxonStatus {
         inat_taxon: inaturalist::Taxon,
     ) -> Result<(usize, RegionalHarvestWindow), UpdateHarvestInfoError> {
         let inat = inaturalist::Client::new()?;
-        let bb = match &self.region.get().geometry {
-            Some(value) => {
-                let geom: geo::Geometry = value
-                    .value
-                    .clone()
-                    .try_into()
-                    .map_err(|_| UpdateHarvestInfoError::RegionGeometry)?;
-                Ok(geom.bounding_rect())
-            }
-            None => Err(UpdateHarvestInfoError::RegionGeometry),
-        }?;
-        let Some(rect) = bb else {
-            return Err(UpdateHarvestInfoError::RegionGeometry);
-        };
+        let rect = self
+            .region
+            .get()
+            .geometry()
+            .and_then(|geo| geo.bounding_rect())
+            .ok_or_else(|| UpdateHarvestInfoError::RegionGeometry)?;
         let loc = inaturalist::SearchArea::BoundingBox(rect);
         let observation_window = {
             let (total, histogram) = inat.seed_histogram(inat_taxon.id, &loc).await?;
