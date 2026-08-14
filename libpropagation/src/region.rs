@@ -551,8 +551,8 @@ pub enum UpdateHarvestInfoError {
     NoInaturalistTaxon,
     #[error("Insufficient observations to calculate a harvest window")]
     InsufficientSamples,
-    #[error("Region has no defined geometry")]
-    RegionGeometry,
+    #[error(transparent)]
+    Geometry(#[from] RegionGeometryError),
 }
 
 impl RegionalTaxonStatus {
@@ -587,12 +587,7 @@ impl RegionalTaxonStatus {
         inat_taxon: inaturalist::Taxon,
     ) -> Result<(usize, RegionalHarvestWindow), UpdateHarvestInfoError> {
         let inat = inaturalist::Client::new()?;
-        let rect = self
-            .region
-            .get()
-            .geometry()
-            .and_then(|geo| geo.bounding_rect())
-            .ok_or_else(|| UpdateHarvestInfoError::RegionGeometry)?;
+        let rect = self.region.get().bounding_box()?;
         let loc = inaturalist::SearchArea::BoundingBox(rect);
         let observation_window = {
             let (total, histogram) = inat.seed_histogram(inat_taxon.id, &loc).await?;
@@ -675,7 +670,7 @@ mod file {
             let taxa: Vec<TaxonInfo> = taxa.into_iter().map(|ts| (&ts).into()).collect();
             Self {
                 name: value.name.clone(),
-                geometry: value.geometry.as_ref().map(|val| val.0.clone()),
+                geometry: value.geometry(),
                 category: value.category,
                 taxa,
                 notes: value.notes.clone(),
