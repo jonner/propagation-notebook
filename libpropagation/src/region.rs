@@ -256,11 +256,11 @@ impl Region {
         Ok((total, query.exec(db).await?))
     }
 
-    fn geometry(&self) -> Option<geojson::Geometry> {
+    pub fn geometry(&self) -> Option<geojson::Geometry> {
         self.geometry.as_ref().map(|jsonvalue| jsonvalue.0.clone())
     }
 
-    fn bounding_box(&self) -> Result<geo::Rect, RegionGeometryError> {
+    pub fn bounding_box(&self) -> Result<geo::Rect, RegionGeometryError> {
         self.geometry()
             .ok_or(RegionGeometryError::NoRegionGeometry)
             .and_then(|jsongeo| {
@@ -579,26 +579,10 @@ impl RegionalTaxonStatus {
             return Err(QueryHarvestError::NoInaturalistTaxon);
         };
 
-        self.query_harvest_window_internal(inat_taxon).await
-    }
-
-    async fn query_harvest_window_internal(
-        &self,
-        inat_taxon: inaturalist::Taxon,
-    ) -> Result<(usize, RegionalHarvestWindow), QueryHarvestError> {
-        let inat = inaturalist::Client::new()?;
-        let rect = self.region.get().bounding_box()?;
-        let loc = inaturalist::SearchArea::BoundingBox(rect);
-        let observation_window = {
-            let (total, histogram) = inat.seed_histogram(inat_taxon.id, &loc).await?;
-            if total < 2 {
-                return Err(QueryHarvestError::InsufficientSamples);
-            }
-            let harvest_window =
-                RegionalHarvestWindow::from_histogram(&histogram).unwrap_or_default();
-            (total, harvest_window)
-        };
-        Ok(observation_window)
+        let loc = inaturalist::SearchArea::BoundingBox(self.region.get().bounding_box()?);
+        let (total, histogram) = inat.seed_histogram(inat_taxon.id, &loc).await?;
+        let harvest_window = RegionalHarvestWindow::from_histogram(&histogram).unwrap_or_default();
+        Ok((total, harvest_window))
     }
 }
 
