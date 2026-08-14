@@ -566,7 +566,7 @@ impl RegionalTaxonStatus {
             let taxon = inat.taxon_info(id).await?;
             Some(taxon)
         } else {
-            let found = taxon.find_exact_inat_taxon(&inat).await?;
+            let found = taxon.find_inaturalist_taxon(&inat).await?;
             if let Some(t) = found.as_ref() {
                 Taxon::update_by_id(taxon.id)
                     .inaturalist_id(t.id)

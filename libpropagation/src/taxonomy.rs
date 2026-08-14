@@ -397,11 +397,10 @@ impl Taxon {
             ))
     }
 
-    pub async fn find_exact_inat_taxon(
+    pub async fn find_inaturalist_taxon(
         &self,
         inat: &inaturalist::Client,
     ) -> Result<Option<inaturalist::Taxon>, inaturalist::Error> {
-        let mut found = None;
         let possible_matches = inat
             .taxon_search(&self.names())
             .await?
@@ -413,12 +412,11 @@ impl Taxon {
             for possibility in possible_matches {
                 if self.matches(&possibility) {
                     tracing::debug!("Using {} for {}", possibility.name, self.reference());
-                    found = Some(possibility);
-                    break;
+                    return Ok(Some(possibility));
                 }
             }
         }
-        Ok(found)
+        Ok(None)
     }
 }
 
