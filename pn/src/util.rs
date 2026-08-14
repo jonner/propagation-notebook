@@ -2,7 +2,6 @@ use anyhow::anyhow;
 use demand::DemandOption;
 use indicatif::ProgressBar;
 use libpropagation::{ImportProgressReporter, taxonomy::Taxon};
-use tracing::{debug, trace};
 
 use crate::util::dialog::select;
 
@@ -39,30 +38,6 @@ impl ImportProgressReporter for IndicatifImportProgress {
             pb.finish_and_clear();
         }
     }
-}
-
-pub async fn find_exact_inat_taxon(
-    taxon: &Taxon,
-    inat: &inaturalist::Client,
-) -> Result<Option<inaturalist::Taxon>, anyhow::Error> {
-    let mut found = None;
-    let possible_matches = inat
-        .taxon_search(&taxon.names())
-        .await?
-        .into_iter()
-        .filter(|t| t.is_active)
-        .collect::<Vec<_>>();
-    trace!(?taxon, ?possible_matches);
-    if !possible_matches.is_empty() {
-        for possibility in possible_matches {
-            if taxon.matches(&possibility) {
-                debug!("Using {} for {}", possibility.name, taxon.reference());
-                found = Some(possibility);
-                break;
-            }
-        }
-    }
-    Ok(found)
 }
 
 // assumes loaded vernacular names
