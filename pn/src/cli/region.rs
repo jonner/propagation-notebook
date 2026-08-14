@@ -764,6 +764,8 @@ async fn interactive_harvest_window(
         let taxon = inat.taxon_info(id).await?;
         println!("Using iNaturalist taxon '{}'", taxon);
         taxon
+    } else if let Some(exact) = taxon.find_inaturalist_taxon(&inat).await? {
+        exact
     } else {
         let inat_taxon = interactive_select_inaturalist_taxon(taxon, &inat).await?;
         Taxon::update_by_id(taxon.id)
