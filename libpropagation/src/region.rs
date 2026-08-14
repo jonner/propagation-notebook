@@ -259,6 +259,28 @@ impl Region {
     fn geometry(&self) -> Option<geojson::Geometry> {
         self.geometry.as_ref().map(|jsonvalue| jsonvalue.0.clone())
     }
+
+    fn bounding_box(&self) -> Result<geo::Rect, RegionGeometryError> {
+        self.geometry()
+            .ok_or(RegionGeometryError::NoRegionGeometry)
+            .and_then(|jsongeo| {
+                jsongeo
+                    .try_into()
+                    .map_err(|_| RegionGeometryError::InvalidRegionGeometry)
+                    .and_then(|g: geo::Geometry| {
+                        let bounding_rect = g.bounding_rect();
+                        bounding_rect.ok_or(RegionGeometryError::InvalidRegionGeometry)
+                    })
+            })
+    }
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum RegionGeometryError {
+    #[error("Region has no defined geometry")]
+    NoRegionGeometry,
+    #[error("Region has invalid geometry")]
+    InvalidRegionGeometry,
 }
 
 fn window_includes(doy: i16) -> toasty::stmt::Expr<bool> {
