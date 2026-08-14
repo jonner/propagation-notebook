@@ -18,14 +18,20 @@ mod regions;
 mod taxa;
 mod util;
 
+async fn background_tasks(db: toasty::Db) -> ! {
+    todo!()
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Error> {
     tracing_subscriber::fmt::init();
+    let db = libpropagation::db().await?;
+    tokio::spawn(background_tasks(db.clone()));
     topcoat::start(
         Router::builder()
             .discover()
             .assets(AssetBundle::load()?)
-            .app_context(libpropagation::db().await?)
+            .app_context(db)
             .build(),
     )
     .await?;
