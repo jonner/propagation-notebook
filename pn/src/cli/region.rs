@@ -29,7 +29,7 @@ use libpropagation::{
     taxonomy::Taxon,
 };
 use toasty::Db;
-use tracing::debug;
+use tracing::{debug, warn};
 
 #[derive(clap::Args, Debug)]
 #[group(required = false, multiple = false)]
@@ -366,46 +366,33 @@ impl RegionCommands {
                         .include(RegionalTaxonStatus::fields().region())
                         .exec(db)
                         .await?;
-                        let taxon = fullrts.taxon.get();
                         pb.set_message(taxon.complete_name.clone());
-                        let inat = inaturalist::Client::new()?;
-                        let inat_taxon = if let Some(id) = taxon.inaturalist_id {
-                            let taxon = inat.taxon_info(id).await?;
-                            Some(taxon)
-                        } else {
-                            let found = find_exact_inat_taxon(taxon, &inat).await?;
-                            if let Some(t) = found.as_ref() {
-                                Taxon::update_by_id(taxon.id)
-                                    .inaturalist_id(t.id)
-                                    .exec(db)
-                                    .await?;
+                        match fullrts.query_harvest_info(db).await {
+                            Ok((total, window)) => {
+                                if total < *min_samples {
+                                    warn!("Too few samples to calculate a harvest window");
+                                } else {
+                                    match RegionalTaxonStatus::update_by_id(fullrts.id)
+                                        .harvest_window(&window)
+                                        .exec(db)
+                                        .await
+                                    {
+                                        Ok(_) => {
+                                            n_updates += 1;
+                                            debug!(
+                                                "Updated harvest window for {} to {window}",
+                                                taxon.reference()
+                                            )
+                                        }
+                                        Err(e) => {
+                                            warn!("Failed to update RegionalTaxonStatus: {e}")
+                                        }
+                                    }
+                                }
                             }
-                            found
-                        };
-                        let Some(inat_taxon) = inat_taxon else {
-                            continue;
-                        };
-
-                        match query_harvest_window_for_taxon(
-                            min_samples,
-                            inat_taxon,
-                            &region,
-                            false,
-                        )
-                        .await
-                        {
-                            Ok((_total, harvest_window)) => {
-                                RegionalTaxonStatus::update_by_id(fullrts.id)
-                                    .harvest_window(&harvest_window)
-                                    .exec(db)
-                                    .await?;
-                                n_updates += 1;
-                                debug!("Updated {} to {}", taxon.reference(), harvest_window)
+                            Err(e) => {
+                                warn!("Failed to calculate a harvest window for {}: {e}", taxon.id)
                             }
-                            Err(e) => debug!(
-                                "Failed to calculate a harvest window for {}: {e}",
-                                fullrts.taxon_id
-                            ),
                         };
                     }
                 }
