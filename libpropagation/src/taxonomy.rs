@@ -396,6 +396,30 @@ impl Taxon {
                     .like(search_string),
             ))
     }
+
+    pub async fn find_exact_inat_taxon(
+        &self,
+        inat: &inaturalist::Client,
+    ) -> Result<Option<inaturalist::Taxon>, inaturalist::Error> {
+        let mut found = None;
+        let possible_matches = inat
+            .taxon_search(&self.names())
+            .await?
+            .into_iter()
+            .filter(|t| t.is_active)
+            .collect::<Vec<_>>();
+        tracing::trace!(?self, ?possible_matches);
+        if !possible_matches.is_empty() {
+            for possibility in possible_matches {
+                if self.matches(&possibility) {
+                    tracing::debug!("Using {} for {}", possibility.name, self.reference());
+                    found = Some(possibility);
+                    break;
+                }
+            }
+        }
+        Ok(found)
+    }
 }
 
 #[derive(Debug, Clone, toasty::Model)]
