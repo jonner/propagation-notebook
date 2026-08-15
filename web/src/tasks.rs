@@ -113,15 +113,41 @@ async fn update_regions(mut db: toasty::Db) -> Result<(), BackgroundError> {
 }
 
 #[tracing::instrument(skip_all)]
+async fn update_photos(mut db: toasty::Db) -> Result<(), BackgroundError> {
+    let taxa = Taxon::all()
+        .order_by(Taxon::fields().sequence().asc())
+        .exec(&mut db)
+        .await?;
+    for taxon in taxa {
+        debug!(?taxon.complete_name, "Updating photo for {}", taxon.complete_name);
+        // ignore errors and continue
+        if let Err(e) = taxon.update_photo(&mut db).await {
+            warn!("Failed to update taxon photo: {e}");
+        }
+        std::thread::sleep(Duration::from_secs(5));
+    }
+    Ok(())
+}
+
+#[tracing::instrument(skip_all)]
 pub async fn background_tasks(db: toasty::Db) -> () {
-    let harvest_handle = std::thread::spawn(async move || {
+    let db1 = db.clone();
+    tokio::spawn(async move {
         loop {
-            if let Err(e) = update_regions(db.clone()).await {
+            if let Err(e) = update_regions(db1.clone()).await {
                 warn!("{e}");
             }
-            std::thread::sleep(Duration::from_secs(10));
+            tokio::time::sleep(Duration::from_secs(10)).await;
         }
     });
 
-    harvest_handle.join().unwrap().await;
+    let db2 = db.clone();
+    tokio::spawn(async move {
+        loop {
+            if let Err(e) = update_photos(db2.clone()).await {
+                warn!("{e}");
+            }
+            tokio::time::sleep(Duration::from_secs(10)).await;
+        }
+    });
 }
