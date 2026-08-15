@@ -273,6 +273,35 @@ impl Region {
                     })
             })
     }
+
+    pub async fn query_harvest_info(
+        &self,
+        taxon: &Taxon,
+        db: &mut toasty::Db,
+    ) -> Result<(usize, RegionalHarvestWindow), QueryHarvestError> {
+        let inat = inaturalist::Client::new()?;
+        let inat_taxon = if let Some(id) = taxon.inaturalist_id {
+            let val = inat.taxon_info(id).await?;
+            Some(val)
+        } else {
+            let found = taxon.find_inaturalist_taxon(&inat).await?;
+            if let Some(t) = found.as_ref() {
+                Taxon::update_by_id(taxon.id)
+                    .inaturalist_id(t.id)
+                    .exec(db)
+                    .await?;
+            }
+            found
+        };
+        let Some(inat_taxon) = inat_taxon else {
+            return Err(QueryHarvestError::NoInaturalistTaxon);
+        };
+
+        let loc = inaturalist::SearchArea::BoundingBox(self.bounding_box()?);
+        let (total, histogram) = inat.seed_histogram(inat_taxon.id, &loc).await?;
+        let harvest_window = RegionalHarvestWindow::from_histogram(&histogram).unwrap_or_default();
+        Ok((total, harvest_window))
+    }
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -556,33 +585,14 @@ pub enum QueryHarvestError {
 }
 
 impl RegionalTaxonStatus {
+    /// assumes taxon and region are loaded
     pub async fn query_harvest_info(
         &self,
         db: &mut toasty::Db,
     ) -> Result<(usize, RegionalHarvestWindow), QueryHarvestError> {
         let taxon = self.taxon.get();
-        let inat = inaturalist::Client::new()?;
-        let inat_taxon = if let Some(id) = taxon.inaturalist_id {
-            let taxon = inat.taxon_info(id).await?;
-            Some(taxon)
-        } else {
-            let found = taxon.find_inaturalist_taxon(&inat).await?;
-            if let Some(t) = found.as_ref() {
-                Taxon::update_by_id(taxon.id)
-                    .inaturalist_id(t.id)
-                    .exec(db)
-                    .await?;
-            }
-            found
-        };
-        let Some(inat_taxon) = inat_taxon else {
-            return Err(QueryHarvestError::NoInaturalistTaxon);
-        };
-
-        let loc = inaturalist::SearchArea::BoundingBox(self.region.get().bounding_box()?);
-        let (total, histogram) = inat.seed_histogram(inat_taxon.id, &loc).await?;
-        let harvest_window = RegionalHarvestWindow::from_histogram(&histogram).unwrap_or_default();
-        Ok((total, harvest_window))
+        let region = self.region.get();
+        region.query_harvest_info(taxon, db).await
     }
 }
 
