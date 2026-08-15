@@ -2,6 +2,7 @@ use std::convert::Infallible;
 
 use serde::Serialize;
 use toasty::Deferred;
+use tracing::trace;
 
 pub mod dto;
 
@@ -418,6 +419,47 @@ impl Taxon {
         }
         Ok(None)
     }
+
+    pub async fn update_photo(self, db: &mut toasty::Db) -> Result<(), UpdatePhotoError> {
+        let inat = inaturalist::Client::new()?;
+        let inat_id = match self.inaturalist_id {
+            Some(id) => Ok(id),
+            None => match self.find_inaturalist_taxon(&inat).await? {
+                Some(itaxon) => {
+                    trace!(?self.complete_name, ?itaxon, "Updating inaturalist ID");
+                    Taxon::update_by_id(self.id)
+                        .inaturalist_id(Some(itaxon.id))
+                        .exec(db)
+                        .await?;
+                    Ok(itaxon.id)
+                }
+                None => Err(UpdatePhotoError::NoInaturalistTaxon),
+            },
+        }?;
+        let default_photo = inat.taxon_default_photo(inat_id).await?;
+        if let Some(default_photo) = default_photo {
+            trace!(?default_photo);
+            TaxonPhoto::upsert_by_taxon_id(self.id)
+                .large_url(default_photo.large_url)
+                .square_url(default_photo.square_url)
+                .medium_url(default_photo.medium_url)
+                .attribution(default_photo.attribution)
+                .is_default(true)
+                .exec(db)
+                .await?;
+        }
+        Ok(())
+    }
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum UpdatePhotoError {
+    #[error(transparent)]
+    Inaturalist(#[from] inaturalist::Error),
+    #[error(transparent)]
+    Db(#[from] toasty::Error),
+    #[error("Unable to find an iNaturalist taxon")]
+    NoInaturalistTaxon,
 }
 
 #[derive(Debug, Clone, toasty::Model)]
