@@ -1,3 +1,4 @@
+use jiff::ToSpan;
 use libpropagation::{
     citation::Citation,
     propagation::PropagationProcedure,
@@ -252,6 +253,7 @@ pub async fn conservation_status_badge(
 #[component]
 pub async fn regional_taxa_table(
     taxa: &[Taxon],
+    #[default] current_doy: Option<i16>,
     #[default] attrs: Attributes,
     #[default] child: View,
 ) -> topcoat::Result {
@@ -265,12 +267,13 @@ pub async fn regional_taxa_table(
                 .map(|rts| (taxon.complete_name.as_str(), taxon.path(), rts))
         })
         .collect();
-    view! { harvest_table(items: &items, attrs: attrs, child: child) }
+    view! { harvest_table(items: &items, current_doy: current_doy, attrs: attrs, child: child) }
 }
 
 #[component]
 pub async fn taxon_regional_table(
     regions: &[RegionalTaxonStatus],
+    #[default] current_doy: Option<i16>,
     #[default] attrs: Attributes,
     #[default] child: View,
 ) -> topcoat::Result {
@@ -281,12 +284,13 @@ pub async fn taxon_regional_table(
             (region.name.as_str(), region.path(), rts)
         })
         .collect();
-    view! { harvest_table(items: &items, attrs: attrs, child: child) }
+    view! { harvest_table(items: &items, current_doy: current_doy, attrs: attrs, child: child) }
 }
 
 #[component]
 pub async fn harvest_table(
     items: &[(&str, String, &RegionalTaxonStatus)],
+    #[default] current_doy: Option<i16>,
     #[default] mut attrs: Attributes,
     #[default] child: View,
 ) -> topcoat::Result {
@@ -316,7 +320,7 @@ pub async fn harvest_table(
                     </div>
                     <div class="flex h-full items-center gap-x-6">
                         <div class="h-full w-120">
-                            harvest_timeline(window: &rts.harvest_window)
+                            harvest_timeline(window: &rts.harvest_window, current_doy: current_doy)
                         </div>
                         <div class="text-nowrap hidden md:block">
                             if rts.harvest_window.start_doy.is_some()
@@ -396,5 +400,29 @@ pub async fn leaflet_map(
     view! {
         <div id=(&leaflet_script.id) (attrs)></div>
         (leaflet_script)
+    }
+}
+
+#[component]
+pub async fn week_navigator(date: jiff::civil::Date) -> topcoat::Result {
+    let prev_date = date - 7.days();
+    let prev_link = format!("?date={}", prev_date);
+    let next_date = date + 7.days();
+    let next_link = format!("?date={}", next_date);
+    let date_str = date.strftime("%B %d").to_string();
+    view! {
+        <nav class="flex gap-4">
+            <ol class="contents">
+                <li>
+                    <a href=(prev_link)>"Prev"</a>
+                </li>
+                <li>
+                (date_str)
+                </li>
+                <li>
+                    <a href=(next_link)>"Next"</a>
+                </li>
+            </ol>
+        </nav>
     }
 }

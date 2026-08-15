@@ -10,7 +10,7 @@ use tracing::trace;
 use crate::{
     components::{
         Breadcrumb, breadcrumbs, conservation_status_badge, harvest_timeline, leaflet_map,
-        origin_badge, pagination_control, regional_taxa_table,
+        origin_badge, pagination_control, regional_taxa_table, week_navigator,
     },
     util::{ModifyOffset, PER_PAGE, PageState, Path, RegionId, TaxonId, db},
 };
@@ -99,7 +99,10 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
             &mut db,
             None,
             Some(OriginFilter::NativeOnly),
-            Some(libpropagation::region::HarvestFilter::EndingSoon(10)),
+            Some(libpropagation::region::HarvestFilter::EndingSoon {
+                context: 10,
+                doy: None,
+            }),
             None,
             Some(N),
         )
@@ -109,7 +112,10 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
             &mut db,
             None,
             Some(OriginFilter::NativeOnly),
-            Some(libpropagation::region::HarvestFilter::StartingSoon(10)),
+            Some(libpropagation::region::HarvestFilter::StartingSoon {
+                context: 10,
+                doy: None,
+            }),
             None,
             Some(N),
         )
@@ -196,22 +202,34 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
     }
 }
 
+#[derive(Debug, Serialize)]
+#[query_params(error = bad_request)]
+struct HarvestParams {
+    date: Option<jiff::civil::Date>,
+}
+
 #[page("/regions/{region_id}/starting")]
 pub(crate) async fn harvest_starting(cx: &Cx) -> topcoat::Result {
     let id = path_param::<RegionId>(cx)?;
     let mut db = db(cx);
+    let params = query_params::<HarvestParams>(cx)?;
     let region = Region::filter_by_id(id)
         .include(Region::fields().taxon_statuses())
         .one()
         .exec(&mut db)
         .await?;
+    let date = params.date.unwrap_or_else(|| jiff::Zoned::now().date());
+    let doy = date.day_of_year();
     // FIXME: pagination
     let (_total, starting_soon) = region
         .get_taxa(
             &mut db,
             None,
             Some(OriginFilter::NativeOnly),
-            Some(libpropagation::region::HarvestFilter::StartingSoon(10)),
+            Some(libpropagation::region::HarvestFilter::StartingSoon {
+                context: 10,
+                doy: Some(doy),
+            }),
             None,
             None,
         )
@@ -235,8 +253,10 @@ pub(crate) async fn harvest_starting(cx: &Cx) -> topcoat::Result {
             <hgroup>
                 breadcrumbs(items: items)
                 <h1>"Taxa beginning to bear fruit"</h1>
+                <p>("These species will be starting to bear fruit on the given date.")</p>
+                week_navigator(date: date)
             </hgroup>
-            regional_taxa_table(taxa: &starting_soon)
+            regional_taxa_table(taxa: &starting_soon, current_doy: Some(doy))
         </div>
     }
 }
@@ -244,19 +264,25 @@ pub(crate) async fn harvest_starting(cx: &Cx) -> topcoat::Result {
 #[page("/regions/{region_id}/ending")]
 pub(crate) async fn harvest_ending(cx: &Cx) -> topcoat::Result {
     let id = path_param::<RegionId>(cx)?;
+    let params = query_params::<HarvestParams>(cx)?;
     let mut db = db(cx);
     let region = Region::filter_by_id(id)
         .include(Region::fields().taxon_statuses())
         .one()
         .exec(&mut db)
         .await?;
+    let date = params.date.unwrap_or_else(|| jiff::Zoned::now().date());
+    let doy = date.day_of_year();
     // FIXME: pagination
     let (_total, ending) = region
         .get_taxa(
             &mut db,
             None,
             Some(OriginFilter::NativeOnly),
-            Some(libpropagation::region::HarvestFilter::EndingSoon(10)),
+            Some(libpropagation::region::HarvestFilter::EndingSoon {
+                context: 10,
+                doy: Some(doy),
+            }),
             None,
             None,
         )
@@ -280,8 +306,10 @@ pub(crate) async fn harvest_ending(cx: &Cx) -> topcoat::Result {
             <hgroup>
                 breadcrumbs(items: items)
                 <h1>"Last chance to harvest"</h1>
+                <p>("These species are nearly done bearing fruit soon on the given date.")</p>
+                week_navigator(date: date)
             </hgroup>
-            regional_taxa_table(taxa: &ending)
+            regional_taxa_table(taxa: &ending, current_doy: Some(doy))
         </div>
     }
 }

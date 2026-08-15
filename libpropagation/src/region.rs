@@ -201,25 +201,25 @@ impl Region {
             rts_filter = rts_filter.and(match f {
                 HarvestFilter::ReadyNow => window_includes(today),
                 HarvestFilter::ReadyOnDoy(doy) => window_includes(doy),
-                HarvestFilter::EndingSoon(days) => RegionalTaxonStatus::fields()
+                HarvestFilter::EndingSoon { context, doy } => RegionalTaxonStatus::fields()
                     .harvest_window()
                     .end_doy()
-                    .ge(today)
+                    .ge(doy.unwrap_or(today))
                     .and(
                         RegionalTaxonStatus::fields()
                             .harvest_window()
                             .end_doy()
-                            .le(today + days),
+                            .le(doy.unwrap_or(today) + context),
                     ),
-                HarvestFilter::StartingSoon(days) => RegionalTaxonStatus::fields()
+                HarvestFilter::StartingSoon { context, doy } => RegionalTaxonStatus::fields()
                     .harvest_window()
                     .start_doy()
-                    .ge(today)
+                    .ge(doy.unwrap_or(today))
                     .and(
                         RegionalTaxonStatus::fields()
                             .harvest_window()
                             .start_doy()
-                            .le(today + days),
+                            .le(doy.unwrap_or(today) + context),
                     ),
             });
         }
@@ -376,8 +376,8 @@ pub struct RegionalHarvestWindow {
 pub enum HarvestFilter {
     ReadyNow,
     ReadyOnDoy(i16),
-    EndingSoon(i16),
-    StartingSoon(i16),
+    EndingSoon { context: i16, doy: Option<i16> },
+    StartingSoon { context: i16, doy: Option<i16> },
 }
 
 impl RegionalHarvestWindow {
