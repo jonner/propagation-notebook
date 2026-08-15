@@ -351,7 +351,7 @@ impl TaxonCommands {
                         .await?;
                     trace!(?taxon);
                     if !missing || taxon.photo.get().is_none() {
-                        update_photo_for_taxon(db, taxon).await?;
+                        taxon.update_photo(db).await?;
                     } else {
                         println!("Not updating ")
                     }
@@ -373,7 +373,7 @@ impl TaxonCommands {
                         if update {
                             tracing::trace!(?taxon.complete_name, "Updating");
                             // ignore errors and continue
-                            _ = update_photo_for_taxon(db, taxon).await;
+                            _ = taxon.update_photo(db).await;
                         } else {
                             trace!("Not updating {}", taxon.complete_name)
                         }
@@ -383,35 +383,4 @@ impl TaxonCommands {
         }
         Ok(())
     }
-}
-
-async fn update_photo_for_taxon(db: &mut Db, taxon: Taxon) -> Result<(), anyhow::Error> {
-    let inat = inaturalist::Client::new()?;
-    let inat_id = match taxon.inaturalist_id {
-        Some(id) => Ok(id),
-        None => match taxon.find_inaturalist_taxon(&inat).await? {
-            Some(itaxon) => {
-                trace!(?taxon.complete_name, ?itaxon, "Updating inaturalist ID");
-                Taxon::update_by_id(taxon.id)
-                    .inaturalist_id(Some(itaxon.id))
-                    .exec(db)
-                    .await?;
-                Ok(itaxon.id)
-            }
-            None => Err(anyhow!("Unable to find inaturalist ID")),
-        },
-    }?;
-    let default_photo = inat.taxon_default_photo(inat_id).await?;
-    if let Some(default_photo) = default_photo {
-        trace!(?default_photo);
-        TaxonPhoto::upsert_by_taxon_id(taxon.id)
-            .large_url(default_photo.large_url)
-            .square_url(default_photo.square_url)
-            .medium_url(default_photo.medium_url)
-            .attribution(default_photo.attribution)
-            .is_default(true)
-            .exec(db)
-            .await?;
-    }
-    Ok(())
 }
