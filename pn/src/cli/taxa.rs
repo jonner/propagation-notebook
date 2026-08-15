@@ -1,4 +1,3 @@
-use anyhow::anyhow;
 use indicatif::ProgressIterator;
 use libpropagation::{
     collecting::CleaningProcedure,
