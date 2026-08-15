@@ -7,7 +7,7 @@ use topcoat::{
     view::{attributes, view},
 };
 
-use crate::error::Error;
+use crate::{error::Error, tasks::background_tasks};
 
 mod citation;
 mod components;
@@ -15,12 +15,9 @@ mod error;
 mod leaflet;
 mod propagation;
 mod regions;
+mod tasks;
 mod taxa;
 mod util;
-
-async fn background_tasks(db: toasty::Db) -> ! {
-    todo!()
-}
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
