@@ -19,6 +19,7 @@ use crate::{
     util::{ModifyOffset, PageState},
 };
 
+pub mod tooltip;
 #[component]
 pub async fn citation_list(citations: Vec<&Citation>) -> topcoat::Result {
     view! {
@@ -217,19 +218,21 @@ pub async fn harvest_timeline(
 #[component]
 pub async fn origin_badge(origin: Origin, #[default] mut attrs: Attributes) -> topcoat::Result {
     let vals = match origin {
-        Origin::Introduced => Some(("introduced", "Introduced")),
-        Origin::Unknown => Some(("unknown", "Unknown origin")),
+        Origin::Introduced => Some(("introduced", "IN", "Introduced")),
+        Origin::Unknown => Some(("unknown", "UN", "Unknown origin")),
         Origin::Native => None,
     };
-    if let Some((klass, text)) = vals {
+    if let Some((klass, text, tooltip_text)) = vals {
         view! {
+            tooltip::tooltip(
             <div
                 class=(class!(klass, "badge", attrs.remove("class")))
                 (attrs)
-                title=(origin.to_string())
             >
                 (text)
             </div>
+                tooltip::tooltip_content((tooltip_text))
+        )
         }
     } else {
         view! {}
@@ -241,19 +244,21 @@ pub async fn conservation_status_badge(
     status: ConservationStatus,
     #[default] mut attrs: Attributes,
 ) -> topcoat::Result {
-    let (klass, text) = match status {
-        ConservationStatus::Endangered => ("endangered", "EN"),
-        ConservationStatus::Threatened => ("threatened", "TH"),
-        ConservationStatus::SpecialConcern => ("specialconcern", "SC"),
+    let (klass, text, tooltip_text) = match status {
+        ConservationStatus::Endangered => ("endangered", "EN", "Endangered"),
+        ConservationStatus::Threatened => ("threatened", "TH", "Threatened"),
+        ConservationStatus::SpecialConcern => ("specialconcern", "SC", "Special Concern"),
     };
     view! {
+        tooltip::tooltip(
         <div
             class=(class!(klass, "badge", attrs.remove("class")))
             (attrs)
-            title=(status.to_string())
         >
             (text)
         </div>
+            tooltip::tooltip_content((tooltip_text))
+    )
     }
 }
 
