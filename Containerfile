@@ -24,6 +24,7 @@ COPY --from=builder /build/assets /app/assets
 EXPOSE 3000
 ENV PN_DB_URI=sqlite:/data/propagation-notebook.sqlite
 ENV RUST_LOG=trace
+ENV ENABLE_BACKGROUND_TASKS=1
 ENV PORT=3000
 ENV HOST=0.0.0.0
 ENTRYPOINT ["/app/propagation-web"]

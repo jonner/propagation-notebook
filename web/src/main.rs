@@ -6,6 +6,7 @@ use topcoat::{
     tailwind,
     view::{attributes, view},
 };
+use tracing::debug;
 
 use crate::{error::Error, tasks::background_tasks};
 
@@ -23,7 +24,10 @@ mod util;
 async fn main() -> Result<(), Error> {
     tracing_subscriber::fmt::init();
     let db = libpropagation::db().await?;
-    tokio::spawn(background_tasks(db.clone()));
+    if std::env::var("ENABLE_BACKGROUND_TASKS").is_ok() {
+        debug!("Enabling background tasks...");
+        tokio::spawn(background_tasks(db.clone()));
+    }
     topcoat::start(
         Router::builder()
             .discover()
