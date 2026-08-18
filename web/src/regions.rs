@@ -11,8 +11,9 @@ use crate::{
     components::{
         Breadcrumb,
         badge::{conservation_status_badge, origin_badge},
-        breadcrumbs, harvest_timeline, leaflet_map, pagination_control, regional_taxa_table,
-        week_navigator,
+        breadcrumbs,
+        harvest::{harvest_timeline, regional_taxa_table},
+        leaflet_map, pagination_control, week_navigator,
     },
     taxa,
     util::{ModifyOffset, PER_PAGE, PageState, db},
