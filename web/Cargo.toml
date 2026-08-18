@@ -13,10 +13,10 @@ serde_json.workspace = true
 thiserror.workspace = true
 toasty.workspace = true
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
-topcoat = { version = "0.6.1", features = ["font-fontsource", "icon-iconify", "tailwind"] }
+topcoat = { version = "0.6.2", features = ["font-fontsource", "icon-iconify", "tailwind"] }
 tracing.workspace = true
 tracing-subscriber.workspace = true
 uuid = "1.24.0"
 
 [build-dependencies]
-topcoat = { version = "0.6.1", default-features= false, features = ["tailwind", "icon-iconify"] }
+topcoat = { version = "0.6.2", default-features= false, features = ["tailwind", "icon-iconify"] }
