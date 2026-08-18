@@ -11,7 +11,8 @@ use tracing::trace;
 
 use crate::{
     components::{
-        self, Breadcrumb, breadcrumbs, citation_list, pagination_control, taxon_regional_table,
+        self, Breadcrumb, breadcrumbs, citations::citation_list, pagination_control,
+        taxon_regional_table,
     },
     util::{ModifyOffset, PER_PAGE, PageState, db},
 };

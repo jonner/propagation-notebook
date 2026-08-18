@@ -1,6 +1,5 @@
 use jiff::ToSpan;
 use libpropagation::{
-    citation::Citation,
     propagation::PropagationProcedure,
     region::{ConservationStatus, Origin, RegionalHarvestWindow, RegionalTaxonStatus},
     taxonomy::Taxon,
@@ -13,29 +12,14 @@ use topcoat::{
 };
 
 use crate::{
-    citation,
+    components::citations::citation_list,
     leaflet::Map,
     mdi, regions, taxa,
     util::{ModifyOffset, PageState},
 };
 
+pub mod citations;
 pub mod tooltip;
-#[component]
-pub async fn citation_list(citations: Vec<&Citation>) -> topcoat::Result {
-    view! {
-        <ul>
-            for citation in citations {
-                <li>
-                    <a
-                        href=(href!(citation::details, citation::CitationId(citation.id)))
-                    >
-                        (&citation.title)
-                    </a>
-                </li>
-            }
-        </ul>
-    }
-}
 
 enum PageLinkType {
     Ellipsis,
