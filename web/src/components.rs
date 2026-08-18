@@ -13,6 +13,7 @@ use topcoat::{
 };
 
 use crate::{
+    citation,
     leaflet::Map,
     mdi, regions, taxa,
     util::{ModifyOffset, PageState},
@@ -24,7 +25,11 @@ pub async fn citation_list(citations: Vec<&Citation>) -> topcoat::Result {
         <ul>
             for citation in citations {
                 <li>
-                    <a href=(format!("/citation/{}", citation.id))>(&citation.title)</a>
+                    <a
+                        href=(href!(citation::details, citation::CitationId(citation.id)))
+                    >
+                        (&citation.title)
+                    </a>
                 </li>
             }
         </ul>

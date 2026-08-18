@@ -20,7 +20,11 @@ pub async fn get_propagation_list(cx: &Cx) -> topcoat::Result {
         <h1>"Propagation Procedures"</h1>
         <ul>
             for p in procedures {
-                <li><a href=(format!("/propagation/{}", p.id))>(p.name)</a></li>
+                <li>
+                    <a href=(href!(get_propagation_details, PropagationId(p.id)))>
+                        (p.name)
+                    </a>
+                </li>
             }
         </ul>
     }
@@ -73,9 +77,7 @@ pub async fn get_propagation_details(cx: &Cx) -> topcoat::Result {
                             <td>(taxon.id)</td>
                             <td>
                                 <span class="latin">
-                                    <a
-                                        href=(href!(taxa::details, taxa::TaxonId(taxon.id)))
-                                    >
+                                    <a href=(href!(taxa::details, taxa::TaxonId(taxon.id)))>
                                         (&taxon.complete_name)
                                     </a>
                                 </span>

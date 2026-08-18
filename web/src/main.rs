@@ -2,7 +2,7 @@ use topcoat::{
     asset::{AssetBundle, RouterBuilderAssetExt},
     font::{Font, fontsource::fontsource_font},
     icon::{icon, iconify},
-    router::{Router, RouterBuilderDiscoverExt, layout, page},
+    router::{Router, RouterBuilderDiscoverExt, href, layout, not_found, page},
     tailwind,
     view::{attributes, view},
 };
@@ -73,7 +73,7 @@ async fn layout(slot: topcoat::Result) -> topcoat::Result {
                     >
                         <ul class="contents">
                             <li>
-                                <a class="block" href="/">
+                                <a class="block" href=(href!(home))>
                                     icon(
                                         data: mdi::FLOWER_POPPY,
                                         label: "Home",
@@ -83,7 +83,7 @@ async fn layout(slot: topcoat::Result) -> topcoat::Result {
                                 </a>
                             </li>
                             <li>
-                                <a class="block" href="/taxa">
+                                <a class="block" href=(href!(taxa::list))>
                                     icon(
                                         data: mdi::FORMAT_LIST_BULLETED,
                                         label: "list icon",
@@ -93,7 +93,7 @@ async fn layout(slot: topcoat::Result) -> topcoat::Result {
                                 </a>
                             </li>
                             <li>
-                                <a class="block" href="/regions">
+                                <a class="block" href=(href!(regions::list))>
                                     icon(
                                         data: mdi::GLOBE,
                                         label: "list icon",
@@ -103,7 +103,7 @@ async fn layout(slot: topcoat::Result) -> topcoat::Result {
                                 </a>
                             </li>
                             // <li>
-                            //     <a class="block" href="/propagation">
+                            //     <a class="block" href=(href!(propagation::get_propagation_list))>
                             //         icon(
                             //             data: mdi::SPROUT,
                             //             label: "list icon",
@@ -113,7 +113,7 @@ async fn layout(slot: topcoat::Result) -> topcoat::Result {
                             //     </a>
                             // </li>
                             // <li>
-                            //     <a class="block" href="/about">
+                            //     <a class="block" href=(href!(about))>
                             //         icon(
                             //             data: mdi::ABOUT,
                             //             label: "about icon",
@@ -179,7 +179,7 @@ async fn home() -> topcoat::Result {
                 <h2>"Regional Information"</h2>
                 <p>
                     "Find out which plants are in your "
-                    <a href="/regions">"region"</a>
+                    <a href=(href!(regions::list))>"region"</a>
                     " and when they are bearing fruit."
                 </p>
             </section>
