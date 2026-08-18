@@ -12,7 +12,7 @@ use tracing::trace;
 use crate::{
     components::{
         self, Breadcrumb, breadcrumbs, citations::citation_list, harvest::taxon_regional_table,
-        pagination_control,
+        pagination::pagination_control,
     },
     util::{ModifyOffset, PER_PAGE, PageState, db},
 };

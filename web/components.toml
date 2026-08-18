@@ -8,6 +8,14 @@ registry = "topcoat"
 hash = "sha256:c7bdcb5ea4ff757611ba616e92178169b262be98155c06dfa2407584d51e7459"
 file = "styles.css"
 
+[registries.topcoat.components.button]
+hash = "sha256:ba4ab32d87e4c9a982faf657258edd8cf2a0da904ece5976e70185eeb5808f57"
+file = "src/components/button.rs"
+
+[registries.topcoat.components.pagination]
+hash = "sha256:b4e1b4f92715e99e66831eaa94da4d0180822d3fd5e3698c95e3dfda55f877ac"
+file = "src/components/pagination.rs"
+
 [registries.topcoat.components.tooltip]
 hash = "sha256:3e3929e2330f126467f584bee4d88bbfc577cf2ff6abe3fd1680f2fef880c120"
 file = "src/components/tooltip.rs"
