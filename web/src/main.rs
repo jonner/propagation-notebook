@@ -39,6 +39,8 @@ iconify::include!("mdi");
 const FONT_HEAD: Font = fontsource_font!(AVERIA_SERIF_LIBRE, host: Asset);
 const FONT_BODY: Font = fontsource_font!(AVERIA_SANS_LIBRE, host: Asset);
 
+not_found!("/");
+
 #[layout("/")]
 async fn layout(slot: topcoat::Result) -> topcoat::Result {
     view! {
