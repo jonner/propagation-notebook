@@ -12,7 +12,7 @@ use tracing::trace;
 use crate::{components::propagation_details, taxa, util::db};
 
 #[page("/propagation")]
-pub async fn get_propagation_list(cx: &Cx) -> topcoat::Result {
+pub async fn list(cx: &Cx) -> topcoat::Result {
     let mut db = db(cx);
     let procedures = PropagationProcedure::all().exec(&mut db).await?;
     trace!(?procedures);
@@ -21,7 +21,7 @@ pub async fn get_propagation_list(cx: &Cx) -> topcoat::Result {
         <ul>
             for p in procedures {
                 <li>
-                    <a href=(href!(get_propagation_details, PropagationId(p.id)))>
+                    <a href=(href!(details, PropagationId(p.id)))>
                         (p.name)
                     </a>
                 </li>
@@ -33,7 +33,7 @@ pub async fn get_propagation_list(cx: &Cx) -> topcoat::Result {
 path_param!(propagation_id: u64, error= bad_request);
 
 #[page("/propagation/{propagation_id}")]
-pub async fn get_propagation_details(cx: &Cx) -> topcoat::Result {
+pub async fn details(cx: &Cx) -> topcoat::Result {
     let mut db = db(cx);
     let propagation_id = path_param::<PropagationId>(cx)?;
     let procedure = PropagationProcedure::filter_by_id(propagation_id)

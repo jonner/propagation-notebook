@@ -103,7 +103,7 @@ async fn layout(slot: topcoat::Result) -> topcoat::Result {
                                 </a>
                             </li>
                             // <li>
-                            //     <a class="block" href=(href!(propagation::get_propagation_list))>
+                            //     <a class="block" href=(href!(propagation::list))>
                             //         icon(
                             //             data: mdi::SPROUT,
                             //             label: "list icon",
