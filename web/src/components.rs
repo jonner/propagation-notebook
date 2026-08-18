@@ -1,7 +1,7 @@
 use jiff::ToSpan;
 use libpropagation::{
     propagation::PropagationProcedure,
-    region::{ConservationStatus, Origin, RegionalHarvestWindow, RegionalTaxonStatus},
+    region::{RegionalHarvestWindow, RegionalTaxonStatus},
     taxonomy::Taxon,
 };
 use topcoat::{
@@ -12,12 +12,16 @@ use topcoat::{
 };
 
 use crate::{
-    components::citations::citation_list,
+    components::{
+        badge::{conservation_status_badge, origin_badge},
+        citations::citation_list,
+    },
     leaflet::Map,
     mdi, regions, taxa,
     util::{ModifyOffset, PageState},
 };
 
+pub mod badge;
 pub mod citations;
 pub mod tooltip;
 
@@ -196,53 +200,6 @@ pub async fn harvest_timeline(
                 style=(format!("left: {:.2}%;", marker_left_pct))
             ></div>
         </div>
-    }
-}
-
-#[component]
-pub async fn origin_badge(origin: Origin, #[default] mut attrs: Attributes) -> topcoat::Result {
-    let vals = match origin {
-        Origin::Introduced => Some(("introduced", "IN", "Introduced")),
-        Origin::Unknown => Some(("unknown", "UN", "Unknown origin")),
-        Origin::Native => None,
-    };
-    if let Some((klass, text, tooltip_text)) = vals {
-        view! {
-            tooltip::tooltip(
-            <div
-                class=(class!(klass, "badge", attrs.remove("class")))
-                (attrs)
-            >
-                (text)
-            </div>
-                tooltip::tooltip_content((tooltip_text))
-        )
-        }
-    } else {
-        view! {}
-    }
-}
-
-#[component]
-pub async fn conservation_status_badge(
-    status: ConservationStatus,
-    #[default] mut attrs: Attributes,
-) -> topcoat::Result {
-    let (klass, text, tooltip_text) = match status {
-        ConservationStatus::Endangered => ("endangered", "EN", "Endangered"),
-        ConservationStatus::Threatened => ("threatened", "TH", "Threatened"),
-        ConservationStatus::SpecialConcern => ("specialconcern", "SC", "Special Concern"),
-    };
-    view! {
-        tooltip::tooltip(
-        <div
-            class=(class!(klass, "badge", attrs.remove("class")))
-            (attrs)
-        >
-            (text)
-        </div>
-            tooltip::tooltip_content((tooltip_text))
-    )
     }
 }
 

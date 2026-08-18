@@ -9,8 +9,10 @@ use tracing::trace;
 
 use crate::{
     components::{
-        Breadcrumb, breadcrumbs, conservation_status_badge, harvest_timeline, leaflet_map,
-        origin_badge, pagination_control, regional_taxa_table, week_navigator,
+        Breadcrumb,
+        badge::{conservation_status_badge, origin_badge},
+        breadcrumbs, harvest_timeline, leaflet_map, pagination_control, regional_taxa_table,
+        week_navigator,
     },
     taxa,
     util::{ModifyOffset, PER_PAGE, PageState, db},
