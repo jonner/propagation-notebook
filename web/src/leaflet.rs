@@ -24,7 +24,7 @@ impl<'a> NodeViewParts for Map<'a> {
 // 1. Initialize the map container without setting a view
 const map = L.map('"#,
         );
-        parts.push_str(self.id);
+        parts.push_str(&self.id);
         parts.push_str(
             r#"');
 
@@ -37,7 +37,7 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 // 2. Parse the injected Rust string
 const geojsonData = JSON.parse(`"#,
         );
-        parts.push_str(self.geometry.to_string());
+        parts.push_str(&self.geometry.to_string());
         parts.push_str_unescaped(
             r#"`);
 // 3. Create the GeoJSON layer

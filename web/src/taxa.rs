@@ -13,8 +13,13 @@ use crate::{
     components::{
         self, Breadcrumb, breadcrumbs, citation_list, pagination_control, taxon_regional_table,
     },
-    util::{CleaningId, ModifyOffset, PER_PAGE, PageState, Path, PropagationId, TaxonId, db},
+    util::{ModifyOffset, PER_PAGE, PageState, Path, db},
 };
+
+path_param!(cleaning_id: u64, error = bad_request);
+path_param!(taxon_id: u64, error = bad_request);
+path_param!(region_id: u64, error = bad_request);
+path_param!(propagation_id: u64, error = bad_request);
 
 #[derive(Debug, Clone, Copy, serde::Deserialize, serde::Serialize)]
 #[serde(rename_all = "lowercase")]

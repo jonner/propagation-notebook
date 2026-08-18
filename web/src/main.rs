@@ -126,13 +126,13 @@ async fn layout(slot: topcoat::Result) -> topcoat::Result {
                     </nav>
                 </header>
                 <main class="m-3 md:m-6 flex-grow">
-                match slot {
-                    Ok(content) => (content),
-                    Err(e) => {
-                        <h1>"Error"</h1>
-                     <div class="error p-6">(e.to_string())</div>
-                    },
-                }
+                    match slot {
+                        Ok(content) => (content),
+                        Err(e) => {
+                            <h1>"Error"</h1>
+                            <div class="error p-6">(e.to_string())</div>
+                        }
+                    }
                 </main>
                 <footer class="p-6">
                     "Developed by Jonathon Jongsma"

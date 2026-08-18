@@ -5,25 +5,7 @@ use libpropagation::{
     taxonomy::{Taxon, TaxonPropagationProcedure},
 };
 use serde::Serialize;
-use topcoat::{
-    context::{Cx, app_context},
-    router::path_param,
-};
-
-#[path_param(error = bad_request)]
-pub(crate) struct TaxonId(u64);
-
-#[path_param(error = bad_request)]
-pub(crate) struct CitationId(u64);
-
-#[path_param(error = bad_request)]
-pub(crate) struct RegionId(u64);
-
-#[path_param(error= bad_request)]
-pub struct PropagationId(u64);
-
-#[path_param(error = bad_request)]
-pub struct CleaningId(u64);
+use topcoat::context::{Cx, app_context};
 
 pub trait Path {
     fn path(&self) -> String;

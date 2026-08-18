@@ -12,7 +12,7 @@ use crate::{
         Breadcrumb, breadcrumbs, conservation_status_badge, harvest_timeline, leaflet_map,
         origin_badge, pagination_control, regional_taxa_table, week_navigator,
     },
-    util::{ModifyOffset, PER_PAGE, PageState, Path, RegionId, TaxonId, db},
+    util::{ModifyOffset, PER_PAGE, PageState, Path, db},
 };
 
 #[page("/regions")]
@@ -83,6 +83,8 @@ pub async fn list(cx: &Cx) -> topcoat::Result {
         </div>
     }
 }
+
+path_param!(region_id: u64, error = bad_request);
 
 #[page("/regions/{region_id}")]
 pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
@@ -172,7 +174,8 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
             </section>
             <section>
                 <h2>"Last chance to harvest"</h2>
-                let remaining = total_ending.saturating_sub(N.try_into().unwrap_or_default());
+                let remaining = total_ending
+                    .saturating_sub(N.try_into().unwrap_or_default());
                 regional_taxa_table(
                     taxa: &ending,
                     if remaining > 0 {
@@ -186,7 +189,8 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
             </section>
             <section>
                 <h2>"Beginning to bear fruit"</h2>
-                let remaining = total_starting.saturating_sub(N.try_into().unwrap_or_default());
+                let remaining = total_starting
+                    .saturating_sub(N.try_into().unwrap_or_default());
                 regional_taxa_table(
                     taxa: &starting_soon,
                     if remaining > 0 {
@@ -253,7 +257,9 @@ pub(crate) async fn harvest_starting(cx: &Cx) -> topcoat::Result {
             <hgroup>
                 breadcrumbs(items: items)
                 <h1>"Taxa beginning to bear fruit"</h1>
-                <p>("These species will be starting to bear fruit on the given date.")</p>
+                <p>
+                    ("These species will be starting to bear fruit on the given date.")
+                </p>
                 week_navigator(date: date)
             </hgroup>
             regional_taxa_table(taxa: &starting_soon, current_doy: Some(doy))
@@ -306,7 +312,9 @@ pub(crate) async fn harvest_ending(cx: &Cx) -> topcoat::Result {
             <hgroup>
                 breadcrumbs(items: items)
                 <h1>"Last chance to harvest"</h1>
-                <p>("These species are nearly done bearing fruit soon on the given date.")</p>
+                <p>
+                    ("These species are nearly done bearing fruit soon on the given date.")
+                </p>
                 week_navigator(date: date)
             </hgroup>
             regional_taxa_table(taxa: &ending, current_doy: Some(doy))
@@ -458,6 +466,8 @@ pub async fn taxa_list(cx: &Cx) -> topcoat::Result {
         </div>
     }
 }
+
+path_param!(taxon_id: u64, error = bad_request);
 
 #[page("/regions/{region_id}/taxa/{taxon_id}")]
 pub async fn taxon_status(cx: &Cx) -> topcoat::Result {

@@ -5,7 +5,8 @@ use topcoat::{
     view::view,
 };
 
-use crate::util::{CitationId, db};
+use crate::util::db;
+path_param!(citation_id: u64, error = bad_request);
 
 #[page("/citation/{citation_id}")]
 pub async fn details(cx: &Cx) -> topcoat::Result {

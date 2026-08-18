@@ -11,7 +11,7 @@ use tracing::trace;
 
 use crate::{
     components::propagation_details,
-    util::{Path, PropagationId, db},
+    util::{Path, db},
 };
 
 #[page("/propagation")]
@@ -28,6 +28,8 @@ pub async fn get_propagation_list(cx: &Cx) -> topcoat::Result {
         </ul>
     }
 }
+
+path_param!(propagation_id: u64, error= bad_request);
 
 #[page("/propagation/{propagation_id}")]
 pub async fn get_propagation_details(cx: &Cx) -> topcoat::Result {

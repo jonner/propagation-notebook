@@ -6,14 +6,16 @@ use libpropagation::{
     taxonomy::Taxon,
 };
 use topcoat::{
+    context::Cx,
     icon::icon,
+    router::href,
     view::{Attributes, View, attributes, class, component, view},
 };
 
 use crate::{
     leaflet::Map,
     mdi,
-    util::{ModifyOffset, PageState, Path},
+    util::{ModifyOffset, PageState},
 };
 
 #[component]
@@ -267,7 +269,14 @@ pub async fn regional_taxa_table(
                 .map(|rts| (taxon.complete_name.as_str(), taxon.path(), rts))
         })
         .collect();
-    view! { harvest_table(items: &items, current_doy: current_doy, attrs: attrs, child: child) }
+    view! {
+        harvest_table(
+            items: &items,
+            current_doy: current_doy,
+            attrs: attrs,
+            child: child
+        )
+    }
 }
 
 #[component]
@@ -284,7 +293,14 @@ pub async fn taxon_regional_table(
             (region.name.as_str(), region.path(), rts)
         })
         .collect();
-    view! { harvest_table(items: &items, current_doy: current_doy, attrs: attrs, child: child) }
+    view! {
+        harvest_table(
+            items: &items,
+            current_doy: current_doy,
+            attrs: attrs,
+            child: child
+        )
+    }
 }
 
 #[component]
@@ -320,7 +336,10 @@ pub async fn harvest_table(
                     </div>
                     <div class="flex h-full items-center gap-x-6">
                         <div class="h-full w-120">
-                            harvest_timeline(window: &rts.harvest_window, current_doy: current_doy)
+                            harvest_timeline(
+                                window: &rts.harvest_window,
+                                current_doy: current_doy
+                            )
                         </div>
                         <div class="text-nowrap hidden md:block">
                             if rts.harvest_window.start_doy.is_some()
@@ -413,15 +432,9 @@ pub async fn week_navigator(date: jiff::civil::Date) -> topcoat::Result {
     view! {
         <nav class="flex gap-4">
             <ol class="contents">
-                <li>
-                    <a href=(prev_link)>"Prev"</a>
-                </li>
-                <li>
-                (date_str)
-                </li>
-                <li>
-                    <a href=(next_link)>"Next"</a>
-                </li>
+                <li><a href=(prev_link)>"Prev"</a></li>
+                <li>(date_str)</li>
+                <li><a href=(next_link)>"Next"</a></li>
             </ol>
         </nav>
     }
