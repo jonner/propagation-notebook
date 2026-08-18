@@ -14,7 +14,7 @@ use topcoat::{
 
 use crate::{
     leaflet::Map,
-    mdi,
+    mdi, regions, taxa,
     util::{ModifyOffset, PageState},
 };
 
@@ -254,6 +254,7 @@ pub async fn conservation_status_badge(
 
 #[component]
 pub async fn regional_taxa_table(
+    cx: &Cx,
     taxa: &[Taxon],
     #[default] current_doy: Option<i16>,
     #[default] attrs: Attributes,
@@ -262,11 +263,13 @@ pub async fn regional_taxa_table(
     let items: Vec<_> = taxa
         .iter()
         .filter_map(|taxon| {
-            taxon
-                .regional_statuses
-                .get()
-                .first()
-                .map(|rts| (taxon.complete_name.as_str(), taxon.path(), rts))
+            taxon.regional_statuses.get().first().map(|rts| {
+                (
+                    taxon.complete_name.as_str(),
+                    href!(taxa::details, taxa::TaxonId(taxon.id)).resolve(cx),
+                    rts,
+                )
+            })
         })
         .collect();
     view! {
@@ -281,6 +284,7 @@ pub async fn regional_taxa_table(
 
 #[component]
 pub async fn taxon_regional_table(
+    cx: &Cx,
     regions: &[RegionalTaxonStatus],
     #[default] current_doy: Option<i16>,
     #[default] attrs: Attributes,
@@ -290,7 +294,11 @@ pub async fn taxon_regional_table(
         .iter()
         .map(|rts| {
             let region = rts.region.get();
-            (region.name.as_str(), region.path(), rts)
+            (
+                region.name.as_str(),
+                href!(regions::details, regions::RegionId(region.id)).resolve(cx),
+                rts,
+            )
         })
         .collect();
     view! {

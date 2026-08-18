@@ -4,15 +4,12 @@ use libpropagation::{
 };
 use topcoat::{
     context::Cx,
-    router::{page, path_param},
+    router::{href, page, path_param},
     view::view,
 };
 use tracing::trace;
 
-use crate::{
-    components::propagation_details,
-    util::{Path, db},
-};
+use crate::{components::propagation_details, taxa, util::db};
 
 #[page("/propagation")]
 pub async fn get_propagation_list(cx: &Cx) -> topcoat::Result {
@@ -76,7 +73,11 @@ pub async fn get_propagation_details(cx: &Cx) -> topcoat::Result {
                             <td>(taxon.id)</td>
                             <td>
                                 <span class="latin">
-                                    <a href=(taxon.path())>(&taxon.complete_name)</a>
+                                    <a
+                                        href=(href!(taxa::details, taxa::TaxonId(taxon.id)))
+                                    >
+                                        (&taxon.complete_name)
+                                    </a>
                                 </span>
                             </td>
                         </tr>

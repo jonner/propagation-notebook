@@ -4,7 +4,7 @@ use libpropagation::{
 };
 use topcoat::{
     context::Cx,
-    router::{page, path_param, query_params},
+    router::{href, page, path_param, query_params},
     view::view,
 };
 use tracing::trace;
@@ -13,13 +13,13 @@ use crate::{
     components::{
         self, Breadcrumb, breadcrumbs, citation_list, pagination_control, taxon_regional_table,
     },
-    util::{ModifyOffset, PER_PAGE, PageState, Path, db},
+    util::{ModifyOffset, PER_PAGE, PageState, db},
 };
 
-path_param!(cleaning_id: u64, error = bad_request);
-path_param!(taxon_id: u64, error = bad_request);
-path_param!(region_id: u64, error = bad_request);
-path_param!(propagation_id: u64, error = bad_request);
+path_param!(pub cleaning_id: u64, error = bad_request);
+path_param!(pub taxon_id: u64, error = bad_request);
+path_param!(pub region_id: u64, error = bad_request);
+path_param!(pub propagation_id: u64, error = bad_request);
 
 #[derive(Debug, Clone, Copy, serde::Deserialize, serde::Serialize)]
 #[serde(rename_all = "lowercase")]
@@ -86,7 +86,7 @@ pub(crate) async fn list(cx: &Cx) -> topcoat::Result {
                     for taxon in taxa.iter() {
                         <div class="p-4 bg-jaggery/5 rounded h-full">
                             <a
-                                href=(taxon.path())
+                                href=(href!(details, TaxonId(taxon.id)))
                                 class="flex flex-col items-center text-center"
                             >
                                 if let Some(photo) = taxon.photo.get() {
@@ -105,7 +105,9 @@ pub(crate) async fn list(cx: &Cx) -> topcoat::Result {
                     for taxon in taxa.iter() {
                         <li>
                             <span class="latin">
-                                <a href=(taxon.path())>(&taxon.complete_name)</a>
+                                <a href=(href!(details, TaxonId(taxon.id)))>
+                                    (&taxon.complete_name)
+                                </a>
                             </span>
                         </li>
                     }
@@ -151,7 +153,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
                 None
             } else {
                 Some(Breadcrumb {
-                    url: Some(l.ancestor.get().path()),
+                    url: Some(href!(details, TaxonId(l.ancestor.get().id)).resolve(cx)),
                     text: l.ancestor.get().complete_name.clone(),
                 })
             }
@@ -203,7 +205,9 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
                             for child in taxon.children.get() {
                                 <li>
                                     <span class="latin">
-                                        <a href=(child.path())>(&child.complete_name)</a>
+                                        <a href=(href!(details, TaxonId(child.id)))>
+                                            (&child.complete_name)
+                                        </a>
                                     </span>
                                 </li>
                             }
@@ -256,7 +260,13 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
                     <div>
                         <ul>
                             for procedure in taxon.cleaning_procedures.get() {
-                                <li><a href=(procedure.path())>(&procedure.name)</a></li>
+                                <li>
+                                    <a
+                                        href=(href!(cleaning_details, TaxonId(procedure.taxon_id), CleaningId(procedure.id)))
+                                    >
+                                        (&procedure.name)
+                                    </a>
+                                </li>
                             }
                         </ul>
                     </div>
@@ -269,7 +279,11 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
                         <ul>
                             for tp in taxon.propagation_procedures.get() {
                                 <li>
-                                    <a href=(tp.path())>(&tp.propagation.get().name)</a>
+                                    <a
+                                        href=(href!(propagation_details, TaxonId(tp.taxon_id), PropagationId(tp.propagation_id)))
+                                    >
+                                        (&tp.propagation.get().name)
+                                    </a>
                                 </li>
                             }
                         </ul>
@@ -435,7 +449,9 @@ pub async fn cleaning_details(cx: &Cx) -> topcoat::Result {
         </h1>
         <dt>"Taxon"</dt>
         <dd>
-            <span class="latin"><a href=(taxon.path())>(&taxon.complete_name)</a></span>
+            <span class="latin">
+                <a href=(href!(details, TaxonId(taxon.id)))>(&taxon.complete_name)</a>
+            </span>
         </dd>
         <dt>"Instructions"</dt>
         <dd>(proc.instructions)</dd>

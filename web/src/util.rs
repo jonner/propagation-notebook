@@ -1,54 +1,5 @@
-use libpropagation::{
-    collecting::CleaningProcedure,
-    propagation::PropagationProcedure,
-    region::{Region, RegionalTaxonStatus},
-    taxonomy::{Taxon, TaxonPropagationProcedure},
-};
 use serde::Serialize;
 use topcoat::context::{Cx, app_context};
-
-pub trait Path {
-    fn path(&self) -> String;
-}
-
-impl Path for CleaningProcedure {
-    fn path(&self) -> String {
-        format!("/taxa/{}/cleaning/{}", self.taxon_id, self.id)
-    }
-}
-
-impl Path for PropagationProcedure {
-    fn path(&self) -> String {
-        format!("/propagation/{}", self.id)
-    }
-}
-
-impl Path for TaxonPropagationProcedure {
-    fn path(&self) -> String {
-        format!(
-            "/taxa/{}/propagation/{}",
-            self.taxon_id, self.propagation_id
-        )
-    }
-}
-
-impl Path for Taxon {
-    fn path(&self) -> String {
-        format!("/taxa/{}", self.id)
-    }
-}
-
-impl Path for Region {
-    fn path(&self) -> String {
-        format!("/regions/{}", self.id)
-    }
-}
-
-impl Path for RegionalTaxonStatus {
-    fn path(&self) -> String {
-        format!("/regions/{}/taxa/{}", self.region_id, self.taxon_id)
-    }
-}
 
 pub const PER_PAGE: usize = 50;
 

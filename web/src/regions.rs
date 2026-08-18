@@ -2,7 +2,7 @@ use libpropagation::region::{OriginFilter, Region, RegionCategory, RegionalTaxon
 use serde::Serialize;
 use topcoat::{
     context::Cx,
-    router::{page, path_param, query_params},
+    router::{href, page, path_param, query_params},
     view::{attributes, view},
 };
 use tracing::trace;
@@ -12,8 +12,11 @@ use crate::{
         Breadcrumb, breadcrumbs, conservation_status_badge, harvest_timeline, leaflet_map,
         origin_badge, pagination_control, regional_taxa_table, week_navigator,
     },
-    util::{ModifyOffset, PER_PAGE, PageState, Path, db},
+    taxa,
+    util::{ModifyOffset, PER_PAGE, PageState, db},
 };
+
+path_param!(pub region_id: u64, error = bad_request);
 
 #[page("/regions")]
 pub async fn list(cx: &Cx) -> topcoat::Result {
@@ -75,7 +78,11 @@ pub async fn list(cx: &Cx) -> topcoat::Result {
                     <h2>(t.0)</h2>
                     <ul class="contents">
                         for region in regions {
-                            <li><a href=(region.path())>(region.name)</a></li>
+                            <li>
+                                <a href=(href!(overview, RegionId(region.id)))>
+                                    (region.name)
+                                </a>
+                            </li>
                         }
                     </ul>
                 </section>
@@ -83,8 +90,6 @@ pub async fn list(cx: &Cx) -> topcoat::Result {
         </div>
     }
 }
-
-path_param!(region_id: u64, error = bad_request);
 
 #[page("/regions/{region_id}")]
 pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
@@ -141,12 +146,12 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
                 <nav>
                     <ul>
                         <li>
-                            <a href=(format!("{}/details", region.path()))>
+                            <a href=(href!(details, RegionId(region.id)))>
                                 "Region details"
                             </a>
                         </li>
                         <li>
-                            <a href=(format!("{}/taxa", region.path()))>
+                            <a href=(href!(taxa_list, RegionId(region.id)))>
                                 "Full taxon list"
                             </a>
                             " ("
@@ -160,7 +165,7 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
                 <h2>"Search"</h2>
                 <form
                     method="get"
-                    action=(format!("{}/taxa", region.path()))
+                    action=(href!(taxa_list, RegionId(region.id)))
                     class="flex w-full md:w-xl"
                 >
                     <input
@@ -180,7 +185,7 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
                     taxa: &ending,
                     if remaining > 0 {
                         <div>
-                            <a href=(format!("{}/ending", region.path()))>
+                            <a href=(href!(harvest_ending, RegionId(region.id)))>
                                 (format!("... and {} more", remaining))
                             </a>
                         </div>
@@ -195,7 +200,7 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
                     taxa: &starting_soon,
                     if remaining > 0 {
                         <div>
-                            <a href=(format!("{}/starting", region.path()))>
+                            <a href=(href!(harvest_starting, RegionId(region.id)))>
                                 (format!("... and {} more", remaining))
                             </a>
                         </div>
@@ -244,7 +249,7 @@ pub(crate) async fn harvest_starting(cx: &Cx) -> topcoat::Result {
             text: "Regions".to_string(),
         },
         Breadcrumb {
-            url: Some(region.path()),
+            url: Some(href!(overview, RegionId(region.id)).resolve(cx)),
             text: region.name,
         },
         Breadcrumb {
@@ -299,7 +304,7 @@ pub(crate) async fn harvest_ending(cx: &Cx) -> topcoat::Result {
             text: "Regions".to_string(),
         },
         Breadcrumb {
-            url: Some(region.path()),
+            url: Some(href!(overview, RegionId(region.id)).resolve(cx)),
             text: region.name,
         },
         Breadcrumb {
@@ -337,7 +342,7 @@ pub(crate) async fn details(cx: &Cx) -> topcoat::Result {
             text: "Regions".to_string(),
         },
         Breadcrumb {
-            url: Some(region.path()),
+            url: Some(href!(overview, RegionId(region.id)).resolve(cx)),
             text: region.name.clone(),
         },
         Breadcrumb {
@@ -359,7 +364,7 @@ pub(crate) async fn details(cx: &Cx) -> topcoat::Result {
             <section>
                 <h2>"Taxa"</h2>
                 <div>
-                    <a href=(format!("{}/taxa", region.path()))>
+                    <a href=(href!(taxa_list, RegionId(region.id)))>
                         (region.taxon_statuses.get().len())
                     </a>
                 </div>
@@ -425,7 +430,7 @@ pub async fn taxa_list(cx: &Cx) -> topcoat::Result {
             text: "Regions".to_string(),
         },
         Breadcrumb {
-            url: Some(region.path()),
+            url: Some(href!(overview, RegionId(region.id)).resolve(cx)),
             text: region.name.clone(),
         },
         Breadcrumb {
@@ -491,10 +496,14 @@ pub async fn taxon_status(cx: &Cx) -> topcoat::Result {
         </h1>
         <dt>"Taxon"</dt>
         <dd>
-            <span class="latin"><a href=(taxon.path())>(&taxon.complete_name)</a></span>
+            <span class="latin">
+                <a href=(href!(taxa::details, taxa::TaxonId(taxon.id)))>
+                    (&taxon.complete_name)
+                </a>
+            </span>
         </dd>
         <dt>"Region"</dt>
-        <dd><a href=(region.path())>(&region.name)</a></dd>
+        <dd><a href=(href!(overview, RegionId(region.id)))>(&region.name)</a></dd>
         <dt>"Origin"</dt>
         <dd>
             if let Some(origin) = rts.origin {
