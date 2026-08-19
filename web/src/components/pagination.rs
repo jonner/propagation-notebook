@@ -141,7 +141,7 @@ pub async fn pagination_previous(
     view! {
         <a
             class=(class!(
-                button_variants(ButtonVariant::Ghost, ButtonSize::Md),
+                button_variants(ButtonVariant::Ghost, ButtonSize::Lg),
                 attrs.remove("class"),
             ))
             (attrs)
@@ -166,7 +166,7 @@ pub async fn pagination_next(
     view! {
         <a
             class=(class!(
-                button_variants(ButtonVariant::Ghost, ButtonSize::Md),
+                button_variants(ButtonVariant::Ghost, ButtonSize::Lg),
                 attrs.remove("class"),
             ))
             (attrs)
@@ -218,7 +218,7 @@ pub async fn pagination_text(
         <a
             aria-current=(active.then_some("page"))
             class=(class!(
-                button_variants(ButtonVariant::Ghost, ButtonSize::Md),
+                button_variants(ButtonVariant::Ghost, ButtonSize::Lg),
                 attrs.remove("class"),
             ))
             (attrs)
