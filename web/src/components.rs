@@ -8,6 +8,7 @@ use crate::{components::citations::citation_list, leaflet::Map, mdi};
 
 pub mod badge;
 pub mod button;
+pub mod card;
 pub mod citations;
 pub mod harvest;
 pub mod pagination;
