@@ -102,7 +102,7 @@ async fn update_regions(mut db: toasty::Db) -> Result<(), BackgroundError> {
                 warn!("Failed to query harvest info: {e}")
             }
             // for a constantly-running update thread, run slowly
-            std::thread::sleep(Duration::from_secs(5));
+            std::thread::sleep(Duration::from_secs(10));
         }
         match page.next(&mut db).await? {
             Some(next) => page = next,
@@ -124,7 +124,7 @@ async fn update_photos(mut db: toasty::Db) -> Result<(), BackgroundError> {
         if let Err(e) = taxon.update_photo(&mut db).await {
             warn!("Failed to update taxon photo: {e}");
         }
-        std::thread::sleep(Duration::from_secs(5));
+        std::thread::sleep(Duration::from_secs(10));
     }
     Ok(())
 }
@@ -137,7 +137,6 @@ pub async fn background_tasks(db: toasty::Db) -> () {
             if let Err(e) = update_regions(db1.clone()).await {
                 warn!("{e}");
             }
-            tokio::time::sleep(Duration::from_secs(20)).await;
         }
     });
 
@@ -147,7 +146,6 @@ pub async fn background_tasks(db: toasty::Db) -> () {
             if let Err(e) = update_photos(db2.clone()).await {
                 warn!("{e}");
             }
-            tokio::time::sleep(Duration::from_secs(20)).await;
         }
     });
 }
