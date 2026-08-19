@@ -329,7 +329,7 @@ pub async fn week_navigator(date: jiff::civil::Date) -> topcoat::Result {
         pagination(
             pagination_content(
                 pagination_item(
-                    pagination_previous(attrs: attributes! { href=(prev_link) })
+                    pagination_previous(label: prev_date.strftime("%B %d").to_string(), attrs: attributes! { href=(prev_link) })
                 )
                 pagination_item(
                     pagination_text(
@@ -338,7 +338,7 @@ pub async fn week_navigator(date: jiff::civil::Date) -> topcoat::Result {
                     )
                 )
                 pagination_item(
-                    pagination_next(attrs: attributes! { href=(next_link) })
+                    pagination_next(label: next_date.strftime("%B %d").to_string(), attrs: attributes! { href=(next_link) })
                 )
             )
         )
