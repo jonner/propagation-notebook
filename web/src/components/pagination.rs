@@ -41,7 +41,7 @@ pub async fn pagination(#[default] mut attrs: Attributes, #[default] child: View
         <nav
             aria-label="pagination"
             class=(class!(
-                "@container mx-auto flex w-full justify-center",
+                "@container mx-auto flex",
                 attrs.remove("class"),
             ))
             (attrs)
