@@ -14,6 +14,7 @@ use crate::{
         Breadcrumb,
         badge::{conservation_status_badge, origin_badge},
         breadcrumbs,
+        card::{card, card_content, card_footer, card_header, card_title},
         harvest::{harvest_timeline, regional_taxa_table},
         leaflet_map,
         pagination::{pagination_control, week_navigator},
@@ -107,7 +108,17 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
         .one()
         .exec(&mut db)
         .await?;
-    let (total_ending, ending) = region
+    let (n_fruiting, _) = region
+        .get_taxa(
+            &mut db,
+            None,
+            Some(OriginFilter::NativeOnly),
+            Some(HarvestFilter::ReadyNow),
+            None,
+            Some(N),
+        )
+        .await?;
+    let (n_ending, _) = region
         .get_taxa(
             &mut db,
             None,
@@ -120,7 +131,7 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
             Some(N),
         )
         .await?;
-    let (total_starting, starting_soon) = region
+    let (n_starting, _) = region
         .get_taxa(
             &mut db,
             None,
@@ -149,25 +160,13 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
                 breadcrumbs(items: items)
                 <h1>"Overview"</h1>
                 <p>(region.notes.as_deref().unwrap_or_default())</p>
-                <nav>
-                    <ul>
-                        <li>
-                            <a href=(href!(taxa_list, RegionId(region.id)))>
-                                "Full taxon list"
-                            </a>
-                            " ("
-                            (region.taxon_statuses.get().len())
-                            " taxa)"
-                        </li>
-                    </ul>
-                </nav>
             </hgroup>
             <section>
                 <h2>"Search"</h2>
                 <form
                     method="get"
                     action=(href!(taxa_list, RegionId(region.id)))
-                    class="flex w-full md:w-xl"
+                    class="flex w-full md:w-2xl"
                 >
                     <input
                         type="text"
@@ -178,36 +177,80 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
                     <button type="submit">"Search"</button>
                 </form>
             </section>
-            <section>
-                <h2>"Last chance to harvest"</h2>
-                let remaining = total_ending
-                    .saturating_sub(N.try_into().unwrap_or_default());
-                regional_taxa_table(
-                    taxa: &ending,
-                    if remaining > 0 {
+            <div class="flex flex-col md:flex-row gap-6">
+                if let Some(value) = region.geometry.as_ref() {
+                    <section class="w-full md:w-2xl order-last md:order-first">
                         <div>
-                            <a href=(href!(harvest_ending, RegionId(region.id)))>
-                                (format!("... and {} more", remaining))
-                            </a>
+                            leaflet_map(
+                                geometry: value,
+                                attrs: attributes!(class="w-full aspect-square max-h-[50dvh]")
+                            )
                         </div>
-                    }
-                )
-            </section>
-            <section>
-                <h2>"Beginning to bear fruit"</h2>
-                let remaining = total_starting
-                    .saturating_sub(N.try_into().unwrap_or_default());
-                regional_taxa_table(
-                    taxa: &starting_soon,
-                    if remaining > 0 {
-                        <div>
-                            <a href=(href!(harvest_starting, RegionId(region.id)))>
-                                (format!("... and {} more", remaining))
-                            </a>
-                        </div>
-                    }
-                )
-            </section>
+                    </section>
+                }
+                <section class="flex flex-col items-stretch gap-6 justify-between">
+                    card(
+                        attrs: attributes! { class="grow" },
+                        card_header(card_title("Total taxa"))
+                        card_content(
+                            <div>
+                                <a
+                                    href=(href!(taxa_list, RegionId(region.id)))
+                                    class="text-4xl"
+                                >
+                                    (region.taxon_statuses.get().len())
+                                </a>
+                            </div>
+                        )
+                        card_footer()
+                    )
+                    card(
+                        attrs: attributes! { class="grow" },
+                        card_header(card_title("Currently Fruiting"))
+                        card_content(
+                            <div>
+                                <a
+                                    href=(href!(harvest_fruiting, RegionId(region.id)))
+                                    class="text-4xl"
+                                >
+                                    (n_fruiting)
+                                </a>
+                            </div>
+                        )
+                        card_footer()
+                    )
+                    card(
+                        attrs: attributes! { class="grow" },
+                        card_header(card_title("Winding Down..."))
+                        card_content(
+                            <div>
+                                <a
+                                    href=(href!(harvest_ending, RegionId(region.id)))
+                                    class="text-4xl"
+                                >
+                                    (n_ending)
+                                </a>
+                            </div>
+                        )
+                        card_footer()
+                    )
+                    card(
+                        attrs: attributes! { class="grow" },
+                        card_header(card_title("Ramping up..."))
+                        card_content(
+                            <div>
+                                <a
+                                    href=(href!(harvest_starting, RegionId(region.id)))
+                                    class="text-4xl"
+                                >
+                                    (n_starting)
+                                </a>
+                            </div>
+                        )
+                        card_footer()
+                    )
+                </section>
+            </div>
         </div>
     }
 }
