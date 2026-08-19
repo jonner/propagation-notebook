@@ -1,4 +1,6 @@
-use libpropagation::region::{OriginFilter, Region, RegionCategory, RegionalTaxonStatus};
+use libpropagation::region::{
+    HarvestFilter, OriginFilter, Region, RegionCategory, RegionalTaxonStatus,
+};
 use serde::Serialize;
 use topcoat::{
     context::Cx,
@@ -110,7 +112,7 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
             &mut db,
             None,
             Some(OriginFilter::NativeOnly),
-            Some(libpropagation::region::HarvestFilter::EndingSoon {
+            Some(HarvestFilter::EndingSoon {
                 context: 10,
                 doy: None,
             }),
@@ -123,7 +125,7 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
             &mut db,
             None,
             Some(OriginFilter::NativeOnly),
-            Some(libpropagation::region::HarvestFilter::StartingSoon {
+            Some(HarvestFilter::StartingSoon {
                 context: 10,
                 doy: None,
             }),
@@ -234,7 +236,7 @@ pub(crate) async fn harvest_starting(cx: &Cx) -> topcoat::Result {
             &mut db,
             None,
             Some(OriginFilter::NativeOnly),
-            Some(libpropagation::region::HarvestFilter::StartingSoon {
+            Some(HarvestFilter::StartingSoon {
                 context: 10,
                 doy: Some(doy),
             }),
@@ -289,7 +291,7 @@ pub(crate) async fn harvest_ending(cx: &Cx) -> topcoat::Result {
             &mut db,
             None,
             Some(OriginFilter::NativeOnly),
-            Some(libpropagation::region::HarvestFilter::EndingSoon {
+            Some(HarvestFilter::EndingSoon {
                 context: 10,
                 doy: Some(doy),
             }),
@@ -357,7 +359,7 @@ pub async fn taxa_list(cx: &Cx) -> topcoat::Result {
                 None
             },
             if Some(true) == params.ready {
-                Some(libpropagation::region::HarvestFilter::ReadyNow)
+                Some(HarvestFilter::ReadyNow)
             } else {
                 None
             },
