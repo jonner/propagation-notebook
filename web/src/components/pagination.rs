@@ -1,3 +1,4 @@
+use jiff::ToSpan;
 use topcoat::{
     Result,
     icon::{icon, iconify::iconify_icon},
@@ -200,6 +201,33 @@ pub async fn pagination_ellipsis(#[default] mut attrs: Attributes) -> Result {
     }
 }
 
+/// The link to the page before the one being read.
+#[component]
+pub async fn pagination_text(
+    /// The link's label.
+    #[into]
+    label: String,
+    /// Whether this link points at the page being read.
+    #[default]
+    active: bool,
+    /// Extra attributes for the `<a>` element.
+    #[default]
+    mut attrs: Attributes,
+) -> Result {
+    view! {
+        <a
+            aria-current=(active.then_some("page"))
+            class=(class!(
+                button_variants(ButtonVariant::Ghost, ButtonSize::Md),
+                attrs.remove("class"),
+            ))
+            (attrs)
+        >
+            <span class=(LABEL)>(label)</span>
+        </a>
+    }
+}
+
 enum PageLinkType {
     Previous(usize),
     Next(usize),
@@ -285,6 +313,33 @@ pub async fn pagination_control<'p, T: ModifyOffset + Clone + Sync + Send + 'p>(
                         }
                     )
                 }
+            )
+        )
+    }
+}
+
+#[component]
+pub async fn week_navigator(date: jiff::civil::Date) -> topcoat::Result {
+    let prev_date = date - 7.days();
+    let prev_link = format!("?date={}", prev_date);
+    let next_date = date + 7.days();
+    let next_link = format!("?date={}", next_date);
+    let date_str = date.strftime("%B %d").to_string();
+    view! {
+        pagination(
+            pagination_content(
+                pagination_item(
+                    pagination_previous(attrs: attributes! { href=(prev_link) })
+                )
+                pagination_item(
+                    pagination_text(
+                        active: true,
+                        label: date_str
+                    )
+                )
+                pagination_item(
+                    pagination_next(attrs: attributes! { href=(next_link) })
+                )
             )
         )
     }

@@ -1,4 +1,3 @@
-use jiff::ToSpan;
 use libpropagation::propagation::PropagationProcedure;
 use topcoat::{
     icon::icon,
@@ -98,23 +97,5 @@ pub async fn leaflet_map(
     view! {
         <div id=(&leaflet_script.id) (attrs)></div>
         (leaflet_script)
-    }
-}
-
-#[component]
-pub async fn week_navigator(date: jiff::civil::Date) -> topcoat::Result {
-    let prev_date = date - 7.days();
-    let prev_link = format!("?date={}", prev_date);
-    let next_date = date + 7.days();
-    let next_link = format!("?date={}", next_date);
-    let date_str = date.strftime("%B %d").to_string();
-    view! {
-        <nav class="flex gap-4">
-            <ol class="contents">
-                <li><a href=(prev_link)>"Prev"</a></li>
-                <li>(date_str)</li>
-                <li><a href=(next_link)>"Next"</a></li>
-            </ol>
-        </nav>
     }
 }
