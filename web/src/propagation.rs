@@ -20,11 +20,7 @@ pub async fn list(cx: &Cx) -> topcoat::Result {
         <h1>"Propagation Procedures"</h1>
         <ul>
             for p in procedures {
-                <li>
-                    <a href=(href!(details, PropagationId(p.id)))>
-                        (p.name)
-                    </a>
-                </li>
+                <li><a href=(href!(details, PropagationId(p.id)))>(p.name)</a></li>
             }
         </ul>
     }

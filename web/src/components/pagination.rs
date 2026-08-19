@@ -246,29 +246,42 @@ pub async fn pagination_control<'p, T: ModifyOffset + Clone + Sync + Send + 'p>(
                         match item {
                             PageLinkType::Ellipsis => {
                                 pagination_ellipsis()
-                            },
+                            }
                             PageLinkType::Page(n) => {
-                                pagination_link(active: n == cur, attrs: attributes! { href=(state
+                                pagination_link(
+                                    active: n == cur,
+                                    attrs: attributes! {
+                                        href=(state
                                             .query_with_offset(
                                                 state.offset_for_page(n).unwrap_or_default(),
                                                 params.clone(),
                                             ))
-                                        }, (n.to_string()))
-                            },
+                                    },
+                                    (n.to_string())
+                                )
+                            }
                             PageLinkType::Next(n) => {
-                                pagination_next(attrs: attributes! { href=(state
+                                pagination_next(
+                                    attrs: attributes! {
+                                        href=(state
                                             .query_with_offset(
                                                 state.offset_for_page(n).unwrap_or_default(),
                                                 params.clone(),
-                                            ))})
-                            },
+                                            ))
+                                    }
+                                )
+                            }
                             PageLinkType::Previous(n) => {
-                                pagination_previous(attrs: attributes! { href=(state
+                                pagination_previous(
+                                    attrs: attributes! {
+                                        href=(state
                                             .query_with_offset(
                                                 state.offset_for_page(n).unwrap_or_default(),
                                                 params.clone(),
-                                            ))})
-                            },
+                                            ))
+                                    }
+                                )
+                            }
                         }
                     )
                 }

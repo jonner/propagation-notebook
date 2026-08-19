@@ -14,14 +14,11 @@ pub async fn origin_badge(origin: Origin, #[default] mut attrs: Attributes) -> t
     if let Some((klass, text, tooltip_text)) = vals {
         view! {
             tooltip(
-            <div
-                class=(class!(klass, "badge", attrs.remove("class")))
-                (attrs)
-            >
-                (text)
-            </div>
+                <div class=(class!(klass, "badge", attrs.remove("class"))) (attrs)>
+                    (text)
+                </div>
                 tooltip_content((tooltip_text))
-        )
+            )
         }
     } else {
         view! {}
@@ -40,13 +37,10 @@ pub async fn conservation_status_badge(
     };
     view! {
         tooltip(
-        <div
-            class=(class!(klass, "badge", attrs.remove("class")))
-            (attrs)
-        >
-            (text)
-        </div>
+            <div class=(class!(klass, "badge", attrs.remove("class"))) (attrs)>
+                (text)
+            </div>
             tooltip_content((tooltip_text))
-    )
+        )
     }
 }
