@@ -183,7 +183,7 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
                         <div>
                             leaflet_map(
                                 geometry: value,
-                                attrs: attributes!(class="w-full aspect-square max-h-[50dvh]")
+                                attrs: attributes!(class="w-full aspect-square")
                             )
                         </div>
                     </section>
