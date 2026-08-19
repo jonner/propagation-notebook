@@ -26,7 +26,10 @@ const map = L.map('"#,
         );
         parts.push_str(&self.id);
         parts.push_str(
-            r#"');
+            r#"', {
+    dragging: !L.Browser.mobile,
+    tap: !L.Browser.mobile,
+});
 
 // Add the base tile layer
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
