@@ -109,7 +109,7 @@ pub async fn taxon_regional_table(
             let region = rts.region.get();
             (
                 region.name.as_str(),
-                href!(regions::details, regions::RegionId(region.id)).resolve(cx),
+                href!(regions::overview, regions::RegionId(region.id)).resolve(cx),
                 rts,
             )
         })
