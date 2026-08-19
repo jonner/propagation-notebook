@@ -319,26 +319,30 @@ pub async fn pagination_control<'p, T: ModifyOffset + Clone + Sync + Send + 'p>(
 }
 
 #[component]
-pub async fn week_navigator(date: jiff::civil::Date) -> topcoat::Result {
+pub async fn week_navigator(
+    date: jiff::civil::Date,
+    #[default] attrs: Attributes,
+) -> topcoat::Result {
+    let fmt = |dt: jiff::civil::Date| dt.strftime("%B %d").to_string();
     let prev_date = date - 7.days();
     let prev_link = format!("?date={}", prev_date);
     let next_date = date + 7.days();
     let next_link = format!("?date={}", next_date);
-    let date_str = date.strftime("%B %d").to_string();
     view! {
         pagination(
+            attrs: attrs,
             pagination_content(
                 pagination_item(
-                    pagination_previous(label: prev_date.strftime("%B %d").to_string(), attrs: attributes! { href=(prev_link) })
+                    pagination_previous(label: fmt(prev_date), attrs: attributes! { href=(prev_link) })
                 )
                 pagination_item(
                     pagination_text(
                         active: true,
-                        label: date_str
+                        label: fmt(date)
                     )
                 )
                 pagination_item(
-                    pagination_next(label: next_date.strftime("%B %d").to_string(), attrs: attributes! { href=(next_link) })
+                    pagination_next(label: fmt(next_date), attrs: attributes! { href=(next_link) })
                 )
             )
         )
