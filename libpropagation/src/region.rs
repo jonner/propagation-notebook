@@ -91,8 +91,6 @@ pub struct Region {
 
     #[has_many]
     pub taxon_statuses: Deferred<Vec<RegionalTaxonStatus>>,
-    #[has_many]
-    pub npcs: Deferred<Vec<NativePlantCommunity>>,
 }
 
 impl Region {
@@ -559,10 +557,6 @@ pub struct RegionalTaxonStatus {
     pub conservation_status: Option<ConservationStatus>,
     pub wetland_indicator: Option<WetlandIndicator>,
     pub harvest_window: RegionalHarvestWindow,
-    #[index]
-    pub native_plant_community_id: Option<u64>,
-    #[belongs_to(key=native_plant_community_id, references=id)]
-    pub native_plant_community: Deferred<NativePlantCommunity>,
 
     #[auto]
     pub created_at: jiff::Timestamp,
@@ -594,24 +588,6 @@ impl RegionalTaxonStatus {
         let region = self.region.get();
         region.query_harvest_info(taxon, db).await
     }
-}
-
-#[derive(Debug, Clone, toasty::Model)]
-pub struct NativePlantCommunity {
-    #[auto]
-    #[key]
-    pub id: u64,
-
-    #[index]
-    pub region_id: u64,
-    #[belongs_to(key=region_id, references=id)]
-    pub region: Deferred<Region>,
-
-    #[index]
-    pub name: String,
-
-    #[has_many]
-    regional_taxon_statuses: Deferred<Vec<RegionalTaxonStatus>>,
 }
 
 mod file {
