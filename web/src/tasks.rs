@@ -137,7 +137,7 @@ pub async fn background_tasks(db: toasty::Db) -> () {
             if let Err(e) = update_regions(db1.clone()).await {
                 warn!("{e}");
             }
-            tokio::time::sleep(Duration::from_secs(10)).await;
+            tokio::time::sleep(Duration::from_secs(20)).await;
         }
     });
 
@@ -147,7 +147,7 @@ pub async fn background_tasks(db: toasty::Db) -> () {
             if let Err(e) = update_photos(db2.clone()).await {
                 warn!("{e}");
             }
-            tokio::time::sleep(Duration::from_secs(10)).await;
+            tokio::time::sleep(Duration::from_secs(20)).await;
         }
     });
 }
