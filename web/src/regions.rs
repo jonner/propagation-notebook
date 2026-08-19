@@ -328,6 +328,56 @@ pub(crate) async fn harvest_ending(cx: &Cx) -> topcoat::Result {
     }
 }
 
+#[page("/regions/{region_id}/fruiting")]
+pub(crate) async fn harvest_fruiting(cx: &Cx) -> topcoat::Result {
+    let id = path_param::<RegionId>(cx)?;
+    let params = query_params::<HarvestParams>(cx)?;
+    let mut db = db(cx);
+    let region = Region::filter_by_id(id)
+        .include(Region::fields().taxon_statuses())
+        .one()
+        .exec(&mut db)
+        .await?;
+    let date = params.date.unwrap_or_else(|| jiff::Zoned::now().date());
+    let doy = date.day_of_year();
+    // FIXME: pagination
+    let (_total, ending) = region
+        .get_taxa(
+            &mut db,
+            None,
+            Some(OriginFilter::NativeOnly),
+            Some(HarvestFilter::ReadyOnDoy(date.day_of_year())),
+            None,
+            None,
+        )
+        .await?;
+    let items = vec![
+        Breadcrumb {
+            url: Some("/regions".to_string()),
+            text: "Regions".to_string(),
+        },
+        Breadcrumb {
+            url: Some(href!(overview, RegionId(region.id)).resolve(cx)),
+            text: region.name,
+        },
+        Breadcrumb {
+            url: None,
+            text: "Fruiting".to_string(),
+        },
+    ];
+    view! {
+        <div class="flex flex-col gap-6">
+            <hgroup>
+                breadcrumbs(items: items)
+                <h1>"Currently fruiting"</h1>
+                <p>("These species are bearing fruit on the given date.")</p>
+                week_navigator(date: date, attrs: attributes! { class="justify-center md:justify-normal" })
+            </hgroup>
+            regional_taxa_table(taxa: &ending, current_doy: Some(doy))
+        </div>
+    }
+}
+
 #[derive(Debug, Clone, Serialize)]
 #[query_params(error = bad_request)]
 pub struct RegionalTaxaListParams {
