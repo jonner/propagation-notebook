@@ -150,11 +150,6 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
                 <nav>
                     <ul>
                         <li>
-                            <a href=(href!(details, RegionId(region.id)))>
-                                "Region details"
-                            </a>
-                        </li>
-                        <li>
                             <a href=(href!(taxa_list, RegionId(region.id)))>
                                 "Full taxon list"
                             </a>
@@ -327,63 +322,6 @@ pub(crate) async fn harvest_ending(cx: &Cx) -> topcoat::Result {
                 week_navigator(date: date)
             </hgroup>
             regional_taxa_table(taxa: &ending, current_doy: Some(doy))
-        </div>
-    }
-}
-
-#[page("/regions/{region_id}/details")]
-pub(crate) async fn details(cx: &Cx) -> topcoat::Result {
-    let id = path_param::<RegionId>(cx)?;
-    let mut db = db(cx);
-    let region = Region::filter_by_id(id)
-        .include(Region::fields().taxon_statuses())
-        .one()
-        .exec(&mut db)
-        .await?;
-    let items = vec![
-        Breadcrumb {
-            url: Some("/regions".to_string()),
-            text: "Regions".to_string(),
-        },
-        Breadcrumb {
-            url: Some(href!(overview, RegionId(region.id)).resolve(cx)),
-            text: region.name.clone(),
-        },
-        Breadcrumb {
-            url: None,
-            text: "Details".to_string(),
-        },
-    ];
-    view! {
-        <div class="flex flex-col gap-6">
-            <hgroup>
-                breadcrumbs(items: items)
-                <h1>(&region.name)</h1>
-                <p>(region.notes.as_deref().unwrap_or_default())</p>
-            </hgroup>
-            <section>
-                <h2>"Category"</h2>
-                <div>(region.category.to_string())</div>
-            </section>
-            <section>
-                <h2>"Taxa"</h2>
-                <div>
-                    <a href=(href!(taxa_list, RegionId(region.id)))>
-                        (region.taxon_statuses.get().len())
-                    </a>
-                </div>
-            </section>
-            if let Some(value) = region.geometry.as_ref() {
-                <section>
-                    <h2>"Geometry"</h2>
-                    <div>
-                        leaflet_map(
-                            geometry: value,
-                            attrs: attributes!(class="w-full aspect-square max-h-[50dvh]")
-                        )
-                    </div>
-                </section>
-            }
         </div>
     }
 }
