@@ -1,6 +1,6 @@
 use directories::ProjectDirs;
-use toasty::ModelSet;
-use tracing::trace;
+use toasty::{ModelSet, embed_migrations, migration::MigrationSet};
+use tracing::{debug, trace};
 
 use crate::error::Error;
 
@@ -16,6 +16,7 @@ pub fn models() -> ModelSet {
     toasty::models!(crate::*)
 }
 
+static MIGRATIONS: MigrationSet = embed_migrations!("../db");
 pub async fn db() -> Result<toasty::Db, Error> {
     let db_uri = match std::env::var("PN_DB_URI") {
         Ok(s) => Ok(s),
@@ -36,10 +37,13 @@ pub async fn db() -> Result<toasty::Db, Error> {
         Err(e) => Err(Error::Runtime(error::Runtime::InvalidEnvVar(e.to_string()))),
     }?;
     trace!(?db_uri);
-    Ok(toasty::Db::builder()
+    let db = toasty::Db::builder()
         .models(models())
         .connect(&db_uri)
-        .await?)
+        .await?;
+    let report = MIGRATIONS.apply(&db).await?;
+    debug!("Applied {} migrations", report.applied());
+    Ok(db)
 }
 
 pub trait ImportProgressReporter {
