@@ -238,14 +238,14 @@ pub struct TaxonPropagationProcedureDetails {
 
 impl From<super::TaxonPropagationProcedure> for TaxonPropagationProcedureDetails {
     fn from(value: super::TaxonPropagationProcedure) -> Self {
+        let citations = if value.citation_links.is_unloaded() {
+            &Default::default()
+        } else {
+            value.citation_links.get()
+        };
         Self {
             taxon: ObjectReference::from_deferred(&value.taxon, value.taxon_id),
-            citations: value
-                .citation_links
-                .get()
-                .iter()
-                .map(|v| v.citation.get().into())
-                .collect(),
+            citations: citations.iter().map(|v| v.citation.get().into()).collect(),
             core: TaxonPropagationProcedureCompact::from(value),
         }
     }
