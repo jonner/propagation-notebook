@@ -414,7 +414,10 @@ pub(crate) async fn harvest_fruiting(cx: &Cx) -> topcoat::Result {
                 breadcrumbs(items: items)
                 <h1>"Currently fruiting"</h1>
                 <p>("These species are bearing fruit on the given date.")</p>
-                week_navigator(date: date, attrs: attributes! { class="justify-center md:justify-normal" })
+                week_navigator(
+                    date: date,
+                    attrs: attributes! { class="justify-center md:justify-normal" }
+                )
             </hgroup>
             regional_taxa_table(taxa: &ending, current_doy: Some(doy))
         </div>
