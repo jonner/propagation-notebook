@@ -5,14 +5,14 @@ use libpropagation::{
 use topcoat::{
     context::Cx,
     router::{href, page, path_param, query_params},
-    view::view,
+    view::{attributes, view},
 };
 use tracing::trace;
 
 use crate::{
     components::{
-        self, Breadcrumb, breadcrumbs, citations::citation_list, harvest::taxon_regional_table,
-        pagination::pagination_control,
+        self, Breadcrumb, breadcrumbs, button::button, citations::citation_list,
+        harvest::taxon_regional_table, input::input, pagination::pagination_control,
     },
     util::{ModifyOffset, PER_PAGE, PageState, db},
 };
@@ -67,14 +67,16 @@ pub(crate) async fn list(cx: &Cx) -> topcoat::Result {
     view! {
         <h1>"Taxon List"</h1>
         <form method="get" action="/taxa" class="flex my-6 w-full md:w-xl">
-            <input
-                type="text"
-                name="q"
-                placeholder="Search for a taxon"
-                value=(params.q.as_deref().unwrap_or_default())
-                class="me-2 flex-grow"
-            >
-            <button type="submit">"Search"</button>
+            input(
+                attrs: attributes! {
+                    type="text"
+                    name="q"
+                    placeholder="Search for a taxon"
+                    value=(params.q.as_deref().unwrap_or_default())
+                    class="me-2 flex-grow"
+                }
+            )
+            button(attrs: attributes! { type="submit" }, "Search")
         </form>
         if page_state.total_pages() > 1 {
             pagination_control(state: &page_state, params: params)

@@ -14,8 +14,10 @@ use crate::{
         Breadcrumb,
         badge::{conservation_status_badge, origin_badge},
         breadcrumbs,
+        button::button,
         card::{card, card_content, card_footer, card_header, card_title},
         harvest::{harvest_timeline, regional_taxa_table},
+        input::input,
         leaflet_map,
         pagination::{pagination_control, week_navigator},
     },
@@ -168,13 +170,15 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
                     action=(href!(taxa_list, RegionId(region.id)))
                     class="flex w-full md:w-2xl"
                 >
-                    <input
-                        type="text"
-                        name="q"
-                        placeholder="Search for a taxon"
-                        class="me-2 flex-grow"
-                    >
-                    <button type="submit">"Search"</button>
+                    input(
+                        attrs: attributes! {
+                            type="text"
+                            name="q"
+                            placeholder="Search for a taxon"
+                            class="me-2 flex-grow"
+                        }
+                    )
+                    button(attrs: attributes! { type="submit" }, "Search")
                 </form>
             </section>
             <div class="flex flex-col md:flex-row gap-6">
@@ -486,14 +490,16 @@ pub async fn taxa_list(cx: &Cx) -> topcoat::Result {
             </hgroup>
             <section>
                 <form method="get" class="flex w-full md:w-xl">
-                    <input
-                        type="text"
-                        name="q"
-                        value=(params.q.as_ref())
-                        placeholder="Search for a taxon"
-                        class="me-2 flex-grow"
-                    >
-                    <button type="submit">"Search"</button>
+                    input(
+                        attrs: attributes! {
+                            type="text"
+                            name="q"
+                            value=(params.q.as_ref())
+                            placeholder="Search for a taxon"
+                            class="me-2 flex-grow"
+                        }
+                    )
+                    button(attrs: attributes! { type="submit" }, "Search")
                 </form>
             </section>
             <section>

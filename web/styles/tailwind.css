@@ -155,14 +155,6 @@ a.button, form button {
   @apply text-white bg-leaf;
 }
 
-form input[type=text], form button {
-  @apply px-3 py-2;
-}
-
-a.button {
-  @apply px-2 py-1;
-}
-
 .latin {
   @apply italic
 }

@@ -11,6 +11,7 @@ pub mod button;
 pub mod card;
 pub mod citations;
 pub mod harvest;
+pub mod input;
 pub mod pagination;
 pub mod tooltip;
 

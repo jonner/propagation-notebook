@@ -8,7 +8,11 @@ use topcoat::{
 };
 use tracing::debug;
 
-use crate::{error::Error, tasks::background_tasks};
+use crate::{
+    components::{button::button, input::input},
+    error::Error,
+    tasks::background_tasks,
+};
 
 mod citation;
 mod components;
@@ -172,13 +176,15 @@ async fn home() -> topcoat::Result {
                 <h2>"Growing Native Plants"</h2>
                 <p>"Find propagation information for a particular species:"</p>
                 <form method="get" action="/taxa" class="flex my-6 w-full md:w-xl">
-                    <input
-                        type="text"
-                        name="q"
-                        placeholder="Search for a taxon"
-                        class="me-2 flex-grow"
-                    >
-                    <button type="submit">"Search"</button>
+                    input(
+                        attrs: attributes! {
+                            type="text"
+                            name="q"
+                            placeholder="Search for a taxon"
+                            class="me-2 flex-grow"
+                        }
+                    )
+                    button(attrs: attributes! { type="submit" }, "Search")
                 </form>
             </section>
             <section>

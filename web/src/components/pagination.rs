@@ -40,10 +40,7 @@ pub async fn pagination(#[default] mut attrs: Attributes, #[default] child: View
     view! {
         <nav
             aria-label="pagination"
-            class=(class!(
-                "@container mx-auto flex",
-                attrs.remove("class"),
-            ))
+            class=(class!("@container mx-auto flex", attrs.remove("class")))
             (attrs)
         >
             (child)
@@ -333,16 +330,17 @@ pub async fn week_navigator(
             attrs: attrs,
             pagination_content(
                 pagination_item(
-                    pagination_previous(label: fmt(prev_date), attrs: attributes! { href=(prev_link) })
-                )
-                pagination_item(
-                    pagination_text(
-                        active: true,
-                        label: fmt(date)
+                    pagination_previous(
+                        label: fmt(prev_date),
+                        attrs: attributes! { href=(prev_link) }
                     )
                 )
+                pagination_item(pagination_text(active: true, label: fmt(date)))
                 pagination_item(
-                    pagination_next(label: fmt(next_date), attrs: attributes! { href=(next_link) })
+                    pagination_next(
+                        label: fmt(next_date),
+                        attrs: attributes! { href=(next_link) }
+                    )
                 )
             )
         )

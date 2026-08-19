@@ -16,6 +16,10 @@ file = "src/components/button.rs"
 hash = "sha256:edfefa3c9ef8e98aedc2f5bad6db77aea7af04211722a23bdac7c532768a554d"
 file = "src/components/card.rs"
 
+[registries.topcoat.components.input]
+hash = "sha256:2640a13bb6147da23026022adc14b2811097e69e5f50ca25b30534d24e1dba5e"
+file = "src/components/input.rs"
+
 [registries.topcoat.components.pagination]
 hash = "sha256:b4e1b4f92715e99e66831eaa94da4d0180822d3fd5e3698c95e3dfda55f877ac"
 file = "src/components/pagination.rs"
