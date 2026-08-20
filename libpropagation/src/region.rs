@@ -519,7 +519,7 @@ impl RegionalHarvestWindow {
         }
 
         let smoothed = gaussian_smooth(weeks, 1.2);
-        harvest_window(&smoothed, 0.9)
+        harvest_window(&smoothed, 0.85)
     }
 }
 
