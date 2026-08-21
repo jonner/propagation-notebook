@@ -92,7 +92,7 @@ async fn update_regions(mut db: toasty::Db) -> Result<(), BackgroundError> {
     let mut page = RegionalTaxonStatus::all()
         .include(RegionalTaxonStatus::fields().taxon())
         .include(RegionalTaxonStatus::fields().region())
-        .order_by(RegionalTaxonStatus::fields().updated_at().asc())
+        .order_by(RegionalTaxonStatus::fields().id().asc())
         .paginate(100)
         .exec(&mut db)
         .await?;
