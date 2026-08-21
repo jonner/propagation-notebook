@@ -365,7 +365,7 @@ impl TaxonCommands {
                         let update = if *missing {
                             let photo = TaxonPhoto::get_by_taxon_id(db, taxon.id).await;
                             trace!(?photo);
-                            !photo.is_ok()
+                            photo.is_err()
                         } else {
                             true
                         };
