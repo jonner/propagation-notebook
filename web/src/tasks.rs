@@ -102,7 +102,7 @@ async fn update_regions(mut db: toasty::Db) -> Result<(), BackgroundError> {
                 warn!("Failed to query harvest info: {e}")
             }
             // for a constantly-running update thread, run slowly
-            std::thread::sleep(Duration::from_secs(10));
+            tokio::time::sleep(Duration::from_secs(10)).await;
         }
         match page.next(&mut db).await? {
             Some(next) => page = next,
