@@ -343,7 +343,7 @@ impl Client {
         &self,
         taxon_id: u64,
         location: &SearchArea,
-    ) -> Result<(usize, Vec<u64>), Error> {
+    ) -> Result<Vec<u64>, Error> {
         let obs_endpoint = API_BASE_URL.join("observations/")?.join("histogram")?;
 
         let mut builder = self.0.get(obs_endpoint.clone()).query(&[
@@ -373,8 +373,7 @@ impl Client {
 
         let res: Response<Histogram> = builder.send().await?.json().await?;
         let weeks = res.into_result()?.results.object().weeks();
-        let total: u64 = weeks.iter().sum();
-        Ok((total as usize, weeks))
+        Ok(weeks)
     }
 
     pub async fn place_search(&self, q: &str) -> Result<Vec<Place>, Error> {

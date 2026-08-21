@@ -25,8 +25,10 @@ async fn update_regional_status(
         "Looking up harvest window for {} in region {}",
         taxon.complete_name, region.name
     );
-    let (samples, window) = rts.query_harvest_info(db).await?;
-    if samples > MIN_SAMPLES_HARVEST_WINDOW && window != rts.harvest_window {
+    let window = rts.query_harvest_info(db).await?;
+    if window.n_samples.unwrap_or_default() > MIN_SAMPLES_HARVEST_WINDOW.try_into().unwrap()
+        && window != rts.harvest_window
+    {
         debug!("Updating harvest window: {}", window);
         RegionalTaxonStatus::update_by_id(rts.id)
             .harvest_window(window)
@@ -67,8 +69,9 @@ async fn update_regional_status(
                         "No parent or siblings listed in this region. let's use the parent taxon to calculate a harvest window..."
                     );
                     if let Ok(parent) = Taxon::get_by_id(db, parent_id).await
-                        && let Ok((samples, window)) = region.query_harvest_info(&parent, db).await
-                        && samples > MIN_SAMPLES_HARVEST_WINDOW
+                        && let Ok(window) = region.query_harvest_info(&parent, db).await
+                        && window.n_samples.unwrap_or_default()
+                            > MIN_SAMPLES_HARVEST_WINDOW.try_into().unwrap()
                     {
                         debug!(
                             "Updating harvest window of {} using parent taxon {} : {}",

@@ -367,8 +367,10 @@ impl RegionCommands {
                         .await?;
                         pb.set_message(taxon.complete_name.clone());
                         match fullrts.query_harvest_info(db).await {
-                            Ok((total, window)) => {
-                                if total < *min_samples {
+                            Ok(window) => {
+                                if window.n_samples.unwrap_or_default()
+                                    < (*min_samples).try_into().unwrap()
+                                {
                                     warn!("Too few samples to calculate a harvest window");
                                 } else {
                                     match RegionalTaxonStatus::update_by_id(fullrts.id)
@@ -543,6 +545,7 @@ impl RegionTaxaCommands {
                     .harvest_window(RegionalHarvestWindow {
                         start_doy: props.harvest_start.map(|d| d.day_of_year()),
                         end_doy: props.harvest_end.map(|d| d.day_of_year()),
+                        ..Default::default()
                     })
                     .exec(db)
                     .await?
@@ -890,7 +893,8 @@ async fn interactive_harvest_window_with_expansion(
     tracing::debug!(?taxon, "getting seed observations with expansion");
     let mut taxon = taxon;
     loop {
-        let (total, histogram) = client.seed_histogram(taxon.id, &loc).await?;
+        let histogram = client.seed_histogram(taxon.id, &loc).await?;
+        let total = histogram.iter().sum::<u64>() as usize;
 
         if total < min_samples {
             let (msg, options) = match total {

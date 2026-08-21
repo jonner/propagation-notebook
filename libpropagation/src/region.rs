@@ -276,7 +276,7 @@ impl Region {
         &self,
         taxon: &Taxon,
         db: &mut toasty::Db,
-    ) -> Result<(usize, RegionalHarvestWindow), QueryHarvestError> {
+    ) -> Result<RegionalHarvestWindow, QueryHarvestError> {
         let inat = inaturalist::Client::new()?;
         let inat_taxon = if let Some(id) = taxon.inaturalist_id {
             let val = inat.taxon_info(id).await?;
@@ -296,9 +296,9 @@ impl Region {
         };
 
         let loc = inaturalist::SearchArea::BoundingBox(self.bounding_box()?);
-        let (total, histogram) = inat.seed_histogram(inat_taxon.id, &loc).await?;
+        let histogram = inat.seed_histogram(inat_taxon.id, &loc).await?;
         let harvest_window = RegionalHarvestWindow::from_histogram(&histogram).unwrap_or_default();
-        Ok((total, harvest_window))
+        Ok(harvest_window)
     }
 }
 
@@ -369,6 +369,7 @@ pub enum OriginFilter {
 pub struct RegionalHarvestWindow {
     pub start_doy: Option<i16>,
     pub end_doy: Option<i16>,
+    pub n_samples: Option<u64>,
 }
 
 pub enum HarvestFilter {
@@ -417,6 +418,7 @@ impl RegionalHarvestWindow {
 
     // FIXME: error handling
     pub fn from_histogram(weeks: &[u64]) -> Option<Self> {
+        let total = weeks.iter().sum();
         if weeks.len() < 52 || weeks.len() > 53 {
             return None;
         }
@@ -463,7 +465,7 @@ impl RegionalHarvestWindow {
         ///
         /// The histogram is treated as circular (weeks of the year), so harvest
         /// seasons that span New Year's are handled correctly.
-        fn harvest_window(weights: &[f64], fraction: f64) -> Option<RegionalHarvestWindow> {
+        fn harvest_window(weights: &[f64], fraction: f64) -> Option<(i16, i16)> {
             assert!(!weights.is_empty());
             assert!((0.0..=1.0).contains(&fraction));
 
@@ -509,17 +511,21 @@ impl RegionalHarvestWindow {
                 }
             }
 
-            Some(RegionalHarvestWindow {
-                // after finding the best start week and best end week, use the
-                // beginning of the week for the start, and the end of the week
-                // for the end
-                start_doy: Some((((best_start % n) as i16) * 7 + 1).clamp(1, 365)),
-                end_doy: Some((((best_end % n + 1) as i16) * 7).clamp(1, 365)),
-            })
+            // after finding the best start week and best end week, use the
+            // beginning of the week for the start, and the end of the week
+            // for the end
+            Some((
+                (((best_start % n) as i16) * 7 + 1).clamp(1, 365),
+                (((best_end % n + 1) as i16) * 7).clamp(1, 365),
+            ))
         }
 
         let smoothed = gaussian_smooth(weeks, 1.2);
-        harvest_window(&smoothed, 0.85)
+        harvest_window(&smoothed, 0.85).map(|(start, end)| RegionalHarvestWindow {
+            start_doy: Some(start),
+            end_doy: Some(end),
+            n_samples: Some(total),
+        })
     }
 }
 
@@ -583,7 +589,7 @@ impl RegionalTaxonStatus {
     pub async fn query_harvest_info(
         &self,
         db: &mut toasty::Db,
-    ) -> Result<(usize, RegionalHarvestWindow), QueryHarvestError> {
+    ) -> Result<RegionalHarvestWindow, QueryHarvestError> {
         let taxon = self.taxon.get();
         let region = self.region.get();
         region.query_harvest_info(taxon, db).await
