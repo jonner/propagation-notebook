@@ -357,7 +357,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
                             if let Some(id) = taxon.inaturalist_id {
                                 <a
                                     href=(format!(
-                                        "Https://www.inaturalist.org/taxa/{id}"
+                                        "https://www.inaturalist.org/taxa/{id}"
                                     ))
                                 >
                                     "iNaturalist taxon info"
