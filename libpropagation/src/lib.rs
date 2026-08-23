@@ -17,7 +17,7 @@ pub fn models() -> ModelSet {
 }
 
 static MIGRATIONS: MigrationSet = embed_migrations!("../db");
-pub async fn db() -> Result<toasty::Db, Error> {
+pub async fn db(migrate: bool) -> Result<toasty::Db, Error> {
     let db_uri = match std::env::var("PN_DB_URI") {
         Ok(s) => Ok(s),
         Err(std::env::VarError::NotPresent) => {
@@ -41,8 +41,10 @@ pub async fn db() -> Result<toasty::Db, Error> {
         .models(models())
         .connect(&db_uri)
         .await?;
-    let report = MIGRATIONS.apply(&db).await?;
-    debug!("Applied {} migrations", report.applied());
+    if migrate {
+        let report = MIGRATIONS.apply(&db).await?;
+        debug!("Applied {} migrations", report.applied());
+    }
     Ok(db)
 }
 

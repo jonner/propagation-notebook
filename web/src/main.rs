@@ -27,7 +27,7 @@ mod util;
 #[tokio::main]
 async fn main() -> Result<(), Error> {
     tracing_subscriber::fmt::init();
-    let db = libpropagation::db().await?;
+    let db = libpropagation::db(true).await?;
     if std::env::var("ENABLE_BACKGROUND_TASKS").is_ok() {
         debug!("Enabling background tasks...");
         tokio::spawn(background_tasks(db.clone()));

@@ -21,7 +21,7 @@ async fn get_region_taxa_from_region_with_full_include() {
         .ok()
         .and_then(|v| v.parse::<u64>().ok())
         .unwrap_or(1);
-    let mut db = libpropagation::db().await.unwrap();
+    let mut db = libpropagation::db(false).await.unwrap();
     let region = Region::filter_by_id(id)
         .include(Region::fields().taxon_statuses().taxon())
         .one()
@@ -48,7 +48,7 @@ async fn get_region_taxa_from_region_by_id_list() {
         .ok()
         .and_then(|v| v.parse::<u64>().ok())
         .unwrap_or(1);
-    let mut db = libpropagation::db().await.unwrap();
+    let mut db = libpropagation::db(false).await.unwrap();
     let region = Region::filter_by_id(id)
         .include(Region::fields().taxon_statuses())
         .one()
@@ -79,7 +79,7 @@ async fn get_region_taxa_from_taxon() {
         .ok()
         .and_then(|v| v.parse::<u64>().ok())
         .unwrap_or(1);
-    let mut db = libpropagation::db().await.unwrap();
+    let mut db = libpropagation::db(false).await.unwrap();
     let _taxa = Taxon::all()
         .filter(
             Taxon::fields()
@@ -106,7 +106,7 @@ async fn get_region_taxa_from_taxon_with_region() {
         .ok()
         .and_then(|v| v.parse::<u64>().ok())
         .unwrap_or(1);
-    let mut db = libpropagation::db().await.unwrap();
+    let mut db = libpropagation::db(false).await.unwrap();
     let _taxa = Taxon::all()
         .filter(
             Taxon::fields()
@@ -133,7 +133,7 @@ async fn get_region_taxa_from_pivot_with_full_include() {
         .ok()
         .and_then(|v| v.parse::<u64>().ok())
         .unwrap_or(1);
-    let mut db = libpropagation::db().await.unwrap();
+    let mut db = libpropagation::db(false).await.unwrap();
     let statuses = RegionalTaxonStatus::filter_by_region_id(id)
         .include(RegionalTaxonStatus::fields().taxon())
         .include(RegionalTaxonStatus::fields().region())

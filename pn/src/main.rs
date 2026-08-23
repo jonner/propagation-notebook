@@ -26,7 +26,7 @@ async fn main() -> anyhow::Result<()> {
     .expect("Failed to set ctrl+c handler");
 
     let options = Options::parse();
-    let mut db = libpropagation::db().await?;
+    let mut db = libpropagation::db(true).await?;
     match options.command {
         MainCommand::Init => init_command(&mut db).await?,
         MainCommand::Taxa { command } => command.run(&mut db, options.format).await?,

@@ -28,7 +28,7 @@ struct File {
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt::init();
-    let mut db = libpropagation::db().await?;
+    let mut db = libpropagation::db(false).await?;
     let path = std::env::args().nth(1).unwrap();
     tracing::debug!(?path);
     let contents: File =

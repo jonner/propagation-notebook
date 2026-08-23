@@ -169,7 +169,7 @@ mod test {
     #[tokio::test]
     async fn test_inat_taxon() {
         tracing_subscriber::fmt::init();
-        let mut db = libpropagation::db().await.unwrap();
+        let mut db = libpropagation::db(false).await.unwrap();
         let taxon = Taxon::filter_by_complete_name("Nuttallanthus canadensis")
             .include(Taxon::fields().vernaculars())
             .one()

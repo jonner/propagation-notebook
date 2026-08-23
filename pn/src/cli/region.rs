@@ -859,7 +859,7 @@ impl Display for MinimumObservationsAction {
 #[tokio::test]
 async fn test_seed_observation_window_with_expansion() {
     tracing_subscriber::fmt::init();
-    let mut db = libpropagation::db().await.unwrap();
+    let mut db = libpropagation::db(false).await.unwrap();
     let taxon = Taxon::filter_by_complete_name("Polemonium reptans var. reptans")
         .include(Taxon::fields().vernaculars())
         .one()
