@@ -291,6 +291,9 @@ pub struct Taxon {
     pub ancestor_links: Deferred<Vec<TaxonHierarchy>>,
     #[has_many(pair=ancestor)]
     pub descendant_links: Deferred<Vec<TaxonHierarchy>>,
+
+    #[has_many]
+    pub resources: Deferred<Vec<TaxonResource>>,
 }
 
 #[derive(Debug, Clone, toasty::Model)]
@@ -556,6 +559,26 @@ pub struct TaxonNote {
     pub citation_links: Deferred<Vec<TaxonNoteCitation>>,
     #[has_many(via=citation_links.citation)]
     pub citations: Deferred<Vec<Citation>>,
+}
+
+#[derive(Debug, Clone, toasty::Model)]
+pub struct TaxonResource {
+    #[auto]
+    #[key]
+    pub id: u64,
+
+    #[index]
+    pub taxon_id: u64,
+    #[belongs_to(key=taxon_id, references=id)]
+    pub taxon: Deferred<Taxon>,
+
+    pub name: String,
+    pub url: String,
+
+    #[auto]
+    pub created_at: jiff::Timestamp,
+    #[auto]
+    pub updated_at: jiff::Timestamp,
 }
 
 pub async fn import(

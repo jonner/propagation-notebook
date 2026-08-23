@@ -279,3 +279,53 @@ impl From<&super::TaxonPropagationProcedure> for TaxonPropagationProcedureCompac
         value.clone().into()
     }
 }
+
+#[skip_serializing_none]
+#[derive(Debug, Clone, Serialize)]
+pub struct TaxonResourceNoTaxon {
+    pub id: u64,
+    pub name: String,
+    pub url: String,
+    pub created_at: jiff::Timestamp,
+    pub updated_at: jiff::Timestamp,
+}
+
+impl From<super::TaxonResource> for TaxonResourceNoTaxon {
+    fn from(value: super::TaxonResource) -> Self {
+        Self {
+            id: value.id,
+            name: value.name,
+            url: value.url,
+            created_at: value.created_at,
+            updated_at: value.updated_at,
+        }
+    }
+}
+
+impl From<&super::TaxonResource> for TaxonResourceNoTaxon {
+    fn from(value: &super::TaxonResource) -> Self {
+        value.clone().into()
+    }
+}
+
+#[skip_serializing_none]
+#[derive(Debug, Clone, Serialize)]
+pub struct TaxonResourceDetails {
+    pub taxon: ObjectReference,
+    pub core: TaxonResourceNoTaxon,
+}
+
+impl From<super::TaxonResource> for TaxonResourceDetails {
+    fn from(value: super::TaxonResource) -> Self {
+        Self {
+            taxon: ObjectReference::from_deferred(&value.taxon, value.taxon_id),
+            core: TaxonResourceNoTaxon::from(value),
+        }
+    }
+}
+
+impl From<&super::TaxonResource> for TaxonResourceDetails {
+    fn from(value: &super::TaxonResource) -> Self {
+        value.clone().into()
+    }
+}
