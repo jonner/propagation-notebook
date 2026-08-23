@@ -9,24 +9,6 @@ use crate::{
 pub mod dto;
 
 #[derive(Debug, Clone, toasty::Model)]
-pub struct CollectingData {
-    #[auto]
-    #[key]
-    pub id: u64,
-
-    #[unique]
-    #[index]
-    pub taxon_id: u64,
-    #[belongs_to(key=taxon_id, references=id)]
-    pub taxon: Deferred<Taxon>,
-
-    pub ripening_indicators: Option<String>,
-    pub harvesting_notes: Option<String>,
-    pub storage: Option<String>,
-    pub storage_life: Option<String>,
-}
-
-#[derive(Debug, Clone, toasty::Model)]
 pub struct CleaningProcedure {
     #[auto]
     #[key]

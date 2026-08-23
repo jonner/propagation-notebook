@@ -16,7 +16,7 @@ pub enum TaxonomicAuthority {
 use crate::{
     ImportProgressReporter,
     citation::{Citation, TaxonNoteCitation, TaxonPropagationProcedureCitation},
-    collecting::{CleaningProcedure, CollectingData},
+    cleaning::CleaningProcedure,
     dto::ObjectReference,
     error::ImportExportError,
     propagation::PropagationProcedure,
@@ -276,8 +276,6 @@ pub struct Taxon {
     pub synonyms: Deferred<Vec<Synonym>>,
     #[has_many]
     pub regional_statuses: Deferred<Vec<RegionalTaxonStatus>>,
-    #[has_one]
-    pub collecting_data: Deferred<Option<CollectingData>>,
     #[has_many]
     pub cleaning_procedures: Deferred<Vec<CleaningProcedure>>,
     #[has_many]
@@ -537,6 +535,14 @@ pub struct TaxonPropagationProcedure {
     pub updated_at: jiff::Timestamp,
 }
 
+#[derive(Debug, Clone, toasty::Embed, Serialize, clap::ValueEnum)]
+pub enum TaxonNoteCategory {
+    General,
+    Ripening,
+    Harvesting,
+    Storage,
+}
+
 #[derive(Debug, Clone, toasty::Model)]
 pub struct TaxonNote {
     #[auto]
@@ -548,6 +554,9 @@ pub struct TaxonNote {
     #[belongs_to(key=taxon_id, references=id)]
     pub taxon: Deferred<Taxon>,
 
+    #[default(TaxonNoteCategory::General)]
+    pub category: TaxonNoteCategory,
+    pub title: String,
     pub text: String,
 
     #[auto]

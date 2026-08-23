@@ -5,7 +5,7 @@ use tracing::{debug, trace};
 use crate::error::Error;
 
 pub mod citation;
-pub mod collecting;
+pub mod cleaning;
 pub mod dto;
 pub mod error;
 pub mod propagation;

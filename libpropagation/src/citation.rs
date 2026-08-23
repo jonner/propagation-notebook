@@ -1,7 +1,7 @@
 use toasty::{Db, Deferred};
 
 use crate::{
-    collecting::CleaningProcedure,
+    cleaning::CleaningProcedure,
     dto::ObjectReference,
     propagation::PropagationProcedure,
     taxonomy::{TaxonNote, TaxonPropagationProcedure},

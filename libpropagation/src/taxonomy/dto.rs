@@ -4,8 +4,8 @@ use serde::Serialize;
 use serde_with::skip_serializing_none;
 
 use crate::{
-    collecting::dto::CleaningProcedureCompact, dto::ObjectReference,
-    region::dto::RegionalTaxonStatusDetailsNoTaxon,
+    cleaning::dto::CleaningProcedureCompact, dto::ObjectReference,
+    region::dto::RegionalTaxonStatusDetailsNoTaxon, taxonomy::TaxonNoteCategory,
 };
 
 #[skip_serializing_none]
@@ -50,7 +50,6 @@ pub struct TaxonDetails {
     pub common_names: Vec<String>,
     pub synonyms: Vec<String>,
     pub regions: Vec<RegionalTaxonStatusDetailsNoTaxon>,
-    pub collecting_data: Option<CollectingDataNoTaxon>,
     pub seed_cleaning: Vec<CleaningProcedureCompact>,
     pub propagation_procedures: Vec<TaxonPropagationProcedureCompact>,
     pub notes: Vec<TaxonNoteNoTaxon>,
@@ -95,10 +94,6 @@ impl From<super::Taxon> for TaxonDetails {
                     .iter()
                     .map(|rs| rs.into())
                     .collect(),
-            },
-            collecting_data: match value.collecting_data.is_unloaded() {
-                true => None,
-                false => value.collecting_data.get().as_ref().map(|d| d.into()),
             },
             seed_cleaning: match value.cleaning_procedures.is_unloaded() {
                 true => Vec::default(),
@@ -155,6 +150,8 @@ impl From<&super::TaxonNote> for TaxonNoteDetails {
 #[derive(Debug, Clone, Serialize)]
 pub struct TaxonNoteNoTaxon {
     pub id: u64,
+    pub category: TaxonNoteCategory,
+    pub title: String,
     pub text: String,
     pub created_at: jiff::Timestamp,
     pub updated_at: jiff::Timestamp,
@@ -164,6 +161,8 @@ impl From<super::TaxonNote> for TaxonNoteNoTaxon {
     fn from(value: super::TaxonNote) -> Self {
         Self {
             id: value.id,
+            category: value.category,
+            title: value.title,
             text: value.text,
             created_at: value.created_at,
             updated_at: value.updated_at,
@@ -174,57 +173,6 @@ impl From<super::TaxonNote> for TaxonNoteNoTaxon {
 impl From<&super::TaxonNote> for TaxonNoteNoTaxon {
     fn from(value: &super::TaxonNote) -> Self {
         value.clone().into()
-    }
-}
-
-#[skip_serializing_none]
-#[derive(Debug, Clone, Serialize)]
-pub struct CollectingDataDetails {
-    pub taxon: ObjectReference,
-    pub ripening_indicators: Option<String>,
-    pub harvesting_notes: Option<String>,
-    pub storage: Option<String>,
-    pub storage_life: Option<String>,
-}
-
-impl From<&super::CollectingData> for CollectingDataDetails {
-    fn from(value: &super::CollectingData) -> Self {
-        value.clone().into()
-    }
-}
-impl From<super::CollectingData> for CollectingDataDetails {
-    fn from(value: super::CollectingData) -> Self {
-        Self {
-            taxon: ObjectReference::from_deferred(&value.taxon, value.taxon_id),
-            ripening_indicators: value.ripening_indicators,
-            harvesting_notes: value.harvesting_notes,
-            storage: value.storage,
-            storage_life: value.storage_life,
-        }
-    }
-}
-#[skip_serializing_none]
-#[derive(Debug, Clone, Serialize)]
-pub struct CollectingDataNoTaxon {
-    pub ripening_indicators: Option<String>,
-    pub harvesting_notes: Option<String>,
-    pub storage: Option<String>,
-    pub storage_life: Option<String>,
-}
-
-impl From<&super::CollectingData> for CollectingDataNoTaxon {
-    fn from(value: &super::CollectingData) -> Self {
-        value.clone().into()
-    }
-}
-impl From<super::CollectingData> for CollectingDataNoTaxon {
-    fn from(value: super::CollectingData) -> Self {
-        Self {
-            ripening_indicators: value.ripening_indicators,
-            harvesting_notes: value.harvesting_notes,
-            storage: value.storage,
-            storage_life: value.storage_life,
-        }
     }
 }
 
