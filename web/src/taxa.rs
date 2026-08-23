@@ -1,6 +1,6 @@
 use libpropagation::{
-    collecting::CleaningProcedure,
-    taxonomy::{Taxon, TaxonPropagationProcedure},
+    cleaning::CleaningProcedure,
+    taxonomy::{Taxon, TaxonNote, TaxonPropagationProcedure},
 };
 use topcoat::{
     context::Cx,
@@ -14,13 +14,14 @@ use crate::{
         self, Breadcrumb, breadcrumbs, button::button, citations::citation_list,
         harvest::taxon_regional_table, input::input, pagination::pagination_control,
     },
-    util::{ModifyOffset, PER_PAGE, PageState, db},
+    util::{ModifyOffset, PER_PAGE, PageState, db, enum_to_string},
 };
 
 path_param!(pub cleaning_id: u64, error = bad_request);
 path_param!(pub taxon_id: u64, error = bad_request);
 path_param!(pub region_id: u64, error = bad_request);
 path_param!(pub propagation_id: u64, error = bad_request);
+path_param!(pub note_id: u64, error = bad_request);
 
 #[derive(Debug, Clone, Copy, serde::Deserialize, serde::Serialize)]
 #[serde(rename_all = "lowercase")]
@@ -136,7 +137,6 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
                 .children()
                 .order_by(Taxon::fields().sequence().asc()),
         )
-        .include(Taxon::fields().collecting_data())
         .include(Taxon::fields().cleaning_procedures())
         .include(Taxon::fields().propagation_procedures().propagation())
         .include(Taxon::fields().regional_statuses().region())
@@ -220,44 +220,6 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
                 </section>
             }
 
-            if let Some(collecting_data) = &taxon.collecting_data.get() {
-                <section>
-                    <h2>"Ripening"</h2>
-                    <div>
-                        (collecting_data
-                            .ripening_indicators
-                            .as_deref()
-                            .unwrap_or_default())
-                    </div>
-                </section>
-                <section>
-                    <h2>"Harvesting Notes"</h2>
-                    <div>
-                        (collecting_data
-                            .harvesting_notes
-                            .as_deref()
-                            .unwrap_or_default())
-                    </div>
-                </section>
-                <section>
-                    <h2>"Storage Conditions"</h2>
-                    <div>
-                        (collecting_data
-                            .storage
-                            .as_deref()
-                            .unwrap_or_default())
-                    </div>
-                </section>
-                <section>
-                    <h2>"Storage Life"</h2>
-                    <div>
-                        (collecting_data
-                            .storage_life
-                            .as_deref()
-                            .unwrap_or_default())
-                    </div>
-                </section>
-            }
             if !taxon.cleaning_procedures.get().is_empty() {
                 <section>
                     <h2>"Seed Cleaning"</h2>
@@ -305,24 +267,17 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
             if !taxon.notes.get().is_empty() {
                 <section>
                     <h2>"Notes"</h2>
-                    <div>
-                        if !taxon.notes.get().is_empty() {
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>"ID"</th>
-                                        <th>"Name"</th>
-                                    </tr>
-                                </thead>
-                                for note in taxon.notes.get() {
-                                    <tr>
-                                        <td>(note.id)</td>
-                                        <td>(&note.text)</td>
-                                    </tr>
-                                }
-                            </table>
+                    <ul>
+                        for note in taxon.notes.get() {
+                            <li>
+                                <a
+                                    href=(href!(note_details, TaxonId(taxon.id), NoteId(note.id)))
+                                >
+                                    (&note.title)
+                                </a>
+                            </li>
                         }
-                    </div>
+                    </ul>
                 </section>
             }
 
@@ -468,6 +423,47 @@ pub async fn cleaning_details(cx: &Cx) -> topcoat::Result {
         <dd>
             citation_list(
                 citations: proc
+                    .citation_links
+                    .get()
+                    .iter()
+                    .map(|cl| cl.citation.get())
+                    .collect()
+            )
+        </dd>
+    }
+}
+
+#[page("/taxa/{taxon_id}/note/{note_id}")]
+pub async fn note_details(cx: &Cx) -> topcoat::Result {
+    let mut db = db(cx);
+    let taxon_id = path_param::<TaxonId>(cx)?;
+    let note_id = path_param::<NoteId>(cx)?;
+    let note = TaxonNote::filter_by_id(note_id)
+        .include(TaxonNote::fields().taxon())
+        .include(TaxonNote::fields().citation_links().citation())
+        .one()
+        .exec(&mut db)
+        .await?;
+    trace!(?note);
+    let taxon = note.taxon.get();
+    view! {
+        <h1>
+            <span>(&note.title)</span>
+            " for "
+            <span class="latin">(&taxon.complete_name)</span>
+        </h1>
+        <dt>"Taxon"</dt>
+        <dd>
+            <span class="latin">
+                <a href=(href!(details, TaxonId(taxon.id)))>(&taxon.complete_name)</a>
+            </span>
+        </dd>
+        <dt>"Body"</dt>
+        <dd>(note.text)</dd>
+        <dt>"Citations"</dt>
+        <dd>
+            citation_list(
+                citations: note
                     .citation_links
                     .get()
                     .iter()
