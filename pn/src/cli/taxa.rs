@@ -26,6 +26,7 @@ pub mod collecting;
 pub mod link;
 pub mod note;
 pub mod propagation;
+pub mod resource;
 
 #[derive(Debug, clap::Subcommand)]
 pub enum TaxonCommands {
@@ -93,6 +94,13 @@ pub enum TaxonCommands {
 
         #[command(subcommand)]
         command: link::TaxonLinkCommands,
+    },
+    #[command(about = "Manage notes for a taxon")]
+    Resources {
+        #[arg(short, long, help = "A taxon name or ID")]
+        taxon: TaxonIdentifier,
+        #[command(subcommand)]
+        command: resource::TaxonResourceCommands,
     },
     #[command(about = "Update images for taxa")]
     UpdateImages {
@@ -311,6 +319,18 @@ impl TaxonCommands {
                 command.run(db, taxon_id, format).await?
             }
             TaxonCommands::Notes {
+                taxon: name_or_id,
+                command,
+            } => {
+                let taxon_id = match name_or_id {
+                    TaxonIdentifier::Id(id) => *id,
+                    TaxonIdentifier::Name(name) => {
+                        Taxon::get_by_complete_name_ignore_case(db, name).await?.id
+                    }
+                };
+                command.run(db, taxon_id, format).await?
+            }
+            TaxonCommands::Resources {
                 taxon: name_or_id,
                 command,
             } => {

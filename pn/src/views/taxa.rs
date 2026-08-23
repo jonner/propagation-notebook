@@ -1,7 +1,10 @@
 use libpropagation::{
     dto::ObjectReference,
     region::dto::RegionalTaxonStatusDetailsNoRegion,
-    taxonomy::dto::{TaxonDetails, TaxonNoteDetails, TaxonNoteNoTaxon},
+    taxonomy::dto::{
+        TaxonDetails, TaxonNoteDetails, TaxonNoteNoTaxon, TaxonResourceDetails,
+        TaxonResourceNoTaxon,
+    },
 };
 
 use crate::{cli::taxa::TaxonSearchResult, style, util::join_or_default};
@@ -280,6 +283,46 @@ impl<'a> TaxonNoteDetailsView<'a> {
         tbuilder.push_record(["Taxon", &self.note.taxon.to_string()]);
         tbuilder.push_record(["Created", &self.note.core.created_at.to_string()]);
         tbuilder.push_record(["Updated", &self.note.core.updated_at.to_string()]);
+        Ok(tbuilder.build().with(style::DetailTable).to_string())
+    }
+}
+
+pub struct TaxonResourcesListView<'a> {
+    resources: &'a Vec<TaxonResourceNoTaxon>,
+}
+
+impl<'a> TaxonResourcesListView<'a> {
+    pub fn new(resources: &'a Vec<TaxonResourceNoTaxon>) -> Self {
+        Self { resources }
+    }
+
+    pub fn render(&self) -> anyhow::Result<String> {
+        let mut tbuilder = tabled::builder::Builder::default();
+        tbuilder.push_record(["ID", "Name", "Url"]);
+        for resource in self.resources {
+            tbuilder.push_record([&resource.id.to_string(), &resource.name, &resource.url]);
+        }
+        Ok(tbuilder.build().with(style::ListTable).to_string())
+    }
+}
+
+pub struct TaxonResourceDetailsView<'a> {
+    resource: &'a TaxonResourceDetails,
+}
+
+impl<'a> TaxonResourceDetailsView<'a> {
+    pub fn new(resource: &'a TaxonResourceDetails) -> Self {
+        Self { resource }
+    }
+
+    pub fn render(&self) -> anyhow::Result<String> {
+        let mut tbuilder = tabled::builder::Builder::default();
+        tbuilder.push_record(["ID", &self.resource.core.id.to_string()]);
+        tbuilder.push_record(["Name", &self.resource.core.name]);
+        tbuilder.push_record(["Url", &self.resource.core.url]);
+        tbuilder.push_record(["Taxon", &self.resource.taxon.to_string()]);
+        tbuilder.push_record(["Created", &self.resource.core.created_at.to_string()]);
+        tbuilder.push_record(["Updated", &self.resource.core.updated_at.to_string()]);
         Ok(tbuilder.build().with(style::DetailTable).to_string())
     }
 }
