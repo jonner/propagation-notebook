@@ -1,6 +1,6 @@
 use libpropagation::{
     citation::{Citation, CleaningProcedureCitation, dto::CitationDetails},
-    collecting::{CleaningProcedure, dto::CleaningProcedureDetails},
+    cleaning::{CleaningProcedure, dto::CleaningProcedureDetails},
 };
 use toasty::Db;
 
@@ -70,7 +70,7 @@ impl TaxonCleaningCommands {
     ) -> anyhow::Result<()> {
         match self {
             TaxonCleaningCommands::List => {
-                let procedures: Vec<libpropagation::collecting::dto::CleaningProcedureCompact> =
+                let procedures: Vec<libpropagation::cleaning::dto::CleaningProcedureCompact> =
                     CleaningProcedure::filter_by_taxon_id(taxon_id)
                         .exec(db)
                         .await?

@@ -1,4 +1,4 @@
-use libpropagation::collecting::dto::{CleaningProcedureCompact, CleaningProcedureDetails};
+use libpropagation::cleaning::dto::{CleaningProcedureCompact, CleaningProcedureDetails};
 
 use crate::style;
 

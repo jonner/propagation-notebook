@@ -1,7 +1,7 @@
 use libpropagation::{
     citation::{Citation, TaxonNoteCitation, dto::CitationDetails},
     taxonomy::{
-        TaxonNote,
+        TaxonNote, TaxonNoteCategory,
         dto::{TaxonNoteDetails, TaxonNoteNoTaxon},
     },
 };
@@ -28,15 +28,23 @@ pub enum TaxonNoteCommands {
     },
     #[command(about = "Add a new note to a taxon", alias = "new")]
     Add {
-        #[arg(help = "A note")]
+        #[arg(long, value_enum, help = "A note category")]
+        category: Option<TaxonNoteCategory>,
+        #[arg(long, help = "A note title")]
+        title: String,
+        #[arg(long, help = "A note body")]
         text: String,
     },
-    #[command(about = "Modify a note for a taxon", alias = "edit")]
+    #[command(about = "Modify a note for a taxon", group(clap::ArgGroup::new("modify_fields").args(["category", "title", "text"]).required(true).multiple(true)), alias = "edit")]
     Modify {
         #[arg(help = "A note ID assigned to this taxon")]
         note_id: u64,
-        #[arg(help = "A note")]
-        text: String,
+        #[arg(long, value_enum, help = "A note category")]
+        category: Option<TaxonNoteCategory>,
+        #[arg(long, help = "A note title")]
+        title: Option<String>,
+        #[arg(long, help = "A note body")]
+        text: Option<String>,
     },
     #[command(about = "Remove a note from the taxon")]
     Remove {
@@ -84,13 +92,19 @@ impl TaxonNoteCommands {
             TaxonNoteCommands::Show { note_id } => {
                 load_and_display_note_details(db, note_id, format).await?;
             }
-            TaxonNoteCommands::Add { text } => {
-                let note: TaxonNoteDetails = TaxonNote::create()
+            TaxonNoteCommands::Add {
+                category,
+                title,
+                text,
+            } => {
+                let mut query = TaxonNote::create()
                     .taxon_id(taxon_id)
-                    .text(text)
-                    .exec(db)
-                    .await?
-                    .into();
+                    .title(title)
+                    .text(text);
+                if let Some(category) = category {
+                    query = query.category(category);
+                }
+                let note: TaxonNoteDetails = query.exec(db).await?.into();
                 let output = match format {
                     OutputFormat::Text => TaxonNoteDetailsView::new(&note).render()?,
                     OutputFormat::Json => JsonView::new(&note).render()?,
@@ -98,8 +112,23 @@ impl TaxonNoteCommands {
                 };
                 println!("{output}");
             }
-            TaxonNoteCommands::Modify { note_id, text } => {
-                TaxonNote::update_by_id(note_id).text(text).exec(db).await?;
+            TaxonNoteCommands::Modify {
+                note_id,
+                category,
+                title,
+                text,
+            } => {
+                let mut query = TaxonNote::update_by_id(note_id);
+                if let Some(category) = category {
+                    query = query.category(category);
+                }
+                if let Some(title) = title {
+                    query = query.title(title);
+                }
+                if let Some(text) = text {
+                    query = query.text(text);
+                }
+                query.exec(db).await?;
                 println!("Updated note {note_id}")
             }
             TaxonNoteCommands::Remove { note_id, assumeyes } => {

@@ -7,7 +7,11 @@ use libpropagation::{
     },
 };
 
-use crate::{cli::taxa::TaxonSearchResult, style, util::join_or_default};
+use crate::{
+    cli::taxa::TaxonSearchResult,
+    style,
+    util::{enum_to_string, join_or_default},
+};
 
 pub struct TaxonDetailsView<'a> {
     taxon: &'a TaxonDetails,
@@ -48,40 +52,6 @@ impl<'a> TaxonDetailsView<'a> {
         if let Some(inat_id) = self.taxon.inaturalist_id {
             tbuilder.push_record(["iNaturalist taxon ID", &inat_id.to_string()]);
         }
-        if let Some(collecting_data) = self.taxon.collecting_data.as_ref() {
-            tbuilder.push_record([
-                "Ripening",
-                collecting_data
-                    .ripening_indicators
-                    .as_deref()
-                    .unwrap_or("-"),
-            ]);
-            tbuilder.push_record([
-                "Harvesting Notes",
-                collecting_data.harvesting_notes.as_deref().unwrap_or("-"),
-            ]);
-            tbuilder.push_record([
-                "Storage Conditions",
-                collecting_data.storage.as_deref().unwrap_or("-"),
-            ]);
-            tbuilder.push_record([
-                "Storage Life",
-                collecting_data.storage_life.as_deref().unwrap_or("-"),
-            ]);
-        }
-        tbuilder.push_record(["Seed Cleaning", &{
-            match &self.taxon.seed_cleaning {
-                procedures if procedures.is_empty() => "-".to_string(),
-                procedures => {
-                    let mut inner_table = tabled::builder::Builder::default();
-                    inner_table.push_record(["ID", "Name"]);
-                    procedures.iter().for_each(|cp| {
-                        inner_table.push_record([&cp.id.to_string(), &cp.name]);
-                    });
-                    inner_table.build().with(style::ListTable).to_string() + "\n"
-                }
-            }
-        }]);
         tbuilder.push_record(["Propagation Procedures", &{
             match &self.taxon.propagation_procedures {
                 tp if tp.is_empty() => "-".to_string(),
@@ -259,9 +229,14 @@ impl<'a> TaxonNotesListView<'a> {
 
     pub fn render(&self) -> anyhow::Result<String> {
         let mut tbuilder = tabled::builder::Builder::default();
-        tbuilder.push_record(["ID", "Note"]);
+        tbuilder.push_record(["ID", "Category", "Title", "Body"]);
         for note in self.notes {
-            tbuilder.push_record([&note.id.to_string(), &note.text]);
+            tbuilder.push_record([
+                &note.id.to_string(),
+                &enum_to_string(&note.category),
+                &note.title,
+                &note.text,
+            ]);
         }
         Ok(tbuilder.build().with(style::ListTable).to_string())
     }
@@ -279,7 +254,9 @@ impl<'a> TaxonNoteDetailsView<'a> {
     pub fn render(&self) -> anyhow::Result<String> {
         let mut tbuilder = tabled::builder::Builder::default();
         tbuilder.push_record(["ID", &self.note.core.id.to_string()]);
-        tbuilder.push_record(["Text", &self.note.core.text]);
+        tbuilder.push_record(["Category", &enum_to_string(&self.note.core.category)]);
+        tbuilder.push_record(["Title", &self.note.core.title]);
+        tbuilder.push_record(["Body", &self.note.core.text]);
         tbuilder.push_record(["Taxon", &self.note.taxon.to_string()]);
         tbuilder.push_record(["Created", &self.note.core.created_at.to_string()]);
         tbuilder.push_record(["Updated", &self.note.core.updated_at.to_string()]);

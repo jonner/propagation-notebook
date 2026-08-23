@@ -2,6 +2,7 @@ use anyhow::anyhow;
 use demand::DemandOption;
 use indicatif::ProgressBar;
 use libpropagation::{ImportProgressReporter, taxonomy::Taxon};
+use serde::Serialize;
 
 use crate::util::dialog::select;
 
@@ -160,6 +161,15 @@ pub mod dialog {
     }
 }
 
+pub fn enum_to_string<T: Serialize>(variant: &T) -> String {
+    let json_value = serde_json::to_value(variant).expect("Enum variant failed serialization");
+
+    match json_value {
+        serde_json::Value::String(s) => s,
+        other => other.to_string(),
+    }
+}
+
 #[cfg(test)]
 mod test {
     use libpropagation::taxonomy::Taxon;
@@ -177,7 +187,9 @@ mod test {
             .await
             .unwrap();
         let client = inaturalist::Client::new().unwrap();
-        let inat_taxon = interactive_select_inaturalist_taxon(&taxon, &client).await.unwrap();
+        let inat_taxon = interactive_select_inaturalist_taxon(&taxon, &client)
+            .await
+            .unwrap();
         tracing::debug!(?inat_taxon);
     }
 }

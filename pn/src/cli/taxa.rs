@@ -1,6 +1,6 @@
 use indicatif::ProgressIterator;
 use libpropagation::{
-    collecting::CleaningProcedure,
+    cleaning::CleaningProcedure,
     dto::ObjectReference,
     region::{RegionalTaxonStatus, dto::RegionalTaxonStatusDetailsNoRegion},
     taxonomy::{
@@ -22,7 +22,6 @@ use crate::{
 };
 
 pub mod cleaning;
-pub mod collecting;
 pub mod link;
 pub mod note;
 pub mod propagation;
@@ -56,13 +55,6 @@ pub enum TaxonCommands {
             default_value_t = TaxonomicAuthority::Itis
         )]
         authority: TaxonomicAuthority,
-    },
-    #[command(about = "Manage collecting information for a taxon")]
-    Collecting {
-        #[arg(short, long, help = "A taxon name or ID")]
-        taxon: TaxonIdentifier,
-        #[command(subcommand)]
-        command: collecting::TaxonCollectingCommands,
     },
     #[command(about = "Manage cleaning information for a taxon")]
     Cleaning {
@@ -183,7 +175,6 @@ impl TaxonCommands {
                 .include(Taxon::fields().vernaculars())
                 .include(Taxon::fields().synonyms())
                 .include(Taxon::fields().regional_statuses().region())
-                .include(Taxon::fields().collecting_data())
                 .include(Taxon::fields().cleaning_procedures())
                 .include(Taxon::fields().propagation_procedures().propagation())
                 .include(Taxon::fields().notes())
@@ -226,11 +217,7 @@ impl TaxonCommands {
                 None => {
                     let taxa: Vec<ObjectReference> = if *has_data {
                         Taxon::filter(
-                            Taxon::fields()
-                                .collecting_data()
-                                .id()
-                                .gt(0)
-                                .or(Taxon::fields().regional_statuses().any(
+                                Taxon::fields().regional_statuses().any(
                                     RegionalTaxonStatus::fields()
                                         .harvest_window()
                                         .start_doy()
@@ -239,7 +226,7 @@ impl TaxonCommands {
                                             .harvest_window()
                                             .end_doy()
                                             .is_some()),
-                                ))
+                                )
                                 .or(Taxon::fields()
                                     .cleaning_procedures()
                                     .any(CleaningProcedure::fields().taxon_id().gt(0)))
@@ -283,18 +270,6 @@ impl TaxonCommands {
                 .await?
             }
             TaxonCommands::Cleaning {
-                taxon: name_or_id,
-                command,
-            } => {
-                let taxon_id = match name_or_id {
-                    TaxonIdentifier::Id(id) => *id,
-                    TaxonIdentifier::Name(name) => {
-                        Taxon::get_by_complete_name_ignore_case(db, name).await?.id
-                    }
-                };
-                command.run(db, taxon_id, format).await?
-            }
-            TaxonCommands::Collecting {
                 taxon: name_or_id,
                 command,
             } => {

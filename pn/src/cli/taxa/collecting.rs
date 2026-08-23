@@ -1,44 +1,67 @@
-use libpropagation::{collecting::CollectingData, taxonomy::dto::CollectingDataDetails};
+use libpropagation::{
+    citation::{Citation, dto::CitationDetails},
+    cleaning::{CollectingData, CollectingDataCategory},
+    taxonomy::dto::CollectingDataDetails,
+};
 
 use toasty::Db;
 
 use crate::{
-    cli::OutputFormat,
+    cli::{OutputFormat, citation::CitationCommands},
     util::dialog::confirm,
-    views::{JsonView, YamlView, collecting::CollectingDataView},
+    views::{
+        JsonView, YamlView,
+        citation::{CitationDetailsView, CitationListView},
+        collecting::{CollectingDataListView, CollectingDataView},
+    },
 };
 
 #[derive(Debug, clap::Subcommand)]
 pub enum TaxonCollectingCommands {
     #[command(about = "Show seed collecting information")]
-    Show,
-    #[command(about = "Modify seed collecting information for a taxon", group(clap::ArgGroup::new("modify_props").args(["ripening_indicators", "harvesting_notes", "storage_conditions", "storage_life"]).required(true).multiple(true)), alias="edit")]
+    List,
+    #[command(about = "Show seed collecting information")]
+    Show {
+        #[arg(help = "A collecting information ID")]
+        id: u64,
+    },
+    #[command(about = "Add seed collecting information for a taxon")]
+    Add {
+        #[arg(short, long, value_enum, help = "The category of this collecting data")]
+        category: CollectingDataCategory,
+        #[arg(long, help = "The title of this collecting information")]
+        title: String,
+        #[arg(long, help = "The full text of this collecting information")]
+        text: String,
+    },
+    #[command(about = "Modify seed collecting information for a taxon", group(clap::ArgGroup::new("modify_props").args(["category", "title", "text"]).required(true).multiple(true)), alias="edit")]
     Modify {
-        #[arg(
-            short,
-            long,
-            help = "What to look for to determine if the seed is ready for collecting"
-        )]
-        ripening_indicators: Option<String>,
-        #[arg(long, help = "Harvesting notes")]
-        harvesting_notes: Option<String>,
-        #[arg(short, long, help = "Instructions for storing the seed")]
-        storage_conditions: Option<String>,
-        #[arg(
-            short = 'l',
-            long,
-            help = "How long the seed will stay viable in storage"
-        )]
-        storage_life: Option<String>,
+        #[arg(help = "A collecting data ID")]
+        id: u64,
+        #[arg(short, long, value_enum, help = "The category of this collecting data")]
+        category: Option<CollectingDataCategory>,
+        #[arg(long, help = "The title of this collecting information")]
+        title: Option<String>,
+        #[arg(long, help = "The full text of this collecting information")]
+        text: Option<String>,
     },
     #[command(about = "Remove seed collecting information")]
     Remove {
+        #[arg(help = "A collecting data ID")]
+        id: u64,
         #[arg(
             short = 'y',
             long,
             help = "Assume yes for all questions requiring confirmation"
         )]
         assumeyes: bool,
+    },
+    #[command(about = "Manage citations for collecting information")]
+    Citations {
+        #[arg(help = "A collecting information ID")]
+        id: u64,
+        #[command(subcommand)]
+        command: CitationCommands,
     },
 }
 
@@ -50,17 +73,17 @@ impl TaxonCollectingCommands {
         format: OutputFormat,
     ) -> anyhow::Result<()> {
         match self {
-            TaxonCollectingCommands::Show => {
+            TaxonCollectingCommands::List => {
                 match CollectingData::filter_by_taxon_id(taxon_id)
                     .include(CollectingData::fields().taxon())
-                    .one()
                     .exec(db)
                     .await
                 {
                     Ok(data) => {
-                        let data: CollectingDataDetails = data.into();
+                        let data: Vec<CollectingDataDetails> =
+                            data.into_iter().map(Into::into).collect();
                         let output = match format {
-                            OutputFormat::Text => CollectingDataView::new(&data).render()?,
+                            OutputFormat::Text => CollectingDataListView::new(&data).render()?,
                             OutputFormat::Json => JsonView::new(&data).render()?,
                             OutputFormat::Yaml => YamlView::new(&data).render()?,
                         };
@@ -72,65 +95,176 @@ impl TaxonCollectingCommands {
                     Err(e) => return Err(e.into()),
                 }
             }
-            TaxonCollectingCommands::Remove { assumeyes } => {
+            TaxonCollectingCommands::Show { id } => {
+                load_and_display_collecting_details(id, db, format).await?;
+            }
+            TaxonCollectingCommands::Remove { id, assumeyes } => {
+                load_and_display_collecting_details(id, db, format).await?;
                 if *assumeyes
                     || confirm("Are you sure you wish to remove this collecting data?")
                         .selected(false)
                         .run()?
                 {
-                    CollectingData::delete_by_taxon_id(db, taxon_id).await?;
-                    println!("Removed collecting data {taxon_id}")
+                    CollectingData::delete_by_id(db, id).await?;
+                    println!("Removed collecting data {id}")
                 }
             }
-            TaxonCollectingCommands::Modify {
-                ripening_indicators,
-                harvesting_notes,
-                storage_conditions,
-                storage_life,
+            TaxonCollectingCommands::Add {
+                category,
+                title,
+                text,
             } => {
-                // Try to create the object first
-                match CollectingData::create()
+                let data: CollectingDataDetails = CollectingData::create()
                     .taxon_id(taxon_id)
-                    .ripening_indicators(ripening_indicators)
-                    .harvesting_notes(harvesting_notes)
-                    .storage(storage_conditions)
-                    .storage_life(storage_life)
+                    .category(category)
+                    .title(title)
+                    .text(text)
                     .exec(db)
-                    .await
-                {
-                    Ok(data) => {
-                        println!("Added collection information for taxon {}", data.taxon_id)
-                    }
-                    Err(e)
-                        if e.is_driver_operation_failed()
-                            // FIXME: it would be nicer if the error categories
-                            // were more fine-grained and I didn't have to
-                            // examine the error string
-                            && e.to_string().contains("constraint failed") =>
-                    {
-                        // The insertion failed because CollectionData already
-                        // exists for taxon_id, which has a unique constraint.
-                        // Just update the existing row
-                        let mut query = CollectingData::update_by_taxon_id(taxon_id);
-                        if let Some(ripening) = ripening_indicators {
-                            query = query.ripening_indicators(ripening);
-                        }
-                        if let Some(harvesting) = harvesting_notes {
-                            query = query.harvesting_notes(harvesting);
-                        }
-                        if let Some(storage) = storage_conditions {
-                            query = query.storage(storage);
-                        }
-                        if let Some(storage_life) = storage_life {
-                            query = query.storage_life(storage_life);
-                        }
-                        query.exec(db).await?;
-                        println!("Modified collection information {taxon_id}");
-                    }
-                    Err(e) => Err(e)?,
+                    .await?
+                    .into();
+                let output = match format {
+                    OutputFormat::Text => CollectingDataView::new(&data).render()?,
+                    OutputFormat::Json => JsonView::new(&data).render()?,
+                    OutputFormat::Yaml => YamlView::new(&data).render()?,
                 };
+                println!("{output}");
+            }
+            TaxonCollectingCommands::Modify {
+                id,
+                category,
+                title,
+                text,
+            } => {
+                let mut query = CollectingData::update_by_id(id);
+                if let Some(category) = category {
+                    query = query.category(category);
+                }
+                if let Some(title) = title {
+                    query = query.title(title);
+                }
+                if let Some(text) = text {
+                    query = query.text(text);
+                }
+                query.exec(db).await?;
+                println!("Modified collection information {id}");
+            }
+            TaxonCollectingCommands::Citations { id, command } => {
+                match command {
+                    CitationCommands::List => {
+                        let citations: Vec<CitationDetails> =
+                            CollectingDataCitation::filter_by_collecting_id(id)
+                                .include(CollectingDataCitation::fields().citation())
+                                .exec(db)
+                                .await?
+                                .into_iter()
+                                .map(|val| val.citation.get().into())
+                                .collect();
+                        let output = match format {
+                            OutputFormat::Text => CitationListView::new(&citations).render()?,
+                            OutputFormat::Json => JsonView::new(&citations).render()?,
+                            OutputFormat::Yaml => YamlView::new(&citations).render()?,
+                        };
+                        println!("{output}");
+                    }
+                    CitationCommands::Show { id: citation_id } => {
+                        load_and_display_citation_details(db, citation_id, id, format).await?
+                    }
+                    CitationCommands::Add {
+                        title,
+                        url,
+                        author,
+                        date,
+                    } => {
+                        let citation = Citation::create()
+                            .title(title)
+                            .url(url)
+                            .author(author)
+                            .date(date)
+                            .exec(db)
+                            .await?;
+                        CollectingDataCitation::create()
+                            .citation_id(citation.id)
+                            .collecting_id(id)
+                            .exec(db)
+                            .await?;
+                        load_and_display_collecting_details(id, db, format).await?;
+                    }
+                    CitationCommands::Remove {
+                        citation_id,
+                        assumeyes,
+                    } => {
+                        if *assumeyes || {
+                            load_and_display_citation_details(
+                                db,
+                                citation_id,
+                                id,
+                                OutputFormat::Text,
+                            )
+                            .await?;
+                            confirm("Do you want to remove this citation?")
+                                .selected(false)
+                                .run()?
+                        } {
+                            CollectingDataCitation::delete_by_citation_id(db, citation_id).await?;
+                            let citation = Citation::filter_by_id(citation_id)
+                                .include(Citation::fields().propagation_procedures())
+                                .include(Citation::fields().taxon_propagation_procedures())
+                                .include(Citation::fields().cleaning_procedures())
+                                .one()
+                                .exec(db)
+                                .await?;
+                            // if the citation is no longer rused, remove it from the database
+                            if citation.propagation_procedures.get().is_empty()
+                                && citation.taxon_propagation_procedures.get().is_empty()
+                                && citation.cleaning_procedures.get().is_empty()
+                            {
+                                Citation::delete_by_id(db, citation_id).await?;
+                            }
+                            load_and_display_collecting_details(id, db, format).await?;
+                        }
+                    }
+                }
             }
         }
         Ok(())
     }
+}
+
+async fn load_and_display_collecting_details(
+    id: &u64,
+    db: &mut Db,
+    format: OutputFormat,
+) -> Result<(), anyhow::Error> {
+    let data: CollectingDataDetails = CollectingData::get_by_id(db, id).await?.into();
+    let output = match format {
+        OutputFormat::Text => CollectingDataView::new(&data).render()?,
+        OutputFormat::Json => JsonView::new(&data).render()?,
+        OutputFormat::Yaml => YamlView::new(&data).render()?,
+    };
+    println!("{output}");
+    Ok(())
+}
+
+async fn load_and_display_citation_details(
+    db: &mut Db,
+    citation_id: &u64,
+    collecting_id: &u64,
+    format: OutputFormat,
+) -> Result<(), anyhow::Error> {
+    let pc: CitationDetails =
+        CollectingDataCitation::filter_by_citation_id_and_collecting_id(citation_id, collecting_id)
+            .include(CollectingDataCitation::fields().citation())
+            .one()
+            .exec(db)
+            .await?
+            .citation
+            .get()
+            .into();
+    let output = match format {
+        OutputFormat::Text => CitationDetailsView::new(&pc).render()?,
+        OutputFormat::Json => JsonView::new(&pc).render()?,
+        OutputFormat::Yaml => YamlView::new(&pc).render()?,
+    };
+    println!("{output}");
+    Ok(())
 }
