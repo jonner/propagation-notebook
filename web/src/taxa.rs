@@ -143,6 +143,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
         .include(Taxon::fields().notes())
         .include(Taxon::fields().photo())
         .include(Taxon::fields().ancestor_links().ancestor())
+        .include(Taxon::fields().resources())
         .one()
         .exec(&mut db)
         .await?;
@@ -363,6 +364,9 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
                                 </a>
                             }
                         </li>
+                        for resource in taxon.resources.get() {
+                            <a href=(&resource.url)>(&resource.name)</a>
+                        }
                     </ul>
                 </div>
             </section>
