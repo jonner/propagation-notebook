@@ -153,14 +153,14 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
         },
         Breadcrumb {
             url: None,
-            text: region.name.clone(),
+            text: "Overview".to_string(),
         },
     ];
     view! {
         <div class="flex flex-col gap-6">
             <hgroup>
                 breadcrumbs(items: items)
-                <h1>"Overview"</h1>
+                <h1>(&region.name)</h1>
                 <p>(region.notes.as_deref().unwrap_or_default())</p>
             </hgroup>
             <section>
