@@ -320,7 +320,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
                             }
                         </li>
                         for resource in taxon.resources.get() {
-                            <a href=(&resource.url)>(&resource.name)</a>
+                            <li><a href=(&resource.url)>(&resource.name)</a></li>
                         }
                     </ul>
                 </div>
