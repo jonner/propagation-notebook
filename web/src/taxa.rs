@@ -256,14 +256,6 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
                     </div>
                 </section>
             }
-            if !taxon.regional_statuses.get().is_empty() {
-                <section>
-                    <h2>"Regions"</h2>
-                    <div>
-                        taxon_regional_table(regions: taxon.regional_statuses.get())
-                    </div>
-                </section>
-            }
             if !taxon.notes.get().is_empty() {
                 <section>
                     <h2>"Notes"</h2>
@@ -281,6 +273,14 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
                 </section>
             }
 
+            if !taxon.regional_statuses.get().is_empty() {
+                <section>
+                    <h2>"Regions"</h2>
+                    <div>
+                        taxon_regional_table(regions: taxon.regional_statuses.get())
+                    </div>
+                </section>
+            }
             if !taxon.synonyms.get().is_empty() {
                 <section>
                     <h2>"Synonyms"</h2>
