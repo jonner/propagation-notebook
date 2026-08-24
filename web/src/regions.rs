@@ -486,7 +486,7 @@ pub async fn taxa_list(cx: &Cx) -> topcoat::Result {
         <div class="flex flex-col gap-6">
             <hgroup>
                 breadcrumbs(items: items)
-                <h1>(&region.name)</h1>
+                <h1>(format!("Taxa list for {}", &region.name))</h1>
             </hgroup>
             <section>
                 <form method="get" class="flex w-full md:w-xl">
