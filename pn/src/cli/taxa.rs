@@ -5,8 +5,8 @@ use libpropagation::{
     dto::ObjectReference,
     region::{RegionalTaxonStatus, dto::RegionalTaxonStatusDetailsNoRegion},
     taxonomy::{
-        Taxon, TaxonHierarchy, TaxonIdentifier, TaxonNote, TaxonPhoto, TaxonPropagationProcedure,
-        TaxonomicAuthority, dto::TaxonDetails,
+        Rank, Taxon, TaxonHierarchy, TaxonIdentifier, TaxonNote, TaxonPhoto,
+        TaxonPropagationProcedure, TaxonomicAuthority, dto::TaxonDetails,
     },
 };
 use serde::Serialize;
@@ -51,6 +51,8 @@ pub enum TaxonCommands {
             help = "Restrict results to taxa that have the given taxa as an ancestor"
         )]
         ancestor: Option<TaxonIdentifier>,
+        #[arg(short, long, help = "Restrict results to taxa with the given rank")]
+        rank: Option<Rank>,
     },
     #[command(about = "Import a new taxonomy for use with this tool")]
     Import {
@@ -146,6 +148,9 @@ impl TaxonCommands {
                             .ancestor_links()
                             .any(TaxonHierarchy::fields().ancestor_id().eq(ancestor_id)),
                     );
+                }
+                if let Some(rank) = rank {
+                    expr = expr.and(Taxon::fields().rank().eq(rank));
                 }
                 if let Ok(found) = Taxon::filter(expr)
                     .order_by(Taxon::fields().sequence().asc())
