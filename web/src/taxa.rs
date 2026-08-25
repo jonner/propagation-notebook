@@ -1,4 +1,5 @@
 use libpropagation::{
+    citation::Citation,
     cleaning::CleaningProcedure,
     taxonomy::{Taxon, TaxonNote, TaxonPropagationProcedure},
 };
@@ -11,10 +12,10 @@ use tracing::trace;
 
 use crate::{
     components::{
-        self, Breadcrumb, breadcrumbs, button::button, citations::citation_list,
+        Breadcrumb, badge::badge, breadcrumbs, button::button, citations::citation_list,
         harvest::taxon_regional_table, input::input, pagination::pagination_control,
     },
-    util::{ModifyOffset, PER_PAGE, PageState, db, enum_to_string},
+    util::{ModifyOffset, PER_PAGE, PageState, db},
 };
 
 path_param!(pub cleaning_id: u64, error = bad_request);
@@ -353,36 +354,65 @@ pub async fn propagation_details(cx: &Cx) -> topcoat::Result {
             .await
             .ok_or_not_found()?;
     trace!(?tp);
-    let proc = tp.propagation.get();
+    let procedure = tp.propagation.get();
     let taxon = tp.taxon.get();
+    let crumbs = vec![
+        Breadcrumb {
+            url: Some(href!(list).resolve(cx)),
+            text: "Taxonomy".to_string(),
+        },
+        Breadcrumb {
+            url: Some(href!(details, TaxonId(taxon.id)).resolve(cx)),
+            text: taxon.complete_name.clone(),
+        },
+        Breadcrumb {
+            url: None,
+            text: format!("Propagation Procedure {}", tp.propagation_id),
+        },
+    ];
 
     view! {
-        <h1>
-            <span>(&proc.name)</span>
-            " for "
-            <span class="latin">(&taxon.complete_name)</span>
-        </h1>
-        <h2>"General procedure information"</h2>
-        <div class="ms-4">
-            components::propagation_details(procedure: tp.propagation.get())
-        </div>
-        <h2>"Taxon-specific information"</h2>
-        <div class="ms-4">
-            <h3>"Confidence"</h3>
-            <div>(tp.confidence.map(|v| v.to_string()).unwrap_or_default())</div>
-            <h3>"Taxon-specific notes"</h3>
-            <div>(tp.notes.as_deref().unwrap_or_default())</div>
-            <h3>"Citations"</h3>
-            <div>
-                citation_list(
-                    citations: tp
+        <div class="flex flex-col gap-4">
+            <hgroup>
+                breadcrumbs(items: crumbs)
+                <h1>(&procedure.name)</h1>
+                <div>badge((procedure.r#type.to_string()))</div>
+            </hgroup>
+            <section>
+                <h2>"Instructions"</h2>
+                <div class="text-2xl">(&procedure.instructions)</div>
+            </section>
+            <section>
+                <h2>"Confidence"</h2>
+                <div>
+                    (tp
+                        .confidence
+                        .map(|v| v.to_string())
+                        .unwrap_or("Unknown".into()))
+                </div>
+            </section>
+            <section>
+                <h2>"Notes"</h2>
+                <div>(procedure.notes.as_deref().unwrap_or_default())</div>
+                if let Some(taxon_notes) = tp.notes {
+                    <div>(taxon_notes)</div>
+                }
+            </section>
+            <section>
+                <h2>"Citations"</h2>
+                <div>
+                    let citations: Vec < & Citation > = tp
                         .citation_links
                         .get()
                         .iter()
                         .map(|cl| cl.citation.get())
-                        .collect()
-                )
-            </div>
+                        .chain(procedure.citations.get().iter())
+                        .collect();
+                    if !citations.is_empty() {
+                        citation_list(citations: citations)
+                    }
+                </div>
+            </section>
         </div>
     }
 }
@@ -439,7 +469,7 @@ pub async fn cleaning_details(cx: &Cx) -> topcoat::Result {
 #[page("/taxa/{taxon_id}/note/{note_id}")]
 pub async fn note_details(cx: &Cx) -> topcoat::Result {
     let mut db = db(cx);
-    let taxon_id = path_param::<TaxonId>(cx)?;
+    let _taxon_id = path_param::<TaxonId>(cx)?;
     let note_id = path_param::<NoteId>(cx)?;
     let note = TaxonNote::filter_by_id(note_id)
         .include(TaxonNote::fields().taxon())
@@ -450,30 +480,37 @@ pub async fn note_details(cx: &Cx) -> topcoat::Result {
         .ok_or_not_found()?;
     trace!(?note);
     let taxon = note.taxon.get();
+    let crumbs = vec![
+        Breadcrumb {
+            url: Some(href!(list).resolve(cx)),
+            text: "Taxonomy".to_string(),
+        },
+        Breadcrumb {
+            url: Some(href!(details, TaxonId(taxon.id)).resolve(cx)),
+            text: taxon.complete_name.clone(),
+        },
+        Breadcrumb {
+            url: None,
+            text: format!("Note {}", note.id),
+        },
+    ];
     view! {
-        <h1>
-            <span>(&note.title)</span>
-            " for "
-            <span class="latin">(&taxon.complete_name)</span>
-        </h1>
-        <dt>"Taxon"</dt>
-        <dd>
-            <span class="latin">
-                <a href=(href!(details, TaxonId(taxon.id)))>(&taxon.complete_name)</a>
-            </span>
-        </dd>
-        <dt>"Body"</dt>
-        <dd>(note.text)</dd>
-        <dt>"Citations"</dt>
-        <dd>
-            citation_list(
-                citations: note
-                    .citation_links
-                    .get()
-                    .iter()
-                    .map(|cl| cl.citation.get())
-                    .collect()
-            )
-        </dd>
+        <div class="flex flex-col gap-4">
+            <section>
+                breadcrumbs(items: crumbs)
+                <h1>(&note.title)</h1>
+                <div class="text-2xl">(note.text)</div>
+            </section>
+            <section>
+                citation_list(
+                    citations: note
+                        .citation_links
+                        .get()
+                        .iter()
+                        .map(|cl| cl.citation.get())
+                        .collect()
+                )
+            </section>
+        </div>
     }
 }

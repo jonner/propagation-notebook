@@ -9,7 +9,7 @@ use topcoat::{
 };
 use tracing::trace;
 
-use crate::{components::propagation_details, taxa, util::db};
+use crate::{components::citations::citation_list, taxa, util::db};
 
 #[page("/propagation")]
 pub async fn list(cx: &Cx) -> topcoat::Result {
@@ -57,7 +57,20 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
     trace!(?procedure);
     view! {
         <h1>(&procedure.name)</h1>
-        propagation_details(procedure: &procedure)
+        <h3>"Type"</h3>
+        <div>(procedure.r#type.to_string())</div>
+        <h3>"Notes"</h3>
+        <div>(procedure.notes.as_deref().unwrap_or_default())</div>
+        <h3>"Instructions"</h3>
+        <div>(&procedure.instructions)</div>
+        <h3>"Citations"</h3>
+        <div>
+            if !procedure.citations.get().is_empty() {
+                citation_list(citations: procedure.citations.get().iter().collect())
+            } else {
+                "None"
+            }
+        </div>
         <div>
             <h2>"Taxa"</h2>
             if !taxa.is_empty() {
