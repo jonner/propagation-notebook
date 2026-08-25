@@ -568,6 +568,7 @@ pub struct RegionalTaxonStatus {
     pub created_at: jiff::Timestamp,
     #[auto]
     pub updated_at: jiff::Timestamp,
+    pub last_sync_attempt: Option<jiff::Timestamp>,
 }
 
 #[derive(thiserror::Error, Debug)]
