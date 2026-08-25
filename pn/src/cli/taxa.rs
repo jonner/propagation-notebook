@@ -1,10 +1,11 @@
+use anyhow::anyhow;
 use indicatif::ProgressIterator;
 use libpropagation::{
     cleaning::CleaningProcedure,
     dto::ObjectReference,
     region::{RegionalTaxonStatus, dto::RegionalTaxonStatusDetailsNoRegion},
     taxonomy::{
-        Taxon, TaxonIdentifier, TaxonNote, TaxonPhoto, TaxonPropagationProcedure,
+        Taxon, TaxonHierarchy, TaxonIdentifier, TaxonNote, TaxonPhoto, TaxonPropagationProcedure,
         TaxonomicAuthority, dto::TaxonDetails,
     },
 };
@@ -42,7 +43,15 @@ pub enum TaxonCommands {
         name_or_id: TaxonIdentifier,
     },
     #[command(about = "Search for a taxon")]
-    Search { search_string: String },
+    Search {
+        search_string: String,
+        #[arg(
+            short,
+            long,
+            help = "Restrict results to taxa that have the given taxa as an ancestor"
+        )]
+        ancestor: Option<TaxonIdentifier>,
+    },
     #[command(about = "Import a new taxonomy for use with this tool")]
     Import {
         #[arg(help = "A URI to the external taxonomy database")]
@@ -116,8 +125,29 @@ pub struct TaxonSearchResult {
 impl TaxonCommands {
     pub async fn run(&self, db: &mut Db, format: OutputFormat) -> anyhow::Result<()> {
         match self {
-            TaxonCommands::Search { search_string } => {
-                if let Ok(found) = Taxon::filter(Taxon::search_filter(search_string))
+            TaxonCommands::Search {
+                search_string,
+                ancestor,
+                rank,
+            } => {
+                let mut expr = Taxon::search_filter(search_string);
+                if let Some(name_or_id) = ancestor {
+                    let ancestor_id = match name_or_id {
+                        TaxonIdentifier::Id(id) => *id,
+                        TaxonIdentifier::Name(name) => {
+                            Taxon::get_by_complete_name_ignore_case(db, name)
+                                .await
+                                .map_err(|_| anyhow!("Couldn't find ancestor taxon '{name}'"))?
+                                .id
+                        }
+                    };
+                    expr = expr.and(
+                        Taxon::fields()
+                            .ancestor_links()
+                            .any(TaxonHierarchy::fields().ancestor_id().eq(ancestor_id)),
+                    );
+                }
+                if let Ok(found) = Taxon::filter(expr)
                     .order_by(Taxon::fields().sequence().asc())
                     .include(Taxon::fields().vernaculars())
                     .include(Taxon::fields().synonyms())
