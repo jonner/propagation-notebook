@@ -260,10 +260,17 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
     }
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 #[query_params(error = bad_request)]
 struct HarvestParams {
     date: Option<jiff::civil::Date>,
+    offset: Option<usize>,
+}
+
+impl ModifyOffset for HarvestParams {
+    fn modify_offset(&mut self, new_offset: usize) {
+        self.offset = Some(new_offset);
+    }
 }
 
 #[page("/regions/{region_id}/starting")]
@@ -279,8 +286,7 @@ pub(crate) async fn harvest_starting(cx: &Cx) -> topcoat::Result {
         .ok_or_not_found()?;
     let date = params.date.unwrap_or_else(|| jiff::Zoned::now().date());
     let doy = date.day_of_year();
-    // FIXME: pagination
-    let (_total, starting_soon) = region
+    let (total, starting_soon) = region
         .get_taxa(
             &mut db,
             None,
@@ -289,10 +295,11 @@ pub(crate) async fn harvest_starting(cx: &Cx) -> topcoat::Result {
                 context: 10,
                 doy: Some(doy),
             }),
-            None,
-            None,
+            params.offset,
+            Some(PER_PAGE),
         )
         .await?;
+    let page_state = PageState::new(params.offset, PER_PAGE, total.try_into().unwrap());
     let items = vec![
         Breadcrumb {
             url: Some("/regions".to_string()),
@@ -317,7 +324,13 @@ pub(crate) async fn harvest_starting(cx: &Cx) -> topcoat::Result {
                 </p>
                 week_navigator(date: date)
             </hgroup>
+            if page_state.total_pages() > 1 {
+                <div>pagination_control(state: &page_state, params: params)</div>
+            }
             regional_taxa_table(taxa: &starting_soon, current_doy: Some(doy))
+            if page_state.total_pages() > 1 {
+                <div>pagination_control(state: &page_state, params: params)</div>
+            }
         </div>
     }
 }
@@ -335,8 +348,7 @@ pub(crate) async fn harvest_ending(cx: &Cx) -> topcoat::Result {
         .ok_or_not_found()?;
     let date = params.date.unwrap_or_else(|| jiff::Zoned::now().date());
     let doy = date.day_of_year();
-    // FIXME: pagination
-    let (_total, ending) = region
+    let (total, ending) = region
         .get_taxa(
             &mut db,
             None,
@@ -345,10 +357,11 @@ pub(crate) async fn harvest_ending(cx: &Cx) -> topcoat::Result {
                 context: 10,
                 doy: Some(doy),
             }),
-            None,
-            None,
+            params.offset,
+            Some(PER_PAGE),
         )
         .await?;
+    let page_state = PageState::new(params.offset, PER_PAGE, total.try_into().unwrap());
     let items = vec![
         Breadcrumb {
             url: Some("/regions".to_string()),
@@ -373,7 +386,13 @@ pub(crate) async fn harvest_ending(cx: &Cx) -> topcoat::Result {
                 </p>
                 week_navigator(date: date)
             </hgroup>
+            if page_state.total_pages() > 1 {
+                <div>pagination_control(state: &page_state, params: params)</div>
+            }
             regional_taxa_table(taxa: &ending, current_doy: Some(doy))
+            if page_state.total_pages() > 1 {
+                <div>pagination_control(state: &page_state, params: params)</div>
+            }
         </div>
     }
 }
@@ -391,17 +410,17 @@ pub(crate) async fn harvest_fruiting(cx: &Cx) -> topcoat::Result {
         .ok_or_not_found()?;
     let date = params.date.unwrap_or_else(|| jiff::Zoned::now().date());
     let doy = date.day_of_year();
-    // FIXME: pagination
-    let (_total, ending) = region
+    let (total, ending) = region
         .get_taxa(
             &mut db,
             None,
             Some(OriginFilter::NativeOnly),
             Some(HarvestFilter::ReadyOnDoy(date.day_of_year())),
-            None,
-            None,
+            params.offset,
+            Some(PER_PAGE),
         )
         .await?;
+    let page_state = PageState::new(params.offset, PER_PAGE, total.try_into().unwrap());
     let items = vec![
         Breadcrumb {
             url: Some("/regions".to_string()),
@@ -427,7 +446,13 @@ pub(crate) async fn harvest_fruiting(cx: &Cx) -> topcoat::Result {
                     attrs: attributes! { class="justify-center md:justify-normal" }
                 )
             </hgroup>
+            if page_state.total_pages() > 1 {
+                <div>pagination_control(state: &page_state, params: params)</div>
+            }
             regional_taxa_table(taxa: &ending, current_doy: Some(doy))
+            if page_state.total_pages() > 1 {
+                <div>pagination_control(state: &page_state, params: params)</div>
+            }
         </div>
     }
 }
