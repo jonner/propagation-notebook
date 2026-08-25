@@ -127,7 +127,7 @@ async fn update_photos(mut db: toasty::Db) -> Result<(), BackgroundError> {
         if let Err(e) = taxon.update_photo(&mut db).await {
             warn!("Failed to update taxon photo: {e}");
         }
-        std::thread::sleep(Duration::from_secs(10));
+        tokio::time::sleep(Duration::from_secs(10)).await;
     }
     Ok(())
 }
