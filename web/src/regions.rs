@@ -4,7 +4,7 @@ use libpropagation::region::{
 use serde::Serialize;
 use topcoat::{
     context::Cx,
-    router::{href, page, path_param, query_params},
+    router::{error::RouterErrorExt, href, page, path_param, query_params},
     view::{attributes, view},
 };
 use tracing::trace;
@@ -109,7 +109,8 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
         .include(Region::fields().taxon_statuses())
         .one()
         .exec(&mut db)
-        .await?;
+        .await
+        .ok_or_not_found()?;
     let (n_fruiting, _) = region
         .get_taxa(
             &mut db,
@@ -274,7 +275,8 @@ pub(crate) async fn harvest_starting(cx: &Cx) -> topcoat::Result {
         .include(Region::fields().taxon_statuses())
         .one()
         .exec(&mut db)
-        .await?;
+        .await
+        .ok_or_not_found()?;
     let date = params.date.unwrap_or_else(|| jiff::Zoned::now().date());
     let doy = date.day_of_year();
     // FIXME: pagination
@@ -329,7 +331,8 @@ pub(crate) async fn harvest_ending(cx: &Cx) -> topcoat::Result {
         .include(Region::fields().taxon_statuses())
         .one()
         .exec(&mut db)
-        .await?;
+        .await
+        .ok_or_not_found()?;
     let date = params.date.unwrap_or_else(|| jiff::Zoned::now().date());
     let doy = date.day_of_year();
     // FIXME: pagination
@@ -384,7 +387,8 @@ pub(crate) async fn harvest_fruiting(cx: &Cx) -> topcoat::Result {
         .include(Region::fields().taxon_statuses())
         .one()
         .exec(&mut db)
-        .await?;
+        .await
+        .ok_or_not_found()?;
     let date = params.date.unwrap_or_else(|| jiff::Zoned::now().date());
     let doy = date.day_of_year();
     // FIXME: pagination
@@ -448,7 +452,9 @@ pub async fn taxa_list(cx: &Cx) -> topcoat::Result {
     let mut db = db(cx);
     let region_id = path_param::<RegionId>(cx)?;
     let params = query_params::<RegionalTaxaListParams>(cx)?;
-    let region = Region::get_by_id(&mut db, region_id).await?;
+    let region = Region::get_by_id(&mut db, region_id)
+        .await
+        .ok_or_not_found()?;
     let (total, taxa) = region
         .get_taxa(
             &mut db,
@@ -523,8 +529,8 @@ path_param!(taxon_id: u64, error = bad_request);
 #[page("/regions/{region_id}/taxa/{taxon_id}")]
 pub async fn taxon_status(cx: &Cx) -> topcoat::Result {
     let mut db = db(cx);
-    let region_id = path_param::<RegionId>(cx)?;
-    let taxon_id = path_param::<TaxonId>(cx)?;
+    let region_id = path_param::<RegionId>(cx).ok_or_not_found()?;
+    let taxon_id = path_param::<TaxonId>(cx).ok_or_not_found()?;
     let rts = RegionalTaxonStatus::filter_by_taxon_id_and_region_id(taxon_id, region_id)
         .include(RegionalTaxonStatus::fields().region())
         .include(RegionalTaxonStatus::fields().taxon().vernaculars())

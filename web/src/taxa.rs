@@ -4,7 +4,7 @@ use libpropagation::{
 };
 use topcoat::{
     context::Cx,
-    router::{href, page, path_param, query_params},
+    router::{error::RouterErrorExt, href, page, path_param, query_params},
     view::{attributes, view},
 };
 use tracing::trace;
@@ -146,7 +146,8 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
         .include(Taxon::fields().resources())
         .one()
         .exec(&mut db)
-        .await?;
+        .await
+        .ok_or_not_found()?;
     trace!(?taxon);
     let ancestors = taxon
         .ancestor_links
@@ -349,7 +350,8 @@ pub async fn propagation_details(cx: &Cx) -> topcoat::Result {
             )
             .one()
             .exec(&mut db)
-            .await?;
+            .await
+            .ok_or_not_found()?;
     trace!(?tp);
     let proc = tp.propagation.get();
     let taxon = tp.taxon.get();
@@ -400,7 +402,8 @@ pub async fn cleaning_details(cx: &Cx) -> topcoat::Result {
     .include(CleaningProcedure::fields().citation_links().citation())
     .one()
     .exec(&mut db)
-    .await?;
+    .await
+    .ok_or_not_found()?;
     trace!(?proc);
     let taxon = proc.taxon.get();
     view! {
@@ -443,7 +446,8 @@ pub async fn note_details(cx: &Cx) -> topcoat::Result {
         .include(TaxonNote::fields().citation_links().citation())
         .one()
         .exec(&mut db)
-        .await?;
+        .await
+        .ok_or_not_found()?;
     trace!(?note);
     let taxon = note.taxon.get();
     view! {
