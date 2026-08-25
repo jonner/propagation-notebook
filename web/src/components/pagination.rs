@@ -320,7 +320,7 @@ pub async fn week_navigator(
     date: jiff::civil::Date,
     #[default] attrs: Attributes,
 ) -> topcoat::Result {
-    let fmt = |dt: jiff::civil::Date| dt.strftime("%B %d").to_string();
+    let fmt = |dt: jiff::civil::Date| dt.strftime("%b %d").to_string();
     let prev_date = date - 7.days();
     let prev_link = format!("?date={}", prev_date);
     let next_date = date + 7.days();
@@ -331,14 +331,12 @@ pub async fn week_navigator(
             pagination_content(
                 pagination_item(
                     pagination_previous(
-                        label: fmt(prev_date),
                         attrs: attributes! { href=(prev_link) }
                     )
                 )
                 pagination_item(pagination_text(active: true, label: fmt(date)))
                 pagination_item(
                     pagination_next(
-                        label: fmt(next_date),
                         attrs: attributes! { href=(next_link) }
                     )
                 )
