@@ -92,36 +92,29 @@ async fn update_regional_status(
 #[tracing::instrument(skip_all)]
 async fn update_regions(mut db: toasty::Db) -> Result<(), BackgroundError> {
     debug!("Updating regional taxon status");
-    let mut page = RegionalTaxonStatus::all()
+    let page = RegionalTaxonStatus::all()
         .include(RegionalTaxonStatus::fields().taxon())
         .include(RegionalTaxonStatus::fields().region())
         .order_by((
             RegionalTaxonStatus::fields().last_sync_attempt().asc(),
             RegionalTaxonStatus::fields().id().asc(),
         ))
-        .paginate(100)
+        .limit(100)
         .exec(&mut db)
         .await?;
-    loop {
-        for rts in page.iter() {
-            if let Err(e) = update_regional_status(&mut db, rts).await {
-                warn!("Failed to query harvest info: {e}")
-            }
-            if let Err(e) = RegionalTaxonStatus::update_by_id(rts.id)
-                .last_sync_attempt(Some(jiff::Timestamp::now()))
-                .exec(&mut db)
-                .await
-            {
-                warn!("Failed to update last sync timestamp: {e}");
-            }
-            // for a constantly-running update thread, run slowly
-            tokio::time::sleep(Duration::from_secs(10)).await;
+    for rts in page.iter() {
+        if let Err(e) = update_regional_status(&mut db, rts).await {
+            warn!("Failed to query harvest info: {e}")
         }
-
-        match page.next(&mut db).await? {
-            Some(next) => page = next,
-            None => break,
+        if let Err(e) = RegionalTaxonStatus::update_by_id(rts.id)
+            .last_sync_attempt(Some(jiff::Timestamp::now()))
+            .exec(&mut db)
+            .await
+        {
+            warn!("Failed to update last sync timestamp: {e}");
         }
+        // for a constantly-running update thread, run slowly
+        tokio::time::sleep(Duration::from_secs(10)).await;
     }
     Ok(())
 }
