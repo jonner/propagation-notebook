@@ -366,6 +366,10 @@ impl RegionCommands {
                         .exec(db)
                         .await?;
                         pb.set_message(taxon.complete_name.clone());
+                        let _ = RegionalTaxonStatus::update_by_id(fullrts.id)
+                            .last_sync_attempt(Some(jiff::Timestamp::now()))
+                            .exec(db)
+                            .await;
                         match fullrts.query_harvest_info(db).await {
                             Ok(window) => {
                                 if window.n_samples.unwrap_or_default()
@@ -778,6 +782,10 @@ async fn interactive_harvest_window(
         inat_taxon
     };
 
+    let _ = RegionalTaxonStatus::update_by_id(rts.id)
+        .last_sync_attempt(Some(jiff::Timestamp::now()))
+        .exec(db)
+        .await;
     let (nsamples, window) = {
         let inat = inaturalist::Client::new()?;
         interactive_harvest_window_with_expansion(
