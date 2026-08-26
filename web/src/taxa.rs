@@ -436,33 +436,55 @@ pub async fn cleaning_details(cx: &Cx) -> topcoat::Result {
     .ok_or_not_found()?;
     trace!(?proc);
     let taxon = proc.taxon.get();
+    let crumbs = vec![
+        Breadcrumb {
+            url: Some(href!(list).resolve(cx)),
+            text: "Taxonomy".to_string(),
+        },
+        Breadcrumb {
+            url: Some(href!(details, TaxonId(taxon.id)).resolve(cx)),
+            text: taxon.complete_name.clone(),
+        },
+        Breadcrumb {
+            url: None,
+            text: format!("Cleaning Procedure {}", proc.id),
+        },
+    ];
+
     view! {
-        <h1>
-            <span>(&proc.name)</span>
-            " for "
-            <span class="latin">(&taxon.complete_name)</span>
-        </h1>
-        <dt>"Taxon"</dt>
-        <dd>
-            <span class="latin">
-                <a href=(href!(details, TaxonId(taxon.id)))>(&taxon.complete_name)</a>
-            </span>
-        </dd>
-        <dt>"Instructions"</dt>
-        <dd>(proc.instructions)</dd>
-        <dt>"Additional Notes"</dt>
-        <dd>(proc.notes.as_deref().unwrap_or_default())</dd>
-        <dt>"Citations"</dt>
-        <dd>
-            citation_list(
-                citations: proc
-                    .citation_links
-                    .get()
-                    .iter()
-                    .map(|cl| cl.citation.get())
-                    .collect()
-            )
-        </dd>
+        <div class="flex flex-col gap-4">
+            <hgroup>
+                breadcrumbs(items: crumbs)
+                <h1>
+                    <span>(&proc.name)</span>
+                    " for "
+                    <span class="latin">(&taxon.complete_name)</span>
+                </h1>
+            </hgroup>
+            <section>
+                <h2>"Instructions"</h2>
+                <div class="text-2xl">(proc.instructions)</div>
+            </section>
+            if let Some(notes) = proc.notes {
+                <section>
+                    <h2>"Additional Notes"</h2>
+                    <div>(notes)</div>
+                </section>
+            }
+            <section>
+                <h2>"Citations"</h2>
+                <div>
+                    citation_list(
+                        citations: proc
+                            .citation_links
+                            .get()
+                            .iter()
+                            .map(|cl| cl.citation.get())
+                            .collect()
+                    )
+                </div>
+            </section>
+        </div>
     }
 }
 

@@ -330,15 +330,11 @@ pub async fn week_navigator(
             attrs: attrs,
             pagination_content(
                 pagination_item(
-                    pagination_previous(
-                        attrs: attributes! { href=(prev_link) }
-                    )
+                    pagination_previous(attrs: attributes! { href=(prev_link) })
                 )
                 pagination_item(pagination_text(active: true, label: fmt(date)))
                 pagination_item(
-                    pagination_next(
-                        attrs: attributes! { href=(next_link) }
-                    )
+                    pagination_next(attrs: attributes! { href=(next_link) })
                 )
             )
         )
