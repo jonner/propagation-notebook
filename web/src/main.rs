@@ -1,10 +1,11 @@
 use topcoat::{
-    asset::{AssetBundle, RouterBuilderAssetExt},
+    asset::{Asset, AssetBundle, RouterBuilderAssetExt, asset, asset_config},
+    context::Cx,
     font::{Font, fontsource::fontsource_font},
     icon::{icon, iconify},
     router::{Router, RouterBuilderDiscoverExt, href, layout, not_found, page},
     tailwind,
-    view::{attributes, view},
+    view::{attributes, class, view},
 };
 use tracing::debug;
 
@@ -49,8 +50,21 @@ const FONT_BODY: Font = fontsource_font!(AVERIA_SANS_LIBRE, host: Asset);
 
 not_found!("/");
 
+// All images from iNaturalist licensed in the public domain
+const HEADERS: &[Asset] = &[
+    // https://www.inaturalist.org/photos/210648286
+    asset!("assets/cypripedium-reginae.webp"),
+    // https://www.inaturalist.org/photos/12597071
+    asset!("assets/asclepias-incarnata.webp"),
+    // https://www.inaturalist.org/photos/147597352
+    asset!("assets/empetrum-nigrum.webp"),
+    // https://www.inaturalist.org/photos/135132632
+    asset!("assets/escobaria-vivipara.webp"),
+];
+
 #[layout("/")]
-async fn layout(slot: topcoat::Result) -> topcoat::Result {
+async fn layout(cx: &Cx, slot: topcoat::Result) -> topcoat::Result {
+    let header_bg = HEADERS[rand::random_range(0..HEADERS.len())];
     view! {
         <!DOCTYPE html>
         <html>
@@ -74,89 +88,86 @@ async fn layout(slot: topcoat::Result) -> topcoat::Result {
                 topcoat::font::link(font: FONT_HEAD)
                 topcoat::font::link(font: FONT_BODY)
             </head>
-            <body class="flex flex-col min-h-screen">
-                <header
-                    class="flex items-center justify-between font-bold flex-wrap p-6"
+            <body class="bg-slate/20">
+                <div
+                    class="w-full md:w-[100rem] max-w-full m-auto shadow-xl flex flex-col min-h-screen"
                 >
-                    <nav
-                        class="w-full block flex-grow lg:w-auto flex items-center gap-6 text-white"
+                    <header
+                        class=(class!(
+                            "flex",
+                            "flex-col",
+                            "items-start",
+                            "justify-between",
+                            "font-bold",
+                            "flex-wrap",
+                            "bg-(image:--background-image)",
+                            "bg-center",
+                            "bg-cover",
+                            "h-[8rem]",
+                            "md:h-[12rem]",
+                        ))
+                        style=(format!("--background-image:url('{}')",asset_config(cx).resolve(header_bg)))
                     >
-                        <ul class="contents">
-                            <li>
-                                <a class="block" href=(href!(home))>
-                                    icon(
-                                        data: mdi::FLOWER_POPPY,
-                                        label: "Home",
-                                        attrs: attributes! { class="icon" }
-                                    )
-                                    <span class="caption">"Propagation Notebook"</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a class="block" href=(href!(taxa::list))>
-                                    icon(
-                                        data: mdi::FORMAT_LIST_BULLETED,
-                                        label: "list icon",
-                                        attrs: attributes! { class="icon" }
-                                    )
-                                    <span class="caption">"Taxonomy"</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a class="block" href=(href!(regions::list))>
-                                    icon(
-                                        data: mdi::GLOBE,
-                                        label: "list icon",
-                                        attrs: attributes! { class="icon" }
-                                    )
-                                    <span class="caption">"Regions"</span>
-                                </a>
-                            </li>
-                            // <li>
-                            //     <a class="block" href=(href!(propagation::list))>
-                            //         icon(
-                            //             data: mdi::SPROUT,
-                            //             label: "list icon",
-                            //             attrs: attributes! { class="icon" }
-                            //         )
-                            //         <span class="caption">"Propagation Protocols"</span>
-                            //     </a>
-                            // </li>
-                            // <li>
-                            //     <a class="block" href=(href!(about))>
-                            //         icon(
-                            //             data: mdi::ABOUT,
-                            //             label: "about icon",
-                            //             attrs: attributes! { class="icon" }
-                            //         )
-                            //         <span class="caption">"About"</span>
-                            //     </a>
-                            // </li>
-                        </ul>
-                    </nav>
-                </header>
-                <main class="m-3 md:m-6 flex-grow">
-                    match slot {
-                        Ok(content) => (content),
-                        Err(e) => {
-                            <h1>"Error"</h1>
-                            <div class="error p-6">(e.to_string())</div>
+                        <nav
+                            class="w-full block flex-shrink flex items-center gap-6 px-6 py-3 text-white bg-neutral-800/50"
+                        >
+                            <ul class="contents">
+                                <li>
+                                    <a class="block" href=(href!(home))>
+                                        icon(
+                                            data: mdi::FLOWER_POPPY,
+                                            label: "Home",
+                                            attrs: attributes! { class="icon" }
+                                        )
+                                        <span class="caption">"Propagation Notebook"</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="block" href=(href!(taxa::list))>
+                                        icon(
+                                            data: mdi::FORMAT_LIST_BULLETED,
+                                            label: "list icon",
+                                            attrs: attributes! { class="icon" }
+                                        )
+                                        <span class="caption">"Taxonomy"</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="block" href=(href!(regions::list))>
+                                        icon(
+                                            data: mdi::GLOBE,
+                                            label: "list icon",
+                                            attrs: attributes! { class="icon" }
+                                        )
+                                        <span class="caption">"Regions"</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </header>
+                    <main class="m-3 md:m-6 flex-grow">
+                        match slot {
+                            Ok(content) => (content),
+                            Err(e) => {
+                                <h1>"Error"</h1>
+                                <div class="error p-6">(e.to_string())</div>
+                            }
                         }
-                    }
-                </main>
-                <footer class="p-6">
-                    "Developed by Jonathon Jongsma"
-                    <div class="text-sm text-white/50">
-                        <div>
-                            "Taxonomy based on "
-                            <a href="https://www.itis.gov">"ITIS"</a>
+                    </main>
+                    <footer class="p-6">
+                        "Developed by Jonathon Jongsma"
+                        <div class="text-sm text-white/50">
+                            <div>
+                                "Taxonomy based on "
+                                <a href="https://www.itis.gov">"ITIS"</a>
+                            </div>
+                            <div>
+                                "Phenology data provided by "
+                                <a href="https://inaturalist.org">"iNaturalist.org"</a>
+                            </div>
                         </div>
-                        <div>
-                            "Phenology data provided by "
-                            <a href="https://inaturalist.org">"iNaturalist.org"</a>
-                        </div>
-                    </div>
-                </footer>
+                    </footer>
+                </div>
             </body>
         </html>
     }
