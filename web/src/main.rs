@@ -60,6 +60,8 @@ const HEADERS: &[Asset] = &[
     asset!("assets/empetrum-nigrum.webp"),
     // https://www.inaturalist.org/photos/135132632
     asset!("assets/escobaria-vivipara.webp"),
+    // https://www.inaturalist.org/photos/102029239
+    asset!("assets/hamamelis-virginiana.webp"),
 ];
 
 #[layout("/")]
