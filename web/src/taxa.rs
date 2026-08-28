@@ -6,7 +6,7 @@ use libpropagation::{
 };
 use topcoat::{
     context::Cx,
-    icon::{icon, iconify::iconify_icon},
+    icon::icon,
     router::{
         error::{RouterErrorExt, redirect},
         href, page, path_param, query_params,
@@ -26,6 +26,7 @@ use crate::{
         input::input,
         pagination::pagination_control,
     },
+    mdi,
     util::{ModifyOffset, PER_PAGE, PageState, db},
 };
 
@@ -149,7 +150,7 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result {
                                         (&taxon.complete_name)
                                     </a>
                                     <a href=(href!(details, TaxonId(taxon.id)))>
-                                        icon(data: iconify_icon!("mdi:information"))
+                                        icon(data: mdi::INFORMATION, label: "Information")
                                     </a>
                                 </span>
                             </li>
@@ -176,7 +177,7 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result {
                                         <img class="block rounded-xl border" src=(url)>
                                     } else {
                                         icon(
-                                            data: iconify_icon!("mdi:leaf-circle"),
+                                            data: mdi::LEAF_CIRCLE,
                                             size: 75,
                                             label: "Missing Image"
                                         )
@@ -194,7 +195,7 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result {
                                     (&taxon.complete_name)
                                 </a>
                                 <a class="p-3" href=(href!(details, TaxonId(taxon.id)))>
-                                    icon(data: iconify_icon!("mdi:information-outline"))
+                                    icon(data: mdi::INFORMATION_OUTLINE, label: "Information")
                                 </a>
                             </div>
                         }

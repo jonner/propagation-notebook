@@ -147,7 +147,7 @@ async fn layout(cx: &Cx, slot: topcoat::Result) -> topcoat::Result {
                                     <a class="block" href=(href!(taxa::taxonomy))>
                                         icon(
                                             data: mdi::FORMAT_LIST_BULLETED,
-                                            label: "list icon",
+                                            label: "Taxonomy",
                                             attrs: attributes! { class="icon" }
                                         )
                                         <span class="caption">"Taxonomy"</span>
@@ -157,7 +157,7 @@ async fn layout(cx: &Cx, slot: topcoat::Result) -> topcoat::Result {
                                     <a class="block" href=(href!(regions::list))>
                                         icon(
                                             data: mdi::GLOBE,
-                                            label: "list icon",
+                                            label: "Regions",
                                             attrs: attributes! { class="icon" }
                                         )
                                         <span class="caption">"Regions"</span>
