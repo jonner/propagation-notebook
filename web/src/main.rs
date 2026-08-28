@@ -168,7 +168,13 @@ async fn layout(cx: &Cx, slot: topcoat::Result) -> topcoat::Result {
                     </header>
                     <main class="m-3 md:m-6 flex-grow">(content)</main>
                     <footer>
-                        "Developed by Jonathon Jongsma"
+                        "Developed with "
+                        icon(
+                            data: mdi::HEART,
+                            label: "Love",
+                            attrs: attributes! { class="text-red-300 inline-block" }
+                        )
+                        " by volunteers"
                         <div class="text-sm text-white/50">
                             <div>
                                 "Taxonomy based on "
