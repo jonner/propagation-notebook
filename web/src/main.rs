@@ -3,7 +3,11 @@ use topcoat::{
     context::Cx,
     font::{Font, fontsource::fontsource_font},
     icon::{icon, iconify},
-    router::{Router, RouterBuilderDiscoverExt, href, layout, not_found, page},
+    router::{
+        Router, RouterBuilderDiscoverExt,
+        error::{ForbiddenError, NotFoundError},
+        href, layout, not_found, page,
+    },
     tailwind,
     view::{attributes, class, view},
 };
@@ -67,6 +71,17 @@ const HEADERS: &[Asset] = &[
 #[layout("/")]
 async fn layout(cx: &Cx, slot: topcoat::Result) -> topcoat::Result {
     let header_bg = HEADERS[rand::random_range(0..HEADERS.len())];
+    let content = match slot {
+        Err(e) if e.downcast_ref::<NotFoundError>().is_some() => view! {
+            <h1>"Error"</h1>
+            <div class="error p-6">"Page Not Found"</div>
+        },
+        Err(e) if e.downcast_ref::<ForbiddenError>().is_some() => view! {
+            <h1>"Error"</h1>
+            <div class="error p-6">"Access Denied"</div>
+        },
+        content => content,
+    }?;
     view! {
         <!DOCTYPE html>
         <html>
@@ -147,15 +162,7 @@ async fn layout(cx: &Cx, slot: topcoat::Result) -> topcoat::Result {
                             </ul>
                         </nav>
                     </header>
-                    <main class="m-3 md:m-6 flex-grow">
-                        match slot {
-                            Ok(content) => (content),
-                            Err(e) => {
-                                <h1>"Error"</h1>
-                                <div class="error p-6">(e.to_string())</div>
-                            }
-                        }
-                    </main>
+                    <main class="m-3 md:m-6 flex-grow">(content)</main>
                     <footer class="p-6">
                         "Developed by Jonathon Jongsma"
                         <div class="text-sm text-white/50">
