@@ -87,6 +87,7 @@ pub async fn ancestor_breadcrumbs(
                         offset: None,
                         parent: Some(taxon.id),
                         fmt: None,
+                        region: None,
                     })
                     .resolve(cx),
             ),

@@ -1,6 +1,7 @@
 use libpropagation::{
     citation::Citation,
     cleaning::CleaningProcedure,
+    region::RegionalTaxonStatus,
     taxonomy::{Taxon, TaxonHierarchy, TaxonNote, TaxonPropagationProcedure},
 };
 use topcoat::{
@@ -46,6 +47,7 @@ pub enum ResultsFormat {
 pub struct TaxaListParams {
     pub offset: Option<usize>,
     pub parent: Option<u64>,
+    pub region: Option<u64>,
     pub fmt: Option<ResultsFormat>,
 }
 
@@ -67,7 +69,19 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result {
                 .id
         }
     };
-    let query = Taxon::filter(Taxon::fields().parent_id().eq(parent_id))
+    let mut filter = Taxon::fields().parent_id().eq(parent_id);
+    if let Some(region) = params.region {
+        filter = filter.and(
+            Taxon::fields().descendant_links().any(
+                TaxonHierarchy::fields()
+                    .descendant()
+                    .regional_statuses()
+                    .any(RegionalTaxonStatus::fields().region_id().eq(region)),
+            ),
+        )
+    }
+
+    let query = Taxon::filter(filter)
         .include(Taxon::fields().photo())
         .order_by((
             Taxon::fields().sequence().asc(),
@@ -129,6 +143,7 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result {
                                                 parent: Some(taxon.id),
                                                 fmt: params.fmt,
                                                 offset: None,
+                                                region: params.region,
                                             }))
                                     >
                                         (&taxon.complete_name)
@@ -153,6 +168,7 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result {
                                             parent: Some(taxon.id),
                                             fmt: params.fmt,
                                             offset: None,
+                                            region: params.region,
                                         }))
                                 >
                                     if let Some(photo) = taxon.photo.get()
@@ -172,6 +188,7 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result {
                                             parent: Some(taxon.id),
                                             fmt: params.fmt,
                                             offset: None,
+                                            region: params.region,
                                         }))
                                 >
                                     (&taxon.complete_name)
