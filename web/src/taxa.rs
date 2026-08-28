@@ -1,7 +1,7 @@
 use libpropagation::{
     citation::Citation,
     cleaning::CleaningProcedure,
-    region::RegionalTaxonStatus,
+    region::{Region, RegionalTaxonStatus},
     taxonomy::{Taxon, TaxonHierarchy, TaxonNote, TaxonPropagationProcedure},
 };
 use topcoat::{
@@ -113,6 +113,11 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result {
             }
         })
         .collect::<Vec<_>>();
+    let region = if let Some(region_id) = params.region {
+        Some(Region::get_by_id(&mut db, region_id).await?)
+    } else {
+        None
+    };
 
     view! {
         <form method="get" action=(href!(search)) class="flex my-6 w-full">
@@ -126,9 +131,29 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result {
             )
             button(attrs: attributes! { type="submit" }, "Search")
         </form>
-        <h1>"Taxonomy Explorer"</h1>
+        <hgroup>
+            <h1>"Taxonomy Explorer"</h1>
+            if let Some(region) = region {
+                <div class="text-muted-foreground">
+                    (format!("Showing only taxa within region '{}'. ", region.name))
+                    <a
+                        href=(href!(taxonomy)
+                            .query(TaxaListParams {
+                                region: None,
+                                offset: None,
+                                parent: params.parent,
+                                fmt: params.fmt,
+                            }))
+                    >
+                        "Clear region filter"
+                    </a>
+                </div>
+            }
+        </hgroup>
         <section>
-            <div class="my-3">ancestor_breadcrumbs(items: &ancestor_taxa, ellipsize: Some(2))</div>
+            <div class="my-3">
+                ancestor_breadcrumbs(items: &ancestor_taxa, ellipsize: Some(2))
+            </div>
             if page_state.total_pages() > 1 {
                 pagination_control(state: &page_state, params: params)
             }
