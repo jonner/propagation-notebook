@@ -195,7 +195,11 @@ async fn home() -> topcoat::Result {
             <section>
                 <h2>"Growing Native Plants"</h2>
                 <p>"Find propagation information for a particular species:"</p>
-                <form method="get" action="/taxa" class="flex my-6 w-full md:w-xl">
+                <form
+                    method="get"
+                    action=(href!(taxa::search))
+                    class="flex my-6 w-full md:w-xl"
+                >
                     input(
                         attrs: attributes! {
                             type="text"
