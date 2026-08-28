@@ -36,17 +36,82 @@
    `border-border`, ...). The indirection through plain variables on `:root`
    and `.dark` is what lets the values swap when the color scheme changes. */
 @theme inline {
-  --color-sail: #BAE5F9;
-  --color-jaggery: #C56C39;
-  --color-brown: #6F4930;
-  --color-leaf: #56903A;
-  --color-mallard: #213A1B;
   --font-header: "Averia Serif Libre", serif;
   --font-body: "Averia Sans Libre", sans;
 
+--color-old-copper-50: #f8f5ee;
+--color-old-copper-100: #ede6d4;
+--color-old-copper-200: #ddcdab;
+--color-old-copper-300: #c9ad7b;
+--color-old-copper-400: #b99256;
+--color-old-copper-500: #aa7f48;
+--color-old-copper-600: #92663c;
+--color-old-copper-700: #6f4930;
+--color-old-copper-800: #634130;
+--color-old-copper-900: #56382d;
+--color-old-copper-950: #311d17;
+--color-brown: var(--color-old-copper-700);
+
+--color-sail-50: #f1f9fe;
+--color-sail-100: #e2f2fc;
+--color-sail-200: #bae5f9;
+--color-sail-300: #84d3f5;
+--color-sail-400: #43bded;
+--color-sail-500: #1aa5dd;
+--color-sail-600: #0d85bc;
+--color-sail-700: #0c6a98;
+--color-sail-800: #0e5a7e;
+--color-sail-900: #114b69;
+--color-sail-950: #0c3045;
+--color-sail: var(--color-sail-200);
+
+--color-piper-50: #fbf7f1;
+--color-piper-100: #f7ecdd;
+--color-piper-200: #eed7ba;
+--color-piper-300: #e2bb8f;
+--color-piper-400: #d69861;
+--color-piper-500: #cd7e42;
+--color-piper-600: #c56c39;
+--color-piper-700: #9f522f;
+--color-piper-800: #80432c;
+--color-piper-900: #673927;
+--color-piper-950: #371c13;
+--color-jaggery: var(--color-piper-600);
+
+--color-vida-loca-50: #f1f9ec;
+--color-vida-loca-100: #e1f0d7;
+--color-vida-loca-200: #c5e3b3;
+--color-vida-loca-300: #a0d185;
+--color-vida-loca-400: #7fbc5f;
+--color-vida-loca-500: #56903a;
+--color-vida-loca-600: #498030;
+--color-vida-loca-700: #3a6229;
+--color-vida-loca-800: #314f25;
+--color-vida-loca-900: #2c4423;
+--color-vida-loca-950: #14240f;
+--color-leaf: var(--color-vida-loca-500);
+
+--color-mallard-50: #f1f9ec;
+--color-mallard-100: #def2d5;
+--color-mallard-200: #c1e6b0;
+--color-mallard-300: #99d581;
+--color-mallard-400: #76c259;
+--color-mallard-500: #57a73b;
+--color-mallard-600: #41852b;
+--color-mallard-700: #336625;
+--color-mallard-800: #2c5222;
+--color-mallard-900: #213a1b;
+--color-mallard-950: #11260d;
+--color-mallard: var(--color-mallard-900);
+
   --font-sans: var(--font-body);
+  --color-backdrop: var(--backdrop);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-background-contrast: var(--background-contrast);
+  --color-foreground-contrast: var(--foreground-contrast);
+  --color-header: var(--header);
+  --color-link: var(--link);
   --color-muted-foreground: var(--muted-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
@@ -59,15 +124,20 @@
 }
 
 :root {
-  --background: oklch(0.995 0.003 260);
+  --backdrop: var(--color-old-copper-50);
+  --background: var(--color-white);
   --foreground: oklch(0.24 0.012 260);
+  --background-contrast: var(--color-old-copper-700);
+  --foreground-contrast: var(--color-white);
+  --header: var(--color-piper-600);
+  --link: var(--color-old-copper-700);
   --muted-foreground: oklch(0.51 0.014 260);
-  --primary: oklch(0.31 0.02 260);
+  --primary: var(--color-vida-loca-500);
   --primary-foreground: oklch(0.985 0.003 260);
   --destructive: oklch(0.55 0.2 27);
   --destructive-foreground: oklch(0.99 0.012 27);
   --border: oklch(0.9 0.008 260);
-  --ring: oklch(0.62 0.06 260);
+  --ring: var(--color-mallard);
   --shadow-xs: 0 1px 2px oklch(0.24 0.02 260 / 12%);
   --shadow-sm:
     0 1px 2px oklch(0.24 0.02 260 / 10%),
@@ -75,8 +145,14 @@
 }
 
 .dark {
-  --background: oklch(0.17 0.012 260);
+  --backdrop: var(--color-neutral-600);
+  --background: var(--color-neutral-800);
+  --background-contrast: var(--color-neutral-900);
+  --foreground-contrast: var(--color-neutral-300);
+  /* --background: oklch(0.17 0.012 260); */
   --foreground: oklch(0.93 0.006 260);
+  --header: var(--color-piper-400);
+  --link: var(--color-piper-300);
   --muted-foreground: oklch(0.68 0.012 260);
   --primary: oklch(0.92 0.008 260);
   --primary-foreground: oklch(0.21 0.015 260);
@@ -91,12 +167,12 @@
 
 @layer base {
   body {
-    @apply bg-background font-sans text-foreground text-lg;
+    @apply bg-backdrop font-sans text-foreground text-lg;
   }
 }
 
 header, footer {
-  @apply text-white text-lg bg-brown;
+  @apply text-foreground-contrast text-lg bg-background-contrast;
 }
 
 header {
@@ -108,11 +184,11 @@ footer {
 }
 
 div.main-content {
-   @apply w-full md:w-[80rem] max-w-full m-auto shadow-xl flex flex-col min-h-screen
+   @apply w-full md:w-[80rem] max-w-full m-auto shadow-xl flex flex-col min-h-screen bg-background
 }
 
 h1, h2, h3, h4, h5 {
-  @apply font-bold text-jaggery font-header;
+  @apply font-bold text-header font-header;
 }
 
 h1 {
@@ -140,23 +216,11 @@ dd {
 }
 
 a[href] {
-  @apply text-brown underline font-bold;
+  @apply text-link underline font-bold;
 }
 
 header a[href], footer a[href] {
-  @apply text-white no-underline;
-}
-
-form input[type=text] {
-  @apply text-slate-800 bg-white placeholder:text-slate-400 ;
-}
-
-form input[type=text], a.button, form button {
-  @apply rounded-lg no-underline ring ring-mallard;
-}
-
-a.button, form button {
-  @apply text-white bg-leaf;
+  @apply text-foreground-contrast no-underline;
 }
 
 .latin {
@@ -180,7 +244,7 @@ td, th {
 }
 
 .error, .endangered {
-  @apply text-red-200 bg-red-700;
+  @apply text-destructive-foreground bg-destructive;
 }
 
 .introduced {
@@ -216,7 +280,7 @@ header nav li span.caption {
 }
 
 nav.breadcrumbs {
-  @apply flex mx-0 px-0 text-brown/80 items-center;
+  @apply flex mx-0 px-0 items-center;
 }
 
 nav.breadcrumbs ol {
@@ -228,7 +292,7 @@ nav.breadcrumbs ol li {
 }
 
 nav.breadcrumbs ol li a {
-  @apply no-underline text-brown
+  @apply no-underline;
 }
 
 .inactive {
