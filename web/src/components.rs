@@ -1,9 +1,12 @@
+use libpropagation::taxonomy::Taxon;
 use topcoat::{
+    context::Cx,
     icon::icon,
+    router::href,
     view::{Attributes, attributes, component, view},
 };
 
-use crate::{leaflet::Map, mdi};
+use crate::{leaflet::Map, mdi, taxa::TaxaListParams};
 
 pub mod badge;
 pub mod button;
@@ -67,6 +70,30 @@ pub async fn breadcrumbs(
             </ol>
         </nav>
     }
+}
+
+#[component]
+pub async fn ancestor_breadcrumbs(
+    cx: &Cx,
+    items: &[&Taxon],
+    #[default] ellipsize: Option<usize>,
+) -> topcoat::Result {
+    let ancestors = items
+        .iter()
+        .map(|taxon| Breadcrumb {
+            url: Some(
+                href!(crate::taxa::taxonomy)
+                    .query(TaxaListParams {
+                        offset: None,
+                        parent: Some(taxon.id),
+                        fmt: None,
+                    })
+                    .resolve(cx),
+            ),
+            text: taxon.complete_name.clone(),
+        })
+        .collect();
+    view! { breadcrumbs(items: ancestors, ellipsize: ellipsize) }
 }
 
 #[component]

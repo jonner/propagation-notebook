@@ -16,7 +16,7 @@ use tracing::trace;
 
 use crate::{
     components::{
-        Breadcrumb,
+        Breadcrumb, ancestor_breadcrumbs,
         badge::{BadgeVariant, badge},
         breadcrumbs,
         button::button,
@@ -87,23 +87,15 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result {
         .include(TaxonHierarchy::fields().ancestor())
         .order_by(TaxonHierarchy::fields().depth().desc())
         .exec(&mut db)
-        .await?
+        .await?;
+    let ancestor_taxa = ancestors
         .iter()
-        .map(|l| Breadcrumb {
-            url: if l.depth == 0 {
+        .filter_map(|l| {
+            if l.depth == 0 {
                 None
             } else {
-                Some(
-                    href!(taxonomy)
-                        .query(TaxaListParams {
-                            parent: Some(l.ancestor.get().id),
-                            fmt: params.fmt,
-                            offset: None,
-                        })
-                        .resolve(cx),
-                )
-            },
-            text: l.ancestor.get().complete_name.clone(),
+                Some(l.ancestor.get())
+            }
         })
         .collect::<Vec<_>>();
 
@@ -121,7 +113,7 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result {
         </form>
         <h1>"Taxonomy"</h1>
         <section>
-            <div class="my-3">breadcrumbs(items: ancestors, ellipsize: Some(2))</div>
+            <div class="my-3">ancestor_breadcrumbs(items: &ancestor_taxa, ellipsize: Some(2))</div>
             if page_state.total_pages() > 1 {
                 pagination_control(state: &page_state, params: params)
             }
@@ -345,21 +337,18 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
         .ancestor_links
         .get()
         .iter()
+        .rev()
         .filter_map(|l| {
             if l.depth == 0 {
                 None
             } else {
-                Some(Breadcrumb {
-                    url: Some(href!(details, TaxonId(l.ancestor.get().id)).resolve(cx)),
-                    text: l.ancestor.get().complete_name.clone(),
-                })
+                Some(l.ancestor.get())
             }
         })
-        .rev()
         .collect::<Vec<_>>();
 
     view! {
-        breadcrumbs(items: ancestors, ellipsize: Some(2))
+        ancestor_breadcrumbs(items: &ancestors, ellipsize: Some(2))
         <h1 class="flex items-center">
             <span class="latin">(&taxon.complete_name)</span>
             badge(
