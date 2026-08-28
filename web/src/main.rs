@@ -111,10 +111,8 @@ async fn layout(cx: &Cx, slot: topcoat::Result) -> topcoat::Result {
                 topcoat::font::link(font: FONT_HEAD)
                 topcoat::font::link(font: FONT_BODY)
             </head>
-            <body class="bg-slate/20">
-                <div
-                    class="w-full md:w-[80rem] max-w-full m-auto shadow-xl flex flex-col min-h-screen"
-                >
+            <body>
+                <div class="main-content">
                     <header
                         class=(class!(
                             "flex",

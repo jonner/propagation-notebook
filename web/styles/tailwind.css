@@ -107,6 +107,10 @@ footer {
   @apply pb-12 mt-6 pb-50 p-6 shadow-[0_-1rem_2rem_rgba(0,0,0,0.2)];
 }
 
+div.main-content {
+   @apply w-full md:w-[80rem] max-w-full m-auto shadow-xl flex flex-col min-h-screen
+}
+
 h1, h2, h3, h4, h5 {
   @apply font-bold text-jaggery font-header;
 }
