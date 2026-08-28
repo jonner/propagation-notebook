@@ -7,6 +7,7 @@ use topcoat::{
         Router, RouterBuilderDiscoverExt,
         error::{ForbiddenError, NotFoundError},
         href, layout, not_found, page,
+        request::uri,
     },
     tailwind,
     view::{attributes, class, view},
@@ -71,14 +72,19 @@ const HEADERS: &[Asset] = &[
 #[layout("/")]
 async fn layout(cx: &Cx, slot: topcoat::Result) -> topcoat::Result {
     let header_bg = HEADERS[rand::random_range(0..HEADERS.len())];
+    let uri = uri(cx);
     let content = match slot {
         Err(e) if e.downcast_ref::<NotFoundError>().is_some() => view! {
-            <h1>"Error"</h1>
-            <div class="error p-6">"Page Not Found"</div>
+            <h1>"404 Not Found"</h1>
+            <p>
+                (format!("We're sorry, but the page '{uri}' cannot be found. The link might be outdated, or the URL could have been a typo."))
+            </p>
         },
         Err(e) if e.downcast_ref::<ForbiddenError>().is_some() => view! {
-            <h1>"Error"</h1>
-            <div class="error p-6">"Access Denied"</div>
+            <h1>"403 — Access Denied"</h1>
+            <div>
+                (format!("Sorry, you do not have permission to access '{uri}' on this server."))
+            </div>
         },
         content => content,
     }?;
