@@ -1,11 +1,15 @@
 use libpropagation::{
     citation::Citation,
     cleaning::CleaningProcedure,
-    taxonomy::{Taxon, TaxonNote, TaxonPropagationProcedure},
+    taxonomy::{Taxon, TaxonHierarchy, TaxonNote, TaxonPropagationProcedure},
 };
 use topcoat::{
     context::Cx,
-    router::{error::RouterErrorExt, href, page, path_param, query_params},
+    icon::{icon, iconify::iconify_icon},
+    router::{
+        error::{RouterErrorExt, redirect},
+        href, page, path_param, query_params,
+    },
     view::{attributes, view},
 };
 use tracing::trace;
@@ -35,7 +39,7 @@ pub enum ResultsFormat {
 #[query_params(error = bad_request)]
 pub struct TaxaListParams {
     pub offset: Option<usize>,
-    pub q: Option<String>,
+    pub parent: Option<u64>,
     pub fmt: Option<ResultsFormat>,
 }
 
@@ -46,18 +50,23 @@ impl ModifyOffset for TaxaListParams {
 }
 
 #[page("/taxa")]
-pub(crate) async fn list(cx: &Cx) -> topcoat::Result {
+pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result {
     let mut db = db(cx);
     let params = query_params::<TaxaListParams>(cx)?;
-    let query = match params.q.as_ref() {
-        Some(q) => Taxon::filter(Taxon::search_filter(q)),
-        None => Taxon::all(),
-    }
-    .include(Taxon::fields().photo())
-    .order_by((
-        Taxon::fields().sequence().asc(),
-        Taxon::fields().complete_name().asc(),
-    ));
+    let parent_id = match params.parent {
+        Some(parent) => parent,
+        None => {
+            Taxon::get_by_complete_name(&mut db, "Tracheophyta")
+                .await?
+                .id
+        }
+    };
+    let query = Taxon::filter(Taxon::fields().parent_id().eq(parent_id))
+        .include(Taxon::fields().photo())
+        .order_by((
+            Taxon::fields().sequence().asc(),
+            Taxon::fields().complete_name().asc(),
+        ));
     let total = query.clone().count().exec(&mut db).await? as usize;
     let page_state = PageState::new(params.offset, PER_PAGE, total);
     let taxa = query
@@ -65,63 +74,236 @@ pub(crate) async fn list(cx: &Cx) -> topcoat::Result {
         .offset(page_state.offset)
         .exec(&mut db)
         .await?;
-    trace!(?taxa);
+    if taxa.is_empty() {
+        return Err(redirect(href!(details, TaxonId(parent_id)).resolve(cx)).into());
+    }
+    let ancestors = TaxonHierarchy::filter(TaxonHierarchy::fields().descendant_id().eq(parent_id))
+        .include(TaxonHierarchy::fields().ancestor())
+        .order_by(TaxonHierarchy::fields().depth().desc())
+        .exec(&mut db)
+        .await?
+        .iter()
+        .map(|l| Breadcrumb {
+            url: if l.depth == 0 {
+                None
+            } else {
+                Some(
+                    href!(taxonomy)
+                        .query(TaxaListParams {
+                            parent: Some(l.ancestor.get().id),
+                            fmt: params.fmt,
+                            offset: None,
+                        })
+                        .resolve(cx),
+                )
+            },
+            text: l.ancestor.get().complete_name.clone(),
+        })
+        .collect::<Vec<_>>();
+
     view! {
-        <h1>"Taxon List"</h1>
-        <form method="get" action="/taxa" class="flex my-6 w-full md:w-xl">
+        <form method="get" action=(href!(search)) class="flex my-6 w-full">
             input(
                 attrs: attributes! {
                     type="text"
                     name="q"
                     placeholder="Search for a taxon"
-                    value=(params.q.as_deref().unwrap_or_default())
                     class="me-2 flex-grow"
                 }
             )
             button(attrs: attributes! { type="submit" }, "Search")
         </form>
-        if page_state.total_pages() > 1 {
-            pagination_control(state: &page_state, params: params)
-        }
-        match params.fmt {
-            Some(ResultsFormat::Grid) => {
-                <div
-                    class="grid items-center gap-6 grid-cols-2 sm:grid-cols-5 xl:grid-cols-10"
-                >
-                    for taxon in taxa.iter() {
-                        <div class="p-4 bg-jaggery/5 rounded h-full">
-                            <a
-                                href=(href!(details, TaxonId(taxon.id)))
-                                class="flex flex-col items-center text-center"
-                            >
-                                if let Some(photo) = taxon.photo.get() {
-                                    if let Some(url) = photo.square_url.as_ref() {
-                                        <img class="block" src=(url)>
-                                    }
-                                }
-                                <div>(&taxon.complete_name)</div>
-                            </a>
-                        </div>
-                    }
-                </div>
+        <h1>"Taxonomy"</h1>
+        <section>
+            <div class="my-3">breadcrumbs(items: ancestors, ellipsize: Some(2))</div>
+            if page_state.total_pages() > 1 {
+                pagination_control(state: &page_state, params: params)
             }
-            _ => {
-                <ul class="contents">
-                    for taxon in taxa.iter() {
-                        <li>
-                            <span class="latin">
-                                <a href=(href!(details, TaxonId(taxon.id)))>
+            match params.fmt {
+                Some(ResultsFormat::List) => {
+                    <ul class="contents">
+                        for taxon in taxa.iter() {
+                            <li>
+                                <span class="latin">
+                                    <a
+                                        href=(href!(taxonomy)
+                                            .query(TaxaListParams {
+                                                parent: Some(taxon.id),
+                                                fmt: params.fmt,
+                                                offset: None,
+                                            }))
+                                    >
+                                        (&taxon.complete_name)
+                                    </a>
+                                    <a href=(href!(details, TaxonId(taxon.id)))>
+                                        icon(data: iconify_icon!("mdi:information"))
+                                    </a>
+                                </span>
+                            </li>
+                        }
+                    </ul>
+                }
+                _ => {
+                    <div class="grid items-center gap-6 grid-cols-2 sm:grid-cols-5">
+                        for taxon in taxa.iter() {
+                            <div
+                                class="p-6 bg-jaggery/5 rounded-xl h-full flex flex-col items-center text-center"
+                            >
+                                <a
+                                    href=(href!(taxonomy)
+                                        .query(TaxaListParams {
+                                            parent: Some(taxon.id),
+                                            fmt: params.fmt,
+                                            offset: None,
+                                        }))
+                                >
+                                    if let Some(photo) = taxon.photo.get()
+                                        && let Some(url) = photo.square_url.as_ref() {
+                                        <img class="block rounded-xl border" src=(url)>
+                                    } else {
+                                        icon(
+                                            data: iconify_icon!("mdi:leaf-circle"),
+                                            size: 75,
+                                            label: "Missing Image"
+                                        )
+                                    }
+                                </a>
+                                <a
+                                    href=(href!(taxonomy)
+                                        .query(TaxaListParams {
+                                            parent: Some(taxon.id),
+                                            fmt: params.fmt,
+                                            offset: None,
+                                        }))
+                                >
                                     (&taxon.complete_name)
                                 </a>
-                            </span>
-                        </li>
-                    }
-                </ul>
+                                <a class="p-3" href=(href!(details, TaxonId(taxon.id)))>
+                                    icon(data: iconify_icon!("mdi:information-outline"))
+                                </a>
+                            </div>
+                        }
+                    </div>
+                }
             }
+            if page_state.total_pages() > 1 {
+                pagination_control(state: &page_state, params: params)
+            }
+        </section>
+    }
+}
+
+#[derive(Debug, Clone, serde::Serialize)]
+#[query_params(error = bad_request)]
+pub struct TaxaSearchParams {
+    pub offset: Option<usize>,
+    pub q: Option<String>,
+    pub fmt: Option<ResultsFormat>,
+}
+
+impl ModifyOffset for TaxaSearchParams {
+    fn modify_offset(&mut self, new_offset: usize) {
+        self.offset = Some(new_offset);
+    }
+}
+
+#[page("/taxa/search")]
+pub(crate) async fn search(cx: &Cx) -> topcoat::Result {
+    let mut db = db(cx);
+    let params = query_params::<TaxaSearchParams>(cx)?;
+    let (page_state, taxa) = match params.q.as_ref() {
+        Some(q) => {
+            let query = Taxon::filter(Taxon::search_filter(q))
+                .include(Taxon::fields().photo())
+                .order_by((
+                    Taxon::fields().sequence().asc(),
+                    Taxon::fields().complete_name().asc(),
+                ));
+            let total = query.clone().count().exec(&mut db).await? as usize;
+            let page_state = PageState::new(params.offset, PER_PAGE, total);
+            let taxa = query
+                .limit(page_state.per_page)
+                .offset(page_state.offset)
+                .exec(&mut db)
+                .await?;
+            (page_state, Some(taxa))
         }
-        if page_state.total_pages() > 1 {
-            pagination_control(state: &page_state, params: params)
-        }
+        None => (
+            PageState {
+                per_page: PER_PAGE,
+                offset: 0,
+                total: 0,
+            },
+            None,
+        ),
+    };
+    view! {
+        <div class="flex flex-col gap-3">
+            <div>
+                <h1>"Taxon Search"</h1>
+                <form method="get" class="flex my-6 w-full">
+                    input(
+                        attrs: attributes! {
+                            type="text"
+                            name="q"
+                            placeholder="Search for a taxon"
+                            value=(params.q.as_deref().unwrap_or_default())
+                            class="me-2 flex-grow"
+                        }
+                    )
+                    button(attrs: attributes! { type="submit" }, "Search")
+                </form>
+            </div>
+            if let Some(taxa) = taxa {
+                <section>
+                    <h3>"Results"</h3>
+                    if page_state.total_pages() > 1 {
+                        pagination_control(state: &page_state, params: params)
+                    }
+                    <div class="my-3">
+                        match params.fmt {
+                            Some(ResultsFormat::Grid) => {
+                                <div
+                                    class="grid items-center gap-6 grid-cols-2 sm:grid-cols-5 xl:grid-cols-10"
+                                >
+                                    for taxon in taxa.iter() {
+                                        <div class="p-4 bg-jaggery/5 rounded h-full">
+                                            <a
+                                                href=(href!(details, TaxonId(taxon.id)))
+                                                class="flex flex-col items-center text-center"
+                                            >
+                                                if let Some(photo) = taxon.photo.get() {
+                                                    if let Some(url) = photo.square_url.as_ref() {
+                                                        <img class="block" src=(url)>
+                                                    }
+                                                }
+                                                <div>(&taxon.complete_name)</div>
+                                            </a>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            _ => {
+                                <ul class="px-2">
+                                    for taxon in taxa.iter() {
+                                        <li class="py-1">
+                                            <span class="latin">
+                                                <a href=(href!(details, TaxonId(taxon.id)))>
+                                                    (&taxon.complete_name)
+                                                </a>
+                                            </span>
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                        }
+                    </div>
+                    if page_state.total_pages() > 1 {
+                        pagination_control(state: &page_state, params: params)
+                    }
+                </section>
+            }
+        </div>
     }
 }
 
@@ -358,7 +540,7 @@ pub async fn propagation_details(cx: &Cx) -> topcoat::Result {
     let taxon = tp.taxon.get();
     let crumbs = vec![
         Breadcrumb {
-            url: Some(href!(list).resolve(cx)),
+            url: Some(href!(taxonomy).resolve(cx)),
             text: "Taxonomy".to_string(),
         },
         Breadcrumb {
@@ -438,7 +620,7 @@ pub async fn cleaning_details(cx: &Cx) -> topcoat::Result {
     let taxon = proc.taxon.get();
     let crumbs = vec![
         Breadcrumb {
-            url: Some(href!(list).resolve(cx)),
+            url: Some(href!(taxonomy).resolve(cx)),
             text: "Taxonomy".to_string(),
         },
         Breadcrumb {
@@ -504,7 +686,7 @@ pub async fn note_details(cx: &Cx) -> topcoat::Result {
     let taxon = note.taxon.get();
     let crumbs = vec![
         Breadcrumb {
-            url: Some(href!(list).resolve(cx)),
+            url: Some(href!(taxonomy).resolve(cx)),
             text: "Taxonomy".to_string(),
         },
         Breadcrumb {

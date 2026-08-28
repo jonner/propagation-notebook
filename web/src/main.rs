@@ -140,7 +140,7 @@ async fn layout(cx: &Cx, slot: topcoat::Result) -> topcoat::Result {
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="block" href=(href!(taxa::list))>
+                                    <a class="block" href=(href!(taxa::taxonomy))>
                                         icon(
                                             data: mdi::FORMAT_LIST_BULLETED,
                                             label: "list icon",
