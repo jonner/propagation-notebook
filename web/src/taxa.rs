@@ -381,7 +381,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
                         <img
                             src=(medium_url)
                             alt=(&taxon.complete_name)
-                            class="border shadow-xl"
+                            class="border shadow-xl rounded-xl"
                         >
                         <figcaption class="text-slate-500">
                             (photo.attribution.as_ref())
