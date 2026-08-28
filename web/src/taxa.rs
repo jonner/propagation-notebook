@@ -257,6 +257,9 @@ pub(crate) async fn search(cx: &Cx) -> topcoat::Result {
             if let Some(taxa) = taxa {
                 <section>
                     <h3>"Results"</h3>
+                    if taxa.is_empty() && let Some(q) = params.q.as_ref() {
+                        <div>(format!("No taxa found for search term '{q}'"))</div>
+                    }
                     if page_state.total_pages() > 1 {
                         pagination_control(state: &page_state, params: params)
                     }
