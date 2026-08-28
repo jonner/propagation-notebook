@@ -111,7 +111,7 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result {
             )
             button(attrs: attributes! { type="submit" }, "Search")
         </form>
-        <h1>"Taxonomy"</h1>
+        <h1>"Taxonomy Explorer"</h1>
         <section>
             <div class="my-3">ancestor_breadcrumbs(items: &ancestor_taxa, ellipsize: Some(2))</div>
             if page_state.total_pages() > 1 {
