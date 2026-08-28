@@ -163,7 +163,7 @@ async fn layout(cx: &Cx, slot: topcoat::Result) -> topcoat::Result {
                         </nav>
                     </header>
                     <main class="m-3 md:m-6 flex-grow">(content)</main>
-                    <footer class="p-6">
+                    <footer>
                         "Developed by Jonathon Jongsma"
                         <div class="text-sm text-white/50">
                             <div>
