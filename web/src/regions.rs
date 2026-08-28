@@ -169,7 +169,7 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
                 <form
                     method="get"
                     action=(href!(taxa_list, RegionId(region.id)))
-                    class="flex w-full md:w-2xl"
+                    class="flex w-full"
                 >
                     input(
                         attrs: attributes! {
@@ -520,7 +520,7 @@ pub async fn taxa_list(cx: &Cx) -> topcoat::Result {
                 <h1>(format!("Taxa list for {}", &region.name))</h1>
             </hgroup>
             <section>
-                <form method="get" class="flex w-full md:w-xl">
+                <form method="get" class="flex w-full">
                     input(
                         attrs: attributes! {
                             type="text"
