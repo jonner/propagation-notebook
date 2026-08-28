@@ -16,8 +16,14 @@ use tracing::trace;
 
 use crate::{
     components::{
-        Breadcrumb, badge::badge, breadcrumbs, button::button, citations::citation_list,
-        harvest::taxon_regional_table, input::input, pagination::pagination_control,
+        Breadcrumb,
+        badge::{BadgeVariant, badge},
+        breadcrumbs,
+        button::button,
+        citations::citation_list,
+        harvest::taxon_regional_table,
+        input::input,
+        pagination::pagination_control,
     },
     util::{ModifyOffset, PER_PAGE, PageState, db},
 };
@@ -354,11 +360,13 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
 
     view! {
         breadcrumbs(items: ancestors, ellipsize: Some(2))
-        <h1>
+        <h1 class="flex items-center">
             <span class="latin">(&taxon.complete_name)</span>
-            " ("
-            (taxon.rank.to_string())
-            ")"
+            badge(
+                variant: BadgeVariant::Secondary,
+                attrs: attributes! { class="mx-3" },
+                (taxon.rank.to_string())
+            )
         </h1>
         <div class="flex flex-col gap-4">
             if let Some(photo) = taxon.photo.get() {
