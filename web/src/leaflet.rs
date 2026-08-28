@@ -55,9 +55,12 @@ const geojsonLayer = L.geoJSON(geojsonData, {
 // 4. Extract bounds and adjust map zoom/position automatically
 const bounds = geojsonLayer.getBounds();
 if (bounds.isValid()) {
+requestAnimationFrame(() => {
+    map.invalidateSize();
     map.fitBounds(bounds, {
-        padding: [50, 50] // Optional: Adds 50px buffer so markers don't hit the screen edge
+        padding: [32, 32] // Optional: Adds buffer so markers don't hit the screen edge
     });
+})
 } else {
     // Fallback view if the GeoJSON dataset happens to be empty
     map.setView([0, 0], 6);

@@ -184,7 +184,7 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
             </section>
             <div class="flex flex-col md:flex-row gap-6">
                 if let Some(value) = region.geometry.as_ref() {
-                    <section class="w-full md:w-2xl order-last md:order-first">
+                    <section class="flex-grow order-last md:order-first">
                         <div>
                             leaflet_map(
                                 geometry: value,
