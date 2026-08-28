@@ -107,7 +107,7 @@ async fn layout(cx: &Cx, slot: topcoat::Result) -> topcoat::Result {
             </head>
             <body class="bg-slate/20">
                 <div
-                    class="w-full md:w-[100rem] max-w-full m-auto shadow-xl flex flex-col min-h-screen"
+                    class="w-full md:w-[80rem] max-w-full m-auto shadow-xl flex flex-col min-h-screen"
                 >
                     <header
                         class=(class!(
