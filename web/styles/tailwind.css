@@ -300,7 +300,7 @@ nav.breadcrumbs ol li a {
 }
 
 figure.taxon-photo {
-  @apply relative inline-block m-0 overflow-hidden w-max rounded-xl border shadow-xl text-xs;
+  @apply relative inline-block m-0 overflow-hidden w-full max-w-max rounded-xl border shadow-xl text-xs;
 }
 
 figure.taxon-photo img {
