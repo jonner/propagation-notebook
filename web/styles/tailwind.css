@@ -298,3 +298,19 @@ nav.breadcrumbs ol li a {
 .inactive {
   @apply opacity-30;
 }
+
+figure.taxon-photo {
+  @apply relative inline-block m-0 overflow-hidden w-max rounded-xl border shadow-xl text-xs;
+}
+
+figure.taxon-photo img {
+  @apply rounded-[inherit] max-w-full;
+}
+
+figure.taxon-photo figcaption {
+  @apply absolute bottom-0 left-0 w-full bg-foreground/40 text-background p-2 overflow-hidden text-ellipsis whitespace-nowrap;
+}
+
+figure.taxon-photo:hover figcaption {
+  @apply whitespace-normal overflow-visible text-clip bg-foreground/60 ;
+}

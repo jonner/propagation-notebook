@@ -396,13 +396,12 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
         <div class="flex flex-col gap-4">
             if let Some(photo) = taxon.photo.get() {
                 if let Some(medium_url) = photo.medium_url.as_ref() {
-                    <figure>
+                    <figure class="taxon-photo">
                         <img
                             src=(medium_url)
                             alt=(&taxon.complete_name)
-                            class="border shadow-xl rounded-xl"
                         >
-                        <figcaption class="text-slate-500">
+                        <figcaption>
                             (photo.attribution.as_ref())
                         </figcaption>
                     </figure>
