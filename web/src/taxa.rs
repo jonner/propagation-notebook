@@ -128,18 +128,26 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result {
             <h1>"Taxonomy Explorer"</h1>
             if let Some(region) = region {
                 <div class="text-muted-foreground">
-                    (format!("Showing only taxa within region '{}'. ", region.name))
-                    <a
-                        href=(href!(taxonomy)
-                            .query(TaxaListParams {
-                                region: None,
-                                offset: None,
-                                parent: params.parent,
-                                fmt: params.fmt,
-                            }))
-                    >
-                        "Clear region filter"
-                    </a>
+                    "Filters: "
+                    badge(
+                        variant: BadgeVariant::Secondary,
+                        (format!("Region: '{}'", region.name))
+                        <a
+                            href=(href!(taxonomy)
+                                .query(TaxaListParams {
+                                    region: None,
+                                    offset: None,
+                                    parent: params.parent,
+                                    fmt: params.fmt,
+                                }))
+                            class="p-2"
+                        >
+                            icon(
+                                data: mdi::CLEAR_BOLD,
+                                label: "Clear filter",
+                            )
+                        </a>
+                    )
                 </div>
             }
         </hgroup>
