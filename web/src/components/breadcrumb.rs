@@ -165,7 +165,12 @@ pub async fn breadcrumbs(
     view! {
         breadcrumb(
             breadcrumb_list(
-                breadcrumb_item(breadcrumb_link(attrs: attributes! { href=(root.url) }, (&root.text)))
+                breadcrumb_item(
+                    breadcrumb_link(
+                        attrs: attributes! { href=(root.url) },
+                        (&root.text)
+                    )
+                )
                 if do_ellipsize {
                     breadcrumb_separator()
                     breadcrumb_ellipsis()
@@ -173,7 +178,12 @@ pub async fn breadcrumbs(
                 for item in rest {
                     breadcrumb_separator()
                     if let Some(url) = item.url {
-                        breadcrumb_item(breadcrumb_link(attrs: attributes! { href=(url) }, (item.text)))
+                        breadcrumb_item(
+                            breadcrumb_link(
+                                attrs: attributes! { href=(url) },
+                                (item.text)
+                            )
+                        )
                     } else {
                         breadcrumb_item(breadcrumb_page((item.text)))
                     }

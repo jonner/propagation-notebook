@@ -145,10 +145,7 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result {
         </hgroup>
         <section>
             <div class="my-3">
-                ancestor_breadcrumbs(
-                    items: &ancestor_taxa,
-                    link_final: false
-                )
+                ancestor_breadcrumbs(items: &ancestor_taxa, link_final: false)
             </div>
             if page_state.total_pages() > 1 {
                 pagination_control(state: &page_state, params: params)
