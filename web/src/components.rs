@@ -2,7 +2,7 @@ use libpropagation::taxonomy::Taxon;
 use topcoat::{
     context::Cx,
     icon::icon,
-    router::href,
+    router::{href, query_params},
     view::{Attributes, attributes, component, view},
 };
 
@@ -76,24 +76,33 @@ pub async fn breadcrumbs(
 pub async fn ancestor_breadcrumbs(
     cx: &Cx,
     items: &[&Taxon],
-    #[default] ellipsize: Option<usize>,
+    #[default] link_final: bool,
+    #[default(Some(2))] ellipsize: Option<usize>,
 ) -> topcoat::Result {
-    let ancestors = items
-        .iter()
-        .map(|taxon| Breadcrumb {
-            url: Some(
+    let params = query_params::<TaxaListParams>(cx)
+        .cloned()
+        .unwrap_or_default();
+    let f = |t: &Taxon, link: bool| -> Breadcrumb {
+        Breadcrumb {
+            url: link.then_some(
                 href!(crate::taxa::taxonomy)
                     .query(TaxaListParams {
                         offset: None,
-                        parent: Some(taxon.id),
-                        fmt: None,
-                        region: None,
+                        parent: Some(t.id),
+                        fmt: params.fmt,
+                        region: params.region,
                     })
                     .resolve(cx),
             ),
-            text: taxon.complete_name.clone(),
-        })
+            text: t.complete_name.clone(),
+        }
+    };
+    let mut ancestors: Vec<_> = items
+        .iter()
+        .take(items.len() - 1)
+        .map(|taxon| f(taxon, true))
         .collect();
+    ancestors.push(f(items.last().unwrap(), link_final));
     view! { breadcrumbs(items: ancestors, ellipsize: ellipsize) }
 }
 

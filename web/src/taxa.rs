@@ -43,7 +43,7 @@ pub enum ResultsFormat {
     Grid,
 }
 
-#[derive(Debug, Clone, serde::Serialize)]
+#[derive(Debug, Clone, serde::Serialize, Default)]
 #[query_params(error = bad_request)]
 pub struct TaxaListParams {
     pub offset: Option<usize>,
@@ -105,13 +105,7 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result {
         .await?;
     let ancestor_taxa = ancestors
         .iter()
-        .filter_map(|l| {
-            if l.depth == 0 {
-                None
-            } else {
-                Some(l.ancestor.get())
-            }
-        })
+        .map(|l| l.ancestor.get())
         .collect::<Vec<_>>();
     let region = if let Some(region_id) = params.region {
         Some(Region::get_by_id(&mut db, region_id).await?)
@@ -152,7 +146,10 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result {
         </hgroup>
         <section>
             <div class="my-3">
-                ancestor_breadcrumbs(items: &ancestor_taxa, ellipsize: Some(2))
+                ancestor_breadcrumbs(
+                    items: &ancestor_taxa,
+                    link_final: false
+                )
             </div>
             if page_state.total_pages() > 1 {
                 pagination_control(state: &page_state, params: params)
@@ -391,7 +388,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
         .collect::<Vec<_>>();
 
     view! {
-        ancestor_breadcrumbs(items: &ancestors, ellipsize: Some(2))
+        ancestor_breadcrumbs(items: &ancestors, link_final: true)
         <h1 class="flex items-center">
             <span class="latin">(&taxon.complete_name)</span>
             badge(
