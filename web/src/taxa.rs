@@ -17,9 +17,8 @@ use tracing::trace;
 
 use crate::{
     components::{
-        Breadcrumb, ancestor_breadcrumbs,
         badge::{BadgeVariant, badge},
-        breadcrumbs,
+        breadcrumb::{Breadcrumb, ancestor_breadcrumbs, breadcrumbs},
         button::button,
         citations::citation_list,
         harvest::taxon_regional_table,

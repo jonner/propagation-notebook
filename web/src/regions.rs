@@ -11,9 +11,8 @@ use tracing::trace;
 
 use crate::{
     components::{
-        Breadcrumb,
         badge::{conservation_status_badge, origin_badge},
-        breadcrumbs,
+        breadcrumb::{Breadcrumb, breadcrumbs},
         button::button,
         card::{card, card_content, card_footer, card_header, card_title},
         harvest::{harvest_timeline, regional_taxa_table},

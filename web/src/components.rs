@@ -1,14 +1,9 @@
-use libpropagation::taxonomy::Taxon;
-use topcoat::{
-    context::Cx,
-    icon::icon,
-    router::{href, query_params},
-    view::{Attributes, attributes, component, view},
-};
+use topcoat::view::{Attributes, component, view};
 
-use crate::{leaflet::Map, mdi, taxa::TaxaListParams};
+use crate::leaflet::Map;
 
 pub mod badge;
+pub mod breadcrumb;
 pub mod button;
 pub mod card;
 pub mod citations;
@@ -16,95 +11,6 @@ pub mod harvest;
 pub mod input;
 pub mod pagination;
 pub mod tooltip;
-
-pub struct Breadcrumb {
-    pub url: Option<String>,
-    pub text: String,
-}
-
-#[component]
-pub async fn breadcrumbs(
-    items: Vec<Breadcrumb>,
-    #[default] ellipsize: Option<usize>,
-) -> topcoat::Result {
-    let do_ellipsize = ellipsize.map(|n| items.len() > n + 1) == Some(true);
-    let mut breadcrumb_iter = items.into_iter();
-    let Some(root) = breadcrumb_iter.next() else {
-        return view! {};
-    };
-    let rest: Vec<_> = if let Some(ellipsize) = ellipsize {
-        breadcrumb_iter.rev().take(ellipsize).rev().collect()
-    } else {
-        breadcrumb_iter.collect()
-    };
-    view! {
-        <nav class="breadcrumbs">
-            <ol>
-                <li><a href=(root.url)>(&root.text)</a></li>
-                if do_ellipsize {
-                    <li>
-                        icon(
-                            data: mdi::NAVIGATE_NEXT,
-                            label: "separator",
-                            attrs: attributes! { class="icon" }
-                        )
-                        <a>
-                            icon(
-                                data: mdi::ELLIPSIS_HORIZONTAL,
-                                label: "skipped",
-                                attrs: attributes! { class="icon" }
-                            )
-                        </a>
-                    </li>
-                }
-                for item in rest {
-                    <li>
-                        icon(
-                            data: mdi::NAVIGATE_NEXT,
-                            label: "separator",
-                            attrs: attributes! { class="icon" }
-                        )
-                        <a href=(item.url)>(&item.text)</a>
-                    </li>
-                }
-            </ol>
-        </nav>
-    }
-}
-
-#[component]
-pub async fn ancestor_breadcrumbs(
-    cx: &Cx,
-    items: &[&Taxon],
-    #[default] link_final: bool,
-    #[default(Some(2))] ellipsize: Option<usize>,
-) -> topcoat::Result {
-    let params = query_params::<TaxaListParams>(cx)
-        .cloned()
-        .unwrap_or_default();
-    let f = |t: &Taxon, link: bool| -> Breadcrumb {
-        Breadcrumb {
-            url: link.then_some(
-                href!(crate::taxa::taxonomy)
-                    .query(TaxaListParams {
-                        offset: None,
-                        parent: Some(t.id),
-                        fmt: params.fmt,
-                        region: params.region,
-                    })
-                    .resolve(cx),
-            ),
-            text: t.complete_name.clone(),
-        }
-    };
-    let mut ancestors: Vec<_> = items
-        .iter()
-        .take(items.len() - 1)
-        .map(|taxon| f(taxon, true))
-        .collect();
-    ancestors.push(f(items.last().unwrap(), link_final));
-    view! { breadcrumbs(items: ancestors, ellipsize: ellipsize) }
-}
 
 #[component]
 pub async fn leaflet_map(
