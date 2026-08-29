@@ -190,7 +190,7 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
                             type="text"
                             name="q"
                             placeholder="Search for a taxon"
-                            class="me-2 flex-grow"
+                            class="me-2 grow"
                         }
                     )
                     button(attrs: attributes! { type="submit" }, "Search")
@@ -198,7 +198,7 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
             </section>
             <div class="flex flex-col md:flex-row gap-6">
                 if let Some(value) = region.geometry.as_ref() {
-                    <section class="flex-grow order-last md:order-first">
+                    <section class="grow order-last md:order-first">
                         <div>
                             leaflet_map(
                                 geometry: value,
@@ -543,7 +543,7 @@ pub async fn taxa_list(cx: &Cx) -> topcoat::Result {
                             name="q"
                             value=(params.q.as_ref())
                             placeholder="Search for a taxon"
-                            class="me-2 flex-grow"
+                            class="me-2 grow"
                         }
                     )
                     button(attrs: attributes! { type="submit" }, "Search")

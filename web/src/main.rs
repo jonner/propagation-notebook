@@ -130,7 +130,7 @@ async fn layout(cx: &Cx, slot: topcoat::Result) -> topcoat::Result {
                         style=(format!("--background-image:url('{}')",asset_config(cx).resolve(header_bg)))
                     >
                         <nav
-                            class="w-full block flex-shrink flex items-center gap-6 px-6 py-3 text-white bg-neutral-800/50"
+                            class="w-full block shrink flex items-center gap-6 px-6 py-3 text-white bg-neutral-800/50"
                         >
                             <ul class="contents">
                                 <li>
@@ -166,7 +166,7 @@ async fn layout(cx: &Cx, slot: topcoat::Result) -> topcoat::Result {
                             </ul>
                         </nav>
                     </header>
-                    <main class="m-3 md:m-6 flex-grow">(content)</main>
+                    <main class="m-3 md:m-6 grow">(content)</main>
                     <footer>
                         "Developed with "
                         icon(
@@ -215,7 +215,7 @@ async fn home() -> topcoat::Result {
                             type="text"
                             name="q"
                             placeholder="Search for a taxon"
-                            class="me-2 flex-grow"
+                            class="me-2 grow"
                         }
                     )
                     button(attrs: attributes! { type="submit" }, "Search")
