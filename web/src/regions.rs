@@ -15,7 +15,7 @@ use crate::{
         badge::{conservation_status_badge, origin_badge},
         breadcrumb::{Breadcrumb, breadcrumbs},
         button::button,
-        card::{card, card_content, card_footer, card_header, card_title},
+        card::*,
         harvest::{harvest_timeline, regional_taxa_table},
         input::input,
         leaflet_map,
@@ -26,6 +26,8 @@ use crate::{
 };
 
 path_param!(pub region_id: u64, error = bad_request);
+
+const SEED_DISCLAIMER: &str = "Seed dates are based on data retrieved from iNaturalist.org. If a species does not have any information about its seed-bearing window shown here, it is likely that iNaturalist either doesn't have enough observations of the species within the given area, or the observations are not annotated to indicate that there were seeds present. We periodically import new data from iNaturalist, so any new or newly-annotated observations should improve these dates over time.";
 
 #[page("/regions")]
 pub async fn list(cx: &Cx) -> topcoat::Result {
@@ -198,7 +200,7 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
             </section>
             <div class="flex flex-col md:flex-row gap-6">
                 if let Some(value) = region.geometry.as_ref() {
-                    <section class="grow order-last md:order-first">
+                    <section class="grow order-last md:min-w-2/3 md:order-first">
                         <div>
                             leaflet_map(
                                 geometry: value,
@@ -207,7 +209,7 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
                         </div>
                     </section>
                 }
-                <section class="flex flex-col items-stretch gap-6 justify-between">
+                <section class="flex flex-col shrink items-stretch gap-6 justify-between">
                     card(
                         attrs: attributes! { class="grow" },
                         card_header(card_title("Region Stats"))
@@ -240,7 +242,10 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
                     )
                     card(
                         attrs: attributes! { class="grow" },
-                        card_header(card_title("Seed-bearing status"))
+                        card_header(card_title("Seed-bearing status")
+                        card_description(
+                            attrs: attributes! { class="whitespace-normal" },
+                            "Using data from iNaturalist, we can estimate when a taxon will be producing seed within this region."))
                         card_content(
                             attrs: attributes! { class="grow" },
                             <div class="flex flex-col gap-3">
@@ -266,7 +271,7 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
                         )
                         card_footer(
                             <a href=(href!(taxa_list, RegionId(region.id)))>
-                                "Full list"
+                                "All seed-bearing statuses"
                             </a>
                         )
                     )
@@ -347,6 +352,7 @@ pub(crate) async fn harvest_starting(cx: &Cx) -> topcoat::Result {
             if page_state.total_pages() > 1 {
                 <div>pagination_control(state: &page_state, params: params)</div>
             }
+            <div class="text-muted-foreground">(SEED_DISCLAIMER)</div>
         </div>
     }
 }
@@ -409,6 +415,7 @@ pub(crate) async fn harvest_ending(cx: &Cx) -> topcoat::Result {
             if page_state.total_pages() > 1 {
                 <div>pagination_control(state: &page_state, params: params)</div>
             }
+            <div class="text-muted-foreground">(SEED_DISCLAIMER)</div>
         </div>
     }
 }
@@ -456,7 +463,7 @@ pub(crate) async fn harvest_fruiting(cx: &Cx) -> topcoat::Result {
             <hgroup>
                 breadcrumbs(items: items)
                 <h1>"Currently fruiting"</h1>
-                <p>("These species are bearing fruit on the given date.")</p>
+                <p>("These species are likely to be bearing seeds on the given date. Note that this does not necessarily mean that the seed is 'ripe' or viable yet.")</p>
                 week_navigator(
                     date: date,
                     attrs: attributes! { class="justify-center md:justify-normal" }
@@ -469,6 +476,7 @@ pub(crate) async fn harvest_fruiting(cx: &Cx) -> topcoat::Result {
             if page_state.total_pages() > 1 {
                 <div>pagination_control(state: &page_state, params: params)</div>
             }
+            <div class="text-muted-foreground">(SEED_DISCLAIMER)</div>
         </div>
     }
 }
