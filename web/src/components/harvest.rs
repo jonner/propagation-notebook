@@ -20,7 +20,7 @@ use crate::{
 pub async fn harvest_timeline(
     window: &RegionalHarvestWindow,
     #[default] current_doy: Option<i16>,
-    #[default] attrs: Attributes,
+    #[default] mut attrs: Attributes,
 ) -> topcoat::Result {
     let cdoy = current_doy.unwrap_or_else(|| jiff::Zoned::now().date().day_of_year());
     let inactive_class = window.is_empty().then_some("inactive");
@@ -33,6 +33,7 @@ pub async fn harvest_timeline(
             class=(class!(
                 "relative flex items-center gap-0 items-stretch w-full h-full select-none min-h-[1em]",
                 inactive_class,
+                attrs.remove("class")
             ))
             (attrs)
         >
