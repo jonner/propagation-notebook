@@ -69,6 +69,8 @@ const HEADERS: &[Asset] = &[
     asset!("assets/hamamelis-virginiana.webp"),
     // https://www.inaturalist.org/photos/531026295
     asset!("assets/desmanthus-illinoensis.webp"),
+    // https://www.inaturalist.org/photos/690459895
+    asset!("assets/hydrastis-canadensis.webp"),
 ];
 
 #[layout("/")]
