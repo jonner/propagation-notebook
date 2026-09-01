@@ -364,11 +364,11 @@ pub(crate) async fn fruiting_soon(cx: &Cx) -> topcoat::Result {
                 week_navigator(date: date)
             </hgroup>
             if page_state.total_pages() > 1 {
-                <div>pagination_control(state: &page_state, params: params)</div>
+                pagination_control(state: &page_state, params: params)
             }
             regional_taxa_table(taxa: &starting_soon, current_doy: Some(doy))
             if page_state.total_pages() > 1 {
-                <div>pagination_control(state: &page_state, params: params)</div>
+                pagination_control(state: &page_state, params: params)
             }
             <div class="disclaimer">(SEED_DISCLAIMER)</div>
         </div>
@@ -439,11 +439,11 @@ pub(crate) async fn fruiting_done(cx: &Cx) -> topcoat::Result {
                 week_navigator(date: date)
             </hgroup>
             if page_state.total_pages() > 1 {
-                <div>pagination_control(state: &page_state, params: params)</div>
+                pagination_control(state: &page_state, params: params)
             }
             regional_taxa_table(taxa: &ending, current_doy: Some(doy))
             if page_state.total_pages() > 1 {
-                <div>pagination_control(state: &page_state, params: params)</div>
+                pagination_control(state: &page_state, params: params)
             }
             <div class="disclaimer">(SEED_DISCLAIMER)</div>
         </div>
@@ -514,11 +514,11 @@ pub(crate) async fn fruiting_now(cx: &Cx) -> topcoat::Result {
                 )
             </hgroup>
             if page_state.total_pages() > 1 {
-                <div>pagination_control(state: &page_state, params: params)</div>
+                pagination_control(state: &page_state, params: params)
             }
             regional_taxa_table(taxa: &ending, current_doy: Some(doy))
             if page_state.total_pages() > 1 {
-                <div>pagination_control(state: &page_state, params: params)</div>
+                pagination_control(state: &page_state, params: params)
             }
             <div class="disclaimer">(SEED_DISCLAIMER)</div>
         </div>
@@ -613,11 +613,11 @@ pub async fn fruiting_all(cx: &Cx) -> topcoat::Result {
                 <h2>(format!("Results for '{q}'"))</h2>
             }
             if page_state.total_pages() > 1 {
-                <div>pagination_control(state: &page_state, params: params)</div>
+                pagination_control(state: &page_state, params: params)
             }
             regional_taxa_table(taxa: &taxa)
             if page_state.total_pages() > 1 {
-                <div>pagination_control(state: &page_state, params: params)</div>
+                pagination_control(state: &page_state, params: params)
             }
             <div class="disclaimer">(SEED_DISCLAIMER)</div>
         </div>

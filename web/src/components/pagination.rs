@@ -237,6 +237,7 @@ pub async fn pagination_control<'p, T: ModifyOffset + Clone + Sync + Send + 'p>(
     state: &PageState,
     params: &'p T,
     #[default(2)] context: usize,
+    #[default] mut attrs: Attributes,
 ) -> topcoat::Result {
     let mut links = Vec::with_capacity(context * 2 + 5);
     let cur = state.current_page();
@@ -264,54 +265,56 @@ pub async fn pagination_control<'p, T: ModifyOffset + Clone + Sync + Send + 'p>(
         links.push(PageLinkType::Next(cur + 1));
     }
     view! {
-        pagination(
-            pagination_content(
-                for item in links {
-                    pagination_item(
-                        match item {
-                            PageLinkType::Ellipsis => {
-                                pagination_ellipsis()
+        <div class=(class!(attrs.remove("class"))) (attrs)>
+            pagination(
+                pagination_content(
+                    for item in links {
+                        pagination_item(
+                            match item {
+                                PageLinkType::Ellipsis => {
+                                    pagination_ellipsis()
+                                }
+                                PageLinkType::Page(n) => {
+                                    pagination_link(
+                                        active: n == cur,
+                                        attrs: attributes! {
+                                            href=(state
+                                                .query_with_offset(
+                                                    state.offset_for_page(n).unwrap_or_default(),
+                                                    params.clone(),
+                                                ))
+                                        },
+                                        (n.to_string())
+                                    )
+                                }
+                                PageLinkType::Next(n) => {
+                                    pagination_next(
+                                        attrs: attributes! {
+                                            href=(state
+                                                .query_with_offset(
+                                                    state.offset_for_page(n).unwrap_or_default(),
+                                                    params.clone(),
+                                                ))
+                                        }
+                                    )
+                                }
+                                PageLinkType::Previous(n) => {
+                                    pagination_previous(
+                                        attrs: attributes! {
+                                            href=(state
+                                                .query_with_offset(
+                                                    state.offset_for_page(n).unwrap_or_default(),
+                                                    params.clone(),
+                                                ))
+                                        }
+                                    )
+                                }
                             }
-                            PageLinkType::Page(n) => {
-                                pagination_link(
-                                    active: n == cur,
-                                    attrs: attributes! {
-                                        href=(state
-                                            .query_with_offset(
-                                                state.offset_for_page(n).unwrap_or_default(),
-                                                params.clone(),
-                                            ))
-                                    },
-                                    (n.to_string())
-                                )
-                            }
-                            PageLinkType::Next(n) => {
-                                pagination_next(
-                                    attrs: attributes! {
-                                        href=(state
-                                            .query_with_offset(
-                                                state.offset_for_page(n).unwrap_or_default(),
-                                                params.clone(),
-                                            ))
-                                    }
-                                )
-                            }
-                            PageLinkType::Previous(n) => {
-                                pagination_previous(
-                                    attrs: attributes! {
-                                        href=(state
-                                            .query_with_offset(
-                                                state.offset_for_page(n).unwrap_or_default(),
-                                                params.clone(),
-                                            ))
-                                    }
-                                )
-                            }
-                        }
-                    )
-                }
+                        )
+                    }
+                )
             )
-        )
+        </div>
     }
 }
 
