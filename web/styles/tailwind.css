@@ -314,3 +314,7 @@ figure.taxon-photo figcaption {
 figure.taxon-photo:hover figcaption {
   @apply whitespace-normal overflow-visible text-clip bg-foreground/60 ;
 }
+
+.disclaimer {
+  @apply text-muted-foreground text-xs;
+}
