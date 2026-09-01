@@ -591,6 +591,9 @@ pub async fn fruiting_all(cx: &Cx) -> topcoat::Result {
                     )
                 )
                 <h1>(format!("Seed-bearing status for plants in {}", &region.name))</h1>
+                <p>
+                    "Seed-bearing timeline for all plants within the region. The bar graph represents a full year. A green background indicates that seeds may be present at that time of year. The vertical bar represents today."
+                </p>
             </hgroup>
             <section>
                 <form method="get" class="flex w-full">
@@ -606,18 +609,16 @@ pub async fn fruiting_all(cx: &Cx) -> topcoat::Result {
                     button(attrs: attributes! { type="submit" }, "Search")
                 </form>
             </section>
-            <section>
-                if let Some(q) = params.q.as_ref() && !q.is_empty() {
-                    <h2>(format!("Results for '{q}'"))</h2>
-                }
-                if page_state.total_pages() > 1 {
-                    pagination_control(state: &page_state, params: params)
-                }
-                regional_taxa_table(taxa: &taxa)
-                if page_state.total_pages() > 1 {
-                    pagination_control(state: &page_state, params: params)
-                }
-            </section>
+            if let Some(q) = params.q.as_ref() && !q.is_empty() {
+                <h2>(format!("Results for '{q}'"))</h2>
+            }
+            if page_state.total_pages() > 1 {
+                <div>pagination_control(state: &page_state, params: params)</div>
+            }
+            regional_taxa_table(taxa: &taxa)
+            if page_state.total_pages() > 1 {
+                <div>pagination_control(state: &page_state, params: params)</div>
+            }
             <div class="disclaimer">(SEED_DISCLAIMER)</div>
         </div>
     }
