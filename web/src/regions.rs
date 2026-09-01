@@ -185,7 +185,7 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
             <section>
                 <form
                     method="get"
-                    action=(href!(taxa_list, RegionId(region.id)))
+                    action=(href!(fruiting_all, RegionId(region.id)))
                     class="flex w-full"
                 >
                     input(
@@ -257,26 +257,26 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
                             <div class="flex flex-col gap-3">
                                 <div>
                                     <h4>"Currently Fruiting"</h4>
-                                    <a href=(href!(harvest_fruiting, RegionId(region.id)))>
+                                    <a href=(href!(fruiting_now, RegionId(region.id)))>
                                         (n_fruiting)
                                     </a>
                                 </div>
                                 <div>
                                     <h4>"Winding down..."</h4>
-                                    <a href=(href!(harvest_ending, RegionId(region.id)))>
+                                    <a href=(href!(fruiting_done, RegionId(region.id)))>
                                         (n_ending)
                                     </a>
                                 </div>
                                 <div>
                                     <h4>"Ramping up..."</h4>
-                                    <a href=(href!(harvest_starting, RegionId(region.id)))>
+                                    <a href=(href!(fruiting_soon, RegionId(region.id)))>
                                         (n_starting)
                                     </a>
                                 </div>
                             </div>
                         )
                         card_footer(
-                            <a href=(href!(taxa_list, RegionId(region.id)))>
+                            <a href=(href!(fruiting_all, RegionId(region.id)))>
                                 "All seed-bearing statuses"
                             </a>
                         )
@@ -300,8 +300,8 @@ impl ModifyOffset for HarvestParams {
     }
 }
 
-#[page("/regions/{region_id}/fruiting/starting")]
-pub(crate) async fn harvest_starting(cx: &Cx) -> topcoat::Result {
+#[page("/regions/{region_id}/fruiting/soon")]
+pub(crate) async fn fruiting_soon(cx: &Cx) -> topcoat::Result {
     let id = path_param::<RegionId>(cx)?;
     let mut db = db(cx);
     let params = query_params::<HarvestParams>(cx)?;
@@ -347,12 +347,19 @@ pub(crate) async fn harvest_starting(cx: &Cx) -> topcoat::Result {
                             )
                         )
                         breadcrumb_separator()
-                        breadcrumb_item(breadcrumb_page("Starting"))
+                        breadcrumb_item(
+                            breadcrumb_link(
+                                attrs: attributes! { href=(href!(fruiting_all, RegionId(region.id))) },
+                                "Seed-bearing"
+                            )
+                        )
+                        breadcrumb_separator()
+                        breadcrumb_item(breadcrumb_page("Soon"))
                     )
                 )
                 <h1>"Taxa beginning to bear fruit"</h1>
                 <p>
-                    ("These species will be starting to bear fruit on the given date.")
+                    "The following species should be starting to bear fruit on the given date."
                 </p>
                 week_navigator(date: date)
             </hgroup>
@@ -368,8 +375,8 @@ pub(crate) async fn harvest_starting(cx: &Cx) -> topcoat::Result {
     }
 }
 
-#[page("/regions/{region_id}/ending")]
-pub(crate) async fn harvest_ending(cx: &Cx) -> topcoat::Result {
+#[page("/regions/{region_id}/fruiting/done")]
+pub(crate) async fn fruiting_done(cx: &Cx) -> topcoat::Result {
     let id = path_param::<RegionId>(cx)?;
     let params = query_params::<HarvestParams>(cx)?;
     let mut db = db(cx);
@@ -415,6 +422,13 @@ pub(crate) async fn harvest_ending(cx: &Cx) -> topcoat::Result {
                             )
                         )
                         breadcrumb_separator()
+                        breadcrumb_item(
+                            breadcrumb_link(
+                                attrs: attributes! { href=(href!(fruiting_all, RegionId(region.id))) },
+                                "Seed-bearing"
+                            )
+                        )
+                        breadcrumb_separator()
                         breadcrumb_item(breadcrumb_page("Ending"))
                     )
                 )
@@ -436,8 +450,8 @@ pub(crate) async fn harvest_ending(cx: &Cx) -> topcoat::Result {
     }
 }
 
-#[page("/regions/{region_id}/fruiting")]
-pub(crate) async fn harvest_fruiting(cx: &Cx) -> topcoat::Result {
+#[page("/regions/{region_id}/fruiting/now")]
+pub(crate) async fn fruiting_now(cx: &Cx) -> topcoat::Result {
     let id = path_param::<RegionId>(cx)?;
     let params = query_params::<HarvestParams>(cx)?;
     let mut db = db(cx);
@@ -480,7 +494,14 @@ pub(crate) async fn harvest_fruiting(cx: &Cx) -> topcoat::Result {
                             )
                         )
                         breadcrumb_separator()
-                        breadcrumb_item(breadcrumb_page("Fruiting"))
+                        breadcrumb_item(
+                            breadcrumb_link(
+                                attrs: attributes! { href=(href!(fruiting_all, RegionId(region.id))) },
+                                "Seed-bearing"
+                            )
+                        )
+                        breadcrumb_separator()
+                        breadcrumb_item(breadcrumb_page("Now"))
                     )
                 )
                 <h1>"Currently fruiting"</h1>
@@ -519,8 +540,8 @@ impl ModifyOffset for RegionalTaxaListParams {
     }
 }
 
-#[page("/regions/{region_id}/taxa")]
-pub async fn taxa_list(cx: &Cx) -> topcoat::Result {
+#[page("/regions/{region_id}/fruiting")]
+pub async fn fruiting_all(cx: &Cx) -> topcoat::Result {
     let mut db = db(cx);
     let region_id = path_param::<RegionId>(cx)?;
     let params = query_params::<RegionalTaxaListParams>(cx)?;
@@ -566,10 +587,10 @@ pub async fn taxa_list(cx: &Cx) -> topcoat::Result {
                             )
                         )
                         breadcrumb_separator()
-                        breadcrumb_item(breadcrumb_page("Taxa"))
+                        breadcrumb_item(breadcrumb_page("Seed-bearing"))
                     )
                 )
-                <h1>(format!("Taxa list for {}", &region.name))</h1>
+                <h1>(format!("Seed-bearing status for plants in {}", &region.name))</h1>
             </hgroup>
             <section>
                 <form method="get" class="flex w-full">
@@ -597,6 +618,7 @@ pub async fn taxa_list(cx: &Cx) -> topcoat::Result {
                     pagination_control(state: &page_state, params: params)
                 }
             </section>
+            <div class="disclaimer">(SEED_DISCLAIMER)</div>
         </div>
     }
 }
