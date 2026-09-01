@@ -18,7 +18,7 @@ use tracing::trace;
 use crate::{
     components::{
         badge::{BadgeVariant, badge},
-        breadcrumb::{Breadcrumb, ancestor_breadcrumbs, breadcrumbs},
+        breadcrumb::*,
         button::button,
         citations::citation_list,
         harvest::taxon_regional_table,
@@ -573,25 +573,29 @@ pub async fn propagation_details(cx: &Cx) -> topcoat::Result {
     trace!(?tp);
     let procedure = tp.propagation.get();
     let taxon = tp.taxon.get();
-    let crumbs = vec![
-        Breadcrumb {
-            url: Some(href!(taxonomy).resolve(cx)),
-            text: "Taxonomy".to_string(),
-        },
-        Breadcrumb {
-            url: Some(href!(details, TaxonId(taxon.id)).resolve(cx)),
-            text: taxon.complete_name.clone(),
-        },
-        Breadcrumb {
-            url: None,
-            text: format!("Propagation Procedure {}", tp.propagation_id),
-        },
-    ];
 
     view! {
         <div class="flex flex-col gap-4">
             <hgroup>
-                breadcrumbs(items: crumbs)
+                breadcrumb(
+                    breadcrumb_list(
+                        breadcrumb_item(
+                            breadcrumb_link(
+                                attrs: attributes! { href=(href!(taxonomy)) },
+                                "Taxonomy"
+                            )
+                            breadcrumb_separator()
+                            breadcrumb_link(
+                                attrs: attributes! { href=(href!(details, TaxonId(taxon.id))) },
+                                (&taxon.complete_name)
+                            )
+                            breadcrumb_separator()
+                            breadcrumb_page(
+                                (format!("Propagation Procedure {}", tp.propagation_id))
+                            )
+                        )
+                    )
+                )
                 <h1>(&procedure.name)</h1>
                 <div>badge((procedure.r#type.to_string()))</div>
             </hgroup>
@@ -653,25 +657,29 @@ pub async fn cleaning_details(cx: &Cx) -> topcoat::Result {
     .ok_or_not_found()?;
     trace!(?proc);
     let taxon = proc.taxon.get();
-    let crumbs = vec![
-        Breadcrumb {
-            url: Some(href!(taxonomy).resolve(cx)),
-            text: "Taxonomy".to_string(),
-        },
-        Breadcrumb {
-            url: Some(href!(details, TaxonId(taxon.id)).resolve(cx)),
-            text: taxon.complete_name.clone(),
-        },
-        Breadcrumb {
-            url: None,
-            text: format!("Cleaning Procedure {}", proc.id),
-        },
-    ];
 
     view! {
         <div class="flex flex-col gap-4">
             <hgroup>
-                breadcrumbs(items: crumbs)
+                breadcrumb(
+                    breadcrumb_list(
+                        breadcrumb_item(
+                            breadcrumb_link(
+                                attrs: attributes! { href=(href!(taxonomy)) },
+                                "Taxonomy"
+                            )
+                            breadcrumb_separator()
+                            breadcrumb_link(
+                                attrs: attributes! { href=(href!(details, TaxonId(taxon.id))) },
+                                (&taxon.complete_name)
+                            )
+                            breadcrumb_separator()
+                            breadcrumb_page(
+                                (format!("Cleaning Procedure {}", proc.id))
+                            )
+                        )
+                    )
+                )
                 <h1>
                     <span>(&proc.name)</span>
                     " for "
@@ -719,24 +727,29 @@ pub async fn note_details(cx: &Cx) -> topcoat::Result {
         .ok_or_not_found()?;
     trace!(?note);
     let taxon = note.taxon.get();
-    let crumbs = vec![
-        Breadcrumb {
-            url: Some(href!(taxonomy).resolve(cx)),
-            text: "Taxonomy".to_string(),
-        },
-        Breadcrumb {
-            url: Some(href!(details, TaxonId(taxon.id)).resolve(cx)),
-            text: taxon.complete_name.clone(),
-        },
-        Breadcrumb {
-            url: None,
-            text: format!("Note {}", note.id),
-        },
-    ];
+
     view! {
         <div class="flex flex-col gap-4">
             <section>
-                breadcrumbs(items: crumbs)
+                breadcrumb(
+                    breadcrumb_list(
+                        breadcrumb_item(
+                            breadcrumb_link(
+                                attrs: attributes! { href=(href!(taxonomy)) },
+                                "Taxonomy"
+                            )
+                            breadcrumb_separator()
+                            breadcrumb_link(
+                                attrs: attributes! { href=(href!(details, TaxonId(taxon.id))) },
+                                (&taxon.complete_name)
+                            )
+                            breadcrumb_separator()
+                            breadcrumb_page(
+                                (format!("Note {}", note.id))
+                            )
+                        )
+                    )
+                )
                 <h1>(&note.title)</h1>
                 <div class="text-2xl">(note.text)</div>
             </section>

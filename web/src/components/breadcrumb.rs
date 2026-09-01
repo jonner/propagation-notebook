@@ -142,13 +142,13 @@ pub async fn breadcrumb_ellipsis(#[default] mut attrs: Attributes) -> Result {
     }
 }
 
-pub struct Breadcrumb {
+struct Breadcrumb {
     pub url: Option<String>,
     pub text: String,
 }
 
 #[component]
-pub async fn breadcrumbs(
+async fn breadcrumbs(
     items: Vec<Breadcrumb>,
     #[default] ellipsize: Option<usize>,
 ) -> topcoat::Result {
