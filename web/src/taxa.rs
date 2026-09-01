@@ -113,45 +113,45 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result {
     };
 
     view! {
-        <form method="get" action=(href!(search)) class="flex my-6 w-full">
-            input(
-                attrs: attributes! {
-                    type="text"
-                    name="q"
-                    placeholder="Search for a taxon"
-                    class="me-2 flex-grow"
+        <div class="flex flex-col gap-3">
+            <form method="get" action=(href!(search)) class="flex my-6 w-full">
+                input(
+                    attrs: attributes! {
+                        type="text"
+                        name="q"
+                        placeholder="Search for a taxon"
+                        class="me-2 flex-grow"
+                    }
+                )
+                button(attrs: attributes! { type="submit" }, "Search")
+            </form>
+            <hgroup>
+                <h1>"Taxonomy Explorer"</h1>
+                if let Some(region) = region {
+                    <div class="text-muted-foreground">
+                        "Filters: "
+                        badge(
+                            variant: BadgeVariant::Secondary,
+                            (format!("Region: '{}'", region.name))
+                            <a
+                                href=(href!(taxonomy)
+                                    .query(TaxaListParams {
+                                        region: None,
+                                        offset: None,
+                                        parent: params.parent,
+                                        fmt: params.fmt,
+                                    }))
+                                class="p-2"
+                            >
+                                icon(data: mdi::CLEAR_BOLD, label: "Clear filter")
+                            </a>
+                        )
+                    </div>
                 }
-            )
-            button(attrs: attributes! { type="submit" }, "Search")
-        </form>
-        <hgroup>
-            <h1>"Taxonomy Explorer"</h1>
-            if let Some(region) = region {
-                <div class="text-muted-foreground">
-                    "Filters: "
-                    badge(
-                        variant: BadgeVariant::Secondary,
-                        (format!("Region: '{}'", region.name))
-                        <a
-                            href=(href!(taxonomy)
-                                .query(TaxaListParams {
-                                    region: None,
-                                    offset: None,
-                                    parent: params.parent,
-                                    fmt: params.fmt,
-                                }))
-                            class="p-2"
-                        >
-                            icon(data: mdi::CLEAR_BOLD, label: "Clear filter")
-                        </a>
-                    )
+                <div class="my-3">
+                    ancestor_breadcrumbs(items: &ancestor_taxa, link_final: false)
                 </div>
-            }
-        </hgroup>
-        <section>
-            <div class="my-3">
-                ancestor_breadcrumbs(items: &ancestor_taxa, link_final: false)
-            </div>
+            </hgroup>
             if page_state.total_pages() > 1 {
                 pagination_control(state: &page_state, params: params)
             }
@@ -228,7 +228,7 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result {
             if page_state.total_pages() > 1 {
                 pagination_control(state: &page_state, params: params)
             }
-        </section>
+        </div>
     }
 }
 
