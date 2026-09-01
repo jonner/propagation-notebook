@@ -142,10 +142,7 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result {
                                 }))
                             class="p-2"
                         >
-                            icon(
-                                data: mdi::CLEAR_BOLD,
-                                label: "Clear filter",
-                            )
+                            icon(data: mdi::CLEAR_BOLD, label: "Clear filter")
                         </a>
                     )
                 </div>
@@ -405,13 +402,8 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
             if let Some(photo) = taxon.photo.get() {
                 if let Some(medium_url) = photo.medium_url.as_ref() {
                     <figure class="taxon-photo">
-                        <img
-                            src=(medium_url)
-                            alt=(&taxon.complete_name)
-                        >
-                        <figcaption>
-                            (photo.attribution.as_ref())
-                        </figcaption>
+                        <img src=(medium_url) alt=(&taxon.complete_name)>
+                        <figcaption>(photo.attribution.as_ref())</figcaption>
                     </figure>
                 }
             }

@@ -13,7 +13,7 @@ use tracing::trace;
 use crate::{
     components::{
         badge::{conservation_status_badge, origin_badge},
-        breadcrumb::{Breadcrumb, breadcrumbs},
+        breadcrumb::*,
         button::button,
         card::*,
         harvest::{harvest_timeline, regional_taxa_table},
@@ -163,21 +163,22 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
             Some(N),
         )
         .await?;
-    let items = vec![
-        Breadcrumb {
-            url: Some("/regions".to_string()),
-            text: "Regions".to_string(),
-        },
-        Breadcrumb {
-            url: None,
-            text: "Overview".to_string(),
-        },
-    ];
 
     view! {
         <div class="flex flex-col gap-6">
             <hgroup>
-                breadcrumbs(items: items)
+                breadcrumb(
+                    breadcrumb_list(
+                        breadcrumb_item(
+                            breadcrumb_link(
+                                attrs: attributes! { href=(href!(list)) },
+                                "Region"
+                            )
+                        )
+                        breadcrumb_separator()
+                        breadcrumb_item(breadcrumb_page("Overview"))
+                    )
+                )
                 <h1>(&region.name)</h1>
                 <p>(region.notes.as_deref().unwrap_or_default())</p>
             </hgroup>
@@ -209,7 +210,9 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
                         </div>
                     </section>
                 }
-                <section class="flex flex-col shrink items-stretch gap-6 justify-between">
+                <section
+                    class="flex flex-col shrink items-stretch gap-6 justify-between"
+                >
                     card(
                         attrs: attributes! { class="grow" },
                         card_header(card_title("Region Stats"))
@@ -242,10 +245,13 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
                     )
                     card(
                         attrs: attributes! { class="grow" },
-                        card_header(card_title("Seed-bearing status")
-                        card_description(
-                            attrs: attributes! { class="whitespace-normal" },
-                            "Using data from iNaturalist, we can estimate when a taxon will be producing seed within this region."))
+                        card_header(
+                            card_title("Seed-bearing status")
+                            card_description(
+                                attrs: attributes! { class="whitespace-normal" },
+                                "Using data from iNaturalist, we can estimate when a taxon will be producing seed within this region."
+                            )
+                        )
                         card_content(
                             attrs: attributes! { class="grow" },
                             <div class="flex flex-col gap-3">
@@ -294,7 +300,7 @@ impl ModifyOffset for HarvestParams {
     }
 }
 
-#[page("/regions/{region_id}/starting")]
+#[page("/regions/{region_id}/fruiting/starting")]
 pub(crate) async fn harvest_starting(cx: &Cx) -> topcoat::Result {
     let id = path_param::<RegionId>(cx)?;
     let mut db = db(cx);
@@ -321,24 +327,29 @@ pub(crate) async fn harvest_starting(cx: &Cx) -> topcoat::Result {
         )
         .await?;
     let page_state = PageState::new(params.offset, PER_PAGE, total.try_into().unwrap());
-    let items = vec![
-        Breadcrumb {
-            url: Some("/regions".to_string()),
-            text: "Regions".to_string(),
-        },
-        Breadcrumb {
-            url: Some(href!(overview, RegionId(region.id)).resolve(cx)),
-            text: region.name,
-        },
-        Breadcrumb {
-            url: None,
-            text: "Starting".to_string(),
-        },
-    ];
+
     view! {
         <div class="flex flex-col gap-6">
             <hgroup>
-                breadcrumbs(items: items)
+                breadcrumb(
+                    breadcrumb_list(
+                        breadcrumb_item(
+                            breadcrumb_link(
+                                attrs: attributes! { href=(href!(list)) },
+                                "Region"
+                            )
+                        )
+                        breadcrumb_separator()
+                        breadcrumb_item(
+                            breadcrumb_link(
+                                attrs: attributes! { href=(href!(overview, RegionId(region.id))) },
+                                (region.name)
+                            )
+                        )
+                        breadcrumb_separator()
+                        breadcrumb_item(breadcrumb_page("Starting"))
+                    )
+                )
                 <h1>"Taxa beginning to bear fruit"</h1>
                 <p>
                     ("These species will be starting to bear fruit on the given date.")
@@ -384,24 +395,29 @@ pub(crate) async fn harvest_ending(cx: &Cx) -> topcoat::Result {
         )
         .await?;
     let page_state = PageState::new(params.offset, PER_PAGE, total.try_into().unwrap());
-    let items = vec![
-        Breadcrumb {
-            url: Some("/regions".to_string()),
-            text: "Regions".to_string(),
-        },
-        Breadcrumb {
-            url: Some(href!(overview, RegionId(region.id)).resolve(cx)),
-            text: region.name,
-        },
-        Breadcrumb {
-            url: None,
-            text: "Ending".to_string(),
-        },
-    ];
+
     view! {
         <div class="flex flex-col gap-6">
             <hgroup>
-                breadcrumbs(items: items)
+                breadcrumb(
+                    breadcrumb_list(
+                        breadcrumb_item(
+                            breadcrumb_link(
+                                attrs: attributes! { href=(href!(list)) },
+                                "Region"
+                            )
+                        )
+                        breadcrumb_separator()
+                        breadcrumb_item(
+                            breadcrumb_link(
+                                attrs: attributes! { href=(href!(overview, RegionId(region.id))) },
+                                (region.name)
+                            )
+                        )
+                        breadcrumb_separator()
+                        breadcrumb_item(breadcrumb_page("Ending"))
+                    )
+                )
                 <h1>"Last chance to harvest"</h1>
                 <p>
                     ("These species are nearly done bearing fruit soon on the given date.")
@@ -444,26 +460,33 @@ pub(crate) async fn harvest_fruiting(cx: &Cx) -> topcoat::Result {
         )
         .await?;
     let page_state = PageState::new(params.offset, PER_PAGE, total.try_into().unwrap());
-    let items = vec![
-        Breadcrumb {
-            url: Some("/regions".to_string()),
-            text: "Regions".to_string(),
-        },
-        Breadcrumb {
-            url: Some(href!(overview, RegionId(region.id)).resolve(cx)),
-            text: region.name,
-        },
-        Breadcrumb {
-            url: None,
-            text: "Fruiting".to_string(),
-        },
-    ];
+
     view! {
         <div class="flex flex-col gap-6">
             <hgroup>
-                breadcrumbs(items: items)
+                breadcrumb(
+                    breadcrumb_list(
+                        breadcrumb_item(
+                            breadcrumb_link(
+                                attrs: attributes! { href=(href!(list)) },
+                                "Region"
+                            )
+                        )
+                        breadcrumb_separator()
+                        breadcrumb_item(
+                            breadcrumb_link(
+                                attrs: attributes! { href=(href!(overview, RegionId(region.id))) },
+                                (region.name)
+                            )
+                        )
+                        breadcrumb_separator()
+                        breadcrumb_item(breadcrumb_page("Fruiting"))
+                    )
+                )
                 <h1>"Currently fruiting"</h1>
-                <p>("These species are likely to be bearing seeds on the given date. Note that this does not necessarily mean that the seed is 'ripe' or viable yet.")</p>
+                <p>
+                    ("These species are likely to be bearing seeds on the given date. Note that this does not necessarily mean that the seed is 'ripe' or viable yet.")
+                </p>
                 week_navigator(
                     date: date,
                     attrs: attributes! { class="justify-center md:justify-normal" }
@@ -523,24 +546,29 @@ pub async fn taxa_list(cx: &Cx) -> topcoat::Result {
         )
         .await?;
     let page_state = PageState::new(params.offset, PER_PAGE, total.try_into().unwrap());
-    let items = vec![
-        Breadcrumb {
-            url: Some("/regions".to_string()),
-            text: "Regions".to_string(),
-        },
-        Breadcrumb {
-            url: Some(href!(overview, RegionId(region.id)).resolve(cx)),
-            text: region.name.clone(),
-        },
-        Breadcrumb {
-            url: None,
-            text: "Taxa".to_string(),
-        },
-    ];
+
     view! {
         <div class="flex flex-col gap-6">
             <hgroup>
-                breadcrumbs(items: items)
+                breadcrumb(
+                    breadcrumb_list(
+                        breadcrumb_item(
+                            breadcrumb_link(
+                                attrs: attributes! { href=(href!(list)) },
+                                "Region"
+                            )
+                        )
+                        breadcrumb_separator()
+                        breadcrumb_item(
+                            breadcrumb_link(
+                                attrs: attributes! { href=(href!(overview, RegionId(region.id))) },
+                                (&region.name)
+                            )
+                        )
+                        breadcrumb_separator()
+                        breadcrumb_item(breadcrumb_page("Taxa"))
+                    )
+                )
                 <h1>(format!("Taxa list for {}", &region.name))</h1>
             </hgroup>
             <section>
