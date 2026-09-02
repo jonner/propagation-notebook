@@ -7,7 +7,7 @@ use topcoat::{
     view::{Attributes, View, attributes, class, component, view},
 };
 
-use crate::taxa::TaxaListParams;
+use crate::{components::badge::*, taxa::TaxaListParams};
 
 /// A breadcrumb component: the trail from the site's root to the current
 /// page.
@@ -142,57 +142,6 @@ pub async fn breadcrumb_ellipsis(#[default] mut attrs: Attributes) -> Result {
     }
 }
 
-struct Breadcrumb {
-    pub url: Option<String>,
-    pub text: String,
-}
-
-#[component]
-async fn breadcrumbs(
-    items: Vec<Breadcrumb>,
-    #[default] ellipsize: Option<usize>,
-) -> topcoat::Result {
-    let do_ellipsize = ellipsize.map(|n| items.len() > n + 1) == Some(true);
-    let mut breadcrumb_iter = items.into_iter();
-    let Some(root) = breadcrumb_iter.next() else {
-        return view! {};
-    };
-    let rest: Vec<_> = if let Some(ellipsize) = ellipsize {
-        breadcrumb_iter.rev().take(ellipsize).rev().collect()
-    } else {
-        breadcrumb_iter.collect()
-    };
-    view! {
-        breadcrumb(
-            breadcrumb_list(
-                breadcrumb_item(
-                    breadcrumb_link(
-                        attrs: attributes! { href=(root.url) },
-                        (&root.text)
-                    )
-                )
-                if do_ellipsize {
-                    breadcrumb_separator()
-                    breadcrumb_ellipsis()
-                }
-                for item in rest {
-                    breadcrumb_separator()
-                    if let Some(url) = item.url {
-                        breadcrumb_item(
-                            breadcrumb_link(
-                                attrs: attributes! { href=(url) },
-                                (item.text)
-                            )
-                        )
-                    } else {
-                        breadcrumb_item(breadcrumb_page((item.text)))
-                    }
-                }
-            )
-        )
-    }
-}
-
 #[component]
 pub async fn ancestor_breadcrumbs(
     cx: &Cx,
@@ -203,26 +152,102 @@ pub async fn ancestor_breadcrumbs(
     let params = query_params::<TaxaListParams>(cx)
         .cloned()
         .unwrap_or_default();
-    let f = |t: &Taxon, link: bool| -> Breadcrumb {
-        Breadcrumb {
-            url: link.then_some(
-                href!(crate::taxa::taxonomy)
-                    .query(TaxaListParams {
-                        offset: None,
-                        parent: Some(t.id),
-                        fmt: params.fmt,
-                        region: params.region,
-                    })
-                    .resolve(cx),
-            ),
-            text: t.complete_name.clone(),
+    let mut item_iter = items.iter();
+    let last = item_iter.next_back();
+    let root = item_iter.next();
+    let middle_items: Vec<_> = item_iter.collect();
+
+    let total_len = items.len();
+    let do_ellipsize = ellipsize.map(|limit| total_len > limit).unwrap_or(false);
+
+    let middle_to_render = if do_ellipsize {
+        if let Some(limit) = ellipsize {
+            middle_items
+                .iter()
+                .rev()
+                .take(limit.saturating_sub(1))
+                .rev()
+                .copied()
+                .collect()
+        } else {
+            middle_items
         }
+    } else {
+        middle_items
     };
-    let mut ancestors: Vec<_> = items
-        .iter()
-        .take(items.len() - 1)
-        .map(|taxon| f(taxon, true))
-        .collect();
-    ancestors.push(f(items.last().unwrap(), link_final));
-    view! { breadcrumbs(items: ancestors, ellipsize: ellipsize) }
+
+    view! {
+        breadcrumb(
+            breadcrumb_list(
+                if let Some(taxon) = root {
+                    breadcrumb_item(
+                        breadcrumb_link(
+                            attrs: attributes! {
+                                href=(href!(crate::taxa::taxonomy)
+                                    .query(TaxaListParams {
+                                        offset: None,
+                                        parent: Some(taxon.id),
+                                        fmt: params.fmt,
+                                        region: params.region,
+                                    }))
+                            },
+                            (&taxon.complete_name)
+                        )
+                    )
+                }
+                if do_ellipsize {
+                    breadcrumb_separator()
+                    breadcrumb_ellipsis()
+                }
+                for taxon in middle_to_render {
+                    breadcrumb_separator()
+                    breadcrumb_item(
+                        breadcrumb_link(
+                            attrs: attributes! {
+                                href=(href!(crate::taxa::taxonomy)
+                                    .query(TaxaListParams {
+                                        offset: None,
+                                        parent: Some(taxon.id),
+                                        fmt: params.fmt,
+                                        region: params.region,
+                                    }))
+                            },
+                            (&taxon.complete_name)
+                        )
+                    )
+                }
+
+                if let Some(taxon) = last {
+                    if root.is_some() {
+                        breadcrumb_separator()
+                    }
+                    breadcrumb_item(
+                        if link_final {
+                            breadcrumb_link(
+                                attrs: attributes! {
+                                    href=(href!(crate::taxa::taxonomy)
+                                        .query(TaxaListParams {
+                                            offset: None,
+                                            parent: Some(taxon.id),
+                                            fmt: params.fmt,
+                                            region: params.region,
+                                        }))
+                                },
+                                (&taxon.complete_name)
+                            )
+                        } else {
+                            breadcrumb_page(
+                                (&taxon.complete_name)
+                                badge(
+                                    variant: BadgeVariant::Secondary,
+                                    attrs: attributes! { class="mx-3" },
+                                    (taxon.rank.to_string())
+                                )
+                            )
+                        }
+                    )
+                }
+            )
+        )
+    }
 }
