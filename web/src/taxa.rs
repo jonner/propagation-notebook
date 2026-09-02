@@ -220,7 +220,7 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result {
                     <div class="grid items-center gap-6 grid-cols-2 sm:grid-cols-5">
                         for taxon in taxa.iter() {
                             <div
-                                class="p-6 bg-jaggery/5 rounded-xl h-full flex flex-col items-center text-center"
+                                class="p-6 h-full flex flex-col items-center text-center"
                             >
                                 <a
                                     href=(href!(taxonomy)
@@ -352,7 +352,7 @@ pub(crate) async fn search(cx: &Cx) -> topcoat::Result {
                                     class="grid items-center gap-6 grid-cols-2 sm:grid-cols-5 xl:grid-cols-10"
                                 >
                                     for taxon in taxa.iter() {
-                                        <div class="p-4 bg-jaggery/5 rounded h-full">
+                                        <div class="p-4 h-full">
                                             <a
                                                 href=(href!(details, TaxonId(taxon.id)))
                                                 class="flex flex-col items-center text-center"
