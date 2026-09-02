@@ -717,9 +717,7 @@ pub async fn cleaning_details(cx: &Cx) -> topcoat::Result {
                                 (&taxon.complete_name)
                             )
                             breadcrumb_separator()
-                            breadcrumb_page(
-                                (format!("Cleaning Procedure {}", proc.id))
-                            )
+                            breadcrumb_page((format!("Cleaning Procedure {}", proc.id)))
                         )
                     )
                 )
@@ -787,9 +785,7 @@ pub async fn note_details(cx: &Cx) -> topcoat::Result {
                                 (&taxon.complete_name)
                             )
                             breadcrumb_separator()
-                            breadcrumb_page(
-                                (format!("Note {}", note.id))
-                            )
+                            breadcrumb_page((format!("Note {}", note.id)))
                         )
                     )
                 )

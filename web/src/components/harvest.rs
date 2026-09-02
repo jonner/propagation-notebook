@@ -33,7 +33,7 @@ pub async fn harvest_timeline(
             class=(class!(
                 "relative flex items-center gap-0 items-stretch w-full h-full select-none min-h-[1em]",
                 inactive_class,
-                attrs.remove("class")
+                attrs.remove("class"),
             ))
             (attrs)
         >
