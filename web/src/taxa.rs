@@ -1,7 +1,7 @@
 use libpropagation::{
     citation::Citation,
     cleaning::CleaningProcedure,
-    region::{Region, RegionalTaxonStatus},
+    region::{Origin, Region, RegionalTaxonStatus},
     taxonomy::{Taxon, TaxonHierarchy, TaxonNote, TaxonPropagationProcedure},
 };
 use topcoat::{
@@ -17,7 +17,7 @@ use tracing::trace;
 
 use crate::{
     components::{
-        badge::{BadgeVariant, badge},
+        badge::{BadgeVariant, badge, origin_badge},
         breadcrumb::*,
         button::button,
         citations::citation_list,
@@ -70,6 +70,7 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result {
         }
     };
     let mut filter = Taxon::fields().parent_id().eq(parent_id);
+    let mut extra_includes = None;
     if let Some(region) = params.region {
         filter = filter.and(
             Taxon::fields().descendant_links().any(
@@ -78,15 +79,22 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result {
                     .regional_statuses()
                     .any(RegionalTaxonStatus::fields().region_id().eq(region)),
             ),
-        )
+        );
+        extra_includes = Some(
+            Taxon::fields()
+                .regional_statuses()
+                .filter(RegionalTaxonStatus::fields().region_id().eq(region)),
+        );
     }
 
-    let query = Taxon::filter(filter)
-        .include(Taxon::fields().photo())
-        .order_by((
-            Taxon::fields().sequence().asc(),
-            Taxon::fields().complete_name().asc(),
-        ));
+    let mut query = Taxon::filter(filter).include(Taxon::fields().photo());
+    if let Some(extra_includes) = extra_includes {
+        query = query.include(extra_includes);
+    }
+    query = query.order_by((
+        Taxon::fields().sequence().asc(),
+        Taxon::fields().complete_name().asc(),
+    ));
     let total = query.clone().count().exec(&mut db).await? as usize;
     let page_state = PageState::new(params.offset, PER_PAGE, total);
     let taxa = query
@@ -111,6 +119,31 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result {
     } else {
         None
     };
+
+    #[derive(Debug)]
+    struct TaxonData {
+        id: u64,
+        name: String,
+        origin: Option<Origin>,
+        photo: Option<String>,
+    }
+    let taxa = taxa
+        .into_iter()
+        .map(|t| TaxonData {
+            id: t.id,
+            name: t.complete_name,
+            origin: if !t.regional_statuses.is_unloaded() {
+                t.regional_statuses
+                    .get()
+                    .iter()
+                    .next()
+                    .and_then(|rts| rts.origin)
+            } else {
+                None
+            },
+            photo: t.photo.into_inner().and_then(|p| p.square_url),
+        })
+        .collect::<Vec<_>>();
 
     view! {
         <div class="flex flex-col gap-3">
@@ -170,8 +203,11 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result {
                                                 region: params.region,
                                             }))
                                     >
-                                        (&taxon.complete_name)
+                                        (&taxon.name)
                                     </a>
+                                    if let Some(origin) = taxon.origin {
+                                        origin_badge(origin: origin)
+                                    }
                                     <a href=(href!(details, TaxonId(taxon.id)))>
                                         icon(data: mdi::INFORMATION, label: "Information")
                                     </a>
@@ -195,9 +231,8 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result {
                                             region: params.region,
                                         }))
                                 >
-                                    if let Some(photo) = taxon.photo.get()
-                                        && let Some(url) = photo.square_url.as_ref() {
-                                        <img class="block rounded-xl border" src=(url)>
+                                    if let Some(photo) = taxon.photo.as_ref() {
+                                        <img class="block rounded-xl border" src=(photo)>
                                     } else {
                                         icon(
                                             data: mdi::LEAF_CIRCLE,
@@ -206,17 +241,25 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result {
                                         )
                                     }
                                 </a>
-                                <a
-                                    href=(href!(taxonomy)
-                                        .query(TaxaListParams {
-                                            parent: Some(taxon.id),
-                                            fmt: params.fmt,
-                                            offset: None,
-                                            region: params.region,
-                                        }))
-                                >
-                                    (&taxon.complete_name)
-                                </a>
+                                <span>
+                                    <a
+                                        href=(href!(taxonomy)
+                                            .query(TaxaListParams {
+                                                parent: Some(taxon.id),
+                                                fmt: params.fmt,
+                                                offset: None,
+                                                region: params.region,
+                                            }))
+                                    >
+                                        (&taxon.name)
+                                    </a>
+                                    if let Some(origin) = taxon.origin {
+                                        origin_badge(
+                                            origin: origin,
+                                            attrs: attributes! { class="ms-1" }
+                                        )
+                                    }
+                                </span>
                                 <a class="p-3" href=(href!(details, TaxonId(taxon.id)))>
                                     icon(data: mdi::INFORMATION_OUTLINE, label: "Information")
                                 </a>
