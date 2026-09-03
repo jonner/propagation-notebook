@@ -1,5 +1,3 @@
-use crate::cli::propagation::PropagationCommands;
-
 #[derive(Debug, Clone, Copy, clap::ValueEnum)]
 pub enum OutputFormat {
     Text,
@@ -31,7 +29,7 @@ pub enum MainCommand {
     #[command(about = "Seed propagation information", alias = "germination")]
     Propagation {
         #[command(subcommand)]
-        command: PropagationCommands,
+        command: propagation::PropagationCommands,
     },
     #[command(about = "Import data into the databse")]
     Import {
