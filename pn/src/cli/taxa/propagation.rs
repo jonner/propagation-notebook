@@ -237,6 +237,15 @@ impl CitationCommands {
             CitationCommands::Show { id } => {
                 load_and_display_citation_details(db, taxon_id, propagation_id, id, format).await?
             }
+            CitationCommands::Link { id } => {
+                TaxonPropagationProcedureCitation::create()
+                    .citation_id(id)
+                    .taxon_id(taxon_id)
+                    .propagation_id(propagation_id)
+                    .exec(db)
+                    .await?;
+                load_and_display_citation_details(db, taxon_id, propagation_id, id, format).await?
+            }
             CitationCommands::Add {
                 title,
                 url,

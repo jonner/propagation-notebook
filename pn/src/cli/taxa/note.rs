@@ -171,6 +171,14 @@ impl TaxonNoteCommands {
                 CitationCommands::Show { id } => {
                     load_and_display_citation_details(db, id, note_id, format).await?;
                 }
+                CitationCommands::Link { id } => {
+                    TaxonNoteCitation::create()
+                        .citation_id(id)
+                        .note_id(note_id)
+                        .exec(db)
+                        .await?;
+                    load_and_display_citation_details(db, id, note_id, format).await?;
+                }
                 CitationCommands::Add {
                     title,
                     url,

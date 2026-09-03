@@ -222,6 +222,14 @@ impl CitationCommands {
             CitationCommands::Show { id } => {
                 load_and_display_citation_details(db, id, propagation_id, format).await?
             }
+            CitationCommands::Link { id } => {
+                PropagationProcedureCitation::create()
+                    .citation_id(id)
+                    .propagation_id(propagation_id)
+                    .exec(db)
+                    .await?;
+                load_and_display_propagation_details(db, format, &propagation_id).await?;
+            }
             CitationCommands::Add {
                 title,
                 url,

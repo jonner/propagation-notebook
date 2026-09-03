@@ -7,6 +7,11 @@ pub enum CitationCommands {
         #[arg(help = "A Citation ID")]
         id: u64,
     },
+    #[command(about = "Link a citation to another object")]
+    Link {
+        #[arg(help = "A Citation ID")]
+        id: u64,
+    },
     #[command(about = "Add a new citation")]
     Add {
         #[arg(help = "Citation title")]

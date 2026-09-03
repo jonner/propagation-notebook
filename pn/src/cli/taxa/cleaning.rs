@@ -235,6 +235,14 @@ impl CitationCommands {
             CitationCommands::Show { id } => {
                 load_and_display_citation_details(db, id, cleaning_id, format).await?
             }
+            CitationCommands::Link { id } => {
+                CleaningProcedureCitation::create()
+                    .citation_id(id)
+                    .cleaning_id(cleaning_id)
+                    .exec(db)
+                    .await?;
+                load_and_display_cleaning_details(db, format, &cleaning_id).await?;
+            }
         }
         Ok(())
     }
