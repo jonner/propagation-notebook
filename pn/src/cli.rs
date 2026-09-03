@@ -33,11 +33,17 @@ pub enum MainCommand {
         #[command(subcommand)]
         command: PropagationCommands,
     },
+    #[command(about = "Import data into the databse")]
+    Import {
+        #[command(subcommand)]
+        command: import::ImportCommands,
+    },
     #[command(about = "Initialize the database")]
     Init,
 }
 
 pub mod citation;
+pub mod import;
 pub mod propagation;
 pub mod region;
 pub mod taxa;

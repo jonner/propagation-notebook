@@ -15,7 +15,6 @@ use tracing::trace;
 
 use crate::{
     cli::OutputFormat,
-    util::IndicatifImportProgress,
     views::{
         JsonView, YamlView,
         taxa::{RegionalTaxaListView, TaxaListView, TaxaSearchResultsView, TaxonDetailsView},
@@ -53,19 +52,6 @@ pub enum TaxonCommands {
         ancestor: Option<TaxonIdentifier>,
         #[arg(short, long, help = "Restrict results to taxa with the given rank")]
         rank: Option<Rank>,
-    },
-    #[command(about = "Import a new taxonomy for use with this tool")]
-    Import {
-        #[arg(help = "A URI to the external taxonomy database")]
-        db_uri: String,
-        #[arg(
-            short,
-            long,
-            help = "The creator of the database",
-            value_enum,
-            default_value_t = TaxonomicAuthority::Itis
-        )]
-        authority: TaxonomicAuthority,
     },
     #[command(about = "Manage cleaning information for a taxon")]
     Cleaning {
@@ -295,15 +281,6 @@ impl TaxonCommands {
                     println!("{output}",);
                 }
             },
-            TaxonCommands::Import { db_uri, authority } => {
-                libpropagation::taxonomy::import(
-                    db,
-                    db_uri,
-                    *authority,
-                    &mut IndicatifImportProgress::default(),
-                )
-                .await?
-            }
             TaxonCommands::Cleaning {
                 taxon: name_or_id,
                 command,

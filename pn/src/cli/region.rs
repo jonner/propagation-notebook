@@ -3,7 +3,7 @@ use std::path::PathBuf;
 
 use crate::cli::OutputFormat;
 use crate::util::dialog::{confirm, select};
-use crate::util::{IndicatifImportProgress, interactive_select_inaturalist_taxon};
+use crate::util::interactive_select_inaturalist_taxon;
 use crate::views::regions::{
     RegionDetailsView, RegionalHarvestDateListView, RegionalTaxonStatusDetailsView,
     RegionalTaxonStatusHarvestView, RegionsListView,
@@ -83,11 +83,6 @@ pub enum RegionCommands {
         category: RegionCategory,
         #[arg(long, help = "Free-form notes about the region")]
         notes: Option<String>,
-    },
-    #[command(about = "Import a new region to the database")]
-    Import {
-        #[arg(help = "A path to a yaml file describing a region")]
-        path: PathBuf,
     },
     #[command(about = "Export a region from the database")]
     Export {
@@ -239,19 +234,6 @@ impl RegionCommands {
                     OutputFormat::Text => RegionDetailsView::new(&new_region).render()?,
                     OutputFormat::Json => JsonView::new(&new_region).render()?,
                     OutputFormat::Yaml => YamlView::new(&new_region).render()?,
-                };
-                println!("{output}")
-            }
-            RegionCommands::Import { path } => {
-                let file_reader = std::fs::OpenOptions::new().read(true).open(path)?;
-                let region: FullRegion =
-                    Region::import(db, file_reader, &mut IndicatifImportProgress::default())
-                        .await?
-                        .into();
-                let output = match format {
-                    OutputFormat::Text => RegionDetailsView::new(&region).render()?,
-                    OutputFormat::Json => JsonView::new(&region).render()?,
-                    OutputFormat::Yaml => YamlView::new(&region).render()?,
                 };
                 println!("{output}")
             }
