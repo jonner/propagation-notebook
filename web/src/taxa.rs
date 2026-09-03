@@ -24,6 +24,7 @@ use crate::{
         harvest::taxon_regional_table,
         input::input,
         pagination::pagination_control,
+        taxa_grid, taxa_grid_item, taxon_icon,
     },
     mdi,
     util::{ModifyOffset, PER_PAGE, PageState, db},
@@ -217,11 +218,9 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result {
                     </ul>
                 }
                 _ => {
-                    <div class="grid items-center gap-6 grid-cols-2 sm:grid-cols-5">
+                    taxa_grid(
                         for taxon in taxa.iter() {
-                            <div
-                                class="p-6 h-full flex flex-col items-center text-center"
-                            >
+                            taxa_grid_item(
                                 <a
                                     href=(href!(taxonomy)
                                         .query(TaxaListParams {
@@ -231,15 +230,7 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result {
                                             region: params.region,
                                         }))
                                 >
-                                    if let Some(photo) = taxon.photo.as_ref() {
-                                        <img class="block rounded-xl border" src=(photo)>
-                                    } else {
-                                        icon(
-                                            data: mdi::LEAF_CIRCLE,
-                                            size: 75,
-                                            label: "Missing Image"
-                                        )
-                                    }
+                                    taxon_icon(url: taxon.photo.as_ref())
                                 </a>
                                 <span>
                                     <a
@@ -263,9 +254,9 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result {
                                 <a class="p-3" href=(href!(details, TaxonId(taxon.id)))>
                                     icon(data: mdi::INFORMATION_OUTLINE, label: "Information")
                                 </a>
-                            </div>
+                            )
                         }
-                    </div>
+                    )
                 }
             }
             if page_state.total_pages() > 1 {
@@ -348,25 +339,25 @@ pub(crate) async fn search(cx: &Cx) -> topcoat::Result {
                     <div class="my-3">
                         match params.fmt {
                             Some(ResultsFormat::Grid) => {
-                                <div
-                                    class="grid items-center gap-6 grid-cols-2 sm:grid-cols-5 xl:grid-cols-10"
-                                >
+                                taxa_grid(
                                     for taxon in taxa.iter() {
-                                        <div class="p-4 h-full">
+                                        taxa_grid_item(
                                             <a
                                                 href=(href!(details, TaxonId(taxon.id)))
                                                 class="flex flex-col items-center text-center"
                                             >
-                                                if let Some(photo) = taxon.photo.get() {
-                                                    if let Some(url) = photo.square_url.as_ref() {
-                                                        <img class="block" src=(url)>
-                                                    }
-                                                }
+                                                taxon_icon(
+                                                    url: taxon
+                                                        .photo
+                                                        .get()
+                                                        .as_ref()
+                                                        .and_then(|p| p.square_url.as_ref())
+                                                )
                                                 <div>(&taxon.complete_name)</div>
                                             </a>
-                                        </div>
+                                        )
                                     }
-                                </div>
+                                )
                             }
                             _ => {
                                 <ul class="px-2">

@@ -318,3 +318,7 @@ figure.taxon-photo:hover figcaption {
 .disclaimer {
   @apply text-muted-foreground text-xs;
 }
+
+.results-grid {
+  @apply grid items-center gap-6 grid-cols-2 sm:grid-cols-5;
+}
