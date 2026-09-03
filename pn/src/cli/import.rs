@@ -33,6 +33,11 @@ pub enum ImportCommands {
         )]
         authority: TaxonomicAuthority,
     },
+    #[command(about = "Import cleaning procedures")]
+    CleaningProcedures {
+        #[arg(help = "A path to a yaml file of cleaning definitions")]
+        path: PathBuf,
+    },
 }
 
 impl ImportCommands {
@@ -59,6 +64,27 @@ impl ImportCommands {
                     &mut IndicatifImportProgress::default(),
                 )
                 .await?
+            }
+            ImportCommands::CleaningProcedures { path } => {
+                let file_reader = std::fs::OpenOptions::new().read(true).open(path)?;
+                let procedures: Vec<libpropagation::cleaning::dto::CleaningProcedureCompact> =
+                    CleaningProcedure::import(
+                        db,
+                        file_reader,
+                        &mut IndicatifImportProgress::default(),
+                    )
+                    .await?
+                    .into_iter()
+                    .map(Into::into)
+                    .collect();
+
+                let output = match format {
+                    OutputFormat::Text => CleaningProcedureListView::new(&procedures).render()?,
+                    OutputFormat::Json => JsonView::new(&procedures).render()?,
+                    OutputFormat::Yaml => YamlView::new(&procedures).render()?,
+                };
+                let n = procedures.len();
+                println!("Imported {n} procedures:\n{output}");
             }
         }
         Ok(())
