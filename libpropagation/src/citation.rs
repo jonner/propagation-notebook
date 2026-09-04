@@ -54,6 +54,7 @@ pub struct Citation {
     pub title: String,
     pub url: Option<String>,
     pub author: Option<String>,
+    #[default(Some(jiff::Zoned::now().date()))]
     pub date: Option<jiff::civil::Date>,
     #[auto]
     pub created_at: jiff::Timestamp,
