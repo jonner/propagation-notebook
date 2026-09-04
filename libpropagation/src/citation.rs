@@ -61,30 +61,46 @@ pub mod dto {
                 url: value.url,
                 author: value.author,
                 date: value.date,
-                cleaning_procedures: value
-                    .cleaning_procedures
-                    .get()
-                    .iter()
-                    .map(|cpc| cpc.cleaning_id)
-                    .collect(),
-                propagation_procedures: value
-                    .propagation_procedures
-                    .get()
-                    .iter()
-                    .map(|ppc| ppc.propagation_id)
-                    .collect(),
-                taxon_propagation_procedures: value
-                    .taxon_propagation_procedures
-                    .get()
-                    .iter()
-                    .map(|tppc| (tppc.taxon_id, tppc.propagation_id))
-                    .collect(),
-                taxon_notes: value
-                    .taxon_notes
-                    .get()
-                    .iter()
-                    .map(|nc| nc.note_id)
-                    .collect(),
+                cleaning_procedures: if value.cleaning_procedures.is_unloaded() {
+                    Vec::default()
+                } else {
+                    value
+                        .cleaning_procedures
+                        .get()
+                        .iter()
+                        .map(|cpc| cpc.cleaning_id)
+                        .collect()
+                },
+                propagation_procedures: if value.propagation_procedures.is_unloaded() {
+                    Vec::default()
+                } else {
+                    value
+                        .propagation_procedures
+                        .get()
+                        .iter()
+                        .map(|ppc| ppc.propagation_id)
+                        .collect()
+                },
+                taxon_propagation_procedures: if value.taxon_propagation_procedures.is_unloaded() {
+                    Vec::default()
+                } else {
+                    value
+                        .taxon_propagation_procedures
+                        .get()
+                        .iter()
+                        .map(|tppc| (tppc.taxon_id, tppc.propagation_id))
+                        .collect()
+                },
+                taxon_notes: if value.taxon_notes.is_unloaded() {
+                    Vec::default()
+                } else {
+                    value
+                        .taxon_notes
+                        .get()
+                        .iter()
+                        .map(|nc| nc.note_id)
+                        .collect()
+                },
             }
         }
     }
