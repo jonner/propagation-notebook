@@ -13,12 +13,44 @@ pub mod dto {
 
     #[skip_serializing_none]
     #[derive(Serialize, Clone, Debug)]
+    pub struct CitationCompact {
+        pub id: u64,
+        pub subject: String,
+        pub url: Option<String>,
+    }
+
+    impl From<super::Citation> for CitationCompact {
+        fn from(value: super::Citation) -> Self {
+            Self {
+                id: value.id,
+                subject: value.title,
+                url: value.url,
+            }
+        }
+    }
+
+    impl From<&super::Citation> for CitationCompact {
+        fn from(value: &super::Citation) -> Self {
+            Self {
+                id: value.id,
+                subject: value.title.clone(),
+                url: value.url.clone(),
+            }
+        }
+    }
+
+    #[skip_serializing_none]
+    #[derive(Serialize, Clone, Debug)]
     pub struct CitationDetails {
         pub id: u64,
         pub subject: String,
         pub url: Option<String>,
         pub author: Option<String>,
         pub date: Option<jiff::civil::Date>,
+        pub cleaning_procedures: Vec<u64>,
+        pub propagation_procedures: Vec<u64>,
+        pub taxon_propagation_procedures: Vec<(u64, u64)>,
+        pub taxon_notes: Vec<u64>,
     }
 
     impl From<super::Citation> for CitationDetails {
@@ -29,19 +61,37 @@ pub mod dto {
                 url: value.url,
                 author: value.author,
                 date: value.date,
+                cleaning_procedures: value
+                    .cleaning_procedures
+                    .get()
+                    .iter()
+                    .map(|cpc| cpc.cleaning_id)
+                    .collect(),
+                propagation_procedures: value
+                    .propagation_procedures
+                    .get()
+                    .iter()
+                    .map(|ppc| ppc.propagation_id)
+                    .collect(),
+                taxon_propagation_procedures: value
+                    .taxon_propagation_procedures
+                    .get()
+                    .iter()
+                    .map(|tppc| (tppc.taxon_id, tppc.propagation_id))
+                    .collect(),
+                taxon_notes: value
+                    .taxon_notes
+                    .get()
+                    .iter()
+                    .map(|nc| nc.note_id)
+                    .collect(),
             }
         }
     }
 
     impl From<&super::Citation> for CitationDetails {
         fn from(value: &super::Citation) -> Self {
-            Self {
-                id: value.id,
-                subject: value.title.clone(),
-                url: value.url.clone(),
-                author: value.author.clone(),
-                date: value.date,
-            }
+            value.clone().into()
         }
     }
 }

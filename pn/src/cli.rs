@@ -31,6 +31,11 @@ pub enum MainCommand {
         #[command(subcommand)]
         command: propagation::PropagationCommands,
     },
+    #[command(about = "Manage Citations")]
+    Citations {
+        #[command(subcommand)]
+        command: citation::CitationCommands,
+    },
     #[command(about = "Import data into the databse")]
     Import {
         #[command(subcommand)]

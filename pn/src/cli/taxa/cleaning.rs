@@ -1,5 +1,8 @@
 use libpropagation::{
-    citation::{Citation, CleaningProcedureCitation, dto::CitationDetails},
+    citation::{
+        Citation, CleaningProcedureCitation,
+        dto::{CitationCompact, CitationDetails},
+    },
     cleaning::{CleaningProcedure, dto::CleaningProcedureDetails},
 };
 use toasty::Db;
@@ -217,7 +220,7 @@ impl CitationCommands {
                 }
             }
             CitationCommands::List => {
-                let citations: Vec<CitationDetails> =
+                let citations: Vec<CitationCompact> =
                     CleaningProcedureCitation::filter_by_cleaning_id(cleaning_id)
                         .include(CleaningProcedureCitation::fields().citation())
                         .exec(db)

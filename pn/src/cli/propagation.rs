@@ -1,7 +1,10 @@
 use std::path::PathBuf;
 
 use libpropagation::{
-    citation::{Citation, PropagationProcedureCitation, dto::CitationDetails},
+    citation::{
+        Citation, PropagationProcedureCitation,
+        dto::{CitationCompact, CitationDetails},
+    },
     propagation::{
         ProcedureType, PropagationProcedure,
         dto::{PropagationProcedureCompact, PropagationProcedureDetails},
@@ -204,7 +207,7 @@ impl CitationCommands {
     ) -> anyhow::Result<()> {
         match self {
             CitationCommands::List => {
-                let citations: Vec<CitationDetails> =
+                let citations: Vec<CitationCompact> =
                     PropagationProcedureCitation::filter_by_propagation_id(propagation_id)
                         .include(PropagationProcedureCitation::fields().citation())
                         .exec(db)

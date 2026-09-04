@@ -1,4 +1,4 @@
-use libpropagation::citation::dto::CitationDetails;
+use libpropagation::citation::dto::{CitationCompact, CitationDetails};
 
 use crate::style;
 
@@ -25,17 +25,18 @@ impl<'a> CitationDetailsView<'a> {
                 .as_deref()
                 .unwrap_or("-"),
         ]);
+        tbuilder.push_record(["References", &format!("{} cleaning procedures\n{} propagation procedures\n{} taxon propagation procedures\n{} taxon notes", self.citation.cleaning_procedures.len(), self.citation.propagation_procedures.len(), self.citation.taxon_propagation_procedures.len(), self.citation.taxon_notes.len())]);
 
         Ok(tbuilder.build().with(style::DetailTable).to_string())
     }
 }
 
 pub struct CitationListView<'a> {
-    citations: &'a Vec<CitationDetails>,
+    citations: &'a Vec<CitationCompact>,
 }
 
 impl<'a> CitationListView<'a> {
-    pub fn new(citations: &'a Vec<CitationDetails>) -> Self {
+    pub fn new(citations: &'a Vec<CitationCompact>) -> Self {
         Self { citations }
     }
 
@@ -46,13 +47,7 @@ impl<'a> CitationListView<'a> {
             tbuilder.push_record([
                 &citation.id.to_string(),
                 &citation.subject,
-                citation.author.as_deref().unwrap_or("-"),
                 citation.url.as_deref().unwrap_or("-"),
-                citation
-                    .date
-                    .map(|d| d.to_string())
-                    .as_deref()
-                    .unwrap_or("-"),
             ]);
         }
 

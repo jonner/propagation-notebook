@@ -1,5 +1,8 @@
 use libpropagation::{
-    citation::{Citation, TaxonPropagationProcedureCitation, dto::CitationDetails},
+    citation::{
+        Citation, TaxonPropagationProcedureCitation,
+        dto::{CitationCompact, CitationDetails},
+    },
     taxonomy::{
         TaxonPropagationProcedure,
         dto::{TaxonPropagationProcedureCompact, TaxonPropagationProcedureDetails},
@@ -209,7 +212,7 @@ impl CitationCommands {
     ) -> anyhow::Result<()> {
         match self {
             CitationCommands::List => {
-                let procedure_citations: Vec<CitationDetails> =
+                let procedure_citations: Vec<CitationCompact> =
                     TaxonPropagationProcedure::filter_by_taxon_id_and_propagation_id(
                         taxon_id,
                         propagation_id,

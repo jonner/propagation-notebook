@@ -1,5 +1,8 @@
 use libpropagation::{
-    citation::{Citation, TaxonNoteCitation, dto::CitationDetails},
+    citation::{
+        Citation, TaxonNoteCitation,
+        dto::{CitationCompact, CitationDetails},
+    },
     taxonomy::{
         TaxonNote, TaxonNoteCategory,
         dto::{TaxonNoteDetails, TaxonNoteNoTaxon},
@@ -155,7 +158,7 @@ impl TaxonNoteCommands {
                         .one()
                         .exec(db)
                         .await?;
-                    let citations: Vec<CitationDetails> = note
+                    let citations: Vec<CitationCompact> = note
                         .citation_links
                         .get()
                         .iter()
