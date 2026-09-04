@@ -4,11 +4,15 @@ use crate::style;
 
 pub struct CitationDetailsView<'a> {
     citation: &'a CitationDetails,
+    show_refs: bool,
 }
 
 impl<'a> CitationDetailsView<'a> {
-    pub fn new(citation: &'a CitationDetails) -> Self {
-        Self { citation }
+    pub fn new(citation: &'a CitationDetails, show_refs: bool) -> Self {
+        Self {
+            citation,
+            show_refs,
+        }
     }
 
     pub fn render(&self) -> anyhow::Result<String> {
@@ -25,7 +29,9 @@ impl<'a> CitationDetailsView<'a> {
                 .as_deref()
                 .unwrap_or("-"),
         ]);
-        tbuilder.push_record(["References", &format!("{} cleaning procedures\n{} propagation procedures\n{} taxon propagation procedures\n{} taxon notes", self.citation.cleaning_procedures.len(), self.citation.propagation_procedures.len(), self.citation.taxon_propagation_procedures.len(), self.citation.taxon_notes.len())]);
+        if self.show_refs {
+            tbuilder.push_record(["References", &format!("{} cleaning procedures\n{} propagation procedures\n{} taxon propagation procedures\n{} taxon notes", self.citation.cleaning_procedures.len(), self.citation.propagation_procedures.len(), self.citation.taxon_propagation_procedures.len(), self.citation.taxon_notes.len())]);
+        }
 
         Ok(tbuilder.build().with(style::DetailTable).to_string())
     }

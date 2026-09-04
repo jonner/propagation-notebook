@@ -316,7 +316,7 @@ async fn load_and_display_citation_details(
         .get()
         .into();
     let output = match format {
-        OutputFormat::Text => CitationDetailsView::new(&pc).render()?,
+        OutputFormat::Text => CitationDetailsView::new(&pc, false).render()?,
         OutputFormat::Json => JsonView::new(&pc).render()?,
         OutputFormat::Yaml => YamlView::new(&pc).render()?,
     };

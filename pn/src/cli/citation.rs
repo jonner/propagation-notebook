@@ -79,7 +79,7 @@ impl CitationCommands {
                     .await?
                     .into();
                 let output = match format {
-                    OutputFormat::Text => CitationDetailsView::new(&citation).render()?,
+                    OutputFormat::Text => CitationDetailsView::new(&citation, true).render()?,
                     OutputFormat::Json => JsonView::new(&citation).render()?,
                     OutputFormat::Yaml => YamlView::new(&citation).render()?,
                 };
@@ -102,7 +102,7 @@ impl CitationCommands {
                 .await?
                 .into();
                 let output = match format {
-                    OutputFormat::Text => CitationDetailsView::new(&citation).render()?,
+                    OutputFormat::Text => CitationDetailsView::new(&citation, false).render()?,
                     OutputFormat::Json => JsonView::new(&citation).render()?,
                     OutputFormat::Yaml => YamlView::new(&citation).render()?,
                 };
@@ -123,7 +123,7 @@ impl CitationCommands {
                         .await?
                         .into();
 
-                    println!("{}", CitationDetailsView::new(&citation).render()?);
+                    println!("{}", CitationDetailsView::new(&citation, true).render()?);
                     confirm("Are you sure you wish to remove this Propagation procedure?")
                         .selected(false)
                         .run()?

@@ -268,7 +268,7 @@ async fn load_and_display_citation_details(
         .await?;
     let citation: CitationDetails = tc.citation.get().into();
     let output = match format {
-        OutputFormat::Text => CitationDetailsView::new(&citation).render()?,
+        OutputFormat::Text => CitationDetailsView::new(&citation, false).render()?,
         OutputFormat::Json => JsonView::new(&citation).render()?,
         OutputFormat::Yaml => YamlView::new(&citation).render()?,
     };
