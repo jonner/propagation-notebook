@@ -11,19 +11,19 @@ use topcoat::{
         error::{RouterErrorExt, redirect},
         href, page, path_param, query_params,
     },
-    view::{attributes, view},
+    view::{View, attributes, view},
 };
 use tracing::trace;
 
 use crate::{
     components::{
-        badge::{BadgeVariant, badge, origin_badge},
+        badge::{BadgeVariant, badge},
         breadcrumb::*,
         button::button,
         citations::citation_list,
         harvest::taxon_regional_table,
         input::input,
-        pagination::pagination_control,
+        pn::{ancestor_breadcrumbs, origin_badge, pagination_control},
         taxa_grid, taxa_grid_item, taxon_icon,
     },
     mdi,
@@ -59,7 +59,7 @@ impl ModifyOffset for TaxaListParams {
 }
 
 #[page("/taxa")]
-pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result {
+pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result<impl View> {
     let mut db = db(cx);
     let params = query_params::<TaxaListParams>(cx)?;
     let parent_id = match params.parent {
@@ -111,10 +111,6 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result {
         .order_by(TaxonHierarchy::fields().depth().desc())
         .exec(&mut db)
         .await?;
-    let ancestor_taxa = ancestors
-        .iter()
-        .map(|l| l.ancestor.get())
-        .collect::<Vec<_>>();
     let region = if let Some(region_id) = params.region {
         Some(Region::get_by_id(&mut db, region_id).await?)
     } else {
@@ -146,7 +142,11 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result {
         })
         .collect::<Vec<_>>();
 
-    view! {
+    Ok(view! {
+        let ancestor_taxa = ancestors
+            .iter()
+            .map(|l| l.ancestor.get())
+            .collect::<Vec<_>>();
         <div class="flex flex-col gap-3">
             <form method="get" action=(href!(search)) class="flex my-6 w-full">
                 input(
@@ -168,13 +168,14 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result {
                             variant: BadgeVariant::Secondary,
                             (format!("Region: '{}'", region.name))
                             <a
-                                href=(href!(taxonomy)
-                                    .query(TaxaListParams {
+                                href=(href!(taxonomy).query(
+                                    TaxaListParams {
                                         region: None,
                                         offset: None,
                                         parent: params.parent,
                                         fmt: params.fmt,
-                                    }))
+                                    },
+                                ))
                                 class="p-2"
                             >
                                 icon(data: mdi::CLEAR_BOLD, label: "Clear filter")
@@ -187,7 +188,7 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result {
                 </div>
             </hgroup>
             if page_state.total_pages() > 1 {
-                pagination_control(state: &page_state, params: params)
+                pagination_control(state: &page_state, params: params.clone())
             }
             match params.fmt {
                 Some(ResultsFormat::List) => {
@@ -196,13 +197,14 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result {
                             <li>
                                 <span class="latin">
                                     <a
-                                        href=(href!(taxonomy)
-                                            .query(TaxaListParams {
+                                        href=(href!(taxonomy).query(
+                                            TaxaListParams {
                                                 parent: Some(taxon.id),
                                                 fmt: params.fmt,
                                                 offset: None,
                                                 region: params.region,
-                                            }))
+                                            },
+                                        ))
                                     >
                                         (&taxon.name)
                                     </a>
@@ -222,25 +224,27 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result {
                         for taxon in taxa.iter() {
                             taxa_grid_item(
                                 <a
-                                    href=(href!(taxonomy)
-                                        .query(TaxaListParams {
+                                    href=(href!(taxonomy).query(
+                                        TaxaListParams {
                                             parent: Some(taxon.id),
                                             fmt: params.fmt,
                                             offset: None,
                                             region: params.region,
-                                        }))
+                                        },
+                                    ))
                                 >
                                     taxon_icon(url: taxon.photo.as_ref())
                                 </a>
                                 <span>
                                     <a
-                                        href=(href!(taxonomy)
-                                            .query(TaxaListParams {
+                                        href=(href!(taxonomy).query(
+                                            TaxaListParams {
                                                 parent: Some(taxon.id),
                                                 fmt: params.fmt,
                                                 offset: None,
                                                 region: params.region,
-                                            }))
+                                            },
+                                        ))
                                     >
                                         (&taxon.name)
                                     </a>
@@ -260,10 +264,10 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result {
                 }
             }
             if page_state.total_pages() > 1 {
-                pagination_control(state: &page_state, params: params)
+                pagination_control(state: &page_state, params: params.clone())
             }
         </div>
-    }
+    })
 }
 
 #[derive(Debug, Clone, serde::Serialize)]
@@ -281,7 +285,7 @@ impl ModifyOffset for TaxaSearchParams {
 }
 
 #[page("/taxa/search")]
-pub(crate) async fn search(cx: &Cx) -> topcoat::Result {
+pub(crate) async fn search(cx: &Cx) -> topcoat::Result<impl View> {
     let mut db = db(cx);
     let params = query_params::<TaxaSearchParams>(cx)?;
     let (page_state, taxa) = match params.q.as_ref() {
@@ -310,7 +314,7 @@ pub(crate) async fn search(cx: &Cx) -> topcoat::Result {
             None,
         ),
     };
-    view! {
+    Ok(view! {
         <div class="flex flex-col gap-3">
             <div>
                 <h1>"Taxon Search"</h1>
@@ -334,7 +338,7 @@ pub(crate) async fn search(cx: &Cx) -> topcoat::Result {
                         <div>(format!("No taxa found for search term '{q}'"))</div>
                     }
                     if page_state.total_pages() > 1 {
-                        pagination_control(state: &page_state, params: params)
+                        pagination_control(state: &page_state, params: params.clone())
                     }
                     <div class="my-3">
                         match params.fmt {
@@ -375,16 +379,16 @@ pub(crate) async fn search(cx: &Cx) -> topcoat::Result {
                         }
                     </div>
                     if page_state.total_pages() > 1 {
-                        pagination_control(state: &page_state, params: params)
+                        pagination_control(state: &page_state, params: params.clone())
                     }
                 </section>
             }
         </div>
-    }
+    })
 }
 
 #[page("/taxa/{taxon_id}")]
-pub async fn details(cx: &Cx) -> topcoat::Result {
+pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
     let mut db = db(cx);
     let id = path_param::<TaxonId>(cx)?;
     let taxon = Taxon::filter_by_id(id)
@@ -407,22 +411,15 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
         .exec(&mut db)
         .await
         .ok_or_not_found()?;
-    trace!(?taxon);
-    let ancestors = taxon
-        .ancestor_links
-        .get()
-        .iter()
-        .rev()
-        .filter_map(|l| {
-            if l.depth == 0 {
-                None
-            } else {
-                Some(l.ancestor.get())
-            }
-        })
-        .collect::<Vec<_>>();
 
-    view! {
+    Ok(view! {
+        let ancestors = taxon
+            .ancestor_links
+            .get()
+            .iter()
+            .rev()
+            .filter_map(|l| { if l.depth == 0 { None } else { Some(l.ancestor.get()) } })
+            .collect::<Vec<_>>();
         ancestor_breadcrumbs(items: &ancestors, link_final: true)
         <h1 class="flex items-center">
             <span class="latin">(&taxon.complete_name)</span>
@@ -483,7 +480,11 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
                             for procedure in taxon.cleaning_procedures.get() {
                                 <li>
                                     <a
-                                        href=(href!(cleaning_details, TaxonId(procedure.taxon_id), CleaningId(procedure.id)))
+                                        href=(href!(
+                                            cleaning_details,
+                                            TaxonId(procedure.taxon_id),
+                                            CleaningId(procedure.id),
+                                        ))
                                     >
                                         (&procedure.name)
                                     </a>
@@ -501,7 +502,11 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
                             for tp in taxon.propagation_procedures.get() {
                                 <li>
                                     <a
-                                        href=(href!(propagation_details, TaxonId(tp.taxon_id), PropagationId(tp.propagation_id)))
+                                        href=(href!(
+                                            propagation_details,
+                                            TaxonId(tp.taxon_id),
+                                            PropagationId(tp.propagation_id),
+                                        ))
                                     >
                                         (&tp.propagation.get().name)
                                     </a>
@@ -518,7 +523,11 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
                         for note in taxon.notes.get() {
                             <li>
                                 <a
-                                    href=(href!(note_details, TaxonId(taxon.id), NoteId(note.id)))
+                                    href=(href!(
+                                        note_details,
+                                        TaxonId(taxon.id),
+                                        NoteId(note.id),
+                                    ))
                                 >
                                     (&note.title)
                                 </a>
@@ -557,7 +566,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
                             <a
                                 href=(format!(
                                     "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value={}",
-                                    taxon.itis_id
+                                    taxon.itis_id,
                                 ))
                             >
                                 "ITIS taxon info"
@@ -565,11 +574,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
                         </li>
                         <li>
                             if let Some(id) = taxon.inaturalist_id {
-                                <a
-                                    href=(format!(
-                                        "https://www.inaturalist.org/taxa/{id}"
-                                    ))
-                                >
+                                <a href=(format!("https://www.inaturalist.org/taxa/{id}"))>
                                     "iNaturalist taxon info"
                                 </a>
                             }
@@ -581,11 +586,11 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
                 </div>
             </section>
         </div>
-    }
+    })
 }
 
 #[page("/taxa/{taxon_id}/propagation/{propagation_id}")]
-pub async fn propagation_details(cx: &Cx) -> topcoat::Result {
+pub async fn propagation_details(cx: &Cx) -> topcoat::Result<impl View> {
     let mut db = db(cx);
     let taxon_id = path_param::<TaxonId>(cx)?;
     let propagation_id = path_param::<PropagationId>(cx)?;
@@ -606,11 +611,10 @@ pub async fn propagation_details(cx: &Cx) -> topcoat::Result {
             .exec(&mut db)
             .await
             .ok_or_not_found()?;
-    trace!(?tp);
-    let procedure = tp.propagation.get();
-    let taxon = tp.taxon.get();
 
-    view! {
+    Ok(view! {
+        let procedure = tp.propagation.get();
+        let taxon = tp.taxon.get();
         <div class="flex flex-col gap-4">
             <hgroup>
                 breadcrumb(
@@ -642,10 +646,7 @@ pub async fn propagation_details(cx: &Cx) -> topcoat::Result {
             <section>
                 <h2>"Confidence"</h2>
                 <div>
-                    (tp
-                        .confidence
-                        .map(|v| v.to_string())
-                        .unwrap_or("Unknown".into()))
+                    (tp.confidence.map(|v| v.to_string()).unwrap_or("Unknown".into()))
                 </div>
             </section>
             <section>
@@ -658,7 +659,7 @@ pub async fn propagation_details(cx: &Cx) -> topcoat::Result {
             <section>
                 <h2>"Citations"</h2>
                 <div>
-                    let citations: Vec < & Citation > = tp
+                    let citations: Vec<&Citation> = tp
                         .citation_links
                         .get()
                         .iter()
@@ -671,11 +672,11 @@ pub async fn propagation_details(cx: &Cx) -> topcoat::Result {
                 </div>
             </section>
         </div>
-    }
+    })
 }
 
 #[page("/taxa/{taxon_id}/cleaning/{cleaning_id}")]
-pub async fn cleaning_details(cx: &Cx) -> topcoat::Result {
+pub async fn cleaning_details(cx: &Cx) -> topcoat::Result<impl View> {
     let mut db = db(cx);
     let taxon_id = path_param::<TaxonId>(cx)?;
     let cleaning_id = path_param::<CleaningId>(cx)?;
@@ -692,9 +693,9 @@ pub async fn cleaning_details(cx: &Cx) -> topcoat::Result {
     .await
     .ok_or_not_found()?;
     trace!(?proc);
-    let taxon = proc.taxon.get();
 
-    view! {
+    Ok(view! {
+        let taxon = proc.taxon.get();
         <div class="flex flex-col gap-4">
             <hgroup>
                 breadcrumb(
@@ -744,11 +745,11 @@ pub async fn cleaning_details(cx: &Cx) -> topcoat::Result {
                 </div>
             </section>
         </div>
-    }
+    })
 }
 
 #[page("/taxa/{taxon_id}/note/{note_id}")]
-pub async fn note_details(cx: &Cx) -> topcoat::Result {
+pub async fn note_details(cx: &Cx) -> topcoat::Result<impl View> {
     let mut db = db(cx);
     let _taxon_id = path_param::<TaxonId>(cx)?;
     let note_id = path_param::<NoteId>(cx)?;
@@ -760,9 +761,9 @@ pub async fn note_details(cx: &Cx) -> topcoat::Result {
         .await
         .ok_or_not_found()?;
     trace!(?note);
-    let taxon = note.taxon.get();
 
-    view! {
+    Ok(view! {
+        let taxon = note.taxon.get();
         <div class="flex flex-col gap-4">
             <section>
                 breadcrumb(
@@ -796,5 +797,5 @@ pub async fn note_details(cx: &Cx) -> topcoat::Result {
                 )
             </section>
         </div>
-    }
+    })
 }

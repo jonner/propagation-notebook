@@ -1,11 +1,8 @@
-use jiff::ToSpan;
 use topcoat::{
     Result,
     icon::{icon, iconify::iconify_icon},
-    view::{Attributes, StaticClass, View, attributes, class, component, view},
+    view::{Attributes, Child, StaticClass, View, attributes, class, component, view},
 };
-
-use crate::util::{ModifyOffset, PageState};
 
 use super::button::{ButtonSize, ButtonVariant, button_variants};
 
@@ -36,16 +33,22 @@ use super::button::{ButtonSize, ButtonVariant, button_variants};
 /// }
 /// ```
 #[component]
-pub async fn pagination(#[default] mut attrs: Attributes, #[default] child: View) -> Result {
-    view! {
+pub async fn pagination(
+    #[default] mut attrs: Attributes,
+    #[default] child: Child<'_>,
+) -> Result<impl View> {
+    Ok(view! {
         <nav
             aria-label="pagination"
-            class=(class!("@container mx-auto flex", attrs.remove("class")))
+            class=(class!(
+                "@container mx-auto flex w-full justify-center",
+                attrs.remove("class"),
+            ))
             (attrs)
         >
             (child)
         </nav>
-    }
+    })
 }
 
 /// The list of steps in a [`pagination`].
@@ -55,9 +58,9 @@ pub async fn pagination(#[default] mut attrs: Attributes, #[default] child: View
 #[component]
 pub async fn pagination_content(
     #[default] mut attrs: Attributes,
-    #[default] child: View,
-) -> Result {
-    view! {
+    #[default] child: Child<'_>,
+) -> Result<impl View> {
+    Ok(view! {
         <ul
             class=(class!(
                 "flex flex-row flex-wrap items-center justify-center gap-1",
@@ -67,13 +70,16 @@ pub async fn pagination_content(
         >
             (child)
         </ul>
-    }
+    })
 }
 
 /// One step of a [`pagination_content`], holding a link or an ellipsis.
 #[component]
-pub async fn pagination_item(#[default] mut attrs: Attributes, #[default] child: View) -> Result {
-    view! { <li class=(attrs.remove("class")) (attrs)>(child)</li> }
+pub async fn pagination_item(
+    #[default] mut attrs: Attributes,
+    #[default] child: Child<'_>,
+) -> Result<impl View> {
+    Ok(view! { <li class=(attrs.remove("class")) (attrs)>(child)</li> })
 }
 
 /// A link to one page of the list, usually labelled with its number.
@@ -92,15 +98,15 @@ pub async fn pagination_link(
     mut attrs: Attributes,
     /// The link's label.
     #[default]
-    child: View,
-) -> Result {
+    child: Child<'_>,
+) -> Result<impl View> {
     let variant = if active {
         ButtonVariant::Outline
     } else {
         ButtonVariant::Ghost
     };
 
-    view! {
+    Ok(view! {
         <a
             aria-current=(active.then_some("page"))
             class=(class!(
@@ -111,7 +117,7 @@ pub async fn pagination_link(
         >
             (child)
         </a>
-    }
+    })
 }
 
 /// The classes for the label of [`pagination_previous`] and
@@ -134,11 +140,11 @@ pub async fn pagination_previous(
     /// Extra attributes for the `<a>` element.
     #[default]
     mut attrs: Attributes,
-) -> Result {
-    view! {
+) -> Result<impl View> {
+    Ok(view! {
         <a
             class=(class!(
-                button_variants(ButtonVariant::Ghost, ButtonSize::Lg),
+                button_variants(ButtonVariant::Ghost, ButtonSize::Md),
                 attrs.remove("class"),
             ))
             (attrs)
@@ -146,7 +152,7 @@ pub async fn pagination_previous(
             icon(data: iconify_icon!("mdi:chevron-left"))
             <span class=(LABEL)>(label)</span>
         </a>
-    }
+    })
 }
 
 /// The link to the page after the one being read.
@@ -159,11 +165,11 @@ pub async fn pagination_next(
     /// Extra attributes for the `<a>` element.
     #[default]
     mut attrs: Attributes,
-) -> Result {
-    view! {
+) -> Result<impl View> {
+    Ok(view! {
         <a
             class=(class!(
-                button_variants(ButtonVariant::Ghost, ButtonSize::Lg),
+                button_variants(ButtonVariant::Ghost, ButtonSize::Md),
                 attrs.remove("class"),
             ))
             (attrs)
@@ -171,7 +177,7 @@ pub async fn pagination_next(
             <span class=(LABEL)>(label)</span>
             icon(data: iconify_icon!("mdi:chevron-right"))
         </a>
-    }
+    })
 }
 
 /// A stand-in for the page links left out of a long pagination.
@@ -180,8 +186,8 @@ pub async fn pagination_next(
 /// nothing to assistive technology, so a phrase standing in for it is read out
 /// instead.
 #[component]
-pub async fn pagination_ellipsis(#[default] mut attrs: Attributes) -> Result {
-    view! {
+pub async fn pagination_ellipsis(#[default] mut attrs: Attributes) -> Result<impl View> {
+    Ok(view! {
         <span
             class=(class!(
                 "flex size-9 items-center justify-center text-muted-foreground",
@@ -190,156 +196,10 @@ pub async fn pagination_ellipsis(#[default] mut attrs: Attributes) -> Result {
             (attrs)
         >
             icon(
-                data: iconify_icon!("mdi:dots-horizontal"),
+                data: iconify_icon!("mdi:more-horiz"),
                 attrs: attributes! { class="size-4" }
             )
             <span class="sr-only">"More pages"</span>
         </span>
-    }
-}
-
-/// The link to the page before the one being read.
-#[component]
-pub async fn pagination_text(
-    /// The link's label.
-    #[into]
-    label: String,
-    /// Whether this link points at the page being read.
-    #[default]
-    active: bool,
-    /// Extra attributes for the `<a>` element.
-    #[default]
-    mut attrs: Attributes,
-) -> Result {
-    view! {
-        <a
-            aria-current=(active.then_some("page"))
-            class=(class!(
-                button_variants(ButtonVariant::Ghost, ButtonSize::Lg),
-                attrs.remove("class"),
-            ))
-            (attrs)
-        >
-            <span class=(LABEL)>(label)</span>
-        </a>
-    }
-}
-
-enum PageLinkType {
-    Previous(usize),
-    Next(usize),
-    Ellipsis,
-    Page(usize),
-}
-
-#[component]
-pub async fn pagination_control<'p, T: ModifyOffset + Clone + Sync + Send + 'p>(
-    state: &PageState,
-    params: &'p T,
-    #[default(2)] context: usize,
-    #[default] mut attrs: Attributes,
-) -> topcoat::Result {
-    let mut links = Vec::with_capacity(context * 2 + 5);
-    let cur = state.current_page();
-    let first = cur.saturating_sub(context).max(1);
-    let last = (cur + context).min(state.total_pages());
-    if cur > 1 {
-        links.push(PageLinkType::Previous(cur - 1));
-    }
-    if first > 1 {
-        links.push(PageLinkType::Page(1));
-    }
-    if first > 2 {
-        links.push(PageLinkType::Ellipsis)
-    }
-    for n in first..=last {
-        links.push(PageLinkType::Page(n));
-    }
-    if last < (state.total_pages() - 1) {
-        links.push(PageLinkType::Ellipsis)
-    }
-    if last < state.total_pages() {
-        links.push(PageLinkType::Page(state.total_pages()));
-    }
-    if cur < last {
-        links.push(PageLinkType::Next(cur + 1));
-    }
-    view! {
-        <div class=(class!(attrs.remove("class"))) (attrs)>
-            pagination(
-                pagination_content(
-                    for item in links {
-                        pagination_item(
-                            match item {
-                                PageLinkType::Ellipsis => {
-                                    pagination_ellipsis()
-                                }
-                                PageLinkType::Page(n) => {
-                                    pagination_link(
-                                        active: n == cur,
-                                        attrs: attributes! {
-                                            href=(state
-                                                .query_with_offset(
-                                                    state.offset_for_page(n).unwrap_or_default(),
-                                                    params.clone(),
-                                                ))
-                                        },
-                                        (n.to_string())
-                                    )
-                                }
-                                PageLinkType::Next(n) => {
-                                    pagination_next(
-                                        attrs: attributes! {
-                                            href=(state
-                                                .query_with_offset(
-                                                    state.offset_for_page(n).unwrap_or_default(),
-                                                    params.clone(),
-                                                ))
-                                        }
-                                    )
-                                }
-                                PageLinkType::Previous(n) => {
-                                    pagination_previous(
-                                        attrs: attributes! {
-                                            href=(state
-                                                .query_with_offset(
-                                                    state.offset_for_page(n).unwrap_or_default(),
-                                                    params.clone(),
-                                                ))
-                                        }
-                                    )
-                                }
-                            }
-                        )
-                    }
-                )
-            )
-        </div>
-    }
-}
-
-#[component]
-pub async fn week_navigator(
-    date: jiff::civil::Date,
-    #[default] attrs: Attributes,
-) -> topcoat::Result {
-    let fmt = |dt: jiff::civil::Date| dt.strftime("%b %d").to_string();
-    let prev_date = date - 7.days();
-    let prev_link = format!("?date={}", prev_date);
-    let next_date = date + 7.days();
-    let next_link = format!("?date={}", next_date);
-    view! {
-        pagination(
-            attrs: attrs,
-            pagination_content(
-                pagination_item(
-                    pagination_previous(attrs: attributes! { href=(prev_link) })
-                )
-                pagination_item(pagination_text(active: true, label: fmt(date)))
-                pagination_item(
-                    pagination_next(attrs: attributes! { href=(next_link) })
-                )
-            )
-        )
-    }
+    })
 }

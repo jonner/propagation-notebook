@@ -1,7 +1,7 @@
 use topcoat::{
     context::Cx,
     router::href,
-    view::{Attributes, View, class, component, view},
+    view::{Attributes, Child, View, class, component, view},
 };
 
 use libpropagation::{
@@ -10,7 +10,7 @@ use libpropagation::{
 };
 
 use crate::{
-    components::badge::{conservation_status_badge, origin_badge},
+    components::pn::{conservation_status_badge, origin_badge},
     regions, taxa,
 };
 
@@ -21,14 +21,14 @@ pub async fn harvest_timeline(
     window: &RegionalHarvestWindow,
     #[default] current_doy: Option<i16>,
     #[default] mut attrs: Attributes,
-) -> topcoat::Result {
+) -> topcoat::Result<impl View> {
     let cdoy = current_doy.unwrap_or_else(|| jiff::Zoned::now().date().day_of_year());
     let inactive_class = window.is_empty().then_some("inactive");
 
     // Compute left offset percentage for current date marker ignoring leap days
     let marker_left_pct = (f32::from(cdoy - 1) / 365.0) * 100.0;
 
-    view! {
+    Ok(view! {
         <div
             class=(class!(
                 "relative flex items-center gap-0 items-stretch w-full h-full select-none min-h-[1em]",
@@ -63,7 +63,7 @@ pub async fn harvest_timeline(
                 style=(format!("left: {:.2}%;", marker_left_pct))
             ></div>
         </div>
-    }
+    })
 }
 
 #[component]
@@ -72,8 +72,8 @@ pub async fn regional_taxa_table(
     taxa: &[Taxon],
     #[default] current_doy: Option<i16>,
     #[default] attrs: Attributes,
-    #[default] child: View,
-) -> topcoat::Result {
+    #[default] child: Child<'_>,
+) -> topcoat::Result<impl View> {
     let items: Vec<_> = taxa
         .iter()
         .filter_map(|taxon| {
@@ -86,14 +86,14 @@ pub async fn regional_taxa_table(
             })
         })
         .collect();
-    view! {
+    Ok(view! {
         harvest_table(
             items: &items,
             current_doy: current_doy,
             attrs: attrs,
             child: child
         )
-    }
+    })
 }
 
 #[component]
@@ -102,8 +102,8 @@ pub async fn taxon_regional_table(
     regions: &[RegionalTaxonStatus],
     #[default] current_doy: Option<i16>,
     #[default] attrs: Attributes,
-    #[default] child: View,
-) -> topcoat::Result {
+    #[default] child: Child<'_>,
+) -> topcoat::Result<impl View> {
     let items: Vec<_> = regions
         .iter()
         .map(|rts| {
@@ -115,14 +115,14 @@ pub async fn taxon_regional_table(
             )
         })
         .collect();
-    view! {
+    Ok(view! {
         harvest_table(
             items: &items,
             current_doy: current_doy,
             attrs: attrs,
             child: child
         )
-    }
+    })
 }
 
 #[component]
@@ -130,9 +130,9 @@ pub async fn harvest_table(
     items: &[(&str, String, &RegionalTaxonStatus)],
     #[default] current_doy: Option<i16>,
     #[default] mut attrs: Attributes,
-    #[default] child: View,
-) -> topcoat::Result {
-    view! {
+    #[default] child: Child<'_>,
+) -> topcoat::Result<impl View> {
+    Ok(view! {
         <div
             class=(class!(
                 "flex flex-col gap-3 md:grid md:grid-cols-[max-content_auto] md:gap-x-6 md:gap-y-2 md:items-center",
@@ -174,5 +174,5 @@ pub async fn harvest_table(
             }
             <div class="md:col-span-2">(child)</div>
         </div>
-    }
+    })
 }

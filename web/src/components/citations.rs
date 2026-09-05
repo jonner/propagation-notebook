@@ -1,14 +1,14 @@
 use libpropagation::citation::Citation;
 use topcoat::{
     router::href,
-    view::{component, view},
+    view::{View, component, view},
 };
 
 use crate::citation;
 
 #[component]
-pub async fn citation_list(citations: Vec<&Citation>) -> topcoat::Result {
-    view! {
+pub async fn citation_list(citations: Vec<&Citation>) -> topcoat::Result<impl View> {
+    Ok(view! {
         <ul>
             for citation in citations {
                 <li>
@@ -20,5 +20,5 @@ pub async fn citation_list(citations: Vec<&Citation>) -> topcoat::Result {
                 </li>
             }
         </ul>
-    }
+    })
 }
