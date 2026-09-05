@@ -149,7 +149,7 @@ mod import {
     pub struct NewCitationDef {
         pub url: String,
         pub title: String,
-        pub author: Option<String>,
+        pub author: String,
     }
 
     #[derive(Debug, serde::Deserialize)]

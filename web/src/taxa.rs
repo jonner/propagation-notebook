@@ -658,7 +658,7 @@ pub async fn propagation_details(cx: &Cx) -> topcoat::Result {
             <section>
                 <h2>"Citations"</h2>
                 <div>
-                    let citations: Vec < & Citation > = tp
+                    let citations: Vec<&Citation> = tp
                         .citation_links
                         .get()
                         .iter()

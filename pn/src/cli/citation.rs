@@ -34,9 +34,18 @@ pub enum CitationCommands {
         #[arg(long, help = "A canonical URL for the citation")]
         url: Option<String>,
         #[arg(long, help = "The author being cited")]
-        author: Option<String>,
-        #[arg(long, help = "The date of the citation")]
-        date: Option<jiff::civil::Date>,
+        author: String,
+        #[arg(long, help = "The publication year")]
+        year: Option<i16>,
+        #[arg(long, help = "The date that the citation was last accessed")]
+        access_date: Option<jiff::civil::Date>,
+        #[arg(
+            long,
+            help = "The name of the 'container' for this citation (e.g. journal, website name, book, etc)"
+        )]
+        container_title: Option<String>,
+        #[arg(long, help = "Digital object identifier for this citation")]
+        doi: Option<String>,
     },
     #[command(about = "Remove a citation")]
     Remove {
@@ -90,13 +99,19 @@ impl CitationCommands {
                 title,
                 url,
                 author,
-                date,
+                year,
+                access_date,
+                container_title,
+                doi,
             } => {
                 let citation: CitationDetails = toasty::create!(Citation {
                     title,
                     url,
                     author,
-                    date: date.or(Some(jiff::Zoned::now().date())),
+                    publication_year: year,
+                    access_date,
+                    container_title,
+                    doi,
                 })
                 .exec(db)
                 .await?

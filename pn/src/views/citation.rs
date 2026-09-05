@@ -19,12 +19,26 @@ impl<'a> CitationDetailsView<'a> {
         let mut tbuilder = tabled::builder::Builder::default();
         tbuilder.push_record(["ID", &self.citation.id.to_string()]);
         tbuilder.push_record(["Title", &self.citation.title]);
-        tbuilder.push_record(["Author", self.citation.author.as_deref().unwrap_or("-")]);
+        tbuilder.push_record(["Author", &self.citation.author]);
         tbuilder.push_record(["URL", self.citation.url.as_deref().unwrap_or("-")]);
+        tbuilder.push_record(["doi", self.citation.doi.as_deref().unwrap_or("-")]);
         tbuilder.push_record([
-            "Date",
+            "Publication year",
+            &self
+                .citation
+                .publication_year
+                .map(|y| y.to_string())
+                .as_deref()
+                .unwrap_or("-"),
+        ]);
+        tbuilder.push_record([
+            "Container title",
+            self.citation.container_title.as_deref().unwrap_or("-"),
+        ]);
+        tbuilder.push_record([
+            "Access date",
             self.citation
-                .date
+                .access_date
                 .map(|d| d.to_string())
                 .as_deref()
                 .unwrap_or("-"),
@@ -48,15 +62,16 @@ impl<'a> CitationListView<'a> {
 
     pub fn render(&self) -> anyhow::Result<String> {
         let mut tbuilder = tabled::builder::Builder::default();
+        tbuilder.push_record(["ID", "title", "Author", "URL"]);
         for citation in self.citations {
-            tbuilder.push_record(["ID", "Subject", "Author", "URL", "Date"]);
             tbuilder.push_record([
                 &citation.id.to_string(),
-                &citation.subject,
+                &citation.title,
+                &citation.author,
                 citation.url.as_deref().unwrap_or("-"),
             ]);
         }
 
-        Ok(tbuilder.build().with(style::DetailTable).to_string())
+        Ok(tbuilder.build().with(style::ListTable).to_string())
     }
 }

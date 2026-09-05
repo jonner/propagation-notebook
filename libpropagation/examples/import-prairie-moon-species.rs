@@ -9,7 +9,7 @@ use serde::Deserialize;
 struct Cite {
     title: String,
     url: Option<String>,
-    author: Option<String>,
+    author: String,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -55,7 +55,6 @@ async fn main() -> anyhow::Result<()> {
                 title: &contents.citation.title,
                 author: contents.citation.author.clone(),
                 url: contents.citation.url.clone(),
-                date: Some(jiff::Zoned::now().date())
             })
         })
         .exec(&mut txn)

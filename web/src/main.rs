@@ -167,6 +167,21 @@ async fn layout(cx: &Cx, slot: topcoat::Result) -> topcoat::Result {
                                         <span class="caption">"Regions"</span>
                                     </a>
                                 </li>
+                                <li class="grow">
+                                    <form
+                                        method="get"
+                                        action=(href!(taxa::search))
+                                        class="flex gap-3"
+                                    >
+                                        input(
+                                            attrs: attributes! { type="text" name="q" placeholder="Search for a taxon" }
+                                        )
+                                        button(
+                                            attrs: attributes! { class="!hidden md:!inline-flex" type="submit" },
+                                            "Search"
+                                        )
+                                    </form>
+                                </li>
                             </ul>
                         </nav>
                     </header>

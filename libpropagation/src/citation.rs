@@ -15,7 +15,8 @@ pub mod dto {
     #[derive(Serialize, Clone, Debug)]
     pub struct CitationCompact {
         pub id: u64,
-        pub subject: String,
+        pub title: String,
+        pub author: String,
         pub url: Option<String>,
     }
 
@@ -23,7 +24,8 @@ pub mod dto {
         fn from(value: super::Citation) -> Self {
             Self {
                 id: value.id,
-                subject: value.title,
+                title: value.title,
+                author: value.author,
                 url: value.url,
             }
         }
@@ -31,11 +33,7 @@ pub mod dto {
 
     impl From<&super::Citation> for CitationCompact {
         fn from(value: &super::Citation) -> Self {
-            Self {
-                id: value.id,
-                subject: value.title.clone(),
-                url: value.url.clone(),
-            }
+            value.clone().into()
         }
     }
 
@@ -45,8 +43,12 @@ pub mod dto {
         pub id: u64,
         pub title: String,
         pub url: Option<String>,
-        pub author: Option<String>,
-        pub date: Option<jiff::civil::Date>,
+        pub author: String,
+        pub access_date: Option<jiff::civil::Date>,
+        pub publication_year: Option<i16>,
+        pub container_title: Option<String>,
+        pub doi: Option<String>,
+
         pub cleaning_procedures: Vec<u64>,
         pub propagation_procedures: Vec<u64>,
         pub taxon_propagation_procedures: Vec<(u64, u64)>,
@@ -60,7 +62,10 @@ pub mod dto {
                 title: value.title,
                 url: value.url,
                 author: value.author,
-                date: value.date,
+                access_date: value.access_date,
+                publication_year: value.publication_year,
+                container_title: value.container_title,
+                doi: value.doi,
                 cleaning_procedures: if value.cleaning_procedures.is_unloaded() {
                     Vec::default()
                 } else {
@@ -119,13 +124,16 @@ pub struct Citation {
     pub id: u64,
     pub title: String,
     pub url: Option<String>,
-    pub author: Option<String>,
+    pub author: String,
     #[default(Some(jiff::Zoned::now().date()))]
-    pub date: Option<jiff::civil::Date>,
+    pub access_date: Option<jiff::civil::Date>,
     #[auto]
     pub created_at: jiff::Timestamp,
     #[auto]
     pub updated_at: jiff::Timestamp,
+    pub publication_year: Option<i16>,
+    pub container_title: Option<String>,
+    pub doi: Option<String>,
 
     #[has_many]
     pub cleaning_procedures: Deferred<Vec<CleaningProcedureCitation>>,
@@ -155,6 +163,35 @@ impl Citation {
             Citation::delete_by_id(db, citation_id).await?;
         }
         Ok(())
+    }
+
+    pub fn format_cse(&self) -> String {
+        [
+            Some(format!("{}. {}.", self.author, self.title)),
+            self.container_title
+                .as_ref()
+                .map(|container| format!(" {container}.")),
+            self.publication_year.map(|y| format!(" {y}.")),
+            self.access_date
+                .map(|date| format!(" [accessed {}]", date.strftime("%Y %b %d"))),
+            self.url.as_ref().map(|val| {
+                format!(
+                    " Available from: {}",
+                    if let Ok(parsed) = url::Url::parse(val) {
+                        if let Some(host) = parsed.host_str() {
+                            format!("{}://{}", parsed.scheme(), host)
+                        } else {
+                            val.to_string()
+                        }
+                    } else {
+                        val.to_string()
+                    }
+                )
+            }),
+        ]
+        .into_iter()
+        .flatten()
+        .collect()
     }
 }
 

@@ -186,7 +186,10 @@ impl TaxonNoteCommands {
                     title,
                     url,
                     author,
-                    date,
+                    year,
+                    access_date,
+                    container_title,
+                    doi,
                 } => {
                     TaxonNoteCitation::create()
                         .citation(
@@ -194,7 +197,10 @@ impl TaxonNoteCommands {
                                 .title(title)
                                 .url(url)
                                 .author(author)
-                                .date(date)
+                                .access_date(access_date)
+                                .publication_year(year)
+                                .container_title(container_title)
+                                .doi(doi)
                                 .exec(db)
                                 .await?,
                         )

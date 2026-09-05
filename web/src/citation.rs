@@ -20,17 +20,27 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
         </h1>
         <dt>"Title"</dt>
         <dd>(citation.title)</dd>
+        <dt>"Author"</dt>
+        <dd>(citation.author)</dd>
+        <dt>"Publication Year"</dt>
+        <dd>(citation.publication_year)</dd>
         <dt>"Url"</dt>
         <dd>
             if let Some(url) = citation.url {
                 <a href=(&url)>(&url)</a>
             }
         </dd>
-        <dt>"Author"</dt>
-        <dd>(citation.author)</dd>
-        <dt>"Date"</dt>
+        <dt>"Container Title"</dt>
+        <dd>(citation.container_title)</dd>
+        <dt>"doi"</dt>
         <dd>
-            if let Some(date) = citation.date {
+            if let Some(doi) = citation.doi {
+                <a href=(format!("https://doi.org/{}", doi))>(doi)</a>
+            }
+        </dd>
+        <dt>"Access Date"</dt>
+        <dd>
+            if let Some(date) = citation.access_date {
                 (date.to_string())
             }
         </dd>
