@@ -43,7 +43,7 @@ pub mod dto {
     #[derive(Serialize, Clone, Debug)]
     pub struct CitationDetails {
         pub id: u64,
-        pub subject: String,
+        pub title: String,
         pub url: Option<String>,
         pub author: Option<String>,
         pub date: Option<jiff::civil::Date>,
@@ -57,7 +57,7 @@ pub mod dto {
         fn from(value: super::Citation) -> Self {
             Self {
                 id: value.id,
-                subject: value.title,
+                title: value.title,
                 url: value.url,
                 author: value.author,
                 date: value.date,
