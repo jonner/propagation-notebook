@@ -160,6 +160,33 @@ impl Histogram {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
+pub enum PhotoSize {
+    Square,
+    Thumb,
+    Small,
+    Medium,
+    Large,
+    Original,
+}
+
+impl std::fmt::Display for PhotoSize {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                PhotoSize::Square => "square",
+                PhotoSize::Thumb => "thumb",
+                PhotoSize::Small => "small",
+                PhotoSize::Medium => "medium",
+                PhotoSize::Large => "large",
+                PhotoSize::Original => "original",
+            }
+        )
+    }
+}
+
 #[derive(Debug, Deserialize)]
 pub struct TaxonDefaultPhoto {
     pub id: u64,
@@ -169,10 +196,28 @@ pub struct TaxonDefaultPhoto {
 #[derive(Debug, Deserialize)]
 pub struct DefaultPhoto {
     pub id: u64,
-    pub square_url: Option<String>,
-    pub medium_url: Option<String>,
-    pub large_url: Option<String>,
+    medium_url: Option<String>,
     pub attribution: Option<String>,
+}
+
+impl DefaultPhoto {
+    pub fn url(&self, size: PhotoSize) -> Option<String> {
+        // The inaturalist api documentation says the following:
+        //   Photos served from https://static.inaturalist.org and
+        //   https://inaturalist-open-data.s3.amazonaws.com have multiple size
+        //   variants and not all size variants are returned in responses. To
+        //   access other sizes, the photo URL can be modified to replace only the
+        //   size qualifier (each variant shares the exact same extension).
+        if size == PhotoSize::Medium {
+            return self.medium_url.clone();
+        }
+        self.medium_url.as_ref().and_then(|url| {
+            let (prefix, filename) = url.rsplit_once('/')?;
+            let filename = filename.strip_prefix(&PhotoSize::Medium.to_string())?;
+            let filename = filename.strip_prefix('.')?;
+            Some(format!("{prefix}/{size}.{filename}"))
+        })
+    }
 }
 
 const PLANTAE_ID: &str = "47126";
@@ -244,7 +289,10 @@ impl Client {
         let res: Response<TaxonDefaultPhoto> = self
             .0
             .get(taxa_endpoint)
-            .query(&[("fields", "(id:!t,default_photo:(id:!t,square_url:!t,medium_url:!t,large_url:!t,attribution:!t))")])
+            .query(&[(
+                "fields",
+                "(id:!t,default_photo:(id:!t,medium_url:!t,attribution:!t))",
+            )])
             .send()
             .await?
             .json()

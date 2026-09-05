@@ -220,6 +220,8 @@ pub struct TaxonPhoto {
     pub created_at: jiff::Timestamp,
     #[auto]
     pub updated_at: jiff::Timestamp,
+
+    pub original_url: Option<String>,
 }
 
 #[derive(Debug, Clone, Copy, toasty::Embed)]
@@ -441,9 +443,10 @@ impl Taxon {
         if let Some(default_photo) = default_photo {
             trace!(?default_photo);
             TaxonPhoto::upsert_by_taxon_id(self.id)
-                .large_url(default_photo.large_url)
-                .square_url(default_photo.square_url)
-                .medium_url(default_photo.medium_url)
+                .square_url(default_photo.url(inaturalist::PhotoSize::Square))
+                .medium_url(default_photo.url(inaturalist::PhotoSize::Medium))
+                .large_url(default_photo.url(inaturalist::PhotoSize::Large))
+                .original_url(default_photo.url(inaturalist::PhotoSize::Original))
                 .attribution(default_photo.attribution)
                 .is_default(true)
                 .exec(db)
