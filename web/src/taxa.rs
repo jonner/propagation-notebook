@@ -434,11 +434,13 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
         </h1>
         <div class="flex flex-col gap-4">
             if let Some(photo) = taxon.photo.get() {
-                if let Some(medium_url) = photo.medium_url.as_ref() {
-                    <figure class="taxon-photo">
-                        <img src=(medium_url) alt=(&taxon.complete_name)>
-                        <figcaption>(photo.attribution.as_ref())</figcaption>
-                    </figure>
+                if let Some(photo_url) = photo.medium_url.as_ref() {
+                    <a href=(photo.original_url.as_ref())>
+                        <figure class="taxon-photo">
+                            <img src=(photo_url) alt=(&taxon.complete_name)>
+                            <figcaption>(photo.attribution.as_ref())</figcaption>
+                        </figure>
+                    </a>
                 }
             }
             if !taxon.vernaculars.get().is_empty() {
