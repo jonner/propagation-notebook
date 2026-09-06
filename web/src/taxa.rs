@@ -16,6 +16,7 @@ use topcoat::{
 use tracing::trace;
 
 use crate::{
+    citation,
     components::{
         badge::{BadgeVariant, badge, origin_badge},
         breadcrumb::*,
@@ -400,10 +401,11 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
                 .children()
                 .order_by(Taxon::fields().sequence().asc()),
         )
-        .include(Taxon::fields().cleaning_procedures())
+        .include(Taxon::fields().cleaning_procedures().citation_links())
         .include(Taxon::fields().propagation_procedures().propagation())
+        .include(Taxon::fields().propagation_procedures().citation_links())
         .include(Taxon::fields().regional_statuses().region())
-        .include(Taxon::fields().notes())
+        .include(Taxon::fields().notes().citation_links())
         .include(Taxon::fields().photo())
         .include(Taxon::fields().ancestor_links().ancestor())
         .include(Taxon::fields().resources())
@@ -495,6 +497,9 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
                                     >
                                         (&procedure.name)
                                     </a>
+                                    for citation in procedure.citation_links.get() {
+                                        <span class="align-super text-xs ps-1">"["<a href=(href!(citation::details, citation::CitationId(citation.citation_id)))>(citation.citation_id)</a>"]"</span>
+                                    }
                                 </li>
                             }
                         </ul>
@@ -517,6 +522,9 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
                                     >
                                         (&tp.propagation.get().name)
                                     </a>
+                                    for citation in tp.citation_links.get() {
+                                        <span class="align-super text-xs ps-1">"["<a href=(href!(citation::details, citation::CitationId(citation.citation_id)))>(citation.citation_id)</a>"]"</span>
+                                    }
                                 </li>
                             }
                         </ul>
@@ -538,6 +546,9 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
                                 >
                                     (&note.title)
                                 </a>
+                                for citation in note.citation_links.get() {
+                                    <span class="align-super text-xs ps-1">"["<a href=(href!(citation::details, citation::CitationId(citation.citation_id)))>(citation.citation_id)</a>"]"</span>
+                                }
                             </li>
                         }
                     </ul>
