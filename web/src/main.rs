@@ -178,10 +178,10 @@ async fn layout(cx: &Cx, slot: topcoat::Result) -> topcoat::Result {
                                     <form
                                         method="get"
                                         action=(href!(taxa::search))
-                                        class="flex gap-3"
+                                        class="flex gap-3 opacity-80"
                                     >
                                         input(
-                                            attrs: attributes! { type="text" name="q" placeholder="Search for a taxon" }
+                                            attrs: attributes! { class="text-foreground" type="text" name="q" placeholder="Search for a taxon" }
                                         )
                                         button(
                                             attrs: attributes! { class="!hidden md:!inline-flex" type="submit" },
