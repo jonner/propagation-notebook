@@ -29,7 +29,7 @@ pub enum CitationCommands {
     },
     #[command(about = "Add a new citation")]
     Add {
-        #[arg(help = "Citation title")]
+        #[arg(long, help = "Citation title")]
         title: String,
         #[arg(long, help = "A canonical URL for the citation")]
         url: Option<String>,
