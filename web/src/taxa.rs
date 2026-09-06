@@ -168,13 +168,14 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result {
                             variant: BadgeVariant::Secondary,
                             (format!("Region: '{}'", region.name))
                             <a
-                                href=(href!(taxonomy)
-                                    .query(TaxaListParams {
+                                href=(href!(taxonomy).query(
+                                    TaxaListParams {
                                         region: None,
                                         offset: None,
                                         parent: params.parent,
                                         fmt: params.fmt,
-                                    }))
+                                    },
+                                ))
                                 class="p-2"
                             >
                                 icon(data: mdi::CLEAR_BOLD, label: "Clear filter")
@@ -196,13 +197,14 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result {
                             <li>
                                 <span class="latin">
                                     <a
-                                        href=(href!(taxonomy)
-                                            .query(TaxaListParams {
+                                        href=(href!(taxonomy).query(
+                                            TaxaListParams {
                                                 parent: Some(taxon.id),
                                                 fmt: params.fmt,
                                                 offset: None,
                                                 region: params.region,
-                                            }))
+                                            },
+                                        ))
                                     >
                                         (&taxon.name)
                                     </a>
@@ -222,25 +224,27 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result {
                         for taxon in taxa.iter() {
                             taxa_grid_item(
                                 <a
-                                    href=(href!(taxonomy)
-                                        .query(TaxaListParams {
+                                    href=(href!(taxonomy).query(
+                                        TaxaListParams {
                                             parent: Some(taxon.id),
                                             fmt: params.fmt,
                                             offset: None,
                                             region: params.region,
-                                        }))
+                                        },
+                                    ))
                                 >
                                     taxon_icon(url: taxon.photo.as_ref())
                                 </a>
                                 <span>
                                     <a
-                                        href=(href!(taxonomy)
-                                            .query(TaxaListParams {
+                                        href=(href!(taxonomy).query(
+                                            TaxaListParams {
                                                 parent: Some(taxon.id),
                                                 fmt: params.fmt,
                                                 offset: None,
                                                 region: params.region,
-                                            }))
+                                            },
+                                        ))
                                     >
                                         (&taxon.name)
                                     </a>
@@ -483,7 +487,11 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
                             for procedure in taxon.cleaning_procedures.get() {
                                 <li>
                                     <a
-                                        href=(href!(cleaning_details, TaxonId(procedure.taxon_id), CleaningId(procedure.id)))
+                                        href=(href!(
+                                            cleaning_details,
+                                            TaxonId(procedure.taxon_id),
+                                            CleaningId(procedure.id),
+                                        ))
                                     >
                                         (&procedure.name)
                                     </a>
@@ -501,7 +509,11 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
                             for tp in taxon.propagation_procedures.get() {
                                 <li>
                                     <a
-                                        href=(href!(propagation_details, TaxonId(tp.taxon_id), PropagationId(tp.propagation_id)))
+                                        href=(href!(
+                                            propagation_details,
+                                            TaxonId(tp.taxon_id),
+                                            PropagationId(tp.propagation_id),
+                                        ))
                                     >
                                         (&tp.propagation.get().name)
                                     </a>
@@ -518,7 +530,11 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
                         for note in taxon.notes.get() {
                             <li>
                                 <a
-                                    href=(href!(note_details, TaxonId(taxon.id), NoteId(note.id)))
+                                    href=(href!(
+                                        note_details,
+                                        TaxonId(taxon.id),
+                                        NoteId(note.id),
+                                    ))
                                 >
                                     (&note.title)
                                 </a>
@@ -557,7 +573,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
                             <a
                                 href=(format!(
                                     "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value={}",
-                                    taxon.itis_id
+                                    taxon.itis_id,
                                 ))
                             >
                                 "ITIS taxon info"
@@ -565,11 +581,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
                         </li>
                         <li>
                             if let Some(id) = taxon.inaturalist_id {
-                                <a
-                                    href=(format!(
-                                        "https://www.inaturalist.org/taxa/{id}"
-                                    ))
-                                >
+                                <a href=(format!("https://www.inaturalist.org/taxa/{id}"))>
                                     "iNaturalist taxon info"
                                 </a>
                             }
@@ -642,10 +654,7 @@ pub async fn propagation_details(cx: &Cx) -> topcoat::Result {
             <section>
                 <h2>"Confidence"</h2>
                 <div>
-                    (tp
-                        .confidence
-                        .map(|v| v.to_string())
-                        .unwrap_or("Unknown".into()))
+                    (tp.confidence.map(|v| v.to_string()).unwrap_or("Unknown".into()))
                 </div>
             </section>
             <section>

@@ -10,7 +10,7 @@ use crate::citation;
 pub async fn citation_link(citation: &Citation) -> topcoat::Result {
     view! {
         <a href=(href!(citation::details, citation::CitationId(citation.id)))>
-        (citation.format_cse())
+            (citation.format_cse())
         </a>
     }
 }
@@ -21,7 +21,10 @@ pub async fn citation_list(
     #[default] mut attrs: Attributes,
 ) -> topcoat::Result {
     view! {
-        <ul class=(class!("text-sm flex flex-col gap-4", attrs.remove("class"))) (attrs)>
+        <ul
+            class=(class!("text-sm flex flex-col gap-4", attrs.remove("class")))
+            (attrs)
+        >
             for citation in citations {
                 <li>citation_link(citation: citation)</li>
             }

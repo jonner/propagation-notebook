@@ -81,13 +81,17 @@ async fn layout(cx: &Cx, slot: topcoat::Result) -> topcoat::Result {
         Err(e) if e.downcast_ref::<NotFoundError>().is_some() => view! {
             <h1>"404 Not Found"</h1>
             <p>
-                (format!("We're sorry, but the page '{uri}' cannot be found. The link might be outdated, or the URL could have been a typo."))
+                (format!(
+                    "We're sorry, but the page '{uri}' cannot be found. The link might be outdated, or the URL could have been a typo.",
+                ))
             </p>
         },
         Err(e) if e.downcast_ref::<ForbiddenError>().is_some() => view! {
             <h1>"403 — Access Denied"</h1>
             <div>
-                (format!("Sorry, you do not have permission to access '{uri}' on this server."))
+                (format!(
+                    "Sorry, you do not have permission to access '{uri}' on this server.",
+                ))
             </div>
         },
         content => content,
@@ -131,7 +135,10 @@ async fn layout(cx: &Cx, slot: topcoat::Result) -> topcoat::Result {
                             "h-[8rem]",
                             "md:h-[12rem]",
                         ))
-                        style=(format!("--background-image:url('{}')",asset_config(cx).resolve(header_bg)))
+                        style=(format!(
+                            "--background-image:url('{}')",
+                            asset_config(cx).resolve(header_bg),
+                        ))
                     >
                         <nav
                             class="w-full block shrink flex items-center gap-6 px-6 py-3 text-white bg-neutral-800/50"

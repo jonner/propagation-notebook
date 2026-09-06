@@ -183,13 +183,14 @@ pub async fn ancestor_breadcrumbs(
                     breadcrumb_item(
                         breadcrumb_link(
                             attrs: attributes! {
-                                href=(href!(crate::taxa::taxonomy)
-                                    .query(TaxaListParams {
+                                href=(href!(crate::taxa::taxonomy).query(
+                                    TaxaListParams {
                                         offset: None,
                                         parent: Some(taxon.id),
                                         fmt: params.fmt,
                                         region: params.region,
-                                    }))
+                                    },
+                                ))
                             },
                             (&taxon.complete_name)
                         )
@@ -204,13 +205,14 @@ pub async fn ancestor_breadcrumbs(
                     breadcrumb_item(
                         breadcrumb_link(
                             attrs: attributes! {
-                                href=(href!(crate::taxa::taxonomy)
-                                    .query(TaxaListParams {
+                                href=(href!(crate::taxa::taxonomy).query(
+                                    TaxaListParams {
                                         offset: None,
                                         parent: Some(taxon.id),
                                         fmt: params.fmt,
                                         region: params.region,
-                                    }))
+                                    },
+                                ))
                             },
                             (&taxon.complete_name)
                         )
@@ -225,13 +227,14 @@ pub async fn ancestor_breadcrumbs(
                         if link_final {
                             breadcrumb_link(
                                 attrs: attributes! {
-                                    href=(href!(crate::taxa::taxonomy)
-                                        .query(TaxaListParams {
+                                    href=(href!(crate::taxa::taxonomy).query(
+                                        TaxaListParams {
                                             offset: None,
                                             parent: Some(taxon.id),
                                             fmt: params.fmt,
                                             region: params.region,
-                                        }))
+                                        },
+                                    ))
                                 },
                                 (&taxon.complete_name)
                             )

@@ -231,13 +231,14 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
                         )
                         card_footer(
                             <a
-                                href=(href!(taxonomy)
-                                    .query(TaxaListParams {
+                                href=(href!(taxonomy).query(
+                                    TaxaListParams {
                                         parent: None,
                                         fmt: None,
                                         offset: None,
                                         region: Some(region.id),
-                                    }))
+                                    },
+                                ))
                             >
                                 "Browse all taxa"
                             </a>
@@ -671,12 +672,7 @@ pub async fn taxon_status(cx: &Cx) -> topcoat::Result {
             }
         </dd>
         <dt>"Wetland Indicator"</dt>
-        <dd>
-            (rts
-                .wetland_indicator
-                .map(|v| v.to_string())
-                .unwrap_or_default())
-        </dd>
+        <dd>(rts.wetland_indicator.map(|v| v.to_string()).unwrap_or_default())</dd>
         <dt>"Fruiting window"</dt>
         <dd>
             <div class="flex h-full items-center gap-x-6">
