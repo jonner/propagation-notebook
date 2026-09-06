@@ -538,12 +538,27 @@ pub struct TaxonPropagationProcedure {
     pub updated_at: jiff::Timestamp,
 }
 
-#[derive(Debug, Clone, toasty::Embed, Serialize, clap::ValueEnum)]
+#[derive(Debug, Clone, Copy, toasty::Embed, Serialize, clap::ValueEnum, Hash, PartialEq, Eq)]
 pub enum TaxonNoteCategory {
     General,
     Ripening,
     Harvesting,
     Storage,
+}
+
+impl std::fmt::Display for TaxonNoteCategory {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                TaxonNoteCategory::General => "General",
+                TaxonNoteCategory::Ripening => "Ripening Indications",
+                TaxonNoteCategory::Harvesting => "Harvesting",
+                TaxonNoteCategory::Storage => "Seed Storage",
+            }
+        )
+    }
 }
 
 #[derive(Debug, Clone, toasty::Model)]

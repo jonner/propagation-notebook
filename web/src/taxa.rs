@@ -1,8 +1,10 @@
+use std::collections::HashMap;
+
 use libpropagation::{
     citation::Citation,
     cleaning::CleaningProcedure,
     region::{Origin, Region, RegionalTaxonStatus},
-    taxonomy::{Taxon, TaxonHierarchy, TaxonNote, TaxonPropagationProcedure},
+    taxonomy::{Taxon, TaxonHierarchy, TaxonNote, TaxonNoteCategory, TaxonPropagationProcedure},
 };
 use topcoat::{
     context::Cx,
@@ -498,7 +500,18 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
                                         (&procedure.name)
                                     </a>
                                     for citation in procedure.citation_links.get() {
-                                        <span class="align-super text-xs ps-1">"["<a href=(href!(citation::details, citation::CitationId(citation.citation_id)))>(citation.citation_id)</a>"]"</span>
+                                        <span class="align-super text-xs ps-1">
+                                            "["
+                                            <a
+                                                href=(href!(
+                                                    citation::details,
+                                                    citation::CitationId(citation.citation_id),
+                                                ))
+                                            >
+                                                (citation.citation_id)
+                                            </a>
+                                            "]"
+                                        </span>
                                     }
                                 </li>
                             }
@@ -523,7 +536,18 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
                                         (&tp.propagation.get().name)
                                     </a>
                                     for citation in tp.citation_links.get() {
-                                        <span class="align-super text-xs ps-1">"["<a href=(href!(citation::details, citation::CitationId(citation.citation_id)))>(citation.citation_id)</a>"]"</span>
+                                        <span class="align-super text-xs ps-1">
+                                            "["
+                                            <a
+                                                href=(href!(
+                                                    citation::details,
+                                                    citation::CitationId(citation.citation_id),
+                                                ))
+                                            >
+                                                (citation.citation_id)
+                                            </a>
+                                            "]"
+                                        </span>
                                     }
                                 </li>
                             }
@@ -534,24 +558,49 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
             if !taxon.notes.get().is_empty() {
                 <section>
                     <h2>"Notes"</h2>
-                    <ul>
-                        for note in taxon.notes.get() {
-                            <li>
-                                <a
-                                    href=(href!(
-                                        note_details,
-                                        TaxonId(taxon.id),
-                                        NoteId(note.id),
-                                    ))
-                                >
-                                    (&note.title)
-                                </a>
-                                for citation in note.citation_links.get() {
-                                    <span class="align-super text-xs ps-1">"["<a href=(href!(citation::details, citation::CitationId(citation.citation_id)))>(citation.citation_id)</a>"]"</span>
-                                }
-                            </li>
-                        }
-                    </ul>
+                    let notes: HashMap<TaxonNoteCategory, Vec<&TaxonNote>> = taxon
+                        .notes
+                        .get()
+                        .iter()
+                        .fold(
+                            HashMap::new(),
+                            |mut acc, member| {
+                                acc.entry(member.category).or_default().push(member);
+                                acc
+                            },
+                        );
+                    for (category, notes) in notes {
+                        <h4>(category.to_string())</h4>
+                        <ul>
+                            for note in notes {
+                                <li>
+                                    <a
+                                        href=(href!(
+                                            note_details,
+                                            TaxonId(taxon.id),
+                                            NoteId(note.id),
+                                        ))
+                                    >
+                                        (&note.title)
+                                    </a>
+                                    for citation in note.citation_links.get() {
+                                        <span class="align-super text-xs ps-1">
+                                            "["
+                                            <a
+                                                href=(href!(
+                                                    citation::details,
+                                                    citation::CitationId(citation.citation_id),
+                                                ))
+                                            >
+                                                (citation.citation_id)
+                                            </a>
+                                            "]"
+                                        </span>
+                                    }
+                                </li>
+                            }
+                        </ul>
+                    }
                 </section>
             }
 
