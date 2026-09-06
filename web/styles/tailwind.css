@@ -169,156 +169,156 @@
   body {
     @apply bg-backdrop font-sans text-foreground text-lg;
   }
-}
 
-header, footer {
-  @apply text-foreground-contrast text-lg bg-background-contrast;
-}
+  header, footer {
+    @apply text-foreground-contrast text-lg bg-background-contrast;
+  }
 
-header {
-  @apply shadow-xl/20;
-}
+  header {
+    @apply shadow-xl/20;
+  }
 
-footer {
-  @apply pb-12 mt-6 pb-50 p-6 shadow-[0_-1rem_2rem_rgba(0,0,0,0.2)];
-}
+  footer {
+    @apply pb-12 mt-6 pb-50 p-6 shadow-[0_-1rem_2rem_rgba(0,0,0,0.2)];
+  }
 
-div.main-content {
-   @apply w-full md:w-[80rem] max-w-full m-auto shadow-xl flex flex-col min-h-screen bg-background
-}
+  div.main-content {
+     @apply w-full md:w-[80rem] max-w-full m-auto shadow-xl flex flex-col min-h-screen bg-background
+  }
 
-h1, h2, h3, h4, h5 {
-  @apply font-bold text-header font-header;
-}
+  h1, h2, h3, h4, h5 {
+    @apply font-bold text-header font-header;
+  }
 
-h1 {
-  @apply text-4xl mb-4;
-}
+  h1 {
+    @apply text-4xl mb-4;
+  }
 
-h2 {
-  @apply text-3xl mb-2;
-}
+  h2 {
+    @apply text-3xl mb-2;
+  }
 
-h3 {
-  @apply text-2xl mb-2;
-}
+  h3 {
+    @apply text-2xl mb-2;
+  }
 
-h4 {
-  @apply text-xl mb-2;
-}
+  h4 {
+    @apply text-xl mb-2;
+  }
 
-dt {
-  @apply font-bold;
-}
+  dt {
+    @apply font-bold;
+  }
 
-dd {
-  @apply ps-4;
-}
+  dd {
+    @apply ps-4;
+  }
 
-a[href] {
-  @apply text-link underline font-bold;
-}
+  a[href] {
+    @apply text-link underline font-bold;
+  }
 
-header a[href], footer a[href] {
-  @apply text-foreground-contrast no-underline;
-}
+  header a[href], footer a[href] {
+    @apply text-foreground-contrast no-underline;
+  }
 
-.latin {
-  @apply italic
-}
+  .latin {
+    @apply italic
+  }
 
-table {
-  @apply border-separate border-spacing-x-6 bg-jaggery/5;
-}
+  table {
+    @apply border-separate border-spacing-x-6 bg-jaggery/5;
+  }
 
-table thead {
-  @apply font-header font-bold;
-}
+  table thead {
+    @apply font-header font-bold;
+  }
 
-td, th {
-  @apply text-start p-1;
-}
+  td, th {
+    @apply text-start p-1;
+  }
 
-.badge {
-  @apply px-1 rounded-lg text-xs font-bold;
-}
+  .badge {
+    @apply px-1 rounded-lg text-xs font-bold;
+  }
 
-.error, .endangered {
-  @apply text-destructive-foreground bg-destructive;
-}
+  .error, .endangered {
+    @apply text-destructive-foreground bg-destructive;
+  }
 
-.introduced {
-  @apply bg-red-100 text-red-700;
-}
+  .introduced {
+    @apply bg-red-100 text-red-700;
+  }
 
-.threatened {
-  @apply bg-orange-500 text-orange-200;
-}
+  .threatened {
+    @apply bg-orange-500 text-orange-200;
+  }
 
-.warning, .specialconcern {
-  @apply bg-amber-300 text-amber-700;
-}
+  .warning, .specialconcern {
+    @apply bg-amber-300 text-amber-700;
+  }
 
-.unknown {
-  @apply bg-sky-100 text-sky-700;
-}
+  .unknown {
+    @apply bg-sky-100 text-sky-700;
+  }
 
-.success, .native {
-  @apply bg-leaf/30 text-mallard;
-}
+  .success, .native {
+    @apply bg-leaf/30 text-mallard;
+  }
 
-.icon {
-  @apply inline-block;
-}
+  .icon {
+    @apply inline-block;
+  }
 
-header nav li .icon {
-  @apply text-white sm:opacity-60 mr-0 sm:mr-2;
-}
+  header nav li .icon {
+    @apply text-white sm:opacity-60 mr-0 sm:mr-2;
+  }
 
-header nav li span.caption {
-  @apply hidden sm:inline;
-}
+  header nav li span.caption {
+    @apply hidden sm:inline;
+  }
 
-nav.breadcrumbs {
-  @apply flex mx-0 px-0 items-center;
-}
+  nav.breadcrumbs {
+    @apply flex mx-0 px-0 items-center;
+  }
 
-nav.breadcrumbs ol {
-  @apply inline-flex items-center text-sm font-light gap-x-2;
-}
+  nav.breadcrumbs ol {
+    @apply inline-flex items-center text-sm font-light gap-x-2;
+  }
 
-nav.breadcrumbs ol li {
-  @apply inline-flex items-center text-nowrap gap-x-2
-}
+  nav.breadcrumbs ol li {
+    @apply inline-flex items-center text-nowrap gap-x-2
+  }
 
-nav.breadcrumbs ol li a {
-  @apply no-underline;
-}
+  nav.breadcrumbs ol li a {
+    @apply no-underline;
+  }
 
-.inactive {
-  @apply opacity-30;
-}
+  .inactive {
+    @apply opacity-30;
+  }
 
-figure.taxon-photo {
-  @apply relative inline-block m-0 overflow-hidden w-full max-w-max rounded-xl border shadow-xl text-xs;
-}
+  figure.taxon-photo {
+    @apply relative inline-block m-0 overflow-hidden w-full max-w-max rounded-xl border shadow-xl text-xs;
+  }
 
-figure.taxon-photo img {
-  @apply rounded-[inherit] max-w-full;
-}
+  figure.taxon-photo img {
+    @apply rounded-[inherit] max-w-full;
+  }
 
-figure.taxon-photo figcaption {
-  @apply absolute bottom-0 left-0 w-full bg-foreground/40 text-background p-2 overflow-hidden text-ellipsis whitespace-nowrap;
-}
+  figure.taxon-photo figcaption {
+    @apply absolute bottom-0 left-0 w-full bg-foreground/40 text-background p-2 overflow-hidden text-ellipsis whitespace-nowrap;
+  }
 
-figure.taxon-photo:hover figcaption {
-  @apply whitespace-normal overflow-visible text-clip bg-foreground/60 ;
-}
+  figure.taxon-photo:hover figcaption {
+    @apply whitespace-normal overflow-visible text-clip bg-foreground/60 ;
+  }
 
-.disclaimer {
-  @apply text-muted-foreground text-xs;
-}
+  .disclaimer {
+    @apply text-muted-foreground text-xs;
+  }
 
-.results-grid {
-  @apply grid items-center gap-6 grid-cols-2 sm:grid-cols-5;
+  .results-grid {
+    @apply grid items-center gap-6 grid-cols-2 sm:grid-cols-5;
+  }
 }
