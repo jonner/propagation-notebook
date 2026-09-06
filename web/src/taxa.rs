@@ -569,38 +569,42 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
                                 acc
                             },
                         );
-                    for (category, notes) in notes {
-                        <h4>(category.to_string())</h4>
-                        <ul>
-                            for note in notes {
-                                <li>
-                                    <a
-                                        href=(href!(
-                                            note_details,
-                                            TaxonId(taxon.id),
-                                            NoteId(note.id),
-                                        ))
-                                    >
-                                        (&note.title)
-                                    </a>
-                                    for citation in note.citation_links.get() {
-                                        <span class="align-super text-xs ps-1">
-                                            "["
+                    <div class="flex flex-col gap-3">
+                        for (category, notes) in notes {
+                            <div>
+                                <h4 class="mb-1">(category.to_string())</h4>
+                                <ul>
+                                    for note in notes {
+                                        <li>
                                             <a
                                                 href=(href!(
-                                                    citation::details,
-                                                    citation::CitationId(citation.citation_id),
+                                                    note_details,
+                                                    TaxonId(taxon.id),
+                                                    NoteId(note.id),
                                                 ))
                                             >
-                                                (citation.citation_id)
+                                                (&note.title)
                                             </a>
-                                            "]"
-                                        </span>
+                                            for citation in note.citation_links.get() {
+                                                <span class="align-super text-xs ps-1">
+                                                    "["
+                                                    <a
+                                                        href=(href!(
+                                                            citation::details,
+                                                            citation::CitationId(citation.citation_id),
+                                                        ))
+                                                    >
+                                                        (citation.citation_id)
+                                                    </a>
+                                                    "]"
+                                                </span>
+                                            }
+                                        </li>
                                     }
-                                </li>
-                            }
-                        </ul>
-                    }
+                                </ul>
+                            </div>
+                        }
+                    </div>
                 </section>
             }
 
