@@ -390,6 +390,45 @@ pub(crate) async fn search(cx: &Cx) -> topcoat::Result {
     }
 }
 
+#[page("/taxa/{taxon_id}/photo/default")]
+pub async fn default_photo(cx: &Cx) -> topcoat::Result {
+    let mut db = db(cx);
+    let id = path_param::<TaxonId>(cx)?;
+    let taxon = Taxon::filter_by_id(id)
+        .include(Taxon::fields().photo())
+        .include(Taxon::fields().ancestor_links().ancestor())
+        .one()
+        .exec(&mut db)
+        .await
+        .ok_or_not_found()?;
+    let photo = taxon.photo.into_inner().ok_or_not_found()?;
+    let photo_url = photo.original_url.ok_or_not_found()?;
+    let ancestors = taxon
+        .ancestor_links
+        .get()
+        .iter()
+        .rev()
+        .map(|l| l.ancestor.get())
+        .collect::<Vec<_>>();
+
+    view! {
+        ancestor_breadcrumbs(items: &ancestors, link_final: true)
+        <h1 class="flex items-center">
+            <span class="latin">(&taxon.complete_name)</span>
+            badge(
+                variant: BadgeVariant::Secondary,
+                attrs: attributes! { class="mx-3" },
+                (taxon.rank.to_string())
+            )
+        </h1>
+        <div class="flex flex-col gap-4">
+            <figure class="taxon-photo">
+                <img src=(photo_url) alt=(&taxon.complete_name)>
+                <figcaption>(photo.attribution.as_ref())</figcaption>
+            </figure>
+        </div>
+    }
+}
 #[page("/taxa/{taxon_id}")]
 pub async fn details(cx: &Cx) -> topcoat::Result {
     let mut db = db(cx);
@@ -443,7 +482,13 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
         <div class="flex flex-col gap-4">
             if let Some(photo) = taxon.photo.get() {
                 if let Some(photo_url) = photo.medium_url.as_ref() {
-                    <a href=(photo.original_url.as_ref())>
+                    <a
+                        class="inline-block w-fit"
+                        href=(photo
+                            .original_url
+                            .is_some()
+                            .then(|| href!(default_photo, TaxonId(*id))))
+                    >
                         <figure class="taxon-photo">
                             <img src=(photo_url) alt=(&taxon.complete_name)>
                             <figcaption>(photo.attribution.as_ref())</figcaption>
