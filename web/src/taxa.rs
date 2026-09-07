@@ -187,7 +187,20 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result<impl View> {
                     </div>
                 }
                 <div class="my-3">
-                    ancestor_breadcrumbs(items: &ancestor_taxa, link_final: false)
+                    ancestor_breadcrumbs(
+                        items: &ancestor_taxa,
+                        link_fn: |taxon| {
+                            href!(crate::taxa::taxonomy).query(
+                                TaxaListParams {
+                                    offset: None,
+                                    parent: Some(taxon.id),
+                                    fmt: params.fmt,
+                                    region: params.region,
+                                },
+                            )
+                        },
+                        link_final: false
+                    )
                 </div>
             </hgroup>
             if page_state.total_pages() > 1 {
@@ -412,7 +425,13 @@ pub async fn default_photo(cx: &Cx) -> topcoat::Result<impl View> {
             .rev()
             .map(|l| l.ancestor.get())
             .collect::<Vec<_>>();
-        ancestor_breadcrumbs(items: &ancestors, link_final: true)
+        ancestor_breadcrumbs(
+            items: &ancestors,
+            link_fn: |taxon| {
+                href!(crate::taxa::details, TaxonId(taxon.id))
+            },
+            link_final: true
+        )
         <h1 class="flex items-center">
             <span class="latin">(&taxon.complete_name)</span>
             badge(
@@ -463,7 +482,20 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
             .rev()
             .filter_map(|l| { if l.depth == 0 { None } else { Some(l.ancestor.get()) } })
             .collect::<Vec<_>>();
-        ancestor_breadcrumbs(items: &ancestors, link_final: true)
+        ancestor_breadcrumbs(
+            items: &ancestors,
+            link_fn: |taxon| {
+                href!(crate::taxa::taxonomy).query(
+                    TaxaListParams {
+                        offset: None,
+                        parent: Some(taxon.id),
+                        fmt: None,
+                        region: None,
+                    },
+                )
+            },
+            link_final: true
+        )
         <h1 class="flex items-center">
             <span class="latin">(&taxon.complete_name)</span>
             badge(

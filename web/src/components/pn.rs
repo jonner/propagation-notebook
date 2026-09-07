@@ -3,15 +3,12 @@ use libpropagation::{
     region::{ConservationStatus, Origin},
     taxonomy::Taxon,
 };
-use topcoat::{
-    context::Cx,
-    router::{href, query_params},
-    view::{Attributes, View, ViewExt, attributes, class, component, view},
+use topcoat::view::{
+    AttributeValueViewParts, Attributes, View, ViewExt, attributes, class, component, view,
 };
 
 use crate::{
     components::{badge::*, breadcrumb::*, pagination::*, tooltip::*},
-    taxa::TaxaListParams,
     util::{ModifyOffset, PageState},
 };
 
@@ -61,15 +58,16 @@ pub async fn conservation_status_badge(
 }
 
 #[component]
-pub async fn ancestor_breadcrumbs(
-    cx: &Cx,
+pub async fn ancestor_breadcrumbs<L, P>(
     items: &[&Taxon],
+    link_fn: L,
     #[default] link_final: bool,
     #[default(Some(2))] ellipsize: Option<usize>,
-) -> topcoat::Result<impl View> {
-    let params = query_params::<TaxaListParams>(cx)
-        .cloned()
-        .unwrap_or_default();
+) -> topcoat::Result<impl View>
+where
+    L: Fn(&Taxon) -> P + Send + Sync,
+    P: AttributeValueViewParts,
+{
     let mut item_iter = items.iter();
     let last = item_iter.next_back();
     let root = item_iter.next();
@@ -100,16 +98,7 @@ pub async fn ancestor_breadcrumbs(
                 if let Some(taxon) = root {
                     breadcrumb_item(
                         breadcrumb_link(
-                            attrs: attributes! {
-                                href=(href!(crate::taxa::taxonomy).query(
-                                    TaxaListParams {
-                                        offset: None,
-                                        parent: Some(taxon.id),
-                                        fmt: params.fmt,
-                                        region: params.region,
-                                    },
-                                ))
-                            },
+                            attrs: attributes! { href=(link_fn(taxon)) },
                             (&taxon.complete_name)
                         )
                     )
@@ -122,16 +111,7 @@ pub async fn ancestor_breadcrumbs(
                     breadcrumb_separator()
                     breadcrumb_item(
                         breadcrumb_link(
-                            attrs: attributes! {
-                                href=(href!(crate::taxa::taxonomy).query(
-                                    TaxaListParams {
-                                        offset: None,
-                                        parent: Some(taxon.id),
-                                        fmt: params.fmt,
-                                        region: params.region,
-                                    },
-                                ))
-                            },
+                            attrs: attributes! { href=(link_fn(taxon)) },
                             (&taxon.complete_name)
                         )
                     )
@@ -144,16 +124,7 @@ pub async fn ancestor_breadcrumbs(
                     breadcrumb_item(
                         if link_final {
                             breadcrumb_link(
-                                attrs: attributes! {
-                                    href=(href!(crate::taxa::taxonomy).query(
-                                        TaxaListParams {
-                                            offset: None,
-                                            parent: Some(taxon.id),
-                                            fmt: params.fmt,
-                                            region: params.region,
-                                        },
-                                    ))
-                                },
+                                attrs: attributes! { href=(link_fn(taxon)) },
                                 (&taxon.complete_name)
                             )
                         } else {
