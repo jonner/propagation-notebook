@@ -765,15 +765,12 @@ pub async fn propagation_details(cx: &Cx) -> topcoat::Result<impl View> {
                     breadcrumb_list(
                         breadcrumb_item(
                             breadcrumb_link(
-                                attrs: attributes! { href=(href!(taxonomy)) },
-                                "Taxonomy"
-                            )
-                            breadcrumb_separator()
-                            breadcrumb_link(
                                 attrs: attributes! { href=(href!(details, TaxonId(taxon.id))) },
                                 (&taxon.complete_name)
                             )
-                            breadcrumb_separator()
+                        )
+                        breadcrumb_separator()
+                        breadcrumb_item(
                             breadcrumb_page(
                                 (format!("Propagation Procedure {}", tp.propagation_id))
                             )
@@ -846,15 +843,12 @@ pub async fn cleaning_details(cx: &Cx) -> topcoat::Result<impl View> {
                     breadcrumb_list(
                         breadcrumb_item(
                             breadcrumb_link(
-                                attrs: attributes! { href=(href!(taxonomy)) },
-                                "Taxonomy"
-                            )
-                            breadcrumb_separator()
-                            breadcrumb_link(
                                 attrs: attributes! { href=(href!(details, TaxonId(taxon.id))) },
                                 (&taxon.complete_name)
                             )
-                            breadcrumb_separator()
+                        )
+                        breadcrumb_separator()
+                        breadcrumb_item(
                             breadcrumb_page((format!("Cleaning Procedure {}", proc.id)))
                         )
                     )
@@ -914,17 +908,12 @@ pub async fn note_details(cx: &Cx) -> topcoat::Result<impl View> {
                     breadcrumb_list(
                         breadcrumb_item(
                             breadcrumb_link(
-                                attrs: attributes! { href=(href!(taxonomy)) },
-                                "Taxonomy"
-                            )
-                            breadcrumb_separator()
-                            breadcrumb_link(
                                 attrs: attributes! { href=(href!(details, TaxonId(taxon.id))) },
                                 (&taxon.complete_name)
                             )
-                            breadcrumb_separator()
-                            breadcrumb_page((format!("Note {}", note.id)))
                         )
+                        breadcrumb_separator()
+                        breadcrumb_item(breadcrumb_page((format!("Note {}", note.id))))
                     )
                 )
                 <h1>(&note.title)</h1>
