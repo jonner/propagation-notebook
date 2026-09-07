@@ -568,7 +568,18 @@ pub struct RegionalTaxonStatus {
     pub created_at: jiff::Timestamp,
     #[auto]
     pub updated_at: jiff::Timestamp,
-    pub last_sync_attempt: Option<jiff::Timestamp>,
+
+    #[has_one]
+    pub sync_task: Deferred<Option<RegionalTaxonSyncTask>>,
+}
+
+#[derive(Debug, Clone, toasty::Model)]
+pub struct RegionalTaxonSyncTask {
+    #[key]
+    pub regional_taxon_status_id: u64,
+    #[belongs_to(key=regional_taxon_status_id, references=id)]
+    pub regional_taxon_status: Deferred<RegionalTaxonStatus>,
+    pub last_attempt: jiff::Timestamp,
 }
 
 #[derive(thiserror::Error, Debug)]

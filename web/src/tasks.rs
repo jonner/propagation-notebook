@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use libpropagation::{
-    region::{QueryHarvestError, RegionalTaxonStatus},
+    region::{QueryHarvestError, RegionalTaxonStatus, RegionalTaxonSyncTask},
     taxonomy::{Rank, Taxon, TaxonSyncTask},
 };
 use tracing::{debug, warn};
@@ -92,31 +92,60 @@ async fn update_regional_status(
 #[tracing::instrument(skip_all)]
 async fn update_regions(mut db: toasty::Db) -> Result<(), BackgroundError> {
     debug!("Updating regional taxon status");
-    let page = RegionalTaxonStatus::all()
-        .include(RegionalTaxonStatus::fields().taxon())
-        .include(RegionalTaxonStatus::fields().region())
-        .order_by((
-            RegionalTaxonStatus::fields().last_sync_attempt().asc(),
-            RegionalTaxonStatus::fields().id().asc(),
-        ))
-        .limit(100)
-        .exec(&mut db)
-        .await?;
-    for rts in page.iter() {
-        if let Err(e) = update_regional_status(&mut db, rts).await {
-            warn!("Failed to query harvest info: {e}")
-        }
-        if let Err(e) = RegionalTaxonStatus::update_by_id(rts.id)
-            .last_sync_attempt(Some(jiff::Timestamp::now()))
+    loop {
+        // populate any task entries that are missing
+        let statement = r#"
+            INSERT INTO "regional_taxon_sync_tasks" ("regional_taxon_status_id", "last_attempt")
+            SELECT r."id", '1970-01-01T00:00:00.000000000Z'
+            FROM "regional_taxon_statuses" AS r
+            WHERE NOT EXISTS (
+                SELECT 1
+                FROM "regional_taxon_sync_tasks" AS s
+                WHERE s."regional_taxon_status_id" = r."id"
+            );
+        "#;
+
+        let _ = toasty::sql::statement(statement)
             .exec(&mut db)
             .await
-        {
-            warn!("Failed to update last sync timestamp: {e}");
+            .unwrap();
+
+        let page = RegionalTaxonSyncTask::all()
+            .include(
+                RegionalTaxonSyncTask::fields()
+                    .regional_taxon_status()
+                    .taxon(),
+            )
+            .include(
+                RegionalTaxonSyncTask::fields()
+                    .regional_taxon_status()
+                    .region(),
+            )
+            .order_by((
+                RegionalTaxonSyncTask::fields().last_attempt().asc(),
+                RegionalTaxonSyncTask::fields()
+                    .regional_taxon_status_id()
+                    .asc(),
+            ))
+            .limit(100)
+            .exec(&mut db)
+            .await?;
+        for task in page.iter() {
+            let rts = task.regional_taxon_status.get();
+            if let Err(e) = update_regional_status(&mut db, rts).await {
+                warn!("Failed to query harvest info: {e}")
+            }
+            if let Err(e) = RegionalTaxonSyncTask::upsert_by_regional_taxon_status_id(rts.id)
+                .last_attempt(jiff::Timestamp::now())
+                .exec(&mut db)
+                .await
+            {
+                warn!("Failed to update last sync timestamp: {e}");
+            }
+            // for a constantly-running update thread, run slowly
+            tokio::time::sleep(Duration::from_secs(10)).await;
         }
-        // for a constantly-running update thread, run slowly
-        tokio::time::sleep(Duration::from_secs(10)).await;
     }
-    Ok(())
 }
 
 #[tracing::instrument(skip_all)]
@@ -168,10 +197,8 @@ async fn update_taxa(mut db: toasty::Db) -> Result<(), BackgroundError> {
 pub async fn background_tasks(db: toasty::Db) -> () {
     let db1 = db.clone();
     tokio::spawn(async move {
-        loop {
-            if let Err(e) = update_regions(db1.clone()).await {
-                warn!("{e}");
-            }
+        if let Err(e) = update_regions(db1.clone()).await {
+            warn!("{e}");
         }
     });
 

@@ -15,11 +15,11 @@ use demand::DemandOption;
 use geo::ChamberlainDuquetteArea;
 use inaturalist::SearchArea;
 use indicatif::{ProgressBar, ProgressIterator, ProgressStyle};
-use libpropagation::region::RegionCategory;
 use libpropagation::region::dto::{
     CompactRegion, FullRegion, RegionalTaxonHarvestInfo, RegionalTaxonStatusDetails,
     RegionalTaxonStatusDetailsNoRegion, RegionalTaxonStatusHarvest,
 };
+use libpropagation::region::{RegionCategory, RegionalTaxonSyncTask};
 use libpropagation::taxonomy::{Rank, TaxonIdentifier};
 use libpropagation::{
     region::{
@@ -348,10 +348,11 @@ impl RegionCommands {
                         .exec(db)
                         .await?;
                         pb.set_message(taxon.complete_name.clone());
-                        let _ = RegionalTaxonStatus::update_by_id(fullrts.id)
-                            .last_sync_attempt(Some(jiff::Timestamp::now()))
-                            .exec(db)
-                            .await;
+                        let _ =
+                            RegionalTaxonSyncTask::upsert_by_regional_taxon_status_id(fullrts.id)
+                                .last_attempt(jiff::Timestamp::now())
+                                .exec(db)
+                                .await;
                         match fullrts.query_harvest_info(db).await {
                             Ok(window) => {
                                 if window.n_samples.unwrap_or_default()
@@ -764,8 +765,8 @@ async fn interactive_harvest_window(
         inat_taxon
     };
 
-    let _ = RegionalTaxonStatus::update_by_id(rts.id)
-        .last_sync_attempt(Some(jiff::Timestamp::now()))
+    let _ = RegionalTaxonSyncTask::upsert_by_regional_taxon_status_id(rts.id)
+        .last_attempt(jiff::Timestamp::now())
         .exec(db)
         .await;
     let (nsamples, window) = {
