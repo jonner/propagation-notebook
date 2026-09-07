@@ -5,31 +5,31 @@ use libpropagation::{
 use topcoat::{
     context::Cx,
     router::{href, page, path_param},
-    view::view,
+    view::{View, view},
 };
 use tracing::trace;
 
 use crate::{components::citations::citation_list, taxa, util::db};
 
 #[page("/propagation")]
-pub async fn list(cx: &Cx) -> topcoat::Result {
+pub async fn list(cx: &Cx) -> topcoat::Result<impl View> {
     let mut db = db(cx);
     let procedures = PropagationProcedure::all().exec(&mut db).await?;
     trace!(?procedures);
-    view! {
+    Ok(view! {
         <h1>"Propagation Procedures"</h1>
         <ul>
             for p in procedures {
                 <li><a href=(href!(details, PropagationId(p.id)))>(p.name)</a></li>
             }
         </ul>
-    }
+    })
 }
 
 path_param!(propagation_id: u64, error= bad_request);
 
 #[page("/propagation/{propagation_id}")]
-pub async fn details(cx: &Cx) -> topcoat::Result {
+pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
     let mut db = db(cx);
     let propagation_id = path_param::<PropagationId>(cx)?;
     let procedure = PropagationProcedure::filter_by_id(propagation_id)
@@ -55,7 +55,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
     .exec(&mut db)
     .await?;
     trace!(?procedure);
-    view! {
+    Ok(view! {
         <h1>(&procedure.name)</h1>
         <h3>"Type"</h3>
         <div>(procedure.r#type.to_string())</div>
@@ -98,5 +98,5 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
                 "None"
             }
         </div>
-    }
+    })
 }

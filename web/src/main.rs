@@ -4,13 +4,13 @@ use topcoat::{
     font::{Font, fontsource::fontsource_font},
     icon::{icon, iconify},
     router::{
-        Router, RouterBuilderDiscoverExt,
+        Router, RouterBuilderDiscoverExt, Slot,
         error::{ForbiddenError, NotFoundError},
         href, layout, not_found, page,
         request::uri,
     },
     tailwind,
-    view::{attributes, class, view},
+    view::{View, ViewExt, attributes, class, error_boundary, view},
 };
 use tracing::debug;
 
@@ -74,29 +74,10 @@ const HEADERS: &[Asset] = &[
 ];
 
 #[layout("/")]
-async fn layout(cx: &Cx, slot: topcoat::Result) -> topcoat::Result {
+async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
     let header_bg = HEADERS[rand::random_range(0..HEADERS.len())];
     let uri = uri(cx);
-    let content = match slot {
-        Err(e) if e.downcast_ref::<NotFoundError>().is_some() => view! {
-            <h1>"404 Not Found"</h1>
-            <p>
-                (format!(
-                    "We're sorry, but the page '{uri}' cannot be found. The link might be outdated, or the URL could have been a typo.",
-                ))
-            </p>
-        },
-        Err(e) if e.downcast_ref::<ForbiddenError>().is_some() => view! {
-            <h1>"403 — Access Denied"</h1>
-            <div>
-                (format!(
-                    "Sorry, you do not have permission to access '{uri}' on this server.",
-                ))
-            </div>
-        },
-        content => content,
-    }?;
-    view! {
+    Ok(view! {
         <!DOCTYPE html>
         <html>
             <head>
@@ -197,7 +178,44 @@ async fn layout(cx: &Cx, slot: topcoat::Result) -> topcoat::Result {
                             </ul>
                         </nav>
                     </header>
-                    <main class="m-3 md:m-6 grow">(content)</main>
+                    <main class="m-3 md:m-6 grow">
+                        error_boundary(
+                            fallback: |error| {
+                                match error {
+                                    e if e.downcast_ref::<NotFoundError>().is_some() => {
+                                        Ok(
+                                            view! {
+                                                <h1>"404 Not Found"</h1>
+                                                <p>
+                                                    (format!(
+                                                        "We're sorry, but the page '{uri}' cannot be found. The link might be outdated, or the URL could have been a typo.",
+                                                    ))
+                                                </p>
+                                            }.boxed(
+
+                                            ),
+                                        )
+                                    }
+                                    e if e.downcast_ref::<ForbiddenError>().is_some() => {
+                                        Ok(
+                                            view! {
+                                                <h1>"403 — Access Denied"</h1>
+                                                <div>
+                                                    (format!(
+                                                        "Sorry, you do not have permission to access '{uri}' on this server.",
+                                                    ))
+                                                </div>
+                                            }.boxed(
+
+                                            ),
+                                        )
+                                    }
+                                    e => Err(e),
+                                }
+                            },
+                            (slot)
+                        )
+                    </main>
                     <footer>
                         "Developed with "
                         icon(
@@ -220,12 +238,12 @@ async fn layout(cx: &Cx, slot: topcoat::Result) -> topcoat::Result {
                 </div>
             </body>
         </html>
-    }
+    })
 }
 
 #[page("/")]
-async fn home() -> topcoat::Result {
-    view! {
+async fn home() -> topcoat::Result<impl View> {
+    Ok(view! {
         <div class="flex flex-col gap-4">
             <hgroup>
                 <h1>"Propagation Notebook"</h1>
@@ -261,12 +279,12 @@ async fn home() -> topcoat::Result {
                 </p>
             </section>
         </div>
-    }
+    })
 }
 
 #[page("/about")]
-async fn about() -> topcoat::Result {
-    view! {
+async fn about() -> topcoat::Result<impl View> {
+    Ok(view! {
         <h1>"About This Site"</h1>
         <div id="content" class="flex flex-col gap-4 text-lg">
             <div>
@@ -336,5 +354,5 @@ async fn about() -> topcoat::Result {
                 </div>
             </div>
         </div>
-    }
+    })
 }

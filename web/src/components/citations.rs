@@ -1,26 +1,26 @@
 use libpropagation::citation::Citation;
 use topcoat::{
     router::href,
-    view::{Attributes, class, component, view},
+    view::{Attributes, View, class, component, view},
 };
 
 use crate::citation;
 
 #[component]
-pub async fn citation_link(citation: &Citation) -> topcoat::Result {
-    view! {
+pub async fn citation_link(citation: &Citation) -> topcoat::Result<impl View> {
+    Ok(view! {
         <a href=(href!(citation::details, citation::CitationId(citation.id)))>
             (citation.format_cse())
         </a>
-    }
+    })
 }
 
 #[component]
 pub async fn citation_list(
     citations: Vec<&Citation>,
     #[default] mut attrs: Attributes,
-) -> topcoat::Result {
-    view! {
+) -> topcoat::Result<impl View> {
+    Ok(view! {
         <ul
             class=(class!("text-sm flex flex-col gap-4", attrs.remove("class")))
             (attrs)
@@ -29,5 +29,5 @@ pub async fn citation_list(
                 <li>citation_link(citation: citation)</li>
             }
         </ul>
-    }
+    })
 }

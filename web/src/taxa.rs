@@ -13,20 +13,20 @@ use topcoat::{
         error::{RouterErrorExt, redirect},
         href, page, path_param, query_params,
     },
-    view::{attributes, view},
+    view::{View, attributes, view},
 };
 use tracing::trace;
 
 use crate::{
     citation,
     components::{
-        badge::{BadgeVariant, badge, origin_badge},
+        badge::{BadgeVariant, badge},
         breadcrumb::*,
         button::button,
         citations::citation_list,
         harvest::taxon_regional_table,
         input::input,
-        pagination::pagination_control,
+        pn::{ancestor_breadcrumbs, origin_badge, pagination_control},
         taxa_grid, taxa_grid_item, taxon_icon,
     },
     mdi,
@@ -62,7 +62,7 @@ impl ModifyOffset for TaxaListParams {
 }
 
 #[page("/taxa")]
-pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result {
+pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result<impl View> {
     let mut db = db(cx);
     let params = query_params::<TaxaListParams>(cx)?;
     let parent_id = match params.parent {
@@ -114,10 +114,6 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result {
         .order_by(TaxonHierarchy::fields().depth().desc())
         .exec(&mut db)
         .await?;
-    let ancestor_taxa = ancestors
-        .iter()
-        .map(|l| l.ancestor.get())
-        .collect::<Vec<_>>();
     let region = if let Some(region_id) = params.region {
         Some(Region::get_by_id(&mut db, region_id).await?)
     } else {
@@ -149,7 +145,11 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result {
         })
         .collect::<Vec<_>>();
 
-    view! {
+    Ok(view! {
+        let ancestor_taxa = ancestors
+            .iter()
+            .map(|l| l.ancestor.get())
+            .collect::<Vec<_>>();
         <div class="flex flex-col gap-3">
             <form method="get" action=(href!(search)) class="flex my-6 w-full">
                 input(
@@ -191,7 +191,7 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result {
                 </div>
             </hgroup>
             if page_state.total_pages() > 1 {
-                pagination_control(state: &page_state, params: params)
+                pagination_control(state: &page_state, params: params.clone())
             }
             match params.fmt {
                 Some(ResultsFormat::List) => {
@@ -267,10 +267,10 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result {
                 }
             }
             if page_state.total_pages() > 1 {
-                pagination_control(state: &page_state, params: params)
+                pagination_control(state: &page_state, params: params.clone())
             }
         </div>
-    }
+    })
 }
 
 #[derive(Debug, Clone, serde::Serialize)]
@@ -288,7 +288,7 @@ impl ModifyOffset for TaxaSearchParams {
 }
 
 #[page("/taxa/search")]
-pub(crate) async fn search(cx: &Cx) -> topcoat::Result {
+pub(crate) async fn search(cx: &Cx) -> topcoat::Result<impl View> {
     let mut db = db(cx);
     let params = query_params::<TaxaSearchParams>(cx)?;
     let (page_state, taxa) = match params.q.as_ref() {
@@ -317,7 +317,7 @@ pub(crate) async fn search(cx: &Cx) -> topcoat::Result {
             None,
         ),
     };
-    view! {
+    Ok(view! {
         <div class="flex flex-col gap-3">
             <div>
                 <h1>"Taxon Search"</h1>
@@ -341,7 +341,7 @@ pub(crate) async fn search(cx: &Cx) -> topcoat::Result {
                         <div>(format!("No taxa found for search term '{q}'"))</div>
                     }
                     if page_state.total_pages() > 1 {
-                        pagination_control(state: &page_state, params: params)
+                        pagination_control(state: &page_state, params: params.clone())
                     }
                     <div class="my-3">
                         match params.fmt {
@@ -382,16 +382,16 @@ pub(crate) async fn search(cx: &Cx) -> topcoat::Result {
                         }
                     </div>
                     if page_state.total_pages() > 1 {
-                        pagination_control(state: &page_state, params: params)
+                        pagination_control(state: &page_state, params: params.clone())
                     }
                 </section>
             }
         </div>
-    }
+    })
 }
 
 #[page("/taxa/{taxon_id}/photo/default")]
-pub async fn default_photo(cx: &Cx) -> topcoat::Result {
+pub async fn default_photo(cx: &Cx) -> topcoat::Result<impl View> {
     let mut db = db(cx);
     let id = path_param::<TaxonId>(cx)?;
     let taxon = Taxon::filter_by_id(id)
@@ -403,15 +403,15 @@ pub async fn default_photo(cx: &Cx) -> topcoat::Result {
         .ok_or_not_found()?;
     let photo = taxon.photo.into_inner().ok_or_not_found()?;
     let photo_url = photo.original_url.ok_or_not_found()?;
-    let ancestors = taxon
-        .ancestor_links
-        .get()
-        .iter()
-        .rev()
-        .map(|l| l.ancestor.get())
-        .collect::<Vec<_>>();
 
-    view! {
+    Ok(view! {
+        let ancestors = taxon
+            .ancestor_links
+            .get()
+            .iter()
+            .rev()
+            .map(|l| l.ancestor.get())
+            .collect::<Vec<_>>();
         ancestor_breadcrumbs(items: &ancestors, link_final: true)
         <h1 class="flex items-center">
             <span class="latin">(&taxon.complete_name)</span>
@@ -427,10 +427,10 @@ pub async fn default_photo(cx: &Cx) -> topcoat::Result {
                 <figcaption>(photo.attribution.as_ref())</figcaption>
             </figure>
         </div>
-    }
+    })
 }
 #[page("/taxa/{taxon_id}")]
-pub async fn details(cx: &Cx) -> topcoat::Result {
+pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
     let mut db = db(cx);
     let id = path_param::<TaxonId>(cx)?;
     let taxon = Taxon::filter_by_id(id)
@@ -454,22 +454,15 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
         .exec(&mut db)
         .await
         .ok_or_not_found()?;
-    trace!(?taxon);
-    let ancestors = taxon
-        .ancestor_links
-        .get()
-        .iter()
-        .rev()
-        .filter_map(|l| {
-            if l.depth == 0 {
-                None
-            } else {
-                Some(l.ancestor.get())
-            }
-        })
-        .collect::<Vec<_>>();
 
-    view! {
+    Ok(view! {
+        let ancestors = taxon
+            .ancestor_links
+            .get()
+            .iter()
+            .rev()
+            .filter_map(|l| { if l.depth == 0 { None } else { Some(l.ancestor.get()) } })
+            .collect::<Vec<_>>();
         ancestor_breadcrumbs(items: &ancestors, link_final: true)
         <h1 class="flex items-center">
             <span class="latin">(&taxon.complete_name)</span>
@@ -702,11 +695,11 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
                 </div>
             </section>
         </div>
-    }
+    })
 }
 
 #[page("/taxa/{taxon_id}/propagation/{propagation_id}")]
-pub async fn propagation_details(cx: &Cx) -> topcoat::Result {
+pub async fn propagation_details(cx: &Cx) -> topcoat::Result<impl View> {
     let mut db = db(cx);
     let taxon_id = path_param::<TaxonId>(cx)?;
     let propagation_id = path_param::<PropagationId>(cx)?;
@@ -727,11 +720,10 @@ pub async fn propagation_details(cx: &Cx) -> topcoat::Result {
             .exec(&mut db)
             .await
             .ok_or_not_found()?;
-    trace!(?tp);
-    let procedure = tp.propagation.get();
-    let taxon = tp.taxon.get();
 
-    view! {
+    Ok(view! {
+        let procedure = tp.propagation.get();
+        let taxon = tp.taxon.get();
         <div class="flex flex-col gap-4">
             <hgroup>
                 breadcrumb(
@@ -789,11 +781,11 @@ pub async fn propagation_details(cx: &Cx) -> topcoat::Result {
                 </div>
             </section>
         </div>
-    }
+    })
 }
 
 #[page("/taxa/{taxon_id}/cleaning/{cleaning_id}")]
-pub async fn cleaning_details(cx: &Cx) -> topcoat::Result {
+pub async fn cleaning_details(cx: &Cx) -> topcoat::Result<impl View> {
     let mut db = db(cx);
     let taxon_id = path_param::<TaxonId>(cx)?;
     let cleaning_id = path_param::<CleaningId>(cx)?;
@@ -810,9 +802,9 @@ pub async fn cleaning_details(cx: &Cx) -> topcoat::Result {
     .await
     .ok_or_not_found()?;
     trace!(?proc);
-    let taxon = proc.taxon.get();
 
-    view! {
+    Ok(view! {
+        let taxon = proc.taxon.get();
         <div class="flex flex-col gap-4">
             <hgroup>
                 breadcrumb(
@@ -862,11 +854,11 @@ pub async fn cleaning_details(cx: &Cx) -> topcoat::Result {
                 </div>
             </section>
         </div>
-    }
+    })
 }
 
 #[page("/taxa/{taxon_id}/note/{note_id}")]
-pub async fn note_details(cx: &Cx) -> topcoat::Result {
+pub async fn note_details(cx: &Cx) -> topcoat::Result<impl View> {
     let mut db = db(cx);
     let _taxon_id = path_param::<TaxonId>(cx)?;
     let note_id = path_param::<NoteId>(cx)?;
@@ -878,9 +870,9 @@ pub async fn note_details(cx: &Cx) -> topcoat::Result {
         .await
         .ok_or_not_found()?;
     trace!(?note);
-    let taxon = note.taxon.get();
 
-    view! {
+    Ok(view! {
+        let taxon = note.taxon.get();
         <div class="flex flex-col gap-4">
             <section>
                 breadcrumb(
@@ -914,5 +906,5 @@ pub async fn note_details(cx: &Cx) -> topcoat::Result {
                 )
             </section>
         </div>
-    }
+    })
 }

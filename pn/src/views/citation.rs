@@ -24,8 +24,7 @@ impl<'a> CitationDetailsView<'a> {
         tbuilder.push_record(["doi", self.citation.doi.as_deref().unwrap_or("-")]);
         tbuilder.push_record([
             "Publication year",
-            &self
-                .citation
+            self.citation
                 .publication_year
                 .map(|y| y.to_string())
                 .as_deref()

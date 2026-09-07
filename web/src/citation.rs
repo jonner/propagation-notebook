@@ -2,18 +2,18 @@ use libpropagation::citation::Citation;
 use topcoat::{
     context::Cx,
     router::{error::RouterErrorExt, page, path_param},
-    view::view,
+    view::{View, view},
 };
 
 use crate::util::db;
 path_param!(pub citation_id: u64, error = bad_request);
 
 #[page("/citation/{citation_id}")]
-pub async fn details(cx: &Cx) -> topcoat::Result {
+pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
     let mut db = db(cx);
     let id = path_param::<CitationId>(cx)?;
     let citation = Citation::get_by_id(&mut db, id).await.ok_or_not_found()?;
-    view! {
+    Ok(view! {
         <h1>
             "Citation "
             (citation.id)
@@ -44,5 +44,5 @@ pub async fn details(cx: &Cx) -> topcoat::Result {
                 (date.to_string())
             }
         </dd>
-    }
+    })
 }

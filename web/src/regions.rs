@@ -6,20 +6,19 @@ use serde::Serialize;
 use topcoat::{
     context::Cx,
     router::{error::RouterErrorExt, href, page, path_param, query_params},
-    view::{attributes, view},
+    view::{View, attributes, view},
 };
 use tracing::trace;
 
 use crate::{
     components::{
-        badge::{conservation_status_badge, origin_badge},
         breadcrumb::*,
         button::button,
         card::*,
         harvest::{harvest_timeline, regional_taxa_table},
         input::input,
         leaflet_map,
-        pagination::{pagination_control, week_navigator},
+        pn::{conservation_status_badge, origin_badge, pagination_control, week_navigator},
     },
     taxa::{self, TaxaListParams, taxonomy},
     util::{ModifyOffset, PER_PAGE, PageState, db},
@@ -30,7 +29,7 @@ path_param!(pub region_id: u64, error = bad_request);
 const SEED_DISCLAIMER: &str = "Seed dates are based on data retrieved from iNaturalist.org. If a species does not have any information about its seed-bearing window shown here, it is likely that either iNaturalist doesn't have enough observations of the species within the given area, or too few observations are annotated to indicate the presence of seeds. We periodically import new data from iNaturalist, so any new or newly-annotated observations should improve these dates over time.";
 
 #[page("/regions")]
-pub async fn list(cx: &Cx) -> topcoat::Result {
+pub async fn list(cx: &Cx) -> topcoat::Result<impl View> {
     let db = db(cx);
     let mut db = db;
     let mut region_types = Vec::default();
@@ -80,7 +79,7 @@ pub async fn list(cx: &Cx) -> topcoat::Result {
             }
         })?;
     trace!(?region_types);
-    view! {
+    Ok(view! {
         <h1>"Regions"</h1>
         <div class="flex flex-col gap-4">
             for t in region_types {
@@ -99,11 +98,11 @@ pub async fn list(cx: &Cx) -> topcoat::Result {
                 </section>
             }
         </div>
-    }
+    })
 }
 
 #[page("/regions/{region_id}")]
-pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
+pub(crate) async fn overview(cx: &Cx) -> topcoat::Result<impl View> {
     let id = path_param::<RegionId>(cx)?;
     let mut db = db(cx);
     const N: usize = 10;
@@ -164,7 +163,7 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
         )
         .await?;
 
-    view! {
+    Ok(view! {
         <div class="flex flex-col gap-6">
             <hgroup>
                 breadcrumb(
@@ -285,7 +284,7 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result {
                 </section>
             </div>
         </div>
-    }
+    })
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -302,7 +301,7 @@ impl ModifyOffset for HarvestParams {
 }
 
 #[page("/regions/{region_id}/fruiting/soon")]
-pub(crate) async fn fruiting_soon(cx: &Cx) -> topcoat::Result {
+pub(crate) async fn fruiting_soon(cx: &Cx) -> topcoat::Result<impl View> {
     let id = path_param::<RegionId>(cx)?;
     let mut db = db(cx);
     let params = query_params::<HarvestParams>(cx)?;
@@ -329,7 +328,7 @@ pub(crate) async fn fruiting_soon(cx: &Cx) -> topcoat::Result {
         .await?;
     let page_state = PageState::new(params.offset, PER_PAGE, total.try_into().unwrap());
 
-    view! {
+    Ok(view! {
         <div class="flex flex-col gap-6">
             <hgroup>
                 breadcrumb(
@@ -365,19 +364,19 @@ pub(crate) async fn fruiting_soon(cx: &Cx) -> topcoat::Result {
                 week_navigator(date: date)
             </hgroup>
             if page_state.total_pages() > 1 {
-                pagination_control(state: &page_state, params: params)
+                pagination_control(state: &page_state, params: params.clone())
             }
             regional_taxa_table(taxa: &starting_soon, current_doy: Some(doy))
             if page_state.total_pages() > 1 {
-                pagination_control(state: &page_state, params: params)
+                pagination_control(state: &page_state, params: params.clone())
             }
             <div class="disclaimer">(SEED_DISCLAIMER)</div>
         </div>
-    }
+    })
 }
 
 #[page("/regions/{region_id}/fruiting/done")]
-pub(crate) async fn fruiting_done(cx: &Cx) -> topcoat::Result {
+pub(crate) async fn fruiting_done(cx: &Cx) -> topcoat::Result<impl View> {
     let id = path_param::<RegionId>(cx)?;
     let params = query_params::<HarvestParams>(cx)?;
     let mut db = db(cx);
@@ -404,7 +403,7 @@ pub(crate) async fn fruiting_done(cx: &Cx) -> topcoat::Result {
         .await?;
     let page_state = PageState::new(params.offset, PER_PAGE, total.try_into().unwrap());
 
-    view! {
+    Ok(view! {
         <div class="flex flex-col gap-6">
             <hgroup>
                 breadcrumb(
@@ -440,19 +439,19 @@ pub(crate) async fn fruiting_done(cx: &Cx) -> topcoat::Result {
                 week_navigator(date: date)
             </hgroup>
             if page_state.total_pages() > 1 {
-                pagination_control(state: &page_state, params: params)
+                pagination_control(state: &page_state, params: params.clone())
             }
             regional_taxa_table(taxa: &ending, current_doy: Some(doy))
             if page_state.total_pages() > 1 {
-                pagination_control(state: &page_state, params: params)
+                pagination_control(state: &page_state, params: params.clone())
             }
             <div class="disclaimer">(SEED_DISCLAIMER)</div>
         </div>
-    }
+    })
 }
 
 #[page("/regions/{region_id}/fruiting/now")]
-pub(crate) async fn fruiting_now(cx: &Cx) -> topcoat::Result {
+pub(crate) async fn fruiting_now(cx: &Cx) -> topcoat::Result<impl View> {
     let id = path_param::<RegionId>(cx)?;
     let params = query_params::<HarvestParams>(cx)?;
     let mut db = db(cx);
@@ -476,7 +475,7 @@ pub(crate) async fn fruiting_now(cx: &Cx) -> topcoat::Result {
         .await?;
     let page_state = PageState::new(params.offset, PER_PAGE, total.try_into().unwrap());
 
-    view! {
+    Ok(view! {
         <div class="flex flex-col gap-6">
             <hgroup>
                 breadcrumb(
@@ -515,15 +514,15 @@ pub(crate) async fn fruiting_now(cx: &Cx) -> topcoat::Result {
                 )
             </hgroup>
             if page_state.total_pages() > 1 {
-                pagination_control(state: &page_state, params: params)
+                pagination_control(state: &page_state, params: params.clone())
             }
             regional_taxa_table(taxa: &ending, current_doy: Some(doy))
             if page_state.total_pages() > 1 {
-                pagination_control(state: &page_state, params: params)
+                pagination_control(state: &page_state, params: params.clone())
             }
             <div class="disclaimer">(SEED_DISCLAIMER)</div>
         </div>
-    }
+    })
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -542,7 +541,7 @@ impl ModifyOffset for RegionalTaxaListParams {
 }
 
 #[page("/regions/{region_id}/fruiting")]
-pub async fn fruiting_all(cx: &Cx) -> topcoat::Result {
+pub async fn fruiting_all(cx: &Cx) -> topcoat::Result<impl View> {
     let mut db = db(cx);
     let region_id = path_param::<RegionId>(cx)?;
     let params = query_params::<RegionalTaxaListParams>(cx)?;
@@ -569,7 +568,7 @@ pub async fn fruiting_all(cx: &Cx) -> topcoat::Result {
         .await?;
     let page_state = PageState::new(params.offset, PER_PAGE, total.try_into().unwrap());
 
-    view! {
+    Ok(view! {
         <div class="flex flex-col gap-6">
             <hgroup>
                 breadcrumb(
@@ -614,21 +613,21 @@ pub async fn fruiting_all(cx: &Cx) -> topcoat::Result {
                 <h2>(format!("Results for '{q}'"))</h2>
             }
             if page_state.total_pages() > 1 {
-                pagination_control(state: &page_state, params: params)
+                pagination_control(state: &page_state, params: params.clone())
             }
             regional_taxa_table(taxa: &taxa)
             if page_state.total_pages() > 1 {
-                pagination_control(state: &page_state, params: params)
+                pagination_control(state: &page_state, params: params.clone())
             }
             <div class="disclaimer">(SEED_DISCLAIMER)</div>
         </div>
-    }
+    })
 }
 
 path_param!(taxon_id: u64, error = bad_request);
 
 #[page("/regions/{region_id}/taxa/{taxon_id}")]
-pub async fn taxon_status(cx: &Cx) -> topcoat::Result {
+pub async fn taxon_status(cx: &Cx) -> topcoat::Result<impl View> {
     let mut db = db(cx);
     let region_id = path_param::<RegionId>(cx).ok_or_not_found()?;
     let taxon_id = path_param::<TaxonId>(cx).ok_or_not_found()?;
@@ -638,10 +637,10 @@ pub async fn taxon_status(cx: &Cx) -> topcoat::Result {
         .one()
         .exec(&mut db)
         .await?;
-    let region = rts.region.get();
-    let taxon = rts.taxon.get();
 
-    view! {
+    Ok(view! {
+        let region = rts.region.get();
+        let taxon = rts.taxon.get();
         <h1>
             <span class="latin">(&taxon.complete_name)</span>
             " in "
@@ -683,5 +682,5 @@ pub async fn taxon_status(cx: &Cx) -> topcoat::Result {
                 (rts.harvest_window.to_string())
             </div>
         </dd>
-    }
+    })
 }
