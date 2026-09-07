@@ -4,7 +4,7 @@ use libpropagation::{
     taxonomy::Taxon,
 };
 use topcoat::view::{
-    AttributeValueViewParts, Attributes, View, ViewExt, attributes, class, component, view,
+    AttributeValueViewParts, Attributes, Child, View, ViewExt, attributes, class, component, view,
 };
 
 use crate::{
@@ -63,6 +63,7 @@ pub async fn ancestor_breadcrumbs<L, P>(
     link_fn: L,
     #[default] link_final: bool,
     #[default(Some(2))] ellipsize: Option<usize>,
+    #[default] child: Child<'_>,
 ) -> topcoat::Result<impl View>
 where
     L: Fn(&Taxon) -> P + Send + Sync,
@@ -139,6 +140,7 @@ where
                         }
                     )
                 }
+                (child)
             )
         )
     })
