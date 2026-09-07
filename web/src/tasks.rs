@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use libpropagation::{
     region::{QueryHarvestError, RegionalTaxonStatus},
-    taxonomy::{Rank, Taxon},
+    taxonomy::{Rank, Taxon, TaxonSyncTask},
 };
 use tracing::{debug, warn};
 const MIN_SAMPLES_HARVEST_WINDOW: usize = 20;
@@ -120,20 +120,48 @@ async fn update_regions(mut db: toasty::Db) -> Result<(), BackgroundError> {
 }
 
 #[tracing::instrument(skip_all)]
-async fn update_photos(mut db: toasty::Db) -> Result<(), BackgroundError> {
-    let taxa = Taxon::all()
-        .order_by(Taxon::fields().sequence().asc())
+async fn update_taxa(mut db: toasty::Db) -> Result<(), BackgroundError> {
+    // populate all task entries that are missing
+    let statement = r#"
+        INSERT INTO "taxon_sync_tasks" ("taxon_id", "last_attempt")
+        SELECT t."id", '1970-01-01T00:00:00.000000000Z'
+        FROM "taxa" AS t
+        WHERE NOT EXISTS (
+            SELECT 1
+            FROM "taxon_sync_tasks" AS s
+            WHERE s."taxon_id" = t."id"
+        );
+    "#;
+
+    let _ = toasty::sql::statement(statement)
         .exec(&mut db)
-        .await?;
-    for taxon in taxa {
-        debug!(?taxon.complete_name, "Updating photo for {}", taxon.complete_name);
-        // ignore errors and continue
-        if let Err(e) = taxon.update_photo(&mut db).await {
-            warn!("Failed to update taxon photo: {e}");
+        .await
+        .unwrap();
+    loop {
+        let tasks = TaxonSyncTask::all()
+            .include(TaxonSyncTask::fields().taxon())
+            .order_by(TaxonSyncTask::fields().last_attempt().asc())
+            .order_by(TaxonSyncTask::fields().taxon_id().asc())
+            .limit(10)
+            .exec(&mut db)
+            .await?;
+        for task in tasks {
+            let taxon = task.taxon.get();
+            debug!(?taxon.complete_name, "Updating photo for {}", taxon.complete_name);
+            // ignore errors and continue
+            if let Err(e) = taxon.update_photo(&mut db).await {
+                warn!(?taxon.id, ?taxon.complete_name, "Failed to update taxon photo: {e}");
+            }
+            if let Err(e) = TaxonSyncTask::update_by_taxon_id(task.taxon_id)
+                .last_attempt(jiff::Timestamp::now())
+                .exec(&mut db)
+                .await
+            {
+                warn!(?taxon.id, ?taxon.complete_name, "Failed to update task sync status: {e}");
+            }
+            tokio::time::sleep(Duration::from_secs(10)).await;
         }
-        tokio::time::sleep(Duration::from_secs(10)).await;
     }
-    Ok(())
 }
 
 #[tracing::instrument(skip_all)]
@@ -149,10 +177,8 @@ pub async fn background_tasks(db: toasty::Db) -> () {
 
     let db2 = db.clone();
     tokio::spawn(async move {
-        loop {
-            if let Err(e) = update_photos(db2.clone()).await {
-                warn!("{e}");
-            }
+        if let Err(e) = update_taxa(db2.clone()).await {
+            warn!("{e}");
         }
     });
 }

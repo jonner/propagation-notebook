@@ -294,6 +294,8 @@ pub struct Taxon {
 
     #[has_many]
     pub resources: Deferred<Vec<TaxonResource>>,
+    #[has_one]
+    pub sync_task: Deferred<Option<TaxonSyncTask>>,
 }
 
 #[derive(Debug, Clone, toasty::Model)]
@@ -310,6 +312,15 @@ pub struct TaxonHierarchy {
     pub ancestor: Deferred<Taxon>,
     #[belongs_to(key=descendant_id, references=id)]
     pub descendant: Deferred<Taxon>,
+}
+
+#[derive(Debug, Clone, toasty::Model)]
+pub struct TaxonSyncTask {
+    #[key]
+    pub taxon_id: u64,
+    #[belongs_to(key=taxon_id, references=id)]
+    pub taxon: Deferred<Taxon>,
+    pub last_attempt: jiff::Timestamp,
 }
 
 #[derive(Debug, Clone)]
@@ -423,7 +434,7 @@ impl Taxon {
         Ok(None)
     }
 
-    pub async fn update_photo(self, db: &mut toasty::Db) -> Result<(), UpdatePhotoError> {
+    pub async fn update_photo(&self, db: &mut toasty::Db) -> Result<(), UpdatePhotoError> {
         let inat = inaturalist::Client::new()?;
         let inat_id = match self.inaturalist_id {
             Some(id) => Ok(id),
@@ -452,6 +463,10 @@ impl Taxon {
                 .exec(db)
                 .await?;
         }
+        _ = TaxonSyncTask::upsert_by_taxon_id(self.id)
+            .last_attempt(jiff::Timestamp::now())
+            .exec(db)
+            .await;
         Ok(())
     }
 }
