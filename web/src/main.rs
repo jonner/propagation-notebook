@@ -20,6 +20,7 @@ use crate::{
     tasks::background_tasks,
 };
 
+mod auth;
 mod citation;
 mod components;
 mod error;

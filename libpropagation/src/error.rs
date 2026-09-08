@@ -23,6 +23,13 @@ pub enum Runtime {
     #[error("Invalid environment variable: {0}")]
     InvalidEnvVar(String),
 }
+#[derive(Debug, thiserror::Error)]
+pub enum AuthError {
+    #[error(transparent)]
+    PasswordHashing(#[from] argon2::password_hash::Error),
+    #[error("Password hash was invalid")]
+    InvalidPasswordHash,
+}
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
@@ -32,4 +39,6 @@ pub enum Error {
     Io(#[from] std::io::Error),
     #[error(transparent)]
     Runtime(Runtime),
+    #[error(transparent)]
+    Auth(#[from] AuthError),
 }

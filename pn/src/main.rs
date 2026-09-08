@@ -34,6 +34,7 @@ async fn main() -> anyhow::Result<()> {
         MainCommand::Propagation { command } => command.run(&mut db, options.format).await?,
         MainCommand::Citations { command } => command.run(&mut db, options.format).await?,
         MainCommand::Import { command } => command.run(&mut db, options.format).await?,
+        MainCommand::Auth { command } => command.run(&mut db, options.format).await?,
     };
     Ok(())
 }

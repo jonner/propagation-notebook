@@ -41,10 +41,16 @@ pub enum MainCommand {
         #[command(subcommand)]
         command: import::ImportCommands,
     },
+    #[command(about = "Manage user authentication and permissions")]
+    Auth {
+        #[command(subcommand)]
+        command: auth::AuthCommands,
+    },
     #[command(about = "Initialize the database")]
     Init,
 }
 
+pub mod auth;
 pub mod citation;
 pub mod import;
 pub mod propagation;

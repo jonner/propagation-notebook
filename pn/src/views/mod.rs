@@ -1,5 +1,6 @@
 use serde::Serialize;
 
+pub mod auth;
 pub mod citation;
 pub mod cleaning;
 pub mod propagation;

@@ -156,6 +156,10 @@ pub mod dialog {
         Input::new(title).theme(theme())
     }
 
+    pub fn password<'a>(title: &str) -> Input<'a> {
+        Input::new(title).password(true).theme(theme())
+    }
+
     pub fn select<'a, T>(title: &str) -> Select<'a, T> {
         Select::new(title).theme(theme())
     }

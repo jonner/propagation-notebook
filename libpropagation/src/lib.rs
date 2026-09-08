@@ -4,6 +4,7 @@ use tracing::{debug, trace};
 
 use crate::error::Error;
 
+pub mod auth;
 pub mod citation;
 pub mod cleaning;
 pub mod dto;
