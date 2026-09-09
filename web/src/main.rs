@@ -164,7 +164,7 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
                                         <span class="caption">"Regions"</span>
                                     </a>
                                 </li>
-                                <li class="grow">
+                                <li class="px-6 mx-auto grow lg:max-w-1/2">
                                     <form
                                         method="get"
                                         action=(href!(taxa::search))
@@ -172,15 +172,11 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
                                     >
                                         input(
                                             attrs: attributes! {
-                                                class="text-foreground hover:opacity-80 focus-within:opacity-80 opacity-50"
+                                                class="text-foreground hover:opacity-90 focus-within:opacity-90 opacity-60"
                                                 type="text"
                                                 name="q"
                                                 placeholder="Search for a taxon"
                                             }
-                                        )
-                                        button(
-                                            attrs: attributes! { class="max-md:hidden" type="submit" },
-                                            "Search"
                                         )
                                     </form>
                                 </li>
