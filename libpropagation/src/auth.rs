@@ -29,6 +29,10 @@ pub struct User {
     pub permissions: Deferred<Vec<Permission>>,
     #[has_many]
     pub sessions: toasty::Deferred<Vec<Session>>,
+    #[has_one]
+    pub profile: toasty::Deferred<Option<UserProfile>>,
+    #[has_many]
+    pub emails: toasty::Deferred<Vec<UserEmail>>,
 }
 
 impl User {
@@ -57,6 +61,40 @@ impl User {
             .await?;
         Ok(())
     }
+}
+
+#[derive(Debug, Clone, toasty::Model)]
+pub struct UserProfile {
+    #[key]
+    pub user_id: Uuid,
+    pub name: Option<String>,
+    pub description: Option<String>,
+    #[auto]
+    pub created_at: jiff::Timestamp,
+    #[auto]
+    pub updated_at: jiff::Timestamp,
+
+    #[belongs_to]
+    pub user: Deferred<User>,
+}
+
+#[derive(Debug, Clone, toasty::Model)]
+pub struct UserEmail {
+    #[key]
+    pub id: Uuid,
+    #[index]
+    pub user_id: Uuid,
+    #[index]
+    pub address: String,
+    #[default(false)]
+    pub confirmed: bool,
+    #[auto]
+    pub created_at: jiff::Timestamp,
+    #[auto]
+    pub updated_at: jiff::Timestamp,
+
+    #[belongs_to]
+    pub user: Deferred<User>,
 }
 
 #[derive(Debug, Clone, toasty::Model)]
