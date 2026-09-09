@@ -5,7 +5,7 @@ use topcoat::{
     icon::{icon, iconify},
     router::{
         Router, RouterBuilderDiscoverExt, Slot,
-        error::{ForbiddenError, NotFoundError},
+        error::{ForbiddenError, NotFoundError, UnauthorizedError},
         href, layout, not_found, page,
         request::uri,
     },
@@ -184,15 +184,13 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
                         error_boundary(
                             fallback: |error| {
                                 match error {
-                                    e if e.downcast_ref::<NotFoundError>().is_some() => {
+                                    e if e.downcast_ref::<UnauthorizedError>().is_some() => {
                                         Ok(
                                             view! {
-                                                <h1>"404 Not Found"</h1>
-                                                <p>
-                                                    (format!(
-                                                        "We're sorry, but the page '{uri}' cannot be found. The link might be outdated, or the URL could have been a typo.",
-                                                    ))
-                                                </p>
+                                                <h1>"401 — Unauthorized"</h1>
+                                                <div>
+                                                        "Sorry, you must be logged in to view this page."
+                                                </div>
                                             }.boxed(
 
                                             ),
@@ -207,6 +205,20 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
                                                         "Sorry, you do not have permission to access '{uri}' on this server.",
                                                     ))
                                                 </div>
+                                            }.boxed(
+
+                                            ),
+                                        )
+                                    }
+                                    e if e.downcast_ref::<NotFoundError>().is_some() => {
+                                        Ok(
+                                            view! {
+                                                <h1>"404 Not Found"</h1>
+                                                <p>
+                                                    (format!(
+                                                        "We're sorry, but the page '{uri}' cannot be found. The link might be outdated, or the URL could have been a typo.",
+                                                    ))
+                                                </p>
                                             }.boxed(
 
                                             ),

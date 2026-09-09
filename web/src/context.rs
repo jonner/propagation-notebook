@@ -1,8 +1,8 @@
 use libpropagation::auth::{PermissionCode, Session, User};
 use topcoat::{
     context::{Cx, app_context, memoize},
-    router::error::{RouterErrorExt, UnauthorizedError, unauthorized},
-    session::{self, TokenHash},
+    router::error::{RouterErrorExt, UnauthorizedError, forbidden},
+    session,
 };
 
 pub fn db(cx: &Cx) -> toasty::Db {
@@ -68,7 +68,7 @@ async fn require_user(cx: &Cx) -> topcoat::Result<&User, UnauthorizedError> {
 async fn require_user_with_permission(
     cx: &Cx,
     permission: PermissionCode,
-) -> topcoat::Result<&User, UnauthorizedError> {
+) -> topcoat::Result<&User> {
     let user = require_user(cx).await?;
     if user
         .user_roles
@@ -88,6 +88,6 @@ async fn require_user_with_permission(
     {
         Ok(user)
     } else {
-        Err(unauthorized())
+        Err(forbidden().into())
     }
 }
