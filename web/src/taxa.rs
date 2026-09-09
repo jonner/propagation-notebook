@@ -428,11 +428,9 @@ pub async fn default_photo(cx: &Cx) -> topcoat::Result<impl View> {
             .collect::<Vec<_>>();
         ancestor_breadcrumbs(
             items: &ancestors,
-            link_fn: |taxon| {
-                href!(crate::taxa::details, TaxonId(taxon.id))
-            },
+            link_fn: |taxon| { href!(crate::taxa::details, TaxonId(taxon.id)) },
             ellipsize: Some(1),
-            link_final: true
+            link_final: true,
             breadcrumb_separator()
             breadcrumb_page("Default photo")
         )

@@ -76,9 +76,13 @@ pub(crate) async fn login(cx: &Cx) -> topcoat::Result<impl View> {
                             }
                         )
                     </div>
-                        input(
-                            attrs: attributes! { type="hidden" name="redirect" value=(params.redirect.as_ref()) }
-                        )
+                    input(
+                        attrs: attributes! {
+                            type="hidden"
+                            name="redirect"
+                            value=(params.redirect.as_ref())
+                        }
+                    )
                     button("Log In")
                 </form>
             </div>
