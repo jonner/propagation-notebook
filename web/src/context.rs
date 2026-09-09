@@ -17,10 +17,6 @@ pub async fn current_user(cx: &Cx) -> Option<&User> {
     }
 }
 
-pub async fn session_hash(cx: &Cx) -> Option<TokenHash> {
-    session::token_hash(cx).await.ok().flatten()
-}
-
 pub async fn persist_session(cx: &Cx, user: &mut User) -> topcoat::Result<()> {
     let session = session::start(cx).await?;
     let timestamp: jiff::Timestamp = session.expires_at.try_into()?;
