@@ -5,7 +5,7 @@ use topcoat::{
     view::{View, view},
 };
 
-use crate::util::db;
+use crate::context::db;
 path_param!(pub citation_id: u64, error = bad_request);
 
 #[page("/citation/{citation_id}")]

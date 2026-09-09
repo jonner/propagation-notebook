@@ -29,8 +29,9 @@ use crate::{
         pn::{ancestor_breadcrumbs, origin_badge, pagination_control},
         taxa_grid, taxa_grid_item, taxon_icon,
     },
+    context::db,
     mdi,
-    util::{ModifyOffset, PER_PAGE, PageState, db},
+    util::{ModifyOffset, PER_PAGE, PageState},
 };
 
 path_param!(pub cleaning_id: u64, error = bad_request);

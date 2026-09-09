@@ -1,5 +1,4 @@
 use serde::Serialize;
-use topcoat::context::{Cx, app_context};
 
 pub const PER_PAGE: usize = 50;
 
@@ -45,10 +44,6 @@ impl PageState {
             .map(|qs| format!("?{qs}"))
             .unwrap_or_default()
     }
-}
-
-pub fn db(cx: &Cx) -> toasty::Db {
-    app_context::<toasty::Db>(cx).clone()
 }
 
 pub fn enum_to_string<T: Serialize>(variant: &T) -> String {

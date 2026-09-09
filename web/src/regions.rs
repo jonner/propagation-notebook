@@ -20,8 +20,9 @@ use crate::{
         leaflet_map,
         pn::{conservation_status_badge, origin_badge, pagination_control, week_navigator},
     },
+    context::db,
     taxa::{self, TaxaListParams, taxonomy},
-    util::{ModifyOffset, PER_PAGE, PageState, db},
+    util::{ModifyOffset, PER_PAGE, PageState},
 };
 
 path_param!(pub region_id: u64, error = bad_request);

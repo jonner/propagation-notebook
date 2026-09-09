@@ -1,11 +1,13 @@
 use libpropagation::auth::{PermissionCode, Session, User};
 use topcoat::{
-    context::{Cx, memoize},
+    context::{Cx, app_context, memoize},
     router::error::{RouterErrorExt, UnauthorizedError, unauthorized},
     session::{self, TokenHash},
 };
 
-use crate::util::db;
+pub fn db(cx: &Cx) -> toasty::Db {
+    app_context::<toasty::Db>(cx).clone()
+}
 
 pub async fn current_user(cx: &Cx) -> Option<&User> {
     if let Ok(Some(user)) = load_user(cx).await {
