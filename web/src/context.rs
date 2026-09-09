@@ -21,13 +21,11 @@ pub async fn session_hash(cx: &Cx) -> Option<TokenHash> {
     session::token_hash(cx).await.ok().flatten()
 }
 
-pub async fn persist_session(cx: &Cx, user: &User) -> topcoat::Result<()> {
+pub async fn persist_session(cx: &Cx, user: &mut User) -> topcoat::Result<()> {
     let session = session::start(cx).await?;
     let timestamp: jiff::Timestamp = session.expires_at.try_into()?;
-    let _ = Session::create()
-        .token_hash(Vec::from(*session.token_hash))
-        .user(user)
-        .expires_at(timestamp);
+    user.login(&mut db(cx), &*session.token_hash, timestamp)
+        .await?;
     Ok(())
 }
 
