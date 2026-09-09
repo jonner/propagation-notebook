@@ -15,6 +15,10 @@ pub struct User {
     pub username: String,
     #[index]
     pub pwhash: String,
+    #[auto]
+    pub created_at: jiff::Timestamp,
+    #[auto]
+    pub updated_at: jiff::Timestamp,
 
     #[has_many]
     pub user_roles: Deferred<Vec<UserRole>>,
@@ -43,6 +47,10 @@ pub struct Session {
     #[index]
     pub user_id: Uuid,
     pub expires_at: jiff::Timestamp,
+    #[auto]
+    pub created_at: jiff::Timestamp,
+    #[auto]
+    pub updated_at: jiff::Timestamp,
 
     #[belongs_to]
     pub user: toasty::Deferred<User>,
@@ -57,6 +65,8 @@ pub struct UserRole {
     #[key]
     #[index]
     pub role_id: Uuid,
+    #[auto]
+    pub created_at: jiff::Timestamp,
 
     #[belongs_to(key=user_id, references=id)]
     pub user: Deferred<User>,
@@ -71,6 +81,10 @@ pub struct Role {
     pub id: Uuid,
     #[index]
     pub name: String,
+    #[auto]
+    pub created_at: jiff::Timestamp,
+    #[auto]
+    pub updated_at: jiff::Timestamp,
 
     #[has_many]
     pub role_permissions: Deferred<Vec<RolePermission>>,
@@ -91,6 +105,8 @@ pub struct RolePermission {
     #[key]
     #[index]
     pub permission_id: Uuid,
+    #[auto]
+    pub created_at: jiff::Timestamp,
 
     #[belongs_to(key=permission_id, references=id)]
     pub permission: Deferred<Permission>,
@@ -107,6 +123,10 @@ pub struct Permission {
     #[unique]
     pub code: PermissionCode,
     pub description: String,
+    #[auto]
+    pub created_at: jiff::Timestamp,
+    #[auto]
+    pub updated_at: jiff::Timestamp,
 
     #[has_many]
     pub role_permissions: Deferred<Vec<RolePermission>>,
