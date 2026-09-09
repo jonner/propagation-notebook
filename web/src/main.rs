@@ -1,6 +1,7 @@
 use topcoat::{
     asset::{Asset, AssetBundle, RouterBuilderAssetExt, asset, asset_config},
     context::Cx,
+    cookie::RouterBuilderCookieExt,
     font::{Font, fontsource::fontsource_font},
     icon::{icon, iconify},
     router::{
@@ -9,17 +10,21 @@ use topcoat::{
         href, layout, not_found, page,
         request::uri,
     },
+    session::{RouterBuilderSessionExt, SessionConfig},
     tailwind,
     view::{View, ViewExt, attributes, class, error_boundary, view},
 };
 use tracing::debug;
 
 use crate::{
+    auth::{LoginFormParams, login},
     components::{button::button, input::input},
+    context::current_user,
     error::Error,
     tasks::background_tasks,
 };
 
+mod auth;
 mod citation;
 mod components;
 mod context;
@@ -44,6 +49,8 @@ async fn main() -> Result<(), Error> {
             .discover()
             .assets(AssetBundle::load()?)
             .app_context(db)
+            .cookies()
+            .sessions(SessionConfig::default())
             .build(),
     )
     .await?;
@@ -177,6 +184,19 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
                                         )
                                     </form>
                                 </li>
+                                <li>
+                                    <div>
+                                        icon(
+                                            data: mdi::ACCOUNT,
+                                            attrs: attributes! { class="icon" }
+                                        )
+                                        if let Some(user) = current_user(cx).await {
+                                            <span class="caption">(&user.username)</span>
+                                        } else {
+                                            <a href=(href!(login).query(LoginFormParams { redirect: Some(uri.to_string()) }))>"Log in"</a>
+                                        }
+                                    </div>
+                                </li>
                             </ul>
                         </nav>
                     </header>
@@ -189,7 +209,9 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
                                             view! {
                                                 <h1>"401 — Unauthorized"</h1>
                                                 <div>
-                                                        "Sorry, you must be logged in to view this page."
+                                                    "Sorry, you must be logged in to view this page. Please "
+                                                    <a href=(href!(login))>"log in"</a>
+                                                    " to continue."
                                                 </div>
                                             }.boxed(
 

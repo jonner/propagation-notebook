@@ -54,6 +54,7 @@ pub async fn load_session(cx: &Cx) -> topcoat::Result<Option<Session>> {
 }
 
 pub async fn delete_session(cx: &Cx) -> topcoat::Result<()> {
+    // FIXME: this doesn't seem to be returning the hash of the current session so it isn't actually logging out
     if let Some(hash) = session::stop(cx).await? {
         Session::delete_by_token_hash(&mut db(cx), Vec::from(*hash)).await?;
     }
