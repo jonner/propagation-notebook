@@ -184,19 +184,28 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
                                         )
                                     </form>
                                 </li>
-                                <li>
-                                    <div>
-                                        icon(
-                                            data: mdi::ACCOUNT,
-                                            attrs: attributes! { class="icon" }
-                                        )
-                                        if let Some(user) = current_user(cx).await {
-                                            <span class="caption">(&user.username)</span>
-                                        } else {
-                                            <a href=(href!(login).query(LoginFormParams { redirect: Some(uri.to_string()) }))>"Log in"</a>
-                                        }
-                                    </div>
-                                </li>
+                                let login_href = href!(login);
+                                if !login_href.is_current(cx) {
+                                    <li class="ml-auto">
+                                        <div>
+                                            icon(
+                                                data: mdi::ACCOUNT,
+                                                attrs: attributes! { class="icon" }
+                                            )
+                                            if let Some(user) = current_user(cx).await {
+                                                <span class="caption">(&user.username)</span>
+                                            } else {
+                                                <a
+                                                    href=(login_href.query(
+                                                        LoginFormParams { redirect: Some(uri.to_string()) },
+                                                    ))
+                                                >
+                                                    "Log in"
+                                                </a>
+                                            }
+                                        </div>
+                                    </li>
+                                }
                             </ul>
                         </nav>
                     </header>
