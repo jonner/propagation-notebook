@@ -31,8 +31,7 @@ const SEED_DISCLAIMER: &str = "Seed dates are based on data retrieved from iNatu
 
 #[page("/regions")]
 pub async fn list(cx: &Cx) -> topcoat::Result<impl View> {
-    let db = db(cx);
-    let mut db = db;
+    let mut db = db(cx);
     let mut region_types = Vec::default();
     Region::filter(Region::fields().category().eq(RegionCategory::Nation))
         .order_by(Region::fields().name().asc())
