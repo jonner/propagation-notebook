@@ -1,9 +1,9 @@
 use argon2::{Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
 use serde::Serialize;
-use toasty::Deferred;
+use toasty::{Db, Deferred};
 use uuid::Uuid;
 
-use crate::error::AuthError::{self, InvalidPasswordHash};
+use crate::error::{AuthError, Error};
 
 #[derive(Debug, Clone, toasty::Model)]
 pub struct User {
@@ -19,6 +19,7 @@ pub struct User {
     pub created_at: jiff::Timestamp,
     #[auto]
     pub updated_at: jiff::Timestamp,
+    pub last_login_at: Option<jiff::Timestamp>,
 
     #[has_many]
     pub user_roles: Deferred<Vec<UserRole>>,
@@ -33,6 +34,28 @@ pub struct User {
 impl User {
     pub fn verify_password(&self, password: &str) -> Result<(), AuthError> {
         verify_password(password, &self.pwhash)
+    }
+
+    /// This doesn't validate the password or provide any security. It just
+    /// marks the user as logged in. It is expected that the caller verifies the
+    /// password before calling this function
+    pub async fn login(
+        &mut self,
+        db: &mut Db,
+        session_hash: &[u8],
+        expiration: jiff::Timestamp,
+    ) -> Result<(), Error> {
+        Session::create()
+            .token_hash(Vec::from(session_hash))
+            .expires_at(expiration)
+            .user_id(self.id)
+            .exec(db)
+            .await?;
+        self.update()
+            .last_login_at(jiff::Timestamp::now())
+            .exec(db)
+            .await?;
+        Ok(())
     }
 }
 
@@ -150,7 +173,8 @@ pub fn hash_password(pw: &str) -> Result<String, AuthError> {
 
 pub fn verify_password(pw: &str, expected_pwhash: &str) -> Result<(), AuthError> {
     let hasher = Argon2::default();
-    let expected_hash = PasswordHash::new(expected_pwhash).map_err(|_| InvalidPasswordHash)?;
+    let expected_hash =
+        PasswordHash::new(expected_pwhash).map_err(|_| AuthError::InvalidPasswordHash)?;
     hasher
         .verify_password(pw.as_bytes(), &expected_hash)
         .map_err(|e| e.into())
