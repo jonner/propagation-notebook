@@ -78,6 +78,7 @@ const HEADERS: &[Asset] = &[
 async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
     let header_bg = HEADERS[rand::random_range(0..HEADERS.len())];
     let uri = uri(cx);
+
     Ok(view! {
         <!DOCTYPE html>
         <html>
@@ -123,7 +124,7 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
                         ))
                     >
                         <nav
-                            class="w-full block shrink flex items-center gap-6 px-6 py-3 text-white bg-neutral-800/50"
+                            class="w-full block shrink flex items-center gap-6 md:gap-4 px-3 md:px-6 py-2 text-white bg-neutral-800/50"
                         >
                             <ul class="contents">
                                 <li>
@@ -160,7 +161,7 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
                                     <form
                                         method="get"
                                         action=(href!(taxa::search))
-                                        class="flex gap-3"
+                                        class="flex gap-2"
                                     >
                                         input(
                                             attrs: attributes! {

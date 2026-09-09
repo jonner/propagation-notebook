@@ -167,11 +167,11 @@
 
 @layer base {
   body {
-    @apply bg-backdrop font-sans text-foreground text-lg;
+    @apply bg-backdrop font-sans text-foreground;
   }
 
   header, footer {
-    @apply text-foreground-contrast text-lg bg-background-contrast;
+    @apply text-foreground-contrast bg-background-contrast;
   }
 
   header {
