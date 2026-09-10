@@ -79,7 +79,12 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
     let uri = uri(cx);
     Ok(view! {
         <!DOCTYPE html>
-        <html>
+        <html
+            style=(format!(
+                "--background-image:url('{}')",
+                asset_config(cx).resolve(header_bg),
+            ))
+        >
             <head>
                 topcoat::dev::script()
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -115,10 +120,6 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
                             "bg-cover",
                             "h-[8rem]",
                             "md:h-[12rem]",
-                        ))
-                        style=(format!(
-                            "--background-image:url('{}')",
-                            asset_config(cx).resolve(header_bg),
                         ))
                     >
                         <nav
@@ -216,22 +217,26 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
                             (slot)
                         )
                     </main>
-                    <footer>
-                        "Developed with "
-                        icon(
-                            data: mdi::HEART,
-                            label: "Love",
-                            attrs: attributes! { class="text-red-300 inline-block" }
-                        )
-                        " by volunteers"
-                        <div class="text-sm text-white/50">
-                            <div>
-                                "Taxonomy based on "
-                                <a href="https://www.itis.gov">"ITIS"</a>
-                            </div>
-                            <div>
-                                "Phenology data provided by "
-                                <a href="https://inaturalist.org">"iNaturalist.org"</a>
+                    <footer
+                        class=(class!("bg-(image:--background-image)", "bg-center", "bg-cover"))
+                    >
+                        <div class="inline-block px-3 md:px-6 py-4 text-white bg-neutral-800/50">
+                            "Developed with "
+                            icon(
+                                data: mdi::HEART,
+                                label: "Love",
+                                attrs: attributes! { class="text-red-300 inline-block" }
+                            )
+                            " by volunteers"
+                            <div class="text-sm text-white/50">
+                                <div>
+                                    "Taxonomy based on "
+                                    <a href="https://www.itis.gov">"ITIS"</a>
+                                </div>
+                                <div>
+                                    "Phenology data provided by "
+                                    <a href="https://inaturalist.org">"iNaturalist.org"</a>
+                                </div>
                             </div>
                         </div>
                     </footer>
