@@ -17,8 +17,8 @@ use topcoat::{
 use tracing::debug;
 
 use crate::{
-    auth::{LoginFormParams, login},
-    components::{button::button, input::input},
+    auth::{LoginFormParams, login, logout},
+    components::{avatar::*, button::*, dropdown_menu::*, input::input},
     context::current_user,
     error::Error,
     tasks::background_tasks,
@@ -183,23 +183,41 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
                                 let login_href = href!(login);
                                 if !login_href.is_current(cx) {
                                     <li class="ml-auto">
-                                        <div>
-                                            icon(
-                                                data: mdi::ACCOUNT,
-                                                attrs: attributes! { class="icon" }
+                                        if let Some(user) = current_user(cx).await {
+                                            <form
+                                                method="POST"
+                                                action=(href!(logout))
+                                                id="logoutForm"
+                                                class="hidden"
+                                            ></form>
+                                            dropdown_menu(
+                                                dropdown_menu_trigger(
+                                                    attrs: attributes! { class="flex" },
+                                                    avatar(
+                                                        attrs: attributes! { class="me-2 bg-background/60" },
+                                                        size: AvatarSize::Sm,
+                                                        avatar_fallback(icon(data: mdi::ACCOUNT))
+                                                    )
+                                                    (&user.username)
+                                                )
+                                                dropdown_menu_content(
+                                                    alignment: DropdownMenuAlignment::Right,
+                                                    dropdown_menu_item(
+                                                        attrs: attributes! { type="submit" class="text-destructive" form="logoutForm" },
+                                                        "Log Out"
+                                                    )
+                                                )
                                             )
-                                            if let Some(user) = current_user(cx).await {
-                                                <span class="caption">(&user.username)</span>
-                                            } else {
-                                                <a
-                                                    href=(login_href.query(
-                                                        LoginFormParams { redirect: Some(uri.to_string()) },
-                                                    ))
-                                                >
-                                                    "Log in"
-                                                </a>
-                                            }
-                                        </div>
+                                        } else {
+                                            <a
+                                                class="flex"
+                                                href=(login_href.query(
+                                                    LoginFormParams { redirect: Some(uri.to_string()) },
+                                                ))
+                                            >
+                                                "Log in"
+                                            </a>
+                                        }
                                     </li>
                                 }
                             </ul>
