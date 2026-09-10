@@ -4,7 +4,7 @@ use topcoat::{
     context::Cx,
     router::{
         content::Form,
-        error::{SeeOther, see_other},
+        error::{SeeOther, redirect, see_other},
         href, page, query_params, route,
     },
     view::{View, attributes, view},
@@ -27,6 +27,22 @@ struct LoginParams {
     username: String,
     password: String,
     redirect: Option<String>,
+}
+
+#[page("/auth/logout")]
+pub(crate) async fn logout(cx: &Cx) -> topcoat::Result<impl View> {
+    if current_user(cx).await.is_none() {
+        return Err(redirect(href!(login).resolve(cx)).into());
+    };
+
+    Ok(view! {
+        <div class="w-full m-auto lg:max-w-1/2 flex flex-col items-center">
+            <h1>"Log out"</h1>
+            <form method="POST" class="w-full flex flex-col gap-6">
+                button("Log Out")
+            </form>
+        </div>
+    })
 }
 
 #[route(POST "/auth/login")]
