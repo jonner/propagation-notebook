@@ -487,16 +487,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
             .collect::<Vec<_>>();
         ancestor_breadcrumbs(
             items: &ancestors,
-            link_fn: |taxon| {
-                href!(crate::taxa::taxonomy).query(
-                    TaxaListParams {
-                        offset: None,
-                        parent: Some(taxon.id),
-                        fmt: None,
-                        region: None,
-                    },
-                )
-            },
+            link_fn: |taxon| { href!(crate::taxa::details, TaxonId(taxon.id)) },
             link_final: true
         )
         <h1 class="flex items-center">
