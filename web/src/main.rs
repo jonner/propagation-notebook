@@ -23,7 +23,6 @@ use crate::{
 mod citation;
 mod components;
 mod error;
-mod leaflet;
 mod propagation;
 mod regions;
 mod tasks;

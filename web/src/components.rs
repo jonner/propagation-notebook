@@ -1,9 +1,11 @@
 use topcoat::{
+    asset::{Asset, asset},
     icon::icon,
     view::{Attributes, Child, View, class, component, view},
 };
+use uuid::Uuid;
 
-use crate::{leaflet::Map, mdi};
+use crate::mdi;
 
 pub mod badge;
 pub mod breadcrumb;
@@ -16,15 +18,22 @@ pub mod pagination;
 pub mod pn;
 pub mod tooltip;
 
+const LEAFLET_INIT_SCRIPT: Asset = asset!("assets/leaflet-initialize.js");
+
 #[component]
 pub async fn leaflet_map(
     geometry: &geojson::Geometry,
     #[default] attrs: Attributes,
 ) -> topcoat::Result<impl View> {
-    let leaflet_script = Map::new(geometry);
+    let id = Uuid::new_v4().to_string();
     Ok(view! {
-        <div id=(&leaflet_script.id) (attrs)></div>
-        (leaflet_script)
+        <div id=(&id) (attrs)></div>
+        <script src=(LEAFLET_INIT_SCRIPT)></script>
+        <script>
+        (format!("var geojson = {};", geometry))
+        (format!("var id = '{}';", id))
+        "initializeLeaflet(id, geojson);"
+        </script>
     })
 }
 
