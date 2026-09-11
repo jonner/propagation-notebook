@@ -30,9 +30,9 @@ pub async fn leaflet_map(
         <div id=(&id) (attrs)></div>
         <script src=(LEAFLET_INIT_SCRIPT)></script>
         <script>
-        (format!("var geojson = {};", geometry))
-        (format!("var id = '{}';", id))
-        "initializeLeaflet(id, geojson);"
+            (format!("var geojson = {};", geometry))
+            (format!("var id = '{}';", id))
+            "initializeLeaflet(id, geojson);"
         </script>
     })
 }
