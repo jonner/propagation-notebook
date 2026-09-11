@@ -136,7 +136,7 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="block" href=(href!(taxa::taxonomy))>
+                                    <a class="block" href=(href!(taxa::explore))>
                                         icon(
                                             data: mdi::FORMAT_LIST_BULLETED,
                                             label: "Taxonomy",

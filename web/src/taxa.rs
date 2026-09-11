@@ -61,8 +61,8 @@ impl ModifyOffset for TaxaListParams {
     }
 }
 
-#[page("/taxa")]
-pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result<impl View> {
+#[page("/taxa/explore")]
+pub(crate) async fn explore(cx: &Cx) -> topcoat::Result<impl View> {
     let mut db = db(cx);
     let params = query_params::<TaxaListParams>(cx)?;
     let parent_id = match params.parent {
@@ -171,7 +171,7 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result<impl View> {
                             variant: BadgeVariant::Secondary,
                             (format!("Region: '{}'", region.name))
                             <a
-                                href=(href!(taxonomy).query(
+                                href=(href!(explore).query(
                                     TaxaListParams {
                                         region: None,
                                         offset: None,
@@ -190,7 +190,7 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result<impl View> {
                     ancestor_breadcrumbs(
                         items: &ancestor_taxa,
                         link_fn: |taxon| {
-                            href!(crate::taxa::taxonomy).query(
+                            href!(explore).query(
                                 TaxaListParams {
                                     offset: None,
                                     parent: Some(taxon.id),
@@ -213,7 +213,7 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result<impl View> {
                             <li>
                                 <span class="latin">
                                     <a
-                                        href=(href!(taxonomy).query(
+                                        href=(href!(explore).query(
                                             TaxaListParams {
                                                 parent: Some(taxon.id),
                                                 fmt: params.fmt,
@@ -240,7 +240,7 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result<impl View> {
                         for taxon in taxa.iter() {
                             taxa_grid_item(
                                 <a
-                                    href=(href!(taxonomy).query(
+                                    href=(href!(explore).query(
                                         TaxaListParams {
                                             parent: Some(taxon.id),
                                             fmt: params.fmt,
@@ -253,7 +253,7 @@ pub(crate) async fn taxonomy(cx: &Cx) -> topcoat::Result<impl View> {
                                 </a>
                                 <span>
                                     <a
-                                        href=(href!(taxonomy).query(
+                                        href=(href!(explore).query(
                                             TaxaListParams {
                                                 parent: Some(taxon.id),
                                                 fmt: params.fmt,

@@ -20,7 +20,7 @@ use crate::{
         leaflet_map,
         pn::{conservation_status_badge, origin_badge, pagination_control, week_navigator},
     },
-    taxa::{self, TaxaListParams, taxonomy},
+    taxa::{self, TaxaListParams},
     util::{ModifyOffset, PER_PAGE, PageState, db},
 };
 
@@ -230,7 +230,7 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result<impl View> {
                         )
                         card_footer(
                             <a
-                                href=(href!(taxonomy).query(
+                                href=(href!(taxa::explore).query(
                                     TaxaListParams {
                                         parent: None,
                                         fmt: None,
