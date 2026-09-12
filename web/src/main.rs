@@ -9,13 +9,14 @@ use topcoat::{
         href, layout, not_found, page,
         request::uri,
     },
+    runtime::RouterBuilderRuntimeExt,
     tailwind,
     view::{View, ViewExt, attributes, class, error_boundary, view},
 };
 use tracing::debug;
 
 use crate::{
-    components::{button::button, input::input},
+    components::{button::button, input::input, taxon_search_bar},
     error::Error,
     tasks::background_tasks,
 };
@@ -39,6 +40,7 @@ async fn main() -> Result<(), Error> {
     }
     topcoat::start(
         Router::builder()
+            .runtime()
             .discover()
             .assets(AssetBundle::load()?)
             .app_context(db)
@@ -85,6 +87,7 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
             ))
         >
             <head>
+                topcoat::runtime::script()
                 topcoat::dev::script()
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <meta charset="UTF-8">
@@ -165,24 +168,7 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
                                     </a>
                                 </li>
                                 <li class="grow">
-                                    <form
-                                        method="get"
-                                        action=(href!(taxa::search))
-                                        class="flex gap-3"
-                                    >
-                                        input(
-                                            attrs: attributes! {
-                                                class="text-foreground hover:opacity-80 focus-within:opacity-80 opacity-50"
-                                                type="text"
-                                                name="q"
-                                                placeholder="Search for a taxon"
-                                            }
-                                        )
-                                        button(
-                                            attrs: attributes! { class="max-md:hidden" type="submit" },
-                                            "Search"
-                                        )
-                                    </form>
+                                    taxon_search_bar()
                                 </li>
                             </ul>
                         </nav>
@@ -228,7 +214,9 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
                     <footer
                         class=(class!("bg-(image:--background-image)", "bg-center", "bg-cover"))
                     >
-                        <div class="inline-block px-3 md:px-6 py-4 text-white bg-neutral-800/50">
+                        <div
+                            class="inline-block px-3 md:px-6 py-4 text-white bg-neutral-800/50"
+                        >
                             "Developed with "
                             icon(
                                 data: mdi::HEART,
