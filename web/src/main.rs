@@ -126,7 +126,10 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
                         >
                             <ul class="contents">
                                 <li>
-                                    <a class="block" href=(href!(home))>
+                                    <a
+                                        class="block text-foreground-contrast no-underline"
+                                        href=(href!(home))
+                                    >
                                         icon(
                                             data: mdi::FLOWER_POPPY,
                                             label: "Home",
@@ -136,7 +139,10 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="block" href=(href!(taxa::explore))>
+                                    <a
+                                        class="block text-foreground-contrast no-underline"
+                                        href=(href!(taxa::explore))
+                                    >
                                         icon(
                                             data: mdi::FORMAT_LIST_BULLETED,
                                             label: "Taxonomy",
@@ -146,7 +152,10 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="block" href=(href!(regions::list))>
+                                    <a
+                                        class="block text-foreground-contrast no-underline"
+                                        href=(href!(regions::list))
+                                    >
                                         icon(
                                             data: mdi::GLOBE,
                                             label: "Regions",

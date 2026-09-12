@@ -218,10 +218,6 @@
     @apply text-link underline font-bold;
   }
 
-  header a[href], footer a[href] {
-    @apply text-foreground-contrast no-underline;
-  }
-
   .latin {
     @apply italic
   }
