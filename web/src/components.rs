@@ -1,9 +1,19 @@
+use libpropagation::taxonomy::Taxon;
 use topcoat::{
+    asset::{Asset, asset},
+    context::Cx,
     icon::icon,
-    view::{Attributes, Child, View, class, component, view},
+    router::href,
+    runtime::{Event, shard, signal},
+    view::{Attributes, Child, View, ViewExt, attributes, class, component, view},
 };
+use uuid::Uuid;
 
-use crate::{leaflet::Map, mdi};
+use crate::{
+    context::db,
+    mdi,
+    taxa::{self, TaxonId},
+};
 
 pub mod avatar;
 pub mod badge;
@@ -18,15 +28,22 @@ pub mod pagination;
 pub mod pn;
 pub mod tooltip;
 
+const LEAFLET_INIT_SCRIPT: Asset = asset!("assets/leaflet-initialize.js");
+
 #[component]
 pub async fn leaflet_map(
     geometry: &geojson::Geometry,
     #[default] attrs: Attributes,
 ) -> topcoat::Result<impl View> {
-    let leaflet_script = Map::new(geometry);
+    let id = Uuid::new_v4().to_string();
     Ok(view! {
-        <div id=(&leaflet_script.id) (attrs)></div>
-        (leaflet_script)
+        <div id=(&id) (attrs)></div>
+        <script src=(LEAFLET_INIT_SCRIPT)></script>
+        <script>
+            (format!("var geojson = {};", geometry))
+            (format!("var id = '{}';", id))
+            "initializeLeaflet(id, geojson);"
+        </script>
     })
 }
 
@@ -72,5 +89,85 @@ pub async fn taxon_icon(
         } else {
             icon(data: mdi::LEAF_CIRCLE, size: 75, label: "Missing Image")
         }
+    })
+}
+
+#[shard]
+pub async fn taxon_search_results(
+    cx: &Cx,
+    query_string: String,
+    visible: bool,
+) -> topcoat::Result<impl View> {
+    let nothing = view! {}.boxed();
+    if !visible || query_string.len() < 2 {
+        return Ok(nothing);
+    }
+    let mut db = db(cx);
+    const LIMIT: u64 = 40;
+    let query = Taxon::filter(Taxon::search_filter(&query_string))
+        .include(Taxon::fields().photo())
+        .order_by((
+            Taxon::fields().sequence().asc(),
+            Taxon::fields().complete_name().asc(),
+        ));
+    let total = query.clone().count().exec(&mut db).await?;
+    let taxa = query.limit(LIMIT as usize).exec(&mut db).await?;
+    if taxa.is_empty() {
+        return Ok(nothing);
+    }
+    Ok(view! {
+        <div
+            class="flex flex-col absolute left-0 right-0 max-h-100 overflow-y-auto gap-2 rounded-xl border border-border p-3 text-sm text-foreground shadow-sm bg-background/80 z-50"
+        >
+            <ul class="contents">
+                for taxon in taxa.iter() {
+                    <li class="py-1">
+                        <span class="latin">
+                            <a href=(href!(taxa::details, TaxonId(taxon.id)))>
+                                (&taxon.complete_name)
+                            </a>
+                        </span>
+                    </li>
+                }
+                if total > LIMIT {
+                    <li>(format!("...and {} more", total - LIMIT))</li>
+                }
+            </ul>
+        </div>
+    }
+    .boxed())
+}
+
+#[component]
+pub async fn taxon_search_bar(
+    cx: &Cx,
+    #[default] mut attrs: Attributes,
+) -> topcoat::Result<impl View> {
+    let query_string = signal(cx, String::new);
+    let search_focus = signal(cx, || false);
+    Ok(view! {
+        <div
+            @focusin=$(|_e: Event| search_focus.set(true))
+            @focusout=$(|_e: Event| search_focus.set(false))
+            class=(class!("relative", attrs.remove("class")))
+            (attrs)
+        >
+            <form method="get" action=(href!(taxa::search)) class="contents">
+                input::input(
+                    attrs: attributes! {
+                        type="text"
+                        name="q"
+                        placeholder="Search for a taxon"
+                        autocomplete="off"
+                        @input=$(|e: Event| query_string.set(e.target.value))
+                        class="text-foreground hover:opacity-80 focus-within:opacity-80 opacity-50"
+                    }
+                )
+                taxon_search_results(
+                    query_string: $(query_string.get()),
+                    visible: $(search_focus.get())
+                )
+            </form>
+        </div>
     })
 }

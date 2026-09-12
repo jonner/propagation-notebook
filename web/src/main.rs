@@ -10,6 +10,7 @@ use topcoat::{
         href, layout, not_found, page,
         request::uri,
     },
+    runtime::RouterBuilderRuntimeExt,
     session::{RouterBuilderSessionExt, SessionConfig},
     tailwind,
     view::{View, ViewExt, attributes, class, error_boundary, view},
@@ -18,7 +19,7 @@ use tracing::debug;
 
 use crate::{
     auth::{LoginFormParams, login, logout},
-    components::{avatar::*, button::*, dropdown_menu::*, input::input},
+    components::{avatar::*, button::*, dropdown_menu::*, input::input, taxon_search_bar},
     context::current_user,
     error::Error,
     tasks::background_tasks,
@@ -29,7 +30,6 @@ mod citation;
 mod components;
 mod context;
 mod error;
-mod leaflet;
 mod propagation;
 mod regions;
 mod tasks;
@@ -46,6 +46,7 @@ async fn main() -> Result<(), Error> {
     }
     topcoat::start(
         Router::builder()
+            .runtime()
             .discover()
             .assets(AssetBundle::load()?)
             .app_context(db)
@@ -88,8 +89,14 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
 
     Ok(view! {
         <!DOCTYPE html>
-        <html>
+        <html
+            style=(format!(
+                "--background-image:url('{}')",
+                asset_config(cx).resolve(header_bg),
+            ))
+        >
             <head>
+                topcoat::runtime::script()
                 topcoat::dev::script()
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <meta charset="UTF-8">
@@ -125,17 +132,16 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
                             "h-[8rem]",
                             "md:h-[12rem]",
                         ))
-                        style=(format!(
-                            "--background-image:url('{}')",
-                            asset_config(cx).resolve(header_bg),
-                        ))
                     >
                         <nav
                             class="w-full block shrink flex items-center gap-6 md:gap-4 px-3 md:px-6 py-2 text-white bg-neutral-800/50"
                         >
                             <ul class="contents">
                                 <li>
-                                    <a class="block" href=(href!(home))>
+                                    <a
+                                        class="block text-foreground-contrast no-underline"
+                                        href=(href!(home))
+                                    >
                                         icon(
                                             data: mdi::FLOWER_POPPY,
                                             label: "Home",
@@ -145,7 +151,10 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="block" href=(href!(taxa::taxonomy))>
+                                    <a
+                                        class="block text-foreground-contrast no-underline"
+                                        href=(href!(taxa::explore))
+                                    >
                                         icon(
                                             data: mdi::FORMAT_LIST_BULLETED,
                                             label: "Taxonomy",
@@ -155,7 +164,10 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="block" href=(href!(regions::list))>
+                                    <a
+                                        class="block text-foreground-contrast no-underline"
+                                        href=(href!(regions::list))
+                                    >
                                         icon(
                                             data: mdi::GLOBE,
                                             label: "Regions",
@@ -165,20 +177,7 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
                                     </a>
                                 </li>
                                 <li class="px-6 mx-auto grow lg:max-w-1/2">
-                                    <form
-                                        method="get"
-                                        action=(href!(taxa::search))
-                                        class="flex gap-2"
-                                    >
-                                        input(
-                                            attrs: attributes! {
-                                                class="text-foreground hover:opacity-90 focus-within:opacity-90 opacity-60"
-                                                type="text"
-                                                name="q"
-                                                placeholder="Search for a taxon"
-                                            }
-                                        )
-                                    </form>
+                                    taxon_search_bar()
                                 </li>
                                 let login_href = href!(login);
                                 if !login_href.is_current(cx) {
@@ -275,22 +274,28 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
                             (slot)
                         )
                     </main>
-                    <footer>
-                        "Developed with "
-                        icon(
-                            data: mdi::HEART,
-                            label: "Love",
-                            attrs: attributes! { class="text-red-300 inline-block" }
-                        )
-                        " by volunteers"
-                        <div class="text-sm text-white/50">
-                            <div>
-                                "Taxonomy based on "
-                                <a href="https://www.itis.gov">"ITIS"</a>
-                            </div>
-                            <div>
-                                "Phenology data provided by "
-                                <a href="https://inaturalist.org">"iNaturalist.org"</a>
+                    <footer
+                        class=(class!("bg-(image:--background-image)", "bg-center", "bg-cover"))
+                    >
+                        <div
+                            class="inline-block px-3 md:px-6 py-4 text-white bg-neutral-800/50"
+                        >
+                            "Developed with "
+                            icon(
+                                data: mdi::HEART,
+                                label: "Love",
+                                attrs: attributes! { class="text-red-300 inline-block" }
+                            )
+                            " by volunteers"
+                            <div class="text-sm text-white/50">
+                                <div>
+                                    "Taxonomy based on "
+                                    <a href="https://www.itis.gov">"ITIS"</a>
+                                </div>
+                                <div>
+                                    "Phenology data provided by "
+                                    <a href="https://inaturalist.org">"iNaturalist.org"</a>
+                                </div>
                             </div>
                         </div>
                     </footer>
