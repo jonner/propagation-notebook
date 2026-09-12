@@ -167,9 +167,7 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
                                         <span class="caption">"Regions"</span>
                                     </a>
                                 </li>
-                                <li class="grow">
-                                    taxon_search_bar()
-                                </li>
+                                <li class="grow">taxon_search_bar()</li>
                             </ul>
                         </nav>
                     </header>

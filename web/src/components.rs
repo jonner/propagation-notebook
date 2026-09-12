@@ -91,13 +91,17 @@ pub async fn taxon_icon(
 }
 
 #[shard]
-pub async fn taxon_search_results(cx: &Cx, query_string: String) -> topcoat::Result<impl View> {
+pub async fn taxon_search_results(
+    cx: &Cx,
+    query_string: String,
+    visible: bool,
+) -> topcoat::Result<impl View> {
     let nothing = view! {}.boxed();
-    if query_string.len() < 2 {
+    if !visible || query_string.len() < 2 {
         return Ok(nothing);
     }
     let mut db = db(cx);
-    const LIMIT: u64 = 20;
+    const LIMIT: u64 = 40;
     let query = Taxon::filter(Taxon::search_filter(&query_string))
         .include(Taxon::fields().photo())
         .order_by((
@@ -111,7 +115,7 @@ pub async fn taxon_search_results(cx: &Cx, query_string: String) -> topcoat::Res
     }
     Ok(view! {
         <div
-            class="flex flex-col absolute left-0 right-0 max-h-lg gap-2 rounded-xl border border-border p-3 text-sm text-foreground shadow-sm bg-background/80 z-50"
+            class="flex flex-col absolute left-0 right-0 max-h-100 overflow-y-auto gap-2 rounded-xl border border-border p-3 text-sm text-foreground shadow-sm bg-background/80 z-50"
         >
             <ul class="contents">
                 for taxon in taxa.iter() {
@@ -138,8 +142,14 @@ pub async fn taxon_search_bar(
     #[default] mut attrs: Attributes,
 ) -> topcoat::Result<impl View> {
     let query_string = signal(cx, String::new);
+    let search_focus = signal(cx, || false);
     Ok(view! {
-        <div class=(class!("relative", attrs.remove("class"))) (attrs)>
+        <div
+            @focusin=$(|_e: Event| search_focus.set(true))
+            @focusout=$(|_e: Event| search_focus.set(false))
+            class=(class!("relative", attrs.remove("class")))
+            (attrs)
+        >
             <form method="get" action=(href!(taxa::search)) class="contents">
                 input::input(
                     attrs: attributes! {
@@ -151,7 +161,10 @@ pub async fn taxon_search_bar(
                         class="text-foreground hover:opacity-80 focus-within:opacity-80 opacity-50"
                     }
                 )
-                taxon_search_results(query_string: $(query_string.get()))
+                taxon_search_results(
+                    query_string: $(query_string.get()),
+                    visible: $(search_focus.get())
+                )
             </form>
         </div>
     })
