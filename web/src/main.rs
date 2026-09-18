@@ -125,12 +125,12 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
                         class="flex flex-col items-start justify-between font-bold flex-wrap bg-(image:--background-image) bg-center bg-cover h-[8rem] md:h-[12rem]"
                     >
                         <nav
-                            class="w-full block shrink flex items-center gap-6 md:gap-4 px-3 md:px-6 py-2 text-white bg-neutral-800/50"
+                            class="w-full block shrink flex items-center gap-6 md:gap-4 px-3 md:px-6 py-2 text-background bg-foreground/50"
                         >
                             <ul class="contents">
                                 <li>
                                     <a
-                                        class="block text-foreground-contrast no-underline"
+                                        class="block"
                                         href=(href!(home))
                                     >
                                         icon(
@@ -143,7 +143,7 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
                                 </li>
                                 <li>
                                     <a
-                                        class="block text-foreground-contrast no-underline"
+                                        class="block"
                                         href=(href!(taxa::explore))
                                     >
                                         icon(
@@ -156,7 +156,7 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
                                 </li>
                                 <li>
                                     <a
-                                        class="block text-foreground-contrast no-underline"
+                                        class="block"
                                         href=(href!(regions::list))
                                     >
                                         icon(
@@ -227,10 +227,10 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
                         )
                     </main>
                     <footer
-                        class="bg-(image:--background-image) bg-center bg-cover flex flex-col justify-end"
+                        class="bg-(image:--background-image) bg-center bg-cover"
                     >
                         <div
-                            class="inline-block px-3 md:px-6 py-4 text-white bg-neutral-800/50"
+                            class="block px-3 md:px-6 py-6 text-background bg-foreground/50"
                         >
                             "Developed with "
                             icon(
@@ -239,7 +239,7 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
                                 attrs: attributes! { class="text-red-300 inline-block" }
                             )
                             " by volunteers"
-                            <div class="text-sm text-white/50">
+                            <div class="opacity-60">
                                 <div>
                                     "Taxonomy based on "
                                     <a href="https://www.itis.gov">"ITIS"</a>
