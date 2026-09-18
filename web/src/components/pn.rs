@@ -3,12 +3,21 @@ use libpropagation::{
     region::{ConservationStatus, Origin},
     taxonomy::Taxon,
 };
-use topcoat::view::{
-    AttributeValueViewParts, Attributes, Child, View, ViewExt, attributes, class, component, view,
+use topcoat::{
+    context::Cx,
+    icon::icon,
+    router::{href, request::uri},
+    view::{
+        AttributeValueViewParts, Attributes, Child, View, ViewExt, attributes, class, component,
+        view,
+    },
 };
 
 use crate::{
-    components::{badge::*, breadcrumb::*, pagination::*, tooltip::*},
+    auth::{LoginFormParams, login, logout},
+    components::{avatar::*, badge::*, breadcrumb::*, dropdown_menu::*, pagination::*, tooltip::*},
+    context::current_user,
+    mdi,
     util::{ModifyOffset, PageState},
 };
 
@@ -266,5 +275,53 @@ pub async fn week_navigator(
                 )
             )
         )
+    })
+}
+
+#[component]
+pub async fn user_menu(cx: &Cx) -> topcoat::Result<impl View> {
+    let uri = uri(cx);
+    let login_href = href!(login);
+    Ok(view! {
+        if !login_href.is_current(cx) {
+            <li class="ml-auto">
+                if let Some(user) = current_user(cx).await {
+                    <form
+                        method="POST"
+                        action=(href!(logout))
+                        id="logoutForm"
+                        class="hidden"
+                    ></form>
+                    dropdown_menu(
+                        dropdown_menu_trigger(
+                            attrs: attributes! { class="flex" },
+                            avatar(
+                                attrs: attributes! { class="me-2 bg-background/60" },
+                                size: AvatarSize::Sm,
+                                avatar_fallback(icon(data: mdi::ACCOUNT))
+                            )
+                            (&user.username)
+                        )
+                        dropdown_menu_content(
+                            alignment: DropdownMenuAlignment::Right,
+                            dropdown_menu_item(
+                                attrs: attributes! { type="submit" class="text-destructive" form="logoutForm" },
+                                "Log Out"
+                            )
+                        )
+                    )
+                } else {
+                    <a
+                        class="flex"
+                        href=(login_href.query(
+                            LoginFormParams { redirect: Some(uri.to_string()) },
+                        ))
+                    >
+                        "Log in"
+                    </a>
+                }
+            </li>
+        }
+
     })
 }

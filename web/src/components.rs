@@ -9,12 +9,6 @@ use topcoat::{
 };
 use uuid::Uuid;
 
-use crate::{
-    context::db,
-    mdi,
-    taxa::{self, TaxonId},
-};
-
 pub mod avatar;
 pub mod badge;
 pub mod breadcrumb;
@@ -27,6 +21,12 @@ pub mod input;
 pub mod pagination;
 pub mod pn;
 pub mod tooltip;
+
+use crate::{
+    context::db,
+    mdi,
+    taxa::{self, TaxonId},
+};
 
 const LEAFLET_INIT_SCRIPT: Asset = asset!("assets/leaflet-initialize.js");
 

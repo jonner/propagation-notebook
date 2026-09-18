@@ -18,9 +18,8 @@ use topcoat::{
 use tracing::debug;
 
 use crate::{
-    auth::{LoginFormParams, login, logout},
-    components::{avatar::*, button::*, dropdown_menu::*, input::input, taxon_search_bar},
-    context::current_user,
+    auth::login,
+    components::{button::*, input::input, pn::user_menu, taxon_search_bar},
     error::Error,
     tasks::background_tasks,
 };
@@ -179,46 +178,7 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
                                 <li class="px-6 mx-auto grow lg:max-w-1/2">
                                     taxon_search_bar()
                                 </li>
-                                let login_href = href!(login);
-                                if !login_href.is_current(cx) {
-                                    <li class="ml-auto">
-                                        if let Some(user) = current_user(cx).await {
-                                            <form
-                                                method="POST"
-                                                action=(href!(logout))
-                                                id="logoutForm"
-                                                class="hidden"
-                                            ></form>
-                                            dropdown_menu(
-                                                dropdown_menu_trigger(
-                                                    attrs: attributes! { class="flex" },
-                                                    avatar(
-                                                        attrs: attributes! { class="me-2 bg-background/60" },
-                                                        size: AvatarSize::Sm,
-                                                        avatar_fallback(icon(data: mdi::ACCOUNT))
-                                                    )
-                                                    (&user.username)
-                                                )
-                                                dropdown_menu_content(
-                                                    alignment: DropdownMenuAlignment::Right,
-                                                    dropdown_menu_item(
-                                                        attrs: attributes! { type="submit" class="text-destructive" form="logoutForm" },
-                                                        "Log Out"
-                                                    )
-                                                )
-                                            )
-                                        } else {
-                                            <a
-                                                class="flex"
-                                                href=(login_href.query(
-                                                    LoginFormParams { redirect: Some(uri.to_string()) },
-                                                ))
-                                            >
-                                                "Log in"
-                                            </a>
-                                        }
-                                    </li>
-                                }
+                                user_menu()
                             </ul>
                         </nav>
                     </header>
