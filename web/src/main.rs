@@ -122,19 +122,7 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
             <body>
                 <div class="main-content">
                     <header
-                        class=(class!(
-                            "flex",
-                            "flex-col",
-                            "items-start",
-                            "justify-between",
-                            "font-bold",
-                            "flex-wrap",
-                            "bg-(image:--background-image)",
-                            "bg-center",
-                            "bg-cover",
-                            "h-[8rem]",
-                            "md:h-[12rem]",
-                        ))
+                        class="flex flex-col items-start justify-between font-bold flex-wrap bg-(image:--background-image) bg-center bg-cover h-[8rem] md:h-[12rem]"
                     >
                         <nav
                             class="w-full block shrink flex items-center gap-6 md:gap-4 px-3 md:px-6 py-2 text-white bg-neutral-800/50"
@@ -239,7 +227,7 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
                         )
                     </main>
                     <footer
-                        class=(class!("bg-(image:--background-image)", "bg-center", "bg-cover"))
+                        class="bg-(image:--background-image) bg-center bg-cover flex flex-col justify-end"
                     >
                         <div
                             class="inline-block px-3 md:px-6 py-4 text-white bg-neutral-800/50"
