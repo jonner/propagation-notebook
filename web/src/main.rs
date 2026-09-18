@@ -19,7 +19,11 @@ use tracing::debug;
 
 use crate::{
     auth::login,
-    components::{button::*, input::input, pn::user_menu, taxon_search_bar},
+    components::{
+        button::*,
+        input::input,
+        pn::{taxon_search_bar, user_menu},
+    },
     error::Error,
     tasks::background_tasks,
 };

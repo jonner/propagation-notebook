@@ -17,8 +17,10 @@ use crate::{
         card::*,
         harvest::{harvest_timeline, regional_taxa_table},
         input::input,
-        leaflet_map,
-        pn::{conservation_status_badge, origin_badge, pagination_control, week_navigator},
+        pn::{
+            conservation_status_badge, leaflet_map, origin_badge, pagination_control,
+            week_navigator,
+        },
     },
     context::db,
     taxa::{self, TaxaListParams},

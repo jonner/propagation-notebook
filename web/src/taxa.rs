@@ -26,8 +26,10 @@ use crate::{
         citations::citation_list,
         harvest::taxon_regional_table,
         input::input,
-        pn::{ancestor_breadcrumbs, origin_badge, pagination_control},
-        taxa_grid, taxa_grid_item, taxon_icon,
+        pn::{
+            ancestor_breadcrumbs, origin_badge, pagination_control, taxa_grid, taxa_grid_item,
+            taxon_icon,
+        },
     },
     context::db,
     mdi,
