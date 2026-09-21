@@ -1,9 +1,8 @@
 use topcoat::{
-    asset::{Asset, AssetBundle, RouterBuilderAssetExt, asset, asset_config},
+    asset::{AssetBundle, RouterBuilderAssetExt, asset_config},
     context::Cx,
     cookie::RouterBuilderCookieExt,
-    font::{Font, fontsource::fontsource_font},
-    icon::{icon, iconify},
+    icon::icon,
     router::{
         Router, RouterBuilderDiscoverExt, Slot,
         error::{ForbiddenError, NotFoundError, UnauthorizedError},
@@ -13,11 +12,12 @@ use topcoat::{
     runtime::RouterBuilderRuntimeExt,
     session::{RouterBuilderSessionExt, SessionConfig},
     tailwind,
-    view::{View, ViewExt, attributes, class, error_boundary, view},
+    view::{View, ViewExt, attributes, error_boundary, view},
 };
 use tracing::debug;
 
 use crate::{
+    assets::{FONT_BODY, FONT_HEAD, HEADER_IMAGES, LEAFLET_CSS, LEAFLET_JS, mdi},
     auth::login,
     components::{
         button::*,
@@ -28,6 +28,7 @@ use crate::{
     tasks::background_tasks,
 };
 
+mod assets;
 mod auth;
 mod citation;
 mod components;
@@ -61,35 +62,11 @@ async fn main() -> Result<(), Error> {
     Ok(())
 }
 
-iconify::include!("mdi");
-const FONT_HEAD: Font = fontsource_font!(AVERIA_SERIF_LIBRE, host: Asset);
-const FONT_BODY: Font = fontsource_font!(AVERIA_SANS_LIBRE, host: Asset);
-
 not_found!("/");
-
-// All images from iNaturalist licensed in the public domain
-const HEADERS: &[Asset] = &[
-    // https://www.inaturalist.org/photos/210648286
-    asset!("assets/cypripedium-reginae.webp"),
-    // https://www.inaturalist.org/photos/12597071
-    asset!("assets/asclepias-incarnata.webp"),
-    // https://www.inaturalist.org/photos/147597352
-    asset!("assets/empetrum-nigrum.webp"),
-    // https://www.inaturalist.org/photos/135132632
-    asset!("assets/escobaria-vivipara.webp"),
-    // https://www.inaturalist.org/photos/102029239
-    asset!("assets/hamamelis-virginiana.webp"),
-    // https://www.inaturalist.org/photos/531026295
-    asset!("assets/desmanthus-illinoensis.webp"),
-    // https://www.inaturalist.org/photos/690459895
-    asset!("assets/hydrastis-canadensis.webp"),
-];
-const LEAFLET_JS: Asset = asset!("https://unpkg.com/leaflet@1.9.4/dist/leaflet.js", checksum:"sha256:db49d009c841f5ca34a888c96511ae936fd9f5533e90d8b2c4d57596f4e5641a");
-const LEAFLET_CSS: Asset = asset!("https://unpkg.com/leaflet@1.9.4/dist/leaflet.css", checksum:"sha256:a7837102824184820dfa198d1ebcd109ff6d0ff9a2672a074b9a1b4d147d04c6");
 
 #[layout("/")]
 async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
-    let header_bg = HEADERS[rand::random_range(0..HEADERS.len())];
+    let header_bg = HEADER_IMAGES[rand::random_range(0..HEADER_IMAGES.len())];
     let uri = uri(cx);
 
     Ok(view! {
