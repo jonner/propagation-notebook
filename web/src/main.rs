@@ -84,6 +84,8 @@ const HEADERS: &[Asset] = &[
     // https://www.inaturalist.org/photos/690459895
     asset!("assets/hydrastis-canadensis.webp"),
 ];
+const LEAFLET_JS: Asset = asset!("https://unpkg.com/leaflet@1.9.4/dist/leaflet.js", checksum:"sha256:db49d009c841f5ca34a888c96511ae936fd9f5533e90d8b2c4d57596f4e5641a");
+const LEAFLET_CSS: Asset = asset!("https://unpkg.com/leaflet@1.9.4/dist/leaflet.css", checksum:"sha256:a7837102824184820dfa198d1ebcd109ff6d0ff9a2672a074b9a1b4d147d04c6");
 
 #[layout("/")]
 async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
@@ -105,17 +107,8 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
                 <meta charset="UTF-8">
                 <title>"Propagation Notebook"</title>
                 <link rel="stylesheet" href=(tailwind::stylesheet!())>
-                <link
-                    rel="stylesheet"
-                    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-                    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-                    crossorigin=""
-                >
-                <script
-                    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-                    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-                    crossorigin=""
-                ></script>
+                <link rel="stylesheet" href=(LEAFLET_CSS)>
+                <script src=(LEAFLET_JS)></script>
                 topcoat::font::link(font: FONT_HEAD)
                 topcoat::font::link(font: FONT_BODY)
             </head>
