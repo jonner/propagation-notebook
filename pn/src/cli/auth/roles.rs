@@ -37,12 +37,14 @@ pub enum RoleCommands {
         )]
         assumeyes: bool,
     },
+    #[command(about = "Add a permission to the role")]
     AddPermission {
         #[arg(help = "A user ID")]
         id: Uuid,
         #[arg(short, long, help = "A permission ID")]
         permission: Uuid,
     },
+    #[command(about = "Remove a permission from the role")]
     RemovePermission {
         #[arg(help = "A user ID")]
         id: Uuid,

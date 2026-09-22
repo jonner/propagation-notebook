@@ -43,12 +43,14 @@ pub enum UserCommands {
         )]
         assumeyes: bool,
     },
+    #[command(about = "Grant a role to the user")]
     AddRole {
         #[arg(help = "A user ID")]
         id: Uuid,
         #[arg(short, long, help = "A role ID")]
         role: Uuid,
     },
+    #[command(about = "Remove a role from the user")]
     RemoveRole {
         #[arg(help = "A user ID")]
         id: Uuid,
