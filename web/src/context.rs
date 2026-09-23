@@ -73,13 +73,7 @@ pub async fn require_user_with_permission(
     permission: PermissionCode,
 ) -> topcoat::Result<&User> {
     let user = require_user(cx).await?;
-    if user
-        .permissions
-        .get()
-        .iter()
-        .find(|p| p.code == permission)
-        .is_some()
-    {
+    if user.has_permission(permission) {
         Ok(user)
     } else {
         Err(forbidden().into())

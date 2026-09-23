@@ -63,6 +63,14 @@ impl User {
             .await?;
         Ok(())
     }
+
+    pub fn has_permission(&self, permission: PermissionCode) -> bool {
+        self.permissions
+            .get()
+            .iter()
+            .find(|p| p.code == permission)
+            .is_some()
+    }
 }
 
 #[derive(Debug, Clone, toasty::Model)]
