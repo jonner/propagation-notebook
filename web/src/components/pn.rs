@@ -307,7 +307,7 @@ pub async fn user_menu(cx: &Cx) -> topcoat::Result<impl View> {
                                 size: AvatarSize::Sm,
                                 avatar_fallback(icon(data: mdi::ACCOUNT))
                             )
-                            (&user.username)
+                            <span class="hidden md:inline-block">(&user.username)</span>
                         )
                         dropdown_menu_content(
                             alignment: DropdownMenuAlignment::Right,
