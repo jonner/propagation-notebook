@@ -215,7 +215,11 @@
   }
 
   a[href] {
-    @apply text-link underline font-bold;
+    @apply underline font-bold;
+  }
+
+  main a[href] {
+    @apply text-link;
   }
 
   header a[href] {
