@@ -421,7 +421,12 @@ pub async fn taxon_search_results(
     }
     Ok(view! {
         <div
-            class="flex flex-col absolute left-0 right-0 max-h-100 overflow-y-auto gap-2 rounded-xl border border-border p-3 text-sm text-foreground shadow-sm bg-background/80 z-50"
+            class="flex flex-col p-3 gap-2
+                fixed left-3 right-3
+                md:absolute md:left-0 md:right-0 md:mx-0
+                max-h-100 overflow-y-auto
+                text-sm text-foreground bg-background/80 z-50
+                rounded-xl border border-border shadow-sm"
         >
             <ul class="contents">
                 for taxon in taxa.iter() {
