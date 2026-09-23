@@ -187,9 +187,7 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
                             (slot)
                         )
                     </main>
-                    <footer
-                        class="bg-(image:--background-image) bg-center bg-cover"
-                    >
+                    <footer class="bg-(image:--background-image) bg-center bg-cover">
                         <div
                             class="block px-3 md:px-6 py-6 text-background bg-foreground/50"
                         >

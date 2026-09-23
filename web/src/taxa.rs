@@ -454,6 +454,7 @@ pub async fn default_photo(cx: &Cx) -> topcoat::Result<impl View> {
         </div>
     })
 }
+
 #[page("/taxa/{taxon_id}")]
 pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
     let mut db = db(cx);

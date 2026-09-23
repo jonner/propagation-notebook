@@ -329,7 +329,6 @@ pub async fn user_menu(cx: &Cx) -> topcoat::Result<impl View> {
                 }
             </li>
         }
-
     })
 }
 
