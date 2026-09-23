@@ -222,10 +222,6 @@
     @apply no-underline;
   }
 
-  .text-background a[href] {
-    @apply text-background;
-  }
-
   .latin {
     @apply italic
   }

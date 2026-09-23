@@ -99,10 +99,7 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
                         >
                             <ul class="contents">
                                 <li>
-                                    <a
-                                        class="block"
-                                        href=(href!(home))
-                                    >
+                                    <a class="block text-inherit" href=(href!(home))>
                                         icon(
                                             data: mdi::FLOWER_POPPY,
                                             label: "Home",
@@ -112,10 +109,7 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
                                     </a>
                                 </li>
                                 <li>
-                                    <a
-                                        class="block"
-                                        href=(href!(taxa::explore))
-                                    >
+                                    <a class="block text-inherit" href=(href!(taxa::explore))>
                                         icon(
                                             data: mdi::FORMAT_LIST_BULLETED,
                                             label: "Taxonomy",
@@ -125,10 +119,7 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
                                     </a>
                                 </li>
                                 <li>
-                                    <a
-                                        class="block"
-                                        href=(href!(regions::list))
-                                    >
+                                    <a class="block text-inherit" href=(href!(regions::list))>
                                         icon(
                                             data: mdi::GLOBE,
                                             label: "Regions",
@@ -212,11 +203,15 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
                             <div class="opacity-60">
                                 <div>
                                     "Taxonomy based on "
-                                    <a href="https://www.itis.gov">"ITIS"</a>
+                                    <a class="text-inherit" href="https://www.itis.gov">
+                                        "ITIS"
+                                    </a>
                                 </div>
                                 <div>
                                     "Phenology data provided by "
-                                    <a href="https://inaturalist.org">"iNaturalist.org"</a>
+                                    <a class="text-inherit" href="https://inaturalist.org">
+                                        "iNaturalist.org"
+                                    </a>
                                 </div>
                             </div>
                         </div>
