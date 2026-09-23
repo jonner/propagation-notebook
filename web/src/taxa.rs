@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use libpropagation::{
+    auth::PermissionCode,
     citation::Citation,
     cleaning::CleaningProcedure,
     region::{Origin, Region, RegionalTaxonStatus},
@@ -13,6 +14,7 @@ use topcoat::{
         error::{RouterErrorExt, redirect},
         href, page, path_param, query_params,
     },
+    runtime::procedure,
     view::{View, attributes, view},
 };
 use tracing::trace;
@@ -31,7 +33,7 @@ use crate::{
             taxon_icon,
         },
     },
-    context::db,
+    context::{current_user, db, require_user_with_permission},
     mdi,
     util::{ModifyOffset, PER_PAGE, PageState},
 };
@@ -477,6 +479,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
         .exec(&mut db)
         .await
         .ok_or_not_found()?;
+    let user = current_user(cx).await;
 
     Ok(view! {
         let ancestors = taxon
@@ -721,6 +724,24 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                     </ul>
                 </div>
             </section>
+            if let Some(user) = user {
+                if user.has_permission(PermissionCode::TaxonSync) {
+                    <section>
+                        <h2>"Administration"</h2>
+                        <div>
+                            let idstr = taxon.id.to_string();
+                            button(
+                                attrs: attributes! {
+                                    @click=$(async |_e: topcoat::runtime::Event| {
+                                        sync_image(idstr).await
+                                    })
+                                },
+                                "Sync Image"
+                            )
+                        </div>
+                    </section>
+                }
+            }
         </div>
     })
 }
@@ -923,4 +944,14 @@ pub async fn note_details(cx: &Cx) -> topcoat::Result<impl View> {
             </section>
         </div>
     })
+}
+
+#[procedure]
+pub async fn sync_image(cx: &Cx, taxon_id: String) -> topcoat::Result<()> {
+    require_user_with_permission(cx, PermissionCode::TaxonSync).await?;
+    let mut db = db(cx);
+    let taxon_id = taxon_id.parse::<u64>()?;
+    let taxon = Taxon::get_by_id(&mut db, taxon_id).await?;
+    taxon.update_photo(&mut db).await?;
+    Ok(())
 }
