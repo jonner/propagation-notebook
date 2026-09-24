@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, HashMap};
+use std::{cmp::Ordering, collections::HashMap};
 
 use libpropagation::{
     auth::PermissionCode,
@@ -486,7 +486,9 @@ pub enum ChildRegionError {
     Toasty(#[from] toasty::Error),
 }
 
-pub async fn child_regions(
+// Look up the regional statuses for all descendant taxa of this taxon and
+// return regional status information that encapsulates all  descendant taxa
+pub async fn descendant_region_statuses(
     db: &mut toasty::Db,
     parent: &Taxon,
 ) -> Result<Vec<(Region, RegionHarvestWindowSummary)>, ChildRegionError> {
@@ -509,8 +511,8 @@ pub async fn child_regions(
         .await?
         .into_iter()
         .fold(
-            BTreeMap::new(),
-            |mut accum: BTreeMap<u64, (Region, RegionHarvestWindowSummary)>, item| {
+            HashMap::new(),
+            |mut accum: HashMap<u64, (Region, RegionHarvestWindowSummary)>, item| {
                 accum
                     .entry(item.region_id)
                     .and_modify(|e| {
@@ -552,7 +554,15 @@ pub async fn child_regions(
                 accum
             },
         );
-    Ok(all_regional_statuses.into_values().collect())
+    let mut regions = all_regional_statuses.into_values().collect::<Vec<_>>();
+    regions.sort_by(|(a, _), (b, _)| {
+        let mut res = a.category.cmp(&b.category).reverse();
+        if res == Ordering::Equal {
+            res = a.name.cmp(&b.name)
+        }
+        res
+    });
+    Ok(regions)
 }
 
 #[page("/taxa/{taxon_id}")]
@@ -581,7 +591,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
         .await
         .ok_or_not_found()?;
     let user = current_user(cx).await;
-    let regions = match child_regions(&mut db, &taxon).await {
+    let regions = match descendant_region_statuses(&mut db, &taxon).await {
         Err(ChildRegionError::TooManyChildren) => Ok(taxon
             .regional_statuses
             .get()

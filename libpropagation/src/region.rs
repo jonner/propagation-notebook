@@ -98,7 +98,16 @@ impl From<&Region> for crate::dto::ObjectReference {
 }
 
 #[derive(
-    Debug, Clone, Copy, toasty::Embed, Serialize, Deserialize, strum::Display, clap::ValueEnum,
+    Debug,
+    Clone,
+    Copy,
+    toasty::Embed,
+    Serialize,
+    Deserialize,
+    strum::Display,
+    clap::ValueEnum,
+    PartialEq,
+    Eq,
 )]
 pub enum RegionCategory {
     Nation,
@@ -106,6 +115,30 @@ pub enum RegionCategory {
     County,
     Municipality,
     Other,
+}
+
+impl RegionCategory {
+    fn sort_key(&self) -> i32 {
+        match self {
+            RegionCategory::Nation => 5,
+            RegionCategory::Province => 4,
+            RegionCategory::County => 3,
+            RegionCategory::Municipality => 2,
+            RegionCategory::Other => 1,
+        }
+    }
+}
+
+impl Ord for RegionCategory {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.sort_key().cmp(&other.sort_key())
+    }
+}
+
+impl PartialOrd for RegionCategory {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
 }
 
 #[derive(Debug, Clone, toasty::Model)]
