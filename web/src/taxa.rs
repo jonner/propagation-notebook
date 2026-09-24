@@ -561,7 +561,7 @@ pub async fn descendant_region_statuses(cx: &Cx, parent_id: u64) -> topcoat::Res
 #[page("/taxa/{taxon_id}")]
 pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
     let mut db = db(cx);
-    let id = path_param::<TaxonId>(cx)?;
+    let id = *path_param::<TaxonId>(cx)?;
     let taxon = Taxon::filter_by_id(id)
         .include(Taxon::fields().vernaculars())
         .include(Taxon::fields().parent())
@@ -584,6 +584,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
         .await
         .ok_or_not_found()?;
     let user = current_user(cx).await;
+    let menu_open = signal(cx, || false);
 
     Ok(view! {
         let ancestors = taxon
@@ -607,9 +608,6 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
             )
             if let Some(user) = user {
                 if user.has_permission(PermissionCode::TaxonSync) {
-                    let menu_open = signal(cx, || false);
-                    // FIXME: use integers in topcoat 0.11
-                    let idstr = taxon.id.to_string();
                     dropdown_menu(
                         attrs: attributes! { class="ms-auto" :open=$(menu_open.get()) },
                         dropdown_menu_trigger(icon(data: crate::mdi::DOTS_VERTICAL))
@@ -620,7 +618,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                                     attrs: attributes! {
                                         @click=$(async |e: Event| {
                                             e.prevent_default();
-                                            let fut = sync_image(idstr);
+                                            let fut = sync_image(id);
                                             menu_open.set(false);
                                             fut.await;
                                         })
@@ -641,7 +639,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                         href=(photo
                             .original_url
                             .is_some()
-                            .then(|| href!(default_photo, TaxonId(*id))))
+                            .then(|| href!(default_photo, TaxonId(id))))
                     >
                         <figure class="taxon-photo">
                             <img src=(photo_url) alt=(&taxon.complete_name)>
@@ -1089,12 +1087,10 @@ pub async fn note_details(cx: &Cx) -> topcoat::Result<impl View> {
     })
 }
 
-// FIXME: Use u64 in topcoat 0.11
-#[procedure]
-pub async fn sync_image(cx: &Cx, taxon_id: String) -> topcoat::Result<()> {
+#[procedure("/taxa/sync-image")]
+pub async fn sync_image(cx: &Cx, taxon_id: u64) -> topcoat::Result<()> {
     require_user_with_permission(cx, PermissionCode::TaxonSync).await?;
     let mut db = db(cx);
-    let taxon_id = taxon_id.parse::<u64>()?;
     let taxon = Taxon::get_by_id(&mut db, taxon_id).await?;
     taxon.update_photo(&mut db).await?;
     Ok(())

@@ -423,7 +423,7 @@ pub async fn taxon_icon(
     })
 }
 
-#[shard]
+#[shard("/taxa/search/results")]
 pub async fn taxon_search_results(
     cx: &Cx,
     query_string: String,

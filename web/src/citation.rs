@@ -126,14 +126,13 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                         },
                         "Cancel"
                     )
-                    let idstr = citation.id.to_string();
                     button(
                         variant: ButtonVariant::Destructive,
                         attrs: attributes! {
                             @click=$(async |e: topcoat::runtime::Event| {
                                 e.prevent_default();
                                 delete_dialog_open.set(false);
-                                delete_citation(idstr).await;
+                                delete_citation(*id).await;
                                 //FIXME: Handle response
                             })
                         },
@@ -145,11 +144,9 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
     })
 }
 
-// FIXME: use integer when topcoat 0.11 comes
-#[procedure]
-pub async fn delete_citation(cx: &Cx, id: String) -> topcoat::Result<()> {
+#[procedure("/citations/delete")]
+pub async fn delete_citation(cx: &Cx, id: u64) -> topcoat::Result<()> {
     let _ = require_user_with_permission(cx, PermissionCode::CitationDelete).await?;
-    let id = id.parse::<u64>()?;
     Citation::delete_by_id(&mut db(cx), id).await?;
     Ok(())
 }
