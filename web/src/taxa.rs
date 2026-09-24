@@ -1,10 +1,10 @@
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 
 use libpropagation::{
     auth::PermissionCode,
     citation::Citation,
     cleaning::CleaningProcedure,
-    region::{Origin, Region, RegionalTaxonStatus},
+    region::{ConservationStatus, Origin, Region, RegionalHarvestWindow, RegionalTaxonStatus},
     taxonomy::{Taxon, TaxonHierarchy, TaxonNote, TaxonNoteCategory, TaxonPropagationProcedure},
 };
 use topcoat::{
@@ -455,6 +455,106 @@ pub async fn default_photo(cx: &Cx) -> topcoat::Result<impl View> {
     })
 }
 
+#[derive(Debug, Clone)]
+pub struct RegionHarvestWindowSummary {
+    pub harvest_window: RegionalHarvestWindow,
+    pub origin: Option<Origin>,
+    pub conservation_status: Option<ConservationStatus>,
+}
+
+impl From<&RegionalTaxonStatus> for RegionHarvestWindowSummary {
+    fn from(value: &RegionalTaxonStatus) -> Self {
+        value.clone().into()
+    }
+}
+
+impl From<RegionalTaxonStatus> for RegionHarvestWindowSummary {
+    fn from(value: RegionalTaxonStatus) -> Self {
+        Self {
+            harvest_window: value.harvest_window,
+            origin: value.origin,
+            conservation_status: value.conservation_status,
+        }
+    }
+}
+
+#[derive(thiserror::Error, Debug)]
+pub enum ChildRegionError {
+    #[error("Too many children to display child regions")]
+    TooManyChildren,
+    #[error(transparent)]
+    Toasty(#[from] toasty::Error),
+}
+
+pub async fn child_regions(
+    db: &mut toasty::Db,
+    parent: &Taxon,
+) -> Result<Vec<(Region, RegionHarvestWindowSummary)>, ChildRegionError> {
+    let filter = RegionalTaxonStatus::filter(
+        RegionalTaxonStatus::fields()
+            .taxon()
+            .ancestors()
+            .any(Taxon::fields().id().eq(parent.id)),
+    );
+
+    let n = filter.clone().count().exec(db).await?;
+
+    if n > 50 {
+        return Err(ChildRegionError::TooManyChildren);
+    }
+
+    let all_regional_statuses = filter
+        .include(RegionalTaxonStatus::fields().region())
+        .exec(db)
+        .await?
+        .into_iter()
+        .fold(
+            BTreeMap::new(),
+            |mut accum: BTreeMap<u64, (Region, RegionHarvestWindowSummary)>, item| {
+                accum
+                    .entry(item.region_id)
+                    .and_modify(|e| {
+                        let e = &mut e.1;
+                        e.harvest_window.start_doy =
+                            [e.harvest_window.start_doy, item.harvest_window.start_doy]
+                                .iter()
+                                .flatten()
+                                .copied()
+                                .min();
+                        e.harvest_window.end_doy =
+                            [e.harvest_window.end_doy, item.harvest_window.end_doy]
+                                .iter()
+                                .flatten()
+                                .copied()
+                                .max();
+                        e.origin = match (e.origin, item.origin) {
+                            (None, None) => None,
+                            (None, Some(b)) => Some(b),
+                            (Some(a), None) => Some(a),
+                            (Some(a), Some(b)) => {
+                                if a == b {
+                                    Some(a)
+                                } else {
+                                    Some(Origin::Unknown)
+                                }
+                            }
+                        };
+                        e.conservation_status = e.conservation_status.max(item.conservation_status);
+                    })
+                    .or_insert((
+                        item.region.into_inner(),
+                        RegionHarvestWindowSummary {
+                            harvest_window: item.harvest_window,
+                            origin: item.origin,
+                            conservation_status: item.conservation_status,
+                        },
+                    ));
+                accum
+            },
+        );
+    Ok(all_regional_statuses.into_values().collect())
+}
+
 #[page("/taxa/{taxon_id}")]
 pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
     let mut db = db(cx);
@@ -481,6 +581,16 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
         .await
         .ok_or_not_found()?;
     let user = current_user(cx).await;
+    let regions = match child_regions(&mut db, &taxon).await {
+        Err(ChildRegionError::TooManyChildren) => Ok(taxon
+            .regional_statuses
+            .get()
+            .iter()
+            .map(|rts| (rts.region.get().clone(), rts.into()))
+            .collect()),
+        Err(e) => Err(e),
+        Ok(val) => Ok(val),
+    }?;
 
     Ok(view! {
         let ancestors = taxon
@@ -677,11 +787,11 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                 </section>
             }
 
-            if !taxon.regional_statuses.get().is_empty() {
+            if !regions.is_empty() {
                 <section>
                     <h2>"Regions"</h2>
                     <div>
-                        taxon_regional_table(regions: taxon.regional_statuses.get())
+                        taxon_regional_table(regions: &regions)
                     </div>
                 </section>
             }

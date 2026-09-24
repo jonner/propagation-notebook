@@ -289,8 +289,12 @@ pub struct Taxon {
 
     #[has_many(pair=descendant)]
     pub ancestor_links: Deferred<Vec<TaxonHierarchy>>,
+    #[has_many(via=ancestor_links.ancestor)]
+    pub ancestors: Deferred<Vec<Taxon>>,
     #[has_many(pair=ancestor)]
     pub descendant_links: Deferred<Vec<TaxonHierarchy>>,
+    #[has_many(via=descendant_links.descendant)]
+    pub descendants: Deferred<Vec<Taxon>>,
 
     #[has_many]
     pub resources: Deferred<Vec<TaxonResource>>,

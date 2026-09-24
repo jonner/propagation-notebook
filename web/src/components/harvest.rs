@@ -5,13 +5,14 @@ use topcoat::{
 };
 
 use libpropagation::{
-    region::{RegionalHarvestWindow, RegionalTaxonStatus},
+    region::{Region, RegionalHarvestWindow},
     taxonomy::Taxon,
 };
 
 use crate::{
     components::pn::{conservation_status_badge, origin_badge},
-    regions, taxa,
+    regions,
+    taxa::{self, RegionHarvestWindowSummary},
 };
 
 /// Renders a 52-week harvest window timeline component with week blocks, active
@@ -79,9 +80,9 @@ pub async fn regional_taxa_table(
         .filter_map(|taxon| {
             taxon.regional_statuses.get().first().map(|rts| {
                 (
-                    taxon.complete_name.as_str(),
+                    taxon.complete_name.clone(),
                     href!(taxa::details, taxa::TaxonId(taxon.id)).resolve(cx),
-                    rts,
+                    rts.into(),
                 )
             })
         })
@@ -99,7 +100,7 @@ pub async fn regional_taxa_table(
 #[component]
 pub async fn taxon_regional_table(
     cx: &Cx,
-    regions: &[RegionalTaxonStatus],
+    regions: &[(Region, RegionHarvestWindowSummary)],
     #[default] current_doy: Option<i16>,
     #[default] attrs: Attributes,
     #[default] child: Child<'_>,
@@ -107,11 +108,11 @@ pub async fn taxon_regional_table(
     let items: Vec<_> = regions
         .iter()
         .map(|rts| {
-            let region = rts.region.get();
+            let (region, window) = rts;
             (
-                region.name.as_str(),
+                region.name.clone(),
                 href!(regions::overview, regions::RegionId(region.id)).resolve(cx),
-                rts,
+                window.clone(),
             )
         })
         .collect();
@@ -127,7 +128,7 @@ pub async fn taxon_regional_table(
 
 #[component]
 pub async fn harvest_table(
-    items: &[(&str, String, &RegionalTaxonStatus)],
+    items: &[(String, String, RegionHarvestWindowSummary)],
     #[default] current_doy: Option<i16>,
     #[default] mut attrs: Attributes,
     #[default] child: Child<'_>,
@@ -141,9 +142,9 @@ pub async fn harvest_table(
             (attrs)
         >
             for item in items {
-                let name = item.0;
+                let name = &item.0;
                 let path = &item.1;
-                let rts = item.2;
+                let rts = &item.2;
                 <div class="flex flex-col gap-1 md:contents">
                     <div class="flex gap-3 items-center w-full">
                         <span class="latin"><a href=(path)>(name)</a></span>

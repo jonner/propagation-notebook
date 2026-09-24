@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fmt::Display};
+use std::{cmp::Ordering, collections::HashMap, fmt::Display};
 
 use geo::BoundingRect;
 use serde::{Deserialize, Serialize};
@@ -37,7 +37,16 @@ pub enum WetlandIndicator {
 }
 
 #[derive(
-    Debug, Clone, Copy, toasty::Embed, strum::Display, clap::ValueEnum, Serialize, Deserialize,
+    Debug,
+    Clone,
+    Copy,
+    toasty::Embed,
+    strum::Display,
+    clap::ValueEnum,
+    Serialize,
+    Deserialize,
+    PartialEq,
+    Eq,
 )]
 #[clap(rename_all = "kebab-case")]
 #[serde(rename_all = "kebab-case")]
@@ -48,6 +57,35 @@ pub enum ConservationStatus {
     Threatened,
     #[column(variant = 3)]
     SpecialConcern,
+}
+
+impl PartialOrd for ConservationStatus {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for ConservationStatus {
+    fn cmp(&self, other: &Self) -> Ordering {
+        match (self, other) {
+            (ConservationStatus::Endangered, ConservationStatus::Endangered)
+            | (ConservationStatus::Threatened, ConservationStatus::Threatened)
+            | (ConservationStatus::SpecialConcern, ConservationStatus::SpecialConcern) => {
+                Ordering::Equal
+            }
+            (ConservationStatus::Endangered, ConservationStatus::Threatened)
+            | (ConservationStatus::Endangered, ConservationStatus::SpecialConcern)
+            | (ConservationStatus::Threatened, ConservationStatus::SpecialConcern) => {
+                Ordering::Greater
+            }
+
+            (ConservationStatus::Threatened, ConservationStatus::Endangered)
+            | (ConservationStatus::SpecialConcern, ConservationStatus::Endangered)
+            | (ConservationStatus::SpecialConcern, ConservationStatus::Threatened) => {
+                Ordering::Less
+            }
+        }
+    }
 }
 
 impl From<&Region> for crate::dto::ObjectReference {

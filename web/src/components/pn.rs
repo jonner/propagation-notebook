@@ -36,7 +36,7 @@ pub async fn origin_badge(
 ) -> topcoat::Result<impl View> {
     let vals = match origin {
         Origin::Introduced => Some(("introduced", "IN", "Introduced")),
-        Origin::Unknown => Some(("unknown", "UN", "Unknown origin")),
+        Origin::Unknown => Some(("unknown", "UN", "Unknown or mixed origin")),
         Origin::Native => None,
     };
     Ok(if let Some((klass, text, tooltip_text)) = vals {
