@@ -17,7 +17,7 @@ use topcoat::{
 use uuid::Uuid;
 
 use crate::{
-    auth::{LoginFormParams, login, logout},
+    auth::{LoginFormParams, do_logout, login},
     components::{
         avatar::*, badge::*, breadcrumb::*, dropdown_menu::*, input::input, pagination::*,
         tooltip::*,
@@ -296,7 +296,7 @@ pub async fn user_menu(cx: &Cx) -> topcoat::Result<impl View> {
                 if let Some(user) = current_user(cx).await {
                     <form
                         method="POST"
-                        action=(href!(logout))
+                        action=(href!(do_logout))
                         id="logoutForm"
                         class="hidden"
                     ></form>
