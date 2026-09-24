@@ -19,12 +19,12 @@ use crate::{
 /// harvest window highlight and a vertical line showing the current day/week.
 #[component]
 pub async fn harvest_timeline(
-    window: &RegionalHarvestWindow,
+    timeline: &RegionalHarvestWindow,
     #[default] current_doy: Option<i16>,
     #[default] mut attrs: Attributes,
 ) -> topcoat::Result<impl View> {
     let cdoy = current_doy.unwrap_or_else(|| jiff::Zoned::now().date().day_of_year());
-    let inactive_class = window.is_empty().then_some("inactive");
+    let inactive_class = timeline.is_empty().then_some("inactive");
 
     // Compute left offset percentage for current date marker ignoring leap days
     let marker_left_pct = (f32::from(cdoy - 1) / 365.0) * 100.0;
@@ -41,8 +41,8 @@ pub async fn harvest_timeline(
             for w in 1..=52 {
                 {
                     let in_window = if let (Some(start_week), Some(end_week)) = (
-                        window.start_week(),
-                        window.end_week(),
+                        timeline.start_week(),
+                        timeline.end_week(),
                     ) {
                         if start_week <= end_week {
                             w >= start_week && w <= end_week
@@ -67,6 +67,8 @@ pub async fn harvest_timeline(
     })
 }
 
+// NOTE: This function assumes that taxa is a list of taxa that have only a
+//  single regional_status: the region we're displaying the table for
 #[component]
 pub async fn regional_taxa_table(
     cx: &Cx,
@@ -75,24 +77,28 @@ pub async fn regional_taxa_table(
     #[default] attrs: Attributes,
     #[default] child: Child<'_>,
 ) -> topcoat::Result<impl View> {
-    let items: Vec<_> = taxa
-        .iter()
-        .filter_map(|taxon| {
-            taxon.regional_statuses.get().first().map(|rts| {
-                (
-                    taxon.complete_name.clone(),
-                    href!(taxa::details, taxa::TaxonId(taxon.id)).resolve(cx),
-                    rts.into(),
-                )
-            })
-        })
-        .collect();
     Ok(view! {
         harvest_table(
-            items: &items,
-            current_doy: current_doy,
             attrs: attrs,
-            child: child
+            for taxon in taxa {
+                if let Some(timeline) = taxon.regional_statuses.get().first(){
+                harvest_table_row(
+                    harvest_table_row_header(
+                        <span class="latin"><a href=(href!(taxa::details, taxa::TaxonId(taxon.id)))>(&taxon.complete_name)</a></span>
+                        <div class="flex items-center gap-4">
+                            if let Some(origin) = timeline.origin {
+                                origin_badge(origin: origin)
+                            }
+                            if let Some(status) = timeline.conservation_status {
+                                conservation_status_badge(status: status)
+                            }
+                        </div>
+                    )
+                    harvest_table_row_timeline(timeline: &timeline.harvest_window, current_doy: current_doy)
+                )
+                }
+            }
+            (child)
         )
     })
 }
@@ -105,31 +111,80 @@ pub async fn taxon_regional_table(
     #[default] attrs: Attributes,
     #[default] child: Child<'_>,
 ) -> topcoat::Result<impl View> {
-    let items: Vec<_> = regions
-        .iter()
-        .map(|rts| {
-            let (region, window) = rts;
-            (
-                region.name.clone(),
-                href!(regions::overview, regions::RegionId(region.id)).resolve(cx),
-                window.clone(),
-            )
-        })
-        .collect();
     Ok(view! {
         harvest_table(
-            items: &items,
-            current_doy: current_doy,
-            attrs: attrs,
-            child: child
+            for (region, timeline) in regions {
+                harvest_table_row(
+                    harvest_table_row_header(
+                        <a href=(href!(regions::overview, regions::RegionId(region.id)))>(&region.name)</a>
+                        <div class="flex items-center gap-4">
+                            if let Some(origin) = timeline.origin {
+                                origin_badge(origin: origin)
+                            }
+                            if let Some(status) = timeline.conservation_status {
+                                conservation_status_badge(status: status)
+                            }
+                        </div>
+                    )
+                    harvest_table_row_timeline(timeline: &timeline.harvest_window, current_doy: current_doy)
+                )
+            }
+            (child)
         )
     })
 }
 
 #[component]
-pub async fn harvest_table(
-    items: &[(String, String, RegionHarvestWindowSummary)],
+pub async fn harvest_table_row(
+    #[default] mut attrs: Attributes,
+    #[default] child: Child<'_>,
+) -> topcoat::Result<impl View> {
+    Ok(view! {
+        <div class=(class!("flex flex-col gap-1 md:contents", attrs.remove("class"))) (attrs)>
+            (child)
+        </div>
+
+    })
+}
+
+#[component]
+pub async fn harvest_table_row_header(
+    #[default] mut attrs: Attributes,
+    #[default] child: Child<'_>,
+) -> topcoat::Result<impl View> {
+    Ok(view! {
+        <div class=(class!("flex gap-3 items-center w-full", attrs.remove("class"))) (attrs)>
+            (child)
+        </div>
+    })
+}
+
+#[component]
+pub async fn harvest_table_row_timeline(
+    timeline: &RegionalHarvestWindow,
     #[default] current_doy: Option<i16>,
+    #[default] mut attrs: Attributes,
+) -> topcoat::Result<impl View> {
+    Ok(view! {
+        <div class=(class!("flex h-full items-center gap-x-6", attrs.remove("class"))) (attrs)>
+            <div class="h-full w-120">
+                harvest_timeline(
+                    timeline: timeline,
+                    current_doy: current_doy
+                )
+            </div>
+            <div class="text-nowrap hidden md:block">
+                if timeline.start_doy.is_some()
+                    && timeline.end_doy.is_some() {
+                    (timeline.to_string())
+                }
+            </div>
+        </div>
+    })
+}
+
+#[component]
+pub async fn harvest_table(
     #[default] mut attrs: Attributes,
     #[default] child: Child<'_>,
 ) -> topcoat::Result<impl View> {
@@ -141,39 +196,7 @@ pub async fn harvest_table(
             ))
             (attrs)
         >
-            for item in items {
-                let name = &item.0;
-                let path = &item.1;
-                let rts = &item.2;
-                <div class="flex flex-col gap-1 md:contents">
-                    <div class="flex gap-3 items-center w-full">
-                        <span class="latin"><a href=(path)>(name)</a></span>
-                        <div class="flex items-center gap-4">
-                            if let Some(origin) = rts.origin {
-                                origin_badge(origin: origin)
-                            }
-                            if let Some(status) = rts.conservation_status {
-                                conservation_status_badge(status: status)
-                            }
-                        </div>
-                    </div>
-                    <div class="flex h-full items-center gap-x-6">
-                        <div class="h-full w-120">
-                            harvest_timeline(
-                                window: &rts.harvest_window,
-                                current_doy: current_doy
-                            )
-                        </div>
-                        <div class="text-nowrap hidden md:block">
-                            if rts.harvest_window.start_doy.is_some()
-                                && rts.harvest_window.end_doy.is_some() {
-                                (rts.harvest_window.to_string())
-                            }
-                        </div>
-                    </div>
-                </div>
-            }
-            <div class="md:col-span-2">(child)</div>
+            (child)
         </div>
     })
 }

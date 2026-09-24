@@ -678,7 +678,7 @@ pub async fn taxon_status(cx: &Cx) -> topcoat::Result<impl View> {
         <dd>
             <div class="flex h-full items-center gap-x-6">
                 harvest_timeline(
-                    window: &rts.harvest_window,
+                    timeline: &rts.harvest_window,
                     attrs: attributes! { class="w-md" }
                 )
                 (rts.harvest_window.to_string())
