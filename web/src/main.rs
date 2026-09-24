@@ -38,6 +38,7 @@ mod propagation;
 mod regions;
 mod tasks;
 mod taxa;
+mod users;
 mod util;
 
 #[tokio::main]

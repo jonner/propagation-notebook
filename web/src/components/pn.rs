@@ -25,6 +25,7 @@ use crate::{
     context::{current_user, db},
     mdi,
     taxa::{self, TaxonId},
+    users,
     util::{ModifyOffset, PageState},
 };
 
@@ -319,6 +320,19 @@ pub async fn user_menu(cx: &Cx) -> topcoat::Result<impl View> {
                         )
                         dropdown_menu_content(
                             alignment: DropdownMenuAlignment::Right,
+                            dropdown_menu_label(
+                                "Logged in as "
+                                (&user.username)
+                            )
+                            dropdown_menu_separator()
+                            dropdown_menu_navigation_item(
+                                attrs: attributes! {
+                                    href=(href!(users::profile))
+                                    type="button"
+                                    @click=$(|_e: Event| menu_open.set(false))
+                                },
+                                "Profile"
+                            )
                             dropdown_menu_item(
                                 attrs: attributes! {
                                     type="submit"

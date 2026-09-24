@@ -60,7 +60,7 @@ pub async fn delete_session(cx: &Cx) -> topcoat::Result<()> {
     Ok(())
 }
 
-async fn require_user(cx: &Cx) -> topcoat::Result<&User, UnauthorizedError> {
+pub async fn require_user(cx: &Cx) -> topcoat::Result<&User, UnauthorizedError> {
     load_session(cx).await.ok_or_unauthorized().and_then(|val| {
         val.as_ref()
             .map(|session| session.user.get())
