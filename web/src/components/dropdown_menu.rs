@@ -160,6 +160,15 @@ pub async fn dropdown_menu_item(
     })
 }
 
+/// One action in a [`dropdown_menu_content`], rendered as a `<a>`.
+#[component]
+pub async fn dropdown_menu_navigation_item(
+    #[default] mut attrs: Attributes,
+    #[default] child: Child<'_>,
+) -> Result<impl View> {
+    Ok(view! { <a class=(class!(ITEM, attrs.remove("class"))) (attrs)>(child)</a> })
+}
+
 /// A nested submenu placed among the items of a [`dropdown_menu_content`].
 ///
 /// Like the [`dropdown_menu`] itself it is built on `<details>`, so clicking

@@ -289,6 +289,7 @@ pub async fn week_navigator(
 pub async fn user_menu(cx: &Cx) -> topcoat::Result<impl View> {
     let uri = uri(cx);
     let login_href = href!(login);
+    let menu_open = signal(cx, || false);
     Ok(view! {
         if !login_href.is_current(cx) {
             <li class="ml-auto">
