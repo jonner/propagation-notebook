@@ -301,8 +301,15 @@ pub async fn user_menu(cx: &Cx) -> topcoat::Result<impl View> {
                         class="hidden"
                     ></form>
                     dropdown_menu(
+                        attrs: attributes! { :open=$(menu_open.get()) },
                         dropdown_menu_trigger(
-                            attrs: attributes! { class="flex" },
+                            attrs: attributes! {
+                                class="flex"
+                                @click=$(|e: Event| {
+                                    e.prevent_default();
+                                    menu_open.toggle();
+                                })
+                            },
                             avatar(
                                 attrs: attributes! { class="me-2 bg-background/60" },
                                 size: AvatarSize::Sm,
@@ -313,7 +320,12 @@ pub async fn user_menu(cx: &Cx) -> topcoat::Result<impl View> {
                         dropdown_menu_content(
                             alignment: DropdownMenuAlignment::Right,
                             dropdown_menu_item(
-                                attrs: attributes! { type="submit" class="text-destructive" form="logoutForm" },
+                                attrs: attributes! {
+                                    type="submit"
+                                    class="text-destructive"
+                                    form="logoutForm"
+                                    @click=$(|_e: Event| menu_open.set(false))
+                                },
                                 "Log Out"
                             )
                         )
