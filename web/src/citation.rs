@@ -8,7 +8,7 @@ use topcoat::{
 use crate::context::db;
 path_param!(pub citation_id: u64, error = bad_request);
 
-#[page("/citation/{citation_id}")]
+#[page("/citations/{citation_id}")]
 pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
     let mut db = db(cx);
     let id = path_param::<CitationId>(cx)?;
