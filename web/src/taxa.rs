@@ -14,7 +14,7 @@ use topcoat::{
         error::{RouterErrorExt, redirect},
         href, page, path_param, query_params,
     },
-    runtime::procedure,
+    runtime::{Event, procedure, signal},
     view::{View, attributes, component, error_boundary, suspense, view},
 };
 use tracing::trace;
@@ -26,6 +26,7 @@ use crate::{
         breadcrumb::*,
         button::button,
         citations::citation_list,
+        dropdown_menu::*,
         harvest::taxon_regional_table,
         input::input,
         pn::{
@@ -609,6 +610,33 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                 attrs: attributes! { class="mx-3" },
                 (taxon.rank.to_string())
             )
+            if let Some(user) = user {
+                if user.has_permission(PermissionCode::TaxonSync) {
+                    let menu_open = signal(cx, || false);
+                    // FIXME: use integers in topcoat 0.11
+                    let idstr = taxon.id.to_string();
+                    dropdown_menu(
+                        attrs: attributes! { class="ms-auto" :open=$(menu_open.get()) },
+                        dropdown_menu_trigger(icon(data: crate::mdi::DOTS_VERTICAL))
+                        dropdown_menu_content(
+                            alignment: DropdownMenuAlignment::Right,
+                            if user.has_permission(PermissionCode::TaxonSync) {
+                                dropdown_menu_item(
+                                    attrs: attributes! {
+                                        @click=$(async |e: Event| {
+                                            e.prevent_default();
+                                            let fut = sync_image(idstr);
+                                            menu_open.set(false);
+                                            fut.await;
+                                        })
+                                    },
+                                    "Sync Image"
+                                )
+                            }
+                        )
+                    )
+                }
+            }
         </h1>
         <div class="flex flex-col gap-4">
             if let Some(photo) = taxon.photo.get() {
@@ -862,24 +890,6 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                     </ul>
                 </div>
             </section>
-            if let Some(user) = user {
-                if user.has_permission(PermissionCode::TaxonSync) {
-                    <section>
-                        <h2>"Administration"</h2>
-                        <div>
-                            let idstr = taxon.id.to_string();
-                            button(
-                                attrs: attributes! {
-                                    @click=$(async |_e: topcoat::runtime::Event| {
-                                        sync_image(idstr).await
-                                    })
-                                },
-                                "Sync Image"
-                            )
-                        </div>
-                    </section>
-                }
-            }
         </div>
     })
 }
@@ -1084,6 +1094,7 @@ pub async fn note_details(cx: &Cx) -> topcoat::Result<impl View> {
     })
 }
 
+// FIXME: Use u64 in topcoat 0.11
 #[procedure]
 pub async fn sync_image(cx: &Cx, taxon_id: String) -> topcoat::Result<()> {
     require_user_with_permission(cx, PermissionCode::TaxonSync).await?;
