@@ -15,7 +15,7 @@ use topcoat::{
         href, page, path_param, query_params,
     },
     runtime::procedure,
-    view::{View, attributes, view},
+    view::{View, attributes, component, error_boundary, suspense, view},
 };
 use tracing::trace;
 
@@ -482,32 +482,29 @@ impl From<RegionalTaxonStatus> for RegionHarvestWindowSummary {
 pub enum ChildRegionError {
     #[error("Too many children to display child regions")]
     TooManyChildren,
-    #[error(transparent)]
-    Toasty(#[from] toasty::Error),
 }
 
 // Look up the regional statuses for all descendant taxa of this taxon and
 // return regional status information that encapsulates all  descendant taxa
-pub async fn descendant_region_statuses(
-    db: &mut toasty::Db,
-    parent: &Taxon,
-) -> Result<Vec<(Region, RegionHarvestWindowSummary)>, ChildRegionError> {
+#[component]
+pub async fn descendant_region_statuses(cx: &Cx, parent_id: u64) -> topcoat::Result<impl View> {
+    let mut db = db(cx);
     let filter = RegionalTaxonStatus::filter(
         RegionalTaxonStatus::fields()
             .taxon()
             .ancestors()
-            .any(Taxon::fields().id().eq(parent.id)),
+            .any(Taxon::fields().id().eq(parent_id)),
     );
 
-    let n = filter.clone().count().exec(db).await?;
+    let n = filter.clone().count().exec(&mut db).await?;
 
     if n > 50 {
-        return Err(ChildRegionError::TooManyChildren);
+        return Err(ChildRegionError::TooManyChildren.into());
     }
 
     let all_regional_statuses = filter
         .include(RegionalTaxonStatus::fields().region())
-        .exec(db)
+        .exec(&mut db)
         .await?
         .into_iter()
         .fold(
@@ -562,7 +559,7 @@ pub async fn descendant_region_statuses(
         }
         res
     });
-    Ok(regions)
+    Ok(view! { taxon_regional_table(regions: &regions) })
 }
 
 #[page("/taxa/{taxon_id}")]
@@ -591,16 +588,6 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
         .await
         .ok_or_not_found()?;
     let user = current_user(cx).await;
-    let regions = match descendant_region_statuses(&mut db, &taxon).await {
-        Err(ChildRegionError::TooManyChildren) => Ok(taxon
-            .regional_statuses
-            .get()
-            .iter()
-            .map(|rts| (rts.region.get().clone(), rts.into()))
-            .collect()),
-        Err(e) => Err(e),
-        Ok(val) => Ok(val),
-    }?;
 
     Ok(view! {
         let ancestors = taxon
@@ -797,14 +784,47 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                 </section>
             }
 
-            if !regions.is_empty() {
-                <section>
-                    <h2>"Regions"</h2>
-                    <div>
-                        taxon_regional_table(regions: &regions)
-                    </div>
-                </section>
-            }
+            <section>
+                <h2>"Regions"</h2>
+                <div>
+                    error_boundary(
+                        fallback: |e| {
+                            let too_many_children = match e.downcast_ref::<
+                                ChildRegionError,
+                            >() {
+                                Some(e) => matches!(e, ChildRegionError::TooManyChildren),
+                                _ => false,
+                            };
+
+                            Ok(
+                                view! {
+                                    let regions = taxon
+                                        .regional_statuses
+                                        .get()
+                                        .iter()
+                                        .map(|rts| (rts.region.get().clone(), rts.into()))
+                                        .collect::<Vec<(Region, RegionHarvestWindowSummary)>>();
+                                    if regions.is_empty() {
+                                        <p class="text-muted-foreground">
+                                            if too_many_children {
+                                                "Too many descendants. Select a child taxa to see regional status."
+                                            } else {
+                                                "None"
+                                            }
+                                        </p>
+                                    } else {
+                                        taxon_regional_table(regions: &regions)
+                                    }
+                                },
+                            )
+                        },
+                        suspense(
+                            fallback: view! { "Loading..." },
+                            descendant_region_statuses(parent_id: taxon.id)
+                        )
+                    )
+                </div>
+            </section>
             if !taxon.synonyms.get().is_empty() {
                 <section>
                     <h2>"Synonyms"</h2>
