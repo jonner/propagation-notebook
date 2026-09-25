@@ -36,9 +36,17 @@ file = "src/components/dropdown_menu.rs"
 hash = "sha256:d3d877b061dc66831afe9185bcdd76a6fcb4a830d42c19079369b807d75f5cb4"
 file = "src/components/input.rs"
 
+[registries.topcoat.components.label]
+hash = "sha256:9d31d6ff7de757d823f3c304c1b49cc9dad56ca24676505f4f4eda4826c7de22"
+file = "src/components/label.rs"
+
 [registries.topcoat.components.pagination]
 hash = "sha256:04c96da7669f28f9b3adb8637080da695d22a947cbef574027b22c78fe7b9687"
 file = "src/components/pagination.rs"
+
+[registries.topcoat.components.textarea]
+hash = "sha256:9cf7ce740191227bde90bf6e085abacca6e90e3b16385c6ace7d455fc032709d"
+file = "src/components/textarea.rs"
 
 [registries.topcoat.components.tooltip]
 hash = "sha256:257cc477e0879964a6374290e7b8dc3f2b8026dcd1dcbaab6d48530e99f0dcfc"

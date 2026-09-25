@@ -10,3 +10,5 @@ pub mod input;
 pub mod pagination;
 pub mod pn;
 pub mod tooltip;
+pub mod label;
+pub mod textarea;

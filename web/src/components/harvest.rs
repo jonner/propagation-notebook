@@ -120,9 +120,7 @@ pub async fn taxon_regional_table(
 ) -> topcoat::Result<impl View> {
     Ok(view! {
         if regions.is_empty() {
-            <div class="text-muted-foreground">
-                "None"
-            </div>
+            <div class="text-muted-foreground">"None"</div>
         } else {
             harvest_table(
                 attrs: attrs,
