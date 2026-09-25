@@ -2,7 +2,6 @@ use toasty::{Db, Deferred};
 
 use crate::{
     cleaning::CleaningProcedure,
-    dto::ObjectReference,
     propagation::PropagationProcedure,
     taxonomy::{TaxonNote, TaxonPropagationProcedure},
 };
@@ -10,6 +9,8 @@ use crate::{
 pub mod dto {
     use serde::Serialize;
     use serde_with::skip_serializing_none;
+
+    use crate::dto::ObjectReference;
 
     #[skip_serializing_none]
     #[derive(Serialize, Clone, Debug)]
@@ -115,6 +116,15 @@ pub mod dto {
             value.clone().into()
         }
     }
+
+    impl From<&super::Citation> for ObjectReference {
+        fn from(value: &super::Citation) -> Self {
+            Self {
+                id: value.id,
+                name: Some(value.title.clone()),
+            }
+        }
+    }
 }
 
 #[derive(Debug, Clone, toasty::Model)]
@@ -192,15 +202,6 @@ impl Citation {
         .into_iter()
         .flatten()
         .collect()
-    }
-}
-
-impl From<&Citation> for ObjectReference {
-    fn from(value: &Citation) -> Self {
-        Self {
-            id: value.id,
-            name: Some(value.title.clone()),
-        }
     }
 }
 
