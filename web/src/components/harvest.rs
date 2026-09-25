@@ -119,32 +119,39 @@ pub async fn taxon_regional_table(
     #[default] child: Child<'_>,
 ) -> topcoat::Result<impl View> {
     Ok(view! {
-        harvest_table(
-            for (region, timeline) in regions {
-                harvest_table_row(
-                    harvest_table_row_header(
-                        <a
-                            href=(href!(regions::overview, regions::RegionId(region.id)))
-                        >
-                            (&region.name)
-                        </a>
-                        <div class="flex items-center gap-4">
-                            if let Some(origin) = timeline.origin {
-                                origin_badge(origin: origin)
-                            }
-                            if let Some(status) = timeline.conservation_status {
-                                conservation_status_badge(status: status)
-                            }
-                        </div>
+        if regions.is_empty() {
+            <div class="text-muted-foreground">
+                "None"
+            </div>
+        } else {
+            harvest_table(
+                attrs: attrs,
+                for (region, timeline) in regions {
+                    harvest_table_row(
+                        harvest_table_row_header(
+                            <a
+                                href=(href!(regions::overview, regions::RegionId(region.id)))
+                            >
+                                (&region.name)
+                            </a>
+                            <div class="flex items-center gap-4">
+                                if let Some(origin) = timeline.origin {
+                                    origin_badge(origin: origin)
+                                }
+                                if let Some(status) = timeline.conservation_status {
+                                    conservation_status_badge(status: status)
+                                }
+                            </div>
+                        )
+                        harvest_table_row_timeline(
+                            timeline: &timeline.harvest_window,
+                            current_doy: current_doy
+                        )
                     )
-                    harvest_table_row_timeline(
-                        timeline: &timeline.harvest_window,
-                        current_doy: current_doy
-                    )
-                )
-            }
-            (child)
-        )
+                }
+                (child)
+            )
+        }
     })
 }
 

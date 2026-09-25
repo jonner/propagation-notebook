@@ -804,15 +804,12 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                                         .iter()
                                         .map(|rts| (rts.region.get().clone(), rts.into()))
                                         .collect::<Vec<(Region, RegionHarvestWindowSummary)>>();
-                                    if regions.is_empty() {
+                                    if too_many_children {
                                         <p class="text-muted-foreground">
-                                            if too_many_children {
-                                                "Too many descendants. Select a child taxa to see regional status."
-                                            } else {
-                                                "None"
-                                            }
+                                            "Too many descendants. Select a child taxa to see regional status."
                                         </p>
                                     } else {
+                                        // use the pre-fetched taxon-level data
                                         taxon_regional_table(regions: &regions)
                                     }
                                 },
