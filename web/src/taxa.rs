@@ -691,7 +691,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                     <div>
                         <ul>
                             for syn in taxon.synonyms.get() {
-                                <li>(&syn.complete_name)</li>
+                                <li><span class="latin">(&syn.complete_name)</span></li>
                             }
                         </ul>
                     </div>
