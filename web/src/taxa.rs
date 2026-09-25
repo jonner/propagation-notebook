@@ -498,7 +498,7 @@ pub async fn descendant_region_statuses(cx: &Cx, parent_id: u64) -> topcoat::Res
 
     let n = filter.clone().count().exec(&mut db).await?;
 
-    if n > 50 {
+    if n > 500 {
         return Err(ChildRegionError::TooManyChildren.into());
     }
 
