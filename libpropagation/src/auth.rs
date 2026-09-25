@@ -216,6 +216,10 @@ pub enum PermissionCode {
     TaxonSync,
     #[column(variant = "citation:create")]
     CitationCreate,
+    #[column(variant = "citation:edit")]
+    CitationEdit,
+    #[column(variant = "citation:delete")]
+    CitationDelete,
 }
 
 pub fn hash_password(pw: &str) -> Result<String, AuthError> {
