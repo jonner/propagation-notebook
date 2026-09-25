@@ -81,21 +81,28 @@ pub async fn regional_taxa_table(
         harvest_table(
             attrs: attrs,
             for taxon in taxa {
-                if let Some(timeline) = taxon.regional_statuses.get().first(){
-                harvest_table_row(
-                    harvest_table_row_header(
-                        <span class="latin"><a href=(href!(taxa::details, taxa::TaxonId(taxon.id)))>(&taxon.complete_name)</a></span>
-                        <div class="flex items-center gap-4">
-                            if let Some(origin) = timeline.origin {
-                                origin_badge(origin: origin)
-                            }
-                            if let Some(status) = timeline.conservation_status {
-                                conservation_status_badge(status: status)
-                            }
-                        </div>
+                if let Some(timeline) = taxon.regional_statuses.get().first() {
+                    harvest_table_row(
+                        harvest_table_row_header(
+                            <span class="latin">
+                                <a href=(href!(taxa::details, taxa::TaxonId(taxon.id)))>
+                                    (&taxon.complete_name)
+                                </a>
+                            </span>
+                            <div class="flex items-center gap-4">
+                                if let Some(origin) = timeline.origin {
+                                    origin_badge(origin: origin)
+                                }
+                                if let Some(status) = timeline.conservation_status {
+                                    conservation_status_badge(status: status)
+                                }
+                            </div>
+                        )
+                        harvest_table_row_timeline(
+                            timeline: &timeline.harvest_window,
+                            current_doy: current_doy
+                        )
                     )
-                    harvest_table_row_timeline(timeline: &timeline.harvest_window, current_doy: current_doy)
-                )
                 }
             }
             (child)
@@ -116,7 +123,11 @@ pub async fn taxon_regional_table(
             for (region, timeline) in regions {
                 harvest_table_row(
                     harvest_table_row_header(
-                        <a href=(href!(regions::overview, regions::RegionId(region.id)))>(&region.name)</a>
+                        <a
+                            href=(href!(regions::overview, regions::RegionId(region.id)))
+                        >
+                            (&region.name)
+                        </a>
                         <div class="flex items-center gap-4">
                             if let Some(origin) = timeline.origin {
                                 origin_badge(origin: origin)
@@ -126,7 +137,10 @@ pub async fn taxon_regional_table(
                             }
                         </div>
                     )
-                    harvest_table_row_timeline(timeline: &timeline.harvest_window, current_doy: current_doy)
+                    harvest_table_row_timeline(
+                        timeline: &timeline.harvest_window,
+                        current_doy: current_doy
+                    )
                 )
             }
             (child)
@@ -140,10 +154,12 @@ pub async fn harvest_table_row(
     #[default] child: Child<'_>,
 ) -> topcoat::Result<impl View> {
     Ok(view! {
-        <div class=(class!("flex flex-col gap-1 md:contents", attrs.remove("class"))) (attrs)>
+        <div
+            class=(class!("flex flex-col gap-1 md:contents", attrs.remove("class")))
+            (attrs)
+        >
             (child)
         </div>
-
     })
 }
 
@@ -153,7 +169,10 @@ pub async fn harvest_table_row_header(
     #[default] child: Child<'_>,
 ) -> topcoat::Result<impl View> {
     Ok(view! {
-        <div class=(class!("flex gap-3 items-center w-full", attrs.remove("class"))) (attrs)>
+        <div
+            class=(class!("flex gap-3 items-center w-full", attrs.remove("class")))
+            (attrs)
+        >
             (child)
         </div>
     })
@@ -166,16 +185,15 @@ pub async fn harvest_table_row_timeline(
     #[default] mut attrs: Attributes,
 ) -> topcoat::Result<impl View> {
     Ok(view! {
-        <div class=(class!("flex h-full items-center gap-x-6", attrs.remove("class"))) (attrs)>
+        <div
+            class=(class!("flex h-full items-center gap-x-6", attrs.remove("class")))
+            (attrs)
+        >
             <div class="h-full w-120">
-                harvest_timeline(
-                    timeline: timeline,
-                    current_doy: current_doy
-                )
+                harvest_timeline(timeline: timeline, current_doy: current_doy)
             </div>
             <div class="text-nowrap hidden md:block">
-                if timeline.start_doy.is_some()
-                    && timeline.end_doy.is_some() {
+                if timeline.start_doy.is_some() && timeline.end_doy.is_some() {
                     (timeline.to_string())
                 }
             </div>
