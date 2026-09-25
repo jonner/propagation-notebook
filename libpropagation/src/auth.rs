@@ -214,6 +214,8 @@ pub enum PermissionCode {
     // cleaning:vote,
     #[column(variant = "taxon:sync")]
     TaxonSync,
+    #[column(variant = "citation:create")]
+    CitationCreate,
 }
 
 pub fn hash_password(pw: &str) -> Result<String, AuthError> {
