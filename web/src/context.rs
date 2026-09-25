@@ -5,17 +5,19 @@ use topcoat::{
     router::error::{RouterErrorExt, UnauthorizedError, forbidden},
     session,
 };
+use tracing::{debug, warn};
 
 pub fn db(cx: &Cx) -> toasty::Db {
     app_context::<toasty::Db>(cx).clone()
 }
 
 pub async fn current_user(cx: &Cx) -> Option<&User> {
-    if let Ok(Some(session)) = load_session(cx).await {
-        Some(session.user.get())
-    } else {
-        None
-    }
+    load_session(cx)
+        .await
+        .inspect_err(|e| warn!("{e}"))
+        .map(|opt_session| opt_session.as_ref().map(|session| session.user.get()))
+        .ok()
+        .flatten()
 }
 
 pub async fn persist_session(cx: &Cx, user: &mut User) -> topcoat::Result<()> {
@@ -30,17 +32,23 @@ pub async fn persist_session(cx: &Cx, user: &mut User) -> topcoat::Result<()> {
 pub async fn load_session(cx: &Cx) -> topcoat::Result<Option<Session>> {
     let hash = session::token_hash(cx).await?;
     if let Some(hash) = hash {
+        debug!(?hash, "User sent a session hash");
         let db_session = Session::filter_by_token_hash(Vec::from(*hash))
             .include(Session::fields().user().roles())
             .include(Session::fields().user().permissions())
             .one()
             .exec(&mut db(cx))
             .await?;
+        debug!(
+            ?db_session.id,
+            ?db_session.user_id, "Found session in the database"
+        );
         // refresh the session if it's near expiration
         if (jiff::Timestamp::now().duration_until(db_session.expires_at))
             < SignedDuration::from_hours(7 * 24)
             && let Some(topcoat_session) = session::refresh(cx).await?
         {
+            debug!("Refreshing session token that is nearing expiration");
             let timestamp: jiff::Timestamp = topcoat_session.expires_at.try_into()?;
             Session::update_by_token_hash(Vec::from(*topcoat_session.token_hash))
                 .expires_at(timestamp)
