@@ -116,6 +116,8 @@
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-destructive: var(--destructive);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
   --color-ring: var(--ring);
@@ -136,6 +138,8 @@
   --primary-foreground: oklch(0.985 0.003 260);
   --destructive: oklch(0.55 0.2 27);
   --destructive-foreground: oklch(0.99 0.012 27);
+  --warning: var(--color-orange-100);
+  --warning-foreground: var(--color-orange-700);
   --border: oklch(0.9 0.008 260);
   --ring: var(--color-mallard);
   --shadow-xs: 0 1px 2px oklch(0.24 0.02 260 / 12%);
@@ -246,7 +250,7 @@
     @apply px-1 rounded-lg text-xs font-bold;
   }
 
-  .error, .endangered {
+  .endangered {
     @apply text-destructive-foreground bg-destructive;
   }
 
@@ -258,7 +262,7 @@
     @apply bg-orange-500 text-orange-200;
   }
 
-  .warning, .specialconcern {
+  .specialconcern {
     @apply bg-amber-300 text-amber-700;
   }
 
