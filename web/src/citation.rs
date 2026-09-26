@@ -1,30 +1,65 @@
-use libpropagation::citation::Citation;
+use libpropagation::{auth::PermissionCode, citation::Citation};
 use serde::Deserialize;
 use topcoat::{
     context::Cx,
+    icon::icon,
     router::{
         content::Form,
         error::{RouterErrorExt, SeeOther, see_other},
         href, page, path_param, route,
     },
+    runtime::{procedure, signal},
     view::{View, attributes, view},
 };
 
 use crate::{
-    components::{button::button, input::input, label::label},
-    context::{db, require_user_with_permission},
+    components::{
+        alert_dialog::*, button::*, dialog::*, dropdown_menu::*, input::input, label::label,
+    },
+    context::{current_user, db, require_user_with_permission},
+    mdi,
 };
+
 path_param!(pub citation_id: u64, error = bad_request);
 
 #[page("/citations/{citation_id}")]
 pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
+    let user = current_user(cx).await;
     let mut db = db(cx);
     let id = path_param::<CitationId>(cx)?;
     let citation = Citation::get_by_id(&mut db, id).await.ok_or_not_found()?;
+    let delete_dialog_open = signal(cx, || false);
     Ok(view! {
-        <h1>
+        <h1 class="flex items-center">
             "Citation "
             (citation.id)
+            if let Some(user) = user {
+                let menu_open = signal(cx, || false);
+                if user.has_permission(PermissionCode::CitationEdit)
+                    || user.has_permission(PermissionCode::CitationDelete) {
+                    dropdown_menu(
+                        attrs: attributes! { class="ms-auto" :open=$(menu_open.get()) },
+                        dropdown_menu_trigger(icon(data: mdi::DOTS_VERTICAL))
+                        dropdown_menu_content(
+                            if user.has_permission(PermissionCode::CitationDelete) {
+                                dropdown_menu_item("Edit")
+                            }
+                            if user.has_permission(PermissionCode::CitationDelete) {
+                                dropdown_menu_item(
+                                    attrs: attributes! {
+                                        @click=$(|_e: topcoat::runtime::Event| {
+                                            delete_dialog_open.set(true);
+                                            menu_open.set(false);
+                                        })
+                                        class="text-destructive"
+                                    },
+                                    "Delete"
+                                )
+                            }
+                        )
+                    )
+                }
+            }
         </h1>
         <dt>"Title"</dt>
         <dd>(citation.title)</dd>
@@ -52,7 +87,49 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                 (date.to_string())
             }
         </dd>
+        alert_dialog(
+            open: delete_dialog_open.get(),
+            dialog_content(
+                dialog_header(
+                    dialog_title("Delete this citation?")
+                    dialog_description("This action is not reversible")
+                )
+                dialog_footer(
+                    button(
+                        attrs: attributes! {
+                            @click=$(|e: topcoat::runtime::Event| {
+                                e.prevent_default();
+                                delete_dialog_open.set(false)
+                            })
+                        },
+                        "Cancel"
+                    )
+                    let idstr = citation.id.to_string();
+                    button(
+                        variant: ButtonVariant::Destructive,
+                        attrs: attributes! {
+                            @click=$(async |e: topcoat::runtime::Event| {
+                                e.prevent_default();
+                                delete_dialog_open.set(false);
+                                delete_citation(idstr).await;
+                                //FIXME: Handle response
+                            })
+                        },
+                        "Delete"
+                    )
+                )
+            )
+        )
     })
+}
+
+// FIXME: use integer when topcoat 0.11 comes
+#[procedure]
+pub async fn delete_citation(cx: &Cx, id: String) -> topcoat::Result<()> {
+    let _ = require_user_with_permission(cx, PermissionCode::CitationDelete).await?;
+    let id = id.parse::<u64>()?;
+    Citation::delete_by_id(&mut db(cx), id).await?;
+    Ok(())
 }
 
 #[derive(Deserialize, Debug)]

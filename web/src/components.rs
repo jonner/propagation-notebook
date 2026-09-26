@@ -12,3 +12,5 @@ pub mod pn;
 pub mod tooltip;
 pub mod label;
 pub mod textarea;
+pub mod alert_dialog;
+pub mod dialog;
