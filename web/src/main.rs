@@ -1,5 +1,7 @@
+use std::hash::{DefaultHasher, Hash, Hasher};
+
 use topcoat::{
-    asset::{AssetBundle, RouterBuilderAssetExt, asset_config},
+    asset::{Asset, AssetBundle, RouterBuilderAssetExt, asset_config},
     context::Cx,
     cookie::RouterBuilderCookieExt,
     icon::icon,
@@ -17,7 +19,9 @@ use topcoat::{
 use tracing::debug;
 
 use crate::{
-    assets::{FONT_BODY, FONT_HEAD, HEADER_IMAGES, LEAFLET_CSS, LEAFLET_JS, mdi},
+    assets::{
+        FONT_BODY, FONT_HEAD, HEADER_IMAGES, HYDRASTIS_CANADENSIS, LEAFLET_CSS, LEAFLET_JS, mdi,
+    },
     auth::login,
     components::{
         button::*,
@@ -63,19 +67,35 @@ async fn main() -> Result<(), Error> {
     Ok(())
 }
 
+// get a stable but "random" header image for each page so we have a variety of
+// headers but the header of a particular page won't change on reload. Hash the
+// url and convert it to an integer and use that to index into the header image
+// collection. Special case the landing pages (home, login) to a particular
+// image.
+fn header_image_for_page(cx: &Cx) -> &Asset {
+    let uri = uri(cx);
+    if href!(home).is_current(cx) || href!(login).is_current(cx) {
+        return &HYDRASTIS_CANADENSIS;
+    }
+    let mut hasher = DefaultHasher::new();
+    uri.hash(&mut hasher);
+    let hash_value = hasher.finish();
+    HEADER_IMAGES[(hash_value as usize) % HEADER_IMAGES.len()]
+}
+
 not_found!("/");
 
 #[layout("/")]
 async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
-    let header_bg = HEADER_IMAGES[rand::random_range(0..HEADER_IMAGES.len())];
     let uri = uri(cx);
+    let header_bg = header_image_for_page(cx);
 
     Ok(view! {
         <!DOCTYPE html>
         <html
             style=(format!(
                 "--background-image:url('{}')",
-                asset_config(cx).resolve(header_bg),
+                asset_config(cx).resolve(*header_bg),
             ))
         >
             <head>
