@@ -527,26 +527,21 @@ pub async fn descendant_region_statuses(cx: &Cx, parent_id: u64) -> topcoat::Res
                                 .flatten()
                                 .copied()
                                 .max();
-                        e.origin = match (e.origin, item.origin) {
-                            (None, None) => None,
-                            (None, Some(b)) => Some(b),
-                            (Some(a), None) => Some(a),
-                            (Some(a), Some(b)) => {
-                                if a == b {
-                                    Some(a)
-                                } else {
-                                    Some(Origin::Unknown)
-                                }
-                            }
-                        };
-                        e.conservation_status = e.conservation_status.max(item.conservation_status);
+                        if item.taxon_id == parent_id {
+                            e.origin = item.origin;
+                            e.conservation_status = item.conservation_status;
+                        }
                     })
                     .or_insert((
                         item.region.into_inner(),
                         RegionHarvestWindowSummary {
                             harvest_window: item.harvest_window,
-                            origin: item.origin,
-                            conservation_status: item.conservation_status,
+                            origin: (item.taxon_id == parent_id)
+                                .then_some(item.origin)
+                                .flatten(),
+                            conservation_status: (item.taxon_id == parent_id)
+                                .then_some(item.conservation_status)
+                                .flatten(),
                         },
                     ));
                 accum
