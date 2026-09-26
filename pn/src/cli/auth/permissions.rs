@@ -1,6 +1,8 @@
+use std::collections::HashSet;
+
 use crate::{
     cli::OutputFormat,
-    util::dialog::confirm,
+    util::{dialog::confirm, enum_to_string},
     views::{
         JsonView, YamlView,
         auth::{PermissionDetailsView, PermissionListView},
@@ -12,6 +14,7 @@ use libpropagation::auth::{
     dto::{PermissionCompact, PermissionDetails},
 };
 
+use strum::IntoEnumIterator;
 use toasty::Db;
 use uuid::Uuid;
 
@@ -28,6 +31,15 @@ pub enum PermissionCommands {
         #[arg(long, short, help = "A description of the permission")]
         description: String,
     },
+    #[command(about = "Modify a permission in the database", alias = "edit")]
+    Modify {
+        #[arg(help = "A permission ID")]
+        id: Uuid,
+        #[arg(long, short, help = "A description of the permission")]
+        description: String,
+    },
+    #[command(about = "Add all missing permissions to the database")]
+    Fill,
     #[command(about = "Remove a permission from the database")]
     Remove {
         #[arg(help = "A permission ID")]
@@ -76,6 +88,33 @@ impl PermissionCommands {
                     OutputFormat::Yaml => YamlView::new(&permission).render()?,
                 };
                 println!("{output}");
+            }
+            PermissionCommands::Modify { id, description } => {
+                Permission::update_by_id(id)
+                    .description(description)
+                    .exec(db)
+                    .await?;
+                load_and_display_permission(id, db, format).await?;
+            }
+            PermissionCommands::Fill => {
+                let existing = Permission::all()
+                    .exec(db)
+                    .await?
+                    .into_iter()
+                    .map(|perm| perm.code)
+                    .collect::<HashSet<_>>();
+                let all_codes = PermissionCode::iter().collect::<HashSet<_>>();
+                let missing = all_codes.difference(&existing);
+                let mut query = Permission::create_many();
+                for code in missing {
+                    query = query.item(
+                        Permission::create()
+                            .code(code)
+                            .description(enum_to_string(&code)),
+                    );
+                }
+                let perms = query.exec(db).await?;
+                println!("Created {} rows", perms.len());
             }
             PermissionCommands::Remove { id, assumeyes } => {
                 if *assumeyes || {

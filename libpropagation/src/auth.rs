@@ -205,7 +205,9 @@ pub struct Permission {
     pub roles: Deferred<Vec<Role>>,
 }
 
-#[derive(Debug, Clone, toasty::Embed, PartialEq, clap::ValueEnum, Serialize)]
+#[derive(
+    Debug, Clone, toasty::Embed, PartialEq, Eq, clap::ValueEnum, Serialize, strum::EnumIter, Hash,
+)]
 pub enum PermissionCode {
     // ideas: note:create, note:edit, note:vote, propagation:create,
     // propagation:edit, propagation:vote, cleaning:create, cleaning:edit,
