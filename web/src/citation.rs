@@ -14,7 +14,13 @@ use topcoat::{
 
 use crate::{
     components::{
-        alert_dialog::*, button::*, dialog::*, dropdown_menu::*, input::input, label::label,
+        alert_dialog::*,
+        button::*,
+        dialog::*,
+        dropdown_menu::*,
+        input::input,
+        label::label,
+        pn::{info_hover_card, required_icon},
     },
     context::{current_user, db, require_user_with_permission},
     mdi,
@@ -178,87 +184,105 @@ pub async fn citation_form(
     #[default] child: Child<'_>,
 ) -> topcoat::Result<impl View> {
     Ok(view! {
-        <form class=(class!("flex flex-col gap-3", attrs.remove("class"))) (attrs)>
-            <div class="flex flex-col gap-1">
+        <form class=(class!("flex flex-col gap-6", attrs.remove("class"))) (attrs)>
+            <div class="flex flex-col gap-2">
                 label(
-                    "Title:"
-                    <span class="text-destructive">"*"</span>
+                    "Title"
+                    required_icon()
+                    info_hover_card(
+                        "Enter the title of the work being cited (e.g. article, web page, book, etc.)"
+                    )
                 )
                 input(
                     attrs: attributes! {
                         type="text"
                         name="title"
-                        placeholder="Enter the title of the work being cited (e.g. article, web page, book, etc.)"
                         value=(citation.map(|c| &c.title))
                     }
                 )
             </div>
             <div class="flex flex-col gap-1">
                 label(
-                    "Author:"
-                    <span class="text-destructive">"*"</span>
+                    "Author"
+                    required_icon()
+                    info_hover_card("The author of the work being cited")
                 )
                 input(
                     attrs: attributes! {
                         type="text"
                         name="author"
-                        placeholder="Enter the author of the work being cited"
                         value=(citation.map(|c| &c.author))
                     }
                 )
             </div>
             <div class="flex flex-col gap-1">
-                label("Containing work")
+                label(
+                    "Containing work"
+                    info_hover_card(
+                        "The name of the containing object (e.g. journal, project, website, etc.)"
+                    )
+                )
                 input(
                     attrs: attributes! {
                         type="text"
                         name="container_title"
-                        placeholder="Enter the name of the containing object (e.g. journal, project, website, etc.)"
                         value=(citation.and_then(|c| c.container_title.as_ref()))
                     }
                 )
             </div>
             <div class="flex flex-col gap-1">
-                label("Publication Year:")
+                label(
+                    "Publication Year"
+                    info_hover_card(
+                        "The year that the work being cited was published"
+                    )
+                )
                 input(
                     attrs: attributes! {
                         type="text"
                         name="publication_year"
-                        placeholder="Enter an optional publication year for the work being cited"
                         value=(citation.and_then(|c| c.publication_year))
                     }
                 )
             </div>
             <div class="flex flex-col gap-1">
-                label("Url:")
+                label(
+                    "URL"
+                    info_hover_card("An optional web address for the work being cited")
+                )
                 input(
                     attrs: attributes! {
                         type="text"
                         name="url"
-                        placeholder="Enter an optional url to the work being cited"
                         value=(citation.and_then(|c| c.url.as_ref()))
                     }
                 )
             </div>
             <div class="flex flex-col gap-1">
-                label("Digital Object Identifier (doi):")
+                label(
+                    "Digital Object Identifier (doi)"
+                    info_hover_card("An optional doi for the work being cited")
+                )
                 input(
                     attrs: attributes! {
                         type="text"
                         name="doi"
-                        placeholder="Enter an optional doi for the work being cited"
                         value=(citation.and_then(|c| c.doi.as_ref()))
                     }
                 )
             </div>
             <div class="flex flex-col gap-1">
-                label("Access Date:")
+                label(
+                    "Access Date"
+                    info_hover_card("The date that the work was last accessed")
+                )
                 input(
                     attrs: attributes! {
                         type="text"
                         name="access_date"
-                        placeholder="Enter the date that the work was last accessed"
-                        value=(citation.and_then(|c| c.access_date.map(|d| d.to_string())))
+                        value=(citation.and_then(
+                            |c| c.access_date.map(|d| d.to_string()),
+                        ))
                     }
                 )
             </div>

@@ -19,8 +19,8 @@ use uuid::Uuid;
 use crate::{
     auth::{LoginFormParams, do_logout, login},
     components::{
-        avatar::*, badge::*, breadcrumb::*, dropdown_menu::*, input::input, pagination::*,
-        tooltip::*,
+        avatar::*, badge::*, breadcrumb::*, dropdown_menu::*, hover_card::*, input::input,
+        pagination::*, tooltip::*,
     },
     context::{current_user, db},
     mdi,
@@ -505,5 +505,30 @@ pub async fn taxon_search_bar(
                 )
             </form>
         </div>
+    })
+}
+
+#[component]
+pub async fn info_hover_card(
+    #[default] attrs: Attributes,
+    #[default] child: Child<'_>,
+) -> topcoat::Result<impl View> {
+    Ok(view! {
+        hover_card(
+            attrs: attrs,
+            icon(data: mdi::INFORMATION_OUTLINE)
+            hover_card_content((child))
+        )
+    })
+}
+
+#[component]
+pub async fn required_icon(#[default] attrs: Attributes) -> topcoat::Result<impl View> {
+    Ok(view! {
+        hover_card(
+            attrs: attrs,
+            <span class="text-destructive">icon(data: mdi::REQUIRED)</span>
+            hover_card_content("Required")
+        )
     })
 }
