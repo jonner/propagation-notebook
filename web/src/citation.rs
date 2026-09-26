@@ -15,6 +15,7 @@ use topcoat::{
 use crate::{
     components::{
         alert_dialog::*,
+        breadcrumb::*,
         button::*,
         dialog::*,
         dropdown_menu::*,
@@ -36,44 +37,52 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
     let citation = Citation::get_by_id(&mut db, id).await.ok_or_not_found()?;
     let delete_dialog_open = signal(cx, || false);
     Ok(view! {
-        <h1 class="flex items-center">
-            "Citation "
-            (citation.id)
-            if let Some(user) = user {
-                let menu_open = signal(cx, || false);
-                if user.has_permission(PermissionCode::CitationEdit)
-                    || user.has_permission(PermissionCode::CitationDelete) {
-                    dropdown_menu(
-                        attrs: attributes! { class="ms-auto" :open=$(menu_open.get()) },
-                        dropdown_menu_trigger(icon(data: mdi::DOTS_VERTICAL))
-                        dropdown_menu_content(
-                            alignment: DropdownMenuAlignment::Right,
-                            if user.has_permission(PermissionCode::CitationDelete) {
-                                dropdown_menu_navigation_item(
-                                    attrs: attributes! {
-                                        href=(href!(modify, CitationId(*id)))
-                                        @click=$(|_e: Event| menu_open.set(false))
-                                    },
-                                    "Modify"
-                                )
-                            }
-                            if user.has_permission(PermissionCode::CitationDelete) {
-                                dropdown_menu_item(
-                                    attrs: attributes! {
-                                        @click=$(|_e: topcoat::runtime::Event| {
-                                            delete_dialog_open.set(true);
-                                            menu_open.set(false);
-                                        })
-                                        class="text-destructive"
-                                    },
-                                    "Delete"
-                                )
-                            }
+        <hgroup>
+            breadcrumb(
+                breadcrumb_list(
+                    breadcrumb_item(breadcrumb_page("Citations"))
+                    breadcrumb_separator()
+                    breadcrumb_item(breadcrumb_page((id)))
+                )
+            )
+            <h1 class="flex items-center">
+                "Citation Details"
+                if let Some(user) = user {
+                    let menu_open = signal(cx, || false);
+                    if user.has_permission(PermissionCode::CitationEdit)
+                        || user.has_permission(PermissionCode::CitationDelete) {
+                        dropdown_menu(
+                            attrs: attributes! { class="ms-auto" :open=$(menu_open.get()) },
+                            dropdown_menu_trigger(icon(data: mdi::DOTS_VERTICAL))
+                            dropdown_menu_content(
+                                alignment: DropdownMenuAlignment::Right,
+                                if user.has_permission(PermissionCode::CitationDelete) {
+                                    dropdown_menu_navigation_item(
+                                        attrs: attributes! {
+                                            href=(href!(modify, CitationId(*id)))
+                                            @click=$(|_e: Event| menu_open.set(false))
+                                        },
+                                        "Modify"
+                                    )
+                                }
+                                if user.has_permission(PermissionCode::CitationDelete) {
+                                    dropdown_menu_item(
+                                        attrs: attributes! {
+                                            @click=$(|_e: topcoat::runtime::Event| {
+                                                delete_dialog_open.set(true);
+                                                menu_open.set(false);
+                                            })
+                                            class="text-destructive"
+                                        },
+                                        "Delete"
+                                    )
+                                }
+                            )
                         )
-                    )
+                    }
                 }
-            }
-        </h1>
+            </h1>
+        </hgroup>
         <dt>"Title"</dt>
         <dd>(citation.title)</dd>
         <dt>"Author"</dt>
@@ -233,9 +242,7 @@ pub async fn citation_form(
             <div class="flex flex-col gap-1">
                 label(
                     "Publication Year"
-                    info_hover_card(
-                        "The year that the work being cited was published"
-                    )
+                    info_hover_card("The year that the work being cited was published")
                 )
                 input(
                     attrs: attributes! {
@@ -297,7 +304,16 @@ pub async fn create(cx: &Cx) -> topcoat::Result<impl View> {
         require_user_with_permission(cx, libpropagation::auth::PermissionCode::CitationCreate)
             .await?;
     Ok(view! {
-        <h1>"Create a new citation"</h1>
+        <hgroup>
+            breadcrumb(
+                breadcrumb_list(
+                    breadcrumb_item(breadcrumb_page("Citations"))
+                    breadcrumb_separator()
+                    breadcrumb_item(breadcrumb_page("Create"))
+                )
+            )
+            <h1>"Create a new citation"</h1>
+        </hgroup>
         citation_form(
             attrs: attributes! { method="POST" action=(href!(do_create)) },
             button("Create")
@@ -313,7 +329,21 @@ pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
     let id = path_param::<CitationId>(cx)?;
     let citation = Citation::get_by_id(&mut db(cx), id).await?;
     Ok(view! {
-        <h1>"Modify a citation"</h1>
+        <hgroup>
+            breadcrumb(
+                breadcrumb_list(
+                    breadcrumb_item(breadcrumb_page("Citations"))
+                    breadcrumb_separator()
+                    breadcrumb_link(
+                        attrs: attributes! { href=(href!(details, CitationId(*id))) },
+                        (id)
+                    )
+                    breadcrumb_separator()
+                    breadcrumb_item(breadcrumb_page("Modify"))
+                )
+            )
+            <h1>"Modify a Citation"</h1>
+        </hgroup>
         citation_form(
             citation: Some(&citation),
             attrs: attributes! { method="POST" action=(href!(do_modify, CitationId(*id))) },
