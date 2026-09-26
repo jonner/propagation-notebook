@@ -8,8 +8,8 @@ use topcoat::{
         error::{RouterErrorExt, SeeOther, see_other},
         href, page, path_param, route,
     },
-    runtime::{procedure, signal},
-    view::{View, attributes, view},
+    runtime::{Event, procedure, signal},
+    view::{Attributes, Child, View, attributes, class, component, view},
 };
 
 use crate::{
@@ -41,8 +41,15 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                         attrs: attributes! { class="ms-auto" :open=$(menu_open.get()) },
                         dropdown_menu_trigger(icon(data: mdi::DOTS_VERTICAL))
                         dropdown_menu_content(
+                            alignment: DropdownMenuAlignment::Right,
                             if user.has_permission(PermissionCode::CitationDelete) {
-                                dropdown_menu_item("Edit")
+                                dropdown_menu_navigation_item(
+                                    attrs: attributes! {
+                                        href=(href!(modify, CitationId(*id)))
+                                        @click=$(|_e: Event| menu_open.set(false))
+                                    },
+                                    "Modify"
+                                )
                             }
                             if user.has_permission(PermissionCode::CitationDelete) {
                                 dropdown_menu_item(
@@ -133,7 +140,7 @@ pub async fn delete_citation(cx: &Cx, id: String) -> topcoat::Result<()> {
 }
 
 #[derive(Deserialize, Debug)]
-struct CitationCreateParams {
+struct CitationParams {
     pub title: String,
     pub url: Option<String>,
     pub author: String,
@@ -144,10 +151,7 @@ struct CitationCreateParams {
 }
 
 #[route(POST "/citations/create")]
-pub async fn do_create(
-    cx: &Cx,
-    Form(params): Form<CitationCreateParams>,
-) -> topcoat::Result<SeeOther> {
+pub async fn do_create(cx: &Cx, Form(params): Form<CitationParams>) -> topcoat::Result<SeeOther> {
     let _user =
         require_user_with_permission(cx, libpropagation::auth::PermissionCode::CitationCreate)
             .await?;
@@ -166,14 +170,15 @@ pub async fn do_create(
     ))
 }
 
-#[page("/citations/create")]
-pub async fn create(cx: &Cx) -> topcoat::Result<impl View> {
-    let _user =
-        require_user_with_permission(cx, libpropagation::auth::PermissionCode::CitationCreate)
-            .await?;
+#[component]
+pub async fn citation_form(
+    cx: &Cx,
+    #[default] citation: Option<&Citation>,
+    #[default] mut attrs: Attributes,
+    #[default] child: Child<'_>,
+) -> topcoat::Result<impl View> {
     Ok(view! {
-        <h1>"Create a new citation"</h1>
-        <form method="POST" action=(href!(do_create)) class="flex flex-col gap-3">
+        <form class=(class!("flex flex-col gap-3", attrs.remove("class"))) (attrs)>
             <div class="flex flex-col gap-1">
                 label(
                     "Title:"
@@ -184,6 +189,7 @@ pub async fn create(cx: &Cx) -> topcoat::Result<impl View> {
                         type="text"
                         name="title"
                         placeholder="Enter the title of the work being cited (e.g. article, web page, book, etc.)"
+                        value=(citation.map(|c| &c.title))
                     }
                 )
             </div>
@@ -197,6 +203,7 @@ pub async fn create(cx: &Cx) -> topcoat::Result<impl View> {
                         type="text"
                         name="author"
                         placeholder="Enter the author of the work being cited"
+                        value=(citation.map(|c| &c.author))
                     }
                 )
             </div>
@@ -207,6 +214,7 @@ pub async fn create(cx: &Cx) -> topcoat::Result<impl View> {
                         type="text"
                         name="container_title"
                         placeholder="Enter the name of the containing object (e.g. journal, project, website, etc.)"
+                        value=(citation.and_then(|c| c.container_title.as_ref()))
                     }
                 )
             </div>
@@ -217,6 +225,7 @@ pub async fn create(cx: &Cx) -> topcoat::Result<impl View> {
                         type="text"
                         name="publication_year"
                         placeholder="Enter an optional publication year for the work being cited"
+                        value=(citation.and_then(|c| c.publication_year))
                     }
                 )
             </div>
@@ -227,6 +236,7 @@ pub async fn create(cx: &Cx) -> topcoat::Result<impl View> {
                         type="text"
                         name="url"
                         placeholder="Enter an optional url to the work being cited"
+                        value=(citation.and_then(|c| c.url.as_ref()))
                     }
                 )
             </div>
@@ -237,6 +247,7 @@ pub async fn create(cx: &Cx) -> topcoat::Result<impl View> {
                         type="text"
                         name="doi"
                         placeholder="Enter an optional doi for the work being cited"
+                        value=(citation.and_then(|c| c.doi.as_ref()))
                     }
                 )
             </div>
@@ -246,12 +257,62 @@ pub async fn create(cx: &Cx) -> topcoat::Result<impl View> {
                     attrs: attributes! {
                         type="text"
                         name="access_date"
-                        value=(&jiff::Zoned::now().date().to_string())
                         placeholder="Enter the date that the work was last accessed"
+                        value=(citation.and_then(|c| c.access_date.map(|d| d.to_string())))
                     }
                 )
             </div>
-            button("Create")
+            (child)
         </form>
     })
+}
+
+#[page("/citations/create")]
+pub async fn create(cx: &Cx) -> topcoat::Result<impl View> {
+    let _user =
+        require_user_with_permission(cx, libpropagation::auth::PermissionCode::CitationCreate)
+            .await?;
+    Ok(view! {
+        <h1>"Create a new citation"</h1>
+        citation_form(
+            attrs: attributes! { method="POST" action=(href!(do_create)) },
+            button("Create")
+        )
+    })
+}
+
+#[page("/citations/{citation_id}/modify")]
+pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
+    let _user =
+        require_user_with_permission(cx, libpropagation::auth::PermissionCode::CitationEdit)
+            .await?;
+    let id = path_param::<CitationId>(cx)?;
+    let citation = Citation::get_by_id(&mut db(cx), id).await?;
+    Ok(view! {
+        <h1>"Modify a citation"</h1>
+        citation_form(
+            citation: Some(&citation),
+            attrs: attributes! { method="POST" action=(href!(do_modify, CitationId(*id))) },
+            button("Update")
+        )
+    })
+}
+
+#[route(POST "/citations/{citation_id}")]
+pub async fn do_modify(cx: &Cx, Form(params): Form<CitationParams>) -> topcoat::Result<SeeOther> {
+    let _user =
+        require_user_with_permission(cx, libpropagation::auth::PermissionCode::CitationEdit)
+            .await?;
+    let id = path_param::<CitationId>(cx)?;
+    Citation::update_by_id(id)
+        .title(params.title)
+        .author(params.author)
+        .url(params.url)
+        .access_date(params.access_date)
+        .publication_year(params.publication_year)
+        .container_title(params.container_title)
+        .doi(params.doi)
+        .exec(&mut db(cx))
+        .await?;
+    Ok(see_other(href!(details, CitationId(*id)).resolve(cx)))
 }
