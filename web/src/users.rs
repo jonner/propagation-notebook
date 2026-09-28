@@ -64,14 +64,18 @@ pub(crate) async fn profile(cx: &Cx) -> topcoat::Result<impl View> {
 
     Ok(view! {
         <h1>(&user.username)</h1>
-        <form class="flex flex-col gap-3" method="POST" action=(href!(update_profile))>
-            <div class="flex flex-col gap-1">
+        <form class="flex flex-col gap-6" method="POST" action=(href!(update_profile))>
+            <div class="flex flex-col gap-2">
                 input(
                     attrs: attributes! { type="hidden" name="userid" value=(user.id.to_string()) }
                 )
-                label(attrs: attributes! { class="text-muted-foreground" }, "Name:")
+                label(
+                    attrs: attributes! { for="name-input" },
+                    "Name:"
+                )
                 input(
                     attrs: attributes! {
+                        id="name-input"
                         type="text"
                         placeholder="Name"
                         name="name"
@@ -79,13 +83,14 @@ pub(crate) async fn profile(cx: &Cx) -> topcoat::Result<impl View> {
                     }
                 )
             </div>
-            <div class="flex flex-col gap-1">
+            <div class="flex flex-col gap-2">
                 label(
-                    attrs: attributes! { class="text-muted-foreground" },
+                    attrs: attributes! { for="description-input" },
                     "Description:"
                 )
                 textarea(
                     attrs: attributes! {
+                        id="description-input"
                         placeholder="Write a short description about yourself"
                         name="description"
                     },
