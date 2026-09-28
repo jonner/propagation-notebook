@@ -39,134 +39,181 @@
   --font-header: "Averia Serif Libre", serif;
   --font-body: "Averia Sans Libre", sans;
 
---color-old-copper-50: #f8f5ee;
---color-old-copper-100: #ede6d4;
---color-old-copper-200: #ddcdab;
---color-old-copper-300: #c9ad7b;
---color-old-copper-400: #b99256;
---color-old-copper-500: #aa7f48;
---color-old-copper-600: #92663c;
---color-old-copper-700: #6f4930;
---color-old-copper-800: #634130;
---color-old-copper-900: #56382d;
---color-old-copper-950: #311d17;
---color-brown: var(--color-old-copper-700);
+  /* custom palette */
+  --color-old-copper-50: #f8f5ee;
+  --color-old-copper-100: #ede6d4;
+  --color-old-copper-200: #ddcdab;
+  --color-old-copper-300: #c9ad7b;
+  --color-old-copper-400: #b99256;
+  --color-old-copper-500: #aa7f48;
+  --color-old-copper-600: #92663c;
+  --color-old-copper-700: #6f4930;
+  --color-old-copper-800: #634130;
+  --color-old-copper-900: #56382d;
+  --color-old-copper-950: #311d17;
+  --color-brown: var(--color-old-copper-700);
 
---color-sail-50: #f1f9fe;
---color-sail-100: #e2f2fc;
---color-sail-200: #bae5f9;
---color-sail-300: #84d3f5;
---color-sail-400: #43bded;
---color-sail-500: #1aa5dd;
---color-sail-600: #0d85bc;
---color-sail-700: #0c6a98;
---color-sail-800: #0e5a7e;
---color-sail-900: #114b69;
---color-sail-950: #0c3045;
---color-sail: var(--color-sail-200);
+  --color-sail-50: #f1f9fe;
+  --color-sail-100: #e2f2fc;
+  --color-sail-200: #bae5f9;
+  --color-sail-300: #84d3f5;
+  --color-sail-400: #43bded;
+  --color-sail-500: #1aa5dd;
+  --color-sail-600: #0d85bc;
+  --color-sail-700: #0c6a98;
+  --color-sail-800: #0e5a7e;
+  --color-sail-900: #114b69;
+  --color-sail-950: #0c3045;
+  --color-sail: var(--color-sail-200);
 
---color-piper-50: #fbf7f1;
---color-piper-100: #f7ecdd;
---color-piper-200: #eed7ba;
---color-piper-300: #e2bb8f;
---color-piper-400: #d69861;
---color-piper-500: #cd7e42;
---color-piper-600: #c56c39;
---color-piper-700: #9f522f;
---color-piper-800: #80432c;
---color-piper-900: #673927;
---color-piper-950: #371c13;
---color-jaggery: var(--color-piper-600);
+  --color-piper-50: #fbf7f1;
+  --color-piper-100: #f7ecdd;
+  --color-piper-200: #eed7ba;
+  --color-piper-300: #e2bb8f;
+  --color-piper-400: #d69861;
+  --color-piper-500: #cd7e42;
+  --color-piper-600: #c56c39;
+  --color-piper-700: #9f522f;
+  --color-piper-800: #80432c;
+  --color-piper-900: #673927;
+  --color-piper-950: #371c13;
+  --color-jaggery: var(--color-piper-600);
 
---color-vida-loca-50: #f1f9ec;
---color-vida-loca-100: #e1f0d7;
---color-vida-loca-200: #c5e3b3;
---color-vida-loca-300: #a0d185;
---color-vida-loca-400: #7fbc5f;
---color-vida-loca-500: #56903a;
---color-vida-loca-600: #498030;
---color-vida-loca-700: #3a6229;
---color-vida-loca-800: #314f25;
---color-vida-loca-900: #2c4423;
---color-vida-loca-950: #14240f;
---color-leaf: var(--color-vida-loca-500);
+  --color-vida-loca-50: #f1f9ec;
+  --color-vida-loca-100: #e1f0d7;
+  --color-vida-loca-200: #c5e3b3;
+  --color-vida-loca-300: #a0d185;
+  --color-vida-loca-400: #7fbc5f;
+  --color-vida-loca-500: #56903a;
+  --color-vida-loca-600: #498030;
+  --color-vida-loca-700: #3a6229;
+  --color-vida-loca-800: #314f25;
+  --color-vida-loca-900: #2c4423;
+  --color-vida-loca-950: #14240f;
+  --color-leaf: var(--color-vida-loca-500);
 
---color-mallard-50: #f1f9ec;
---color-mallard-100: #def2d5;
---color-mallard-200: #c1e6b0;
---color-mallard-300: #99d581;
---color-mallard-400: #76c259;
---color-mallard-500: #57a73b;
---color-mallard-600: #41852b;
---color-mallard-700: #336625;
---color-mallard-800: #2c5222;
---color-mallard-900: #213a1b;
---color-mallard-950: #11260d;
---color-mallard: var(--color-mallard-900);
+  --color-mallard-50: #f1f9ec;
+  --color-mallard-100: #def2d5;
+  --color-mallard-200: #c1e6b0;
+  --color-mallard-300: #99d581;
+  --color-mallard-400: #76c259;
+  --color-mallard-500: #57a73b;
+  --color-mallard-600: #41852b;
+  --color-mallard-700: #336625;
+  --color-mallard-800: #2c5222;
+  --color-mallard-900: #213a1b;
+  --color-mallard-950: #11260d;
+  --color-mallard: var(--color-mallard-900);
 
   --font-sans: var(--font-body);
-  --color-backdrop: var(--backdrop);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-background-contrast: var(--background-contrast);
-  --color-foreground-contrast: var(--foreground-contrast);
-  --color-header: var(--header);
-  --color-link: var(--link);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
   --color-muted-foreground: var(--muted-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-destructive: var(--destructive);
-  --color-warning: var(--warning);
-  --color-warning-foreground: var(--warning-foreground);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
   --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
   --shadow-xs: var(--shadow-xs);
   --shadow-sm: var(--shadow-sm);
+
+  /* my theme additions */
+  --color-backdrop: var(--backdrop);
+  --color-background-contrast: var(--background-contrast);
+  --color-foreground-contrast: var(--foreground-contrast);
+  --color-header: var(--header);
+  --color-link: var(--link);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
 }
 
 :root {
-  --backdrop: var(--color-old-copper-50);
-  --background: var(--color-white);
+  /* --background: oklch(0.9875 0.003 260); */
   --foreground: oklch(0.24 0.012 260);
-  --background-contrast: var(--color-old-copper-700);
-  --foreground-contrast: var(--color-white);
-  --header: var(--color-piper-600);
-  --link: var(--color-old-copper-700);
+  --card: oklch(0.995 0.003 260);
+  --card-foreground: oklch(0.24 0.012 260);
+  --popover: oklch(0.995 0.003 260);
+  --popover-foreground: oklch(0.24 0.012 260);
   --muted-foreground: oklch(0.51 0.014 260);
-  --primary: var(--color-vida-loca-500);
+  /* --primary: oklch(0.21 0.02 260); */
   --primary-foreground: oklch(0.985 0.003 260);
   --destructive: oklch(0.55 0.2 27);
   --destructive-foreground: oklch(0.99 0.012 27);
-  --warning: var(--color-orange-100);
-  --warning-foreground: var(--color-orange-700);
   --border: oklch(0.9 0.008 260);
-  --ring: var(--color-mallard);
+  /* --ring: oklch(0.32 0.02 260); */
+  --sidebar: oklch(0.995 0.003 260);
+  --sidebar-foreground: oklch(0.24 0.012 260);
+  --sidebar-primary: oklch(0.21 0.02 260);
+  --sidebar-primary-foreground: oklch(0.985 0.003 260);
+  --sidebar-accent: color-mix(in oklab, var(--sidebar-foreground) 10%, var(--sidebar));
+  --sidebar-accent-foreground: oklch(0.24 0.012 260);
+  --sidebar-border: oklch(0.9 0.008 260);
+  --sidebar-ring: oklch(0.32 0.02 260);
   --shadow-xs: 0 1px 2px oklch(0.24 0.02 260 / 12%);
   --shadow-sm:
     0 1px 2px oklch(0.24 0.02 260 / 10%),
     0 2px 8px -2px oklch(0.24 0.02 260 / 9%);
+
+  /* theme additions / changes */
+  --backdrop: var(--color-old-copper-50);
+  --background: var(--color-white);
+  --background-contrast: var(--color-old-copper-700);
+  --foreground-contrast: var(--color-white);
+  --header: var(--color-piper-600);
+  --link: var(--color-old-copper-700);
+  --primary: var(--color-vida-loca-500);
+  --warning: var(--color-orange-100);
+  --warning-foreground: var(--color-orange-700);
+  --ring: var(--color-mallard);
 }
 
 .dark {
-  --backdrop: var(--color-neutral-600);
-  --background: var(--color-neutral-800);
-  --background-contrast: var(--color-neutral-900);
-  --foreground-contrast: var(--color-neutral-300);
   /* --background: oklch(0.17 0.012 260); */
   --foreground: oklch(0.93 0.006 260);
-  --header: var(--color-piper-400);
-  --link: var(--color-piper-300);
+  --card: oklch(0.22 0.012 260);
+  --card-foreground: oklch(0.93 0.006 260);
+  --popover: oklch(0.22 0.012 260);
+  --popover-foreground: oklch(0.93 0.006 260);
   --muted-foreground: oklch(0.68 0.012 260);
   --primary: oklch(0.92 0.008 260);
   --primary-foreground: oklch(0.21 0.015 260);
   --destructive: oklch(0.66 0.18 25);
   --destructive-foreground: oklch(0.14 0.02 25);
   --border: oklch(0.3 0.012 260);
-  --ring: oklch(0.6 0.05 260);
-  /* Light-mode shadows disappear on a dark background, so these are deeper. */
+  --ring: oklch(0.6 0.02 260);
+  --sidebar: oklch(0.22 0.012 260);
+  --sidebar-foreground: oklch(0.93 0.006 260);
+  --sidebar-primary: oklch(0.92 0.008 260);
+  --sidebar-primary-foreground: oklch(0.21 0.015 260);
+  --sidebar-accent: color-mix(in oklab, var(--sidebar-foreground) 10%, var(--sidebar));
+  --sidebar-accent-foreground: oklch(0.93 0.006 260);
+  --sidebar-border: oklch(0.3 0.012 260);
+  --sidebar-ring: oklch(0.6 0.02 260);
   --shadow-xs: 0 1px 2px oklch(0 0 0 / 35%);
-  --shadow-sm: 0 1px 2px oklch(0 0 0 / 35%), 0 2px 8px -2px oklch(0 0 0 / 30%);
+  --shadow-sm:
+    0 1px 2px oklch(0 0 0 / 35%),
+    0 2px 8px -2px oklch(0 0 0 / 30%);
+  
+  /* theme additions / changes */
+  --backdrop: var(--color-neutral-600);
+  --background: var(--color-neutral-800);
+  --background-contrast: var(--color-neutral-900);
+  --foreground-contrast: var(--color-neutral-300);
+  --header: var(--color-piper-400);
+  --link: var(--color-piper-300);
 }
 
 @layer base {
