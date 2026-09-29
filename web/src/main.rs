@@ -209,10 +209,10 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
                         )
                     </main>
                     <footer
-                        class="dark bg-(image:--background-image) bg-center bg-cover"
+                        class="dark bg-(image:--background-image) bg-center bg-cover mt-6 shadow-[0_-1rem_2rem_rgba(0,0,0,0.2)]"
                     >
                         <div
-                            class="text-foreground bg-background/70 block px-3 md:px-6 py-6"
+                            class="text-foreground bg-linear-to-t from-background to-50% to-transparent block px-3 md:px-6 pt-50 pb-6"
                         >
                             "Developed with "
                             icon(

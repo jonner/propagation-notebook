@@ -222,10 +222,6 @@
     @apply shadow-xl/20;
   }
 
-  footer {
-    @apply mt-6 pt-50 shadow-[0_-1rem_2rem_rgba(0,0,0,0.2)];
-  }
-
   div.main-content {
      @apply w-full md:w-[80rem] max-w-full m-auto shadow-xl flex flex-col min-h-screen bg-background
   }
