@@ -11,7 +11,7 @@ use topcoat::{
 };
 
 use crate::{
-    components::{button::button, input::input},
+    components::{button::button, card::*, field::*, input::input},
     context::{current_user, db, delete_session, persist_session},
     home,
 };
@@ -69,39 +69,47 @@ pub struct LoginFormParams {
 pub(crate) async fn login(cx: &Cx) -> topcoat::Result<impl View> {
     let user = current_user(cx).await;
     let params = query_params::<LoginFormParams>(cx)?;
+    if user.is_some() {
+        return Err(see_other(href!(crate::home).resolve(cx)).into());
+    }
 
     Ok(view! {
-        if user.is_some() {
-            <h1>"Already Logged In"</h1>
-        } else {
-            <div class="w-full m-auto lg:max-w-1/2 flex flex-col items-center">
-                <h1>"Login"</h1>
+        card(
+            attrs: attributes! { class="w-full mx-auto my-12 lg:max-w-1/2" },
+            card_header(card_title("Log In"))
+            card_content(
+                attrs: attributes! { class="flex flex-col items-center" },
                 <form method="POST" class="w-full flex flex-col gap-6">
-                    <div>
-                        input(
-                            attrs: attributes! { id="username" placeholder="Username" name="username" }
+                    field_set(
+                        field(
+                            field_label(
+                                attrs: attributes! { for="username-input" },
+                                "Username"
+                            )
+                            input(
+                                attrs: attributes! { id="username-input" name="username" }
+                            )
                         )
-                    </div>
-                    <div>
+                        field(
+                            field_label(
+                                attrs: attributes! { for="password-input" },
+                                "Password"
+                            )
+                            input(
+                                attrs: attributes! { type="password" id="password-input" name="password" }
+                            )
+                        )
                         input(
                             attrs: attributes! {
-                                type="password"
-                                id="password"
-                                placeholder="Password"
-                                name="password"
+                                type="hidden"
+                                name="redirect"
+                                value=(params.redirect.as_ref())
                             }
                         )
-                    </div>
-                    input(
-                        attrs: attributes! {
-                            type="hidden"
-                            name="redirect"
-                            value=(params.redirect.as_ref())
-                        }
                     )
                     button("Log In")
                 </form>
-            </div>
-        }
+            )
+        )
     })
 }
