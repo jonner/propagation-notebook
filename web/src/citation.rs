@@ -19,6 +19,7 @@ use crate::{
         button::*,
         dialog::*,
         dropdown_menu::*,
+        field::*,
         input::input,
         label::label,
         pn::{info_hover_card, required_icon},
@@ -189,122 +190,143 @@ pub async fn citation_form(
     #[default] mut attrs: Attributes,
     #[default] child: Child<'_>,
 ) -> topcoat::Result<impl View> {
+    let title = signal(cx, || citation.map(|c| c.title.clone()).unwrap_or_default());
+    let author = signal(cx, || {
+        citation.map(|c| c.author.clone()).unwrap_or_default()
+    });
     Ok(view! {
         <form class=(class!("flex flex-col gap-6", attrs.remove("class"))) (attrs)>
-            <div class="flex flex-col gap-2">
-                label(
-                    attrs: attributes! { for="citation-title" },
-                    "Title"
-                    required_icon()
-                    info_hover_card(
-                        "Enter the title of the work being cited (e.g. article, web page, book, etc.)"
+            field_set(
+                field_group(
+                    field(
+                        field_label(
+                            attrs: attributes! { for="citation-title" },
+                            "Title"
+                        )
+                        field_description(
+                            "The title of the work being cited (e.g. article, web page, book, etc.)"
+                        )
+                        input(
+                            attrs: attributes! {
+                                id="citation-title"
+                                type="text"
+                                name="title"
+                                value=(citation.map(|c| &c.title))
+                                @input=$(|e: topcoat::runtime::Event| title.set(
+                                        e.target.value,
+                                    ))
+                            }
+                        )
+                        field_error(
+                            attrs: attributes! { :hidden=$(!title.get().trim().is_empty()) },
+                            "Please enter a title for the citation"
+                        )
                     )
-                )
-                input(
-                    attrs: attributes! {
-                        id="citation-title"
-                        type="text"
-                        name="title"
-                        value=(citation.map(|c| &c.title))
-                    }
-                )
-            </div>
-            <div class="flex flex-col gap-2">
-                label(
-                    attrs: attributes! { for="citation-author" },
-                    "Author"
-                    required_icon()
-                    info_hover_card("The author of the work being cited")
-                )
-                input(
-                    attrs: attributes! {
-                        id="citation-author"
-                        type="text"
-                        name="author"
-                        value=(citation.map(|c| &c.author))
-                    }
-                )
-            </div>
-            <div class="flex flex-col gap-2">
-                label(
-                    attrs: attributes! { for="citation-container" },
-                    "Containing work"
-                    info_hover_card(
-                        "The name of the containing object (e.g. journal, project, website, etc.)"
+                    field(
+                        field_label(
+                            attrs: attributes! { for="citation-author" },
+                            "Author"
+                        )
+                        field_description("The author of the work being cited")
+                        input(
+                            attrs: attributes! {
+                                id="citation-author"
+                                type="text"
+                                name="author"
+                                value=(citation.map(|c| &c.author))
+                                @input=$(|e: topcoat::runtime::Event| author.set(
+                                        e.target.value,
+                                    ))
+                            }
+                        )
+                        field_error(
+                            attrs: attributes! { :hidden=$(!author.get().trim().is_empty()) },
+                            "Please enter an author for the citation"
+                        )
                     )
+                    field(
+                        field_label(
+                            attrs: attributes! { for="citation-container" },
+                            "Containing work"
+                        )
+                        field_description(
+                            "The name of the containing object (e.g. journal, project, website, etc.)"
+                        )
+                        input(
+                            attrs: attributes! {
+                                id="citation-container"
+                                type="text"
+                                name="container_title"
+                                value=(citation.and_then(|c| c.container_title.as_ref()))
+                            }
+                        )
+                    )
+                    field(
+                        field_label(
+                            attrs: attributes! { for="citation-publication" },
+                            "Publication Year"
+                        )
+                        field_description(
+                            "The year that the work being cited was published"
+                        )
+                        input(
+                            attrs: attributes! {
+                                id="citation-publication"
+                                type="text"
+                                name="publication_year"
+                                value=(citation.and_then(|c| c.publication_year))
+                            }
+                        )
+                    )
+                    field(
+                        field_label(attrs: attributes! { for="citation-url" }, "URL")
+                        field_description(
+                            "An optional web address for the work being cited"
+                        )
+                        input(
+                            attrs: attributes! {
+                                id="citation-url"
+                                type="text"
+                                name="url"
+                                value=(citation.and_then(|c| c.url.as_ref()))
+                            }
+                        )
+                    )
+                    field(
+                        field_label(
+                            attrs: attributes! { for="citation-doi" },
+                            "Digital Object Identifier (doi)"
+                        )
+                        field_description("An optional doi for the work being cited")
+                        input(
+                            attrs: attributes! {
+                                id="citation-doi"
+                                type="text"
+                                name="doi"
+                                value=(citation.and_then(|c| c.doi.as_ref()))
+                            }
+                        )
+                    )
+                    field(
+                        field_label(
+                            attrs: attributes! { for="citation-accessdate" },
+                            "Access Date"
+                        )
+                        field_description("The date that the work was last accessed")
+                        input(
+                            attrs: attributes! {
+                                id="citation-accessdate"
+                                type="text"
+                                name="access_date"
+                                value=(citation.and_then(
+                                    |c| c.access_date.map(|d| d.to_string()),
+                                ))
+                            }
+                        )
+                    )
+                    (child)
                 )
-                input(
-                    attrs: attributes! {
-                        id="citation-container"
-                        type="text"
-                        name="container_title"
-                        value=(citation.and_then(|c| c.container_title.as_ref()))
-                    }
-                )
-            </div>
-            <div class="flex flex-col gap-2">
-                label(
-                    attrs: attributes! { for="citation-publication" },
-                    "Publication Year"
-                    info_hover_card("The year that the work being cited was published")
-                )
-                input(
-                    attrs: attributes! {
-                        id="citation-publication"
-                        type="text"
-                        name="publication_year"
-                        value=(citation.and_then(|c| c.publication_year))
-                    }
-                )
-            </div>
-            <div class="flex flex-col gap-2">
-                label(
-                    attrs: attributes! { for="citation-url" },
-                    "URL"
-                    info_hover_card("An optional web address for the work being cited")
-                )
-                input(
-                    attrs: attributes! {
-                        id="citation-url"
-                        type="text"
-                        name="url"
-                        value=(citation.and_then(|c| c.url.as_ref()))
-                    }
-                )
-            </div>
-            <div class="flex flex-col gap-2">
-                label(
-                    attrs: attributes! { for="citation-doi" },
-                    "Digital Object Identifier (doi)"
-                    info_hover_card("An optional doi for the work being cited")
-                )
-                input(
-                    attrs: attributes! {
-                        id="citation-doi"
-                        type="text"
-                        name="doi"
-                        value=(citation.and_then(|c| c.doi.as_ref()))
-                    }
-                )
-            </div>
-            <div class="flex flex-col gap-2">
-                label(
-                    attrs: attributes! { for="citation-accessdate" },
-                    "Access Date"
-                    info_hover_card("The date that the work was last accessed")
-                )
-                input(
-                    attrs: attributes! {
-                        id="citation-accessdate"
-                        type="text"
-                        name="access_date"
-                        value=(citation.and_then(
-                            |c| c.access_date.map(|d| d.to_string()),
-                        ))
-                    }
-                )
-            </div>
-            (child)
+            )
         </form>
     })
 }
