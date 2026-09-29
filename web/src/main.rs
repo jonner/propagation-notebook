@@ -113,14 +113,14 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
             <body>
                 <div class="main-content">
                     <header
-                        class="flex flex-col items-start justify-between font-bold flex-wrap bg-(image:--background-image) bg-center bg-cover h-[8rem] md:h-[12rem]"
+                        class="dark flex flex-col items-start justify-between font-bold flex-wrap bg-(image:--background-image) bg-center bg-cover h-[8rem] md:h-[12rem]"
                     >
                         <nav
-                            class="w-full block shrink flex items-center gap-6 md:gap-4 px-3 md:px-6 py-2 text-background bg-foreground/50"
+                            class="text-foreground bg-background/70 w-full block shrink flex items-center gap-6 md:gap-4 px-3 md:px-6 py-2"
                         >
                             <ul class="contents">
                                 <li>
-                                    <a class="block text-inherit" href=(href!(home))>
+                                    <a class="block" href=(href!(home))>
                                         icon(
                                             data: mdi::FLOWER_POPPY,
                                             label: "Home",
@@ -130,7 +130,7 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="block text-inherit" href=(href!(taxa::explore))>
+                                    <a class="block" href=(href!(taxa::explore))>
                                         icon(
                                             data: mdi::FORMAT_LIST_BULLETED,
                                             label: "Taxonomy",
@@ -140,7 +140,7 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="block text-inherit" href=(href!(regions::list))>
+                                    <a class="block" href=(href!(regions::list))>
                                         icon(
                                             data: mdi::GLOBE,
                                             label: "Regions",
@@ -208,9 +208,11 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
                             (slot)
                         )
                     </main>
-                    <footer class="bg-(image:--background-image) bg-center bg-cover">
+                    <footer
+                        class="dark bg-(image:--background-image) bg-center bg-cover"
+                    >
                         <div
-                            class="block px-3 md:px-6 py-6 text-background bg-foreground/50"
+                            class="text-foreground bg-background/70 block px-3 md:px-6 py-6"
                         >
                             "Developed with "
                             icon(
@@ -222,15 +224,11 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
                             <div class="opacity-60">
                                 <div>
                                     "Taxonomy based on "
-                                    <a class="text-inherit" href="https://www.itis.gov">
-                                        "ITIS"
-                                    </a>
+                                    <a href="https://www.itis.gov">"ITIS"</a>
                                 </div>
                                 <div>
                                     "Phenology data provided by "
-                                    <a class="text-inherit" href="https://inaturalist.org">
-                                        "iNaturalist.org"
-                                    </a>
+                                    <a href="https://inaturalist.org">"iNaturalist.org"</a>
                                 </div>
                             </div>
                         </div>

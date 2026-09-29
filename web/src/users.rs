@@ -69,10 +69,7 @@ pub(crate) async fn profile(cx: &Cx) -> topcoat::Result<impl View> {
                 input(
                     attrs: attributes! { type="hidden" name="userid" value=(user.id.to_string()) }
                 )
-                label(
-                    attrs: attributes! { for="name-input" },
-                    "Name:"
-                )
+                label(attrs: attributes! { for="name-input" }, "Name:")
                 input(
                     attrs: attributes! {
                         id="name-input"
@@ -84,10 +81,7 @@ pub(crate) async fn profile(cx: &Cx) -> topcoat::Result<impl View> {
                 )
             </div>
             <div class="flex flex-col gap-2">
-                label(
-                    attrs: attributes! { for="description-input" },
-                    "Description:"
-                )
+                label(attrs: attributes! { for="description-input" }, "Description:")
                 textarea(
                     attrs: attributes! {
                         id="description-input"

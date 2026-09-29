@@ -496,7 +496,6 @@ pub async fn taxon_search_bar(
                         placeholder="Search for a taxon"
                         autocomplete="off"
                         @input=$(|e: Event| query_string.set(e.target.value))
-                        class="text-foreground hover:opacity-80 focus-within:opacity-80 opacity-50"
                     }
                 )
                 taxon_search_results(

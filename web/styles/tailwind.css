@@ -132,8 +132,6 @@
 
   /* my theme additions */
   --color-backdrop: var(--backdrop);
-  --color-background-contrast: var(--background-contrast);
-  --color-foreground-contrast: var(--foreground-contrast);
   --color-header: var(--header);
   --color-link: var(--link);
   --color-warning: var(--warning);
@@ -170,8 +168,6 @@
   /* theme additions / changes */
   --backdrop: var(--color-old-copper-50);
   --background: var(--color-white);
-  --background-contrast: var(--color-old-copper-700);
-  --foreground-contrast: var(--color-white);
   --header: var(--color-piper-600);
   --link: var(--color-old-copper-700);
   --primary: var(--color-vida-loca-500);
@@ -210,8 +206,6 @@
   /* theme additions / changes */
   --backdrop: var(--color-neutral-600);
   --background: var(--color-neutral-800);
-  --background-contrast: var(--color-neutral-900);
-  --foreground-contrast: var(--color-neutral-300);
   --header: var(--color-piper-400);
   --link: var(--color-piper-300);
 }
@@ -222,7 +216,6 @@
   }
 
   header, footer {
-    @apply text-foreground-contrast bg-background-contrast;
   }
 
   header {
@@ -326,7 +319,7 @@
   }
 
   header nav li .icon {
-    @apply text-white sm:opacity-60 mr-0 sm:mr-2;
+    @apply mr-0 sm:mr-2;
   }
 
   header nav li span.caption {
