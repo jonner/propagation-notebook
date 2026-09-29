@@ -17,7 +17,7 @@ use topcoat::{
     runtime::{Event, procedure, signal},
     view::{View, attributes, component, error_boundary, suspense, view},
 };
-use tracing::trace;
+use tracing::{debug, trace, warn};
 
 use crate::{
     citation,
@@ -607,7 +607,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                 (taxon.rank.to_string())
             )
             if let Some(user) = user {
-                if user.has_permission(PermissionCode::TaxonSync) {
+                if user.has_permission(PermissionCode::TaxonSync) || user.has_permission(PermissionCode::RegionSync) {
                     dropdown_menu(
                         attrs: attributes! { class="ms-auto" :open=$(menu_open.get()) },
                         dropdown_menu_trigger(icon(data: crate::mdi::DOTS_VERTICAL))
@@ -624,6 +624,19 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                                         })
                                     },
                                     "Sync Image"
+                                )
+                            }
+                            if user.has_permission(PermissionCode::RegionSync) {
+                                dropdown_menu_item(
+                                    attrs: attributes! {
+                                        @click=$(async |e: Event| {
+                                            e.prevent_default();
+                                            let fut = sync_regions(id);
+                                            menu_open.set(false);
+                                            fut.await;
+                                        })
+                                    },
+                                    "Sync Regions"
                                 )
                             }
                         )
@@ -1093,5 +1106,52 @@ pub async fn sync_image(cx: &Cx, taxon_id: u64) -> topcoat::Result<()> {
     let mut db = db(cx);
     let taxon = Taxon::get_by_id(&mut db, taxon_id).await?;
     taxon.update_photo(&mut db).await?;
+    Ok(())
+}
+
+#[procedure("/region/sync-regions")]
+pub async fn sync_regions(cx: &Cx, taxon_id: u64) -> topcoat::Result<()> {
+    require_user_with_permission(cx, PermissionCode::RegionSync).await?;
+    let mut db = db(cx);
+
+    // FIXME: allow min to be customized
+    const MIN_SAMPLES: usize = 10;
+
+    let regions = RegionalTaxonStatus::filter_by_taxon_id(taxon_id)
+        .include(RegionalTaxonStatus::fields().taxon())
+        .include(RegionalTaxonStatus::fields().region())
+        .exec(&mut db)
+        .await?;
+    for rts in regions {
+        match rts.query_harvest_info(&mut db).await {
+            Ok(window) => {
+                if window.n_samples.unwrap_or_default() < (MIN_SAMPLES).try_into().unwrap() {
+                    warn!("Too few samples to calculate a harvest window");
+                } else {
+                    match RegionalTaxonStatus::update_by_id(rts.id)
+                        .harvest_window(&window)
+                        .exec(&mut db)
+                        .await
+                    {
+                        Ok(_) => {
+                            debug!(
+                                "Updated harvest window for {} to {window}",
+                                rts.taxon.get().reference()
+                            )
+                        }
+                        Err(e) => {
+                            warn!("Failed to update RegionalTaxonStatus: {e}")
+                        }
+                    }
+                }
+            }
+            Err(e) => {
+                warn!(
+                    "Failed to calculate a harvest window for {}: {e}",
+                    rts.taxon.get().reference()
+                )
+            }
+        };
+    }
     Ok(())
 }

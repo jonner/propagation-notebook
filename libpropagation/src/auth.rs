@@ -220,6 +220,14 @@ pub enum PermissionCode {
     CitationEdit,
     #[column(variant = "citation:delete")]
     CitationDelete,
+    #[column(variant = "region:sync")]
+    RegionSync,
+    #[column(variant = "region:create")]
+    RegionCreate,
+    #[column(variant = "region:delete")]
+    RegionDelete,
+    #[column(variant = "region:edit")]
+    RegionEdit,
 }
 
 pub fn hash_password(pw: &str) -> Result<String, AuthError> {
