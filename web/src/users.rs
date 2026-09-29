@@ -15,7 +15,7 @@ use topcoat::{
 use uuid::Uuid;
 
 use crate::{
-    components::{button::button, input::input, label::label, textarea::textarea},
+    components::{button::button, field::*, input::input, label::label, textarea::textarea},
     context::{db, require_user},
 };
 
@@ -65,32 +65,39 @@ pub(crate) async fn profile(cx: &Cx) -> topcoat::Result<impl View> {
     Ok(view! {
         <h1>(&user.username)</h1>
         <form class="flex flex-col gap-6" method="POST" action=(href!(update_profile))>
-            <div class="flex flex-col gap-2">
-                input(
-                    attrs: attributes! { type="hidden" name="userid" value=(user.id.to_string()) }
+            input(
+                attrs: attributes! { type="hidden" name="userid" value=(user.id.to_string()) }
+            )
+            field_set(
+                field(
+                    field_label(attrs: attributes! { for="name-input" }, "Name")
+                    input(
+                        attrs: attributes! {
+                            id="name-input"
+                            type="text"
+                            name="name"
+                            value=(profile.as_ref().map(|p| p.name.as_ref()))
+                        }
+                    )
                 )
-                label(attrs: attributes! { for="name-input" }, "Name:")
-                input(
-                    attrs: attributes! {
-                        id="name-input"
-                        type="text"
-                        placeholder="Name"
-                        name="name"
-                        value=(profile.as_ref().map(|p| p.name.as_ref()))
-                    }
+                field(
+                    field_label(
+                        attrs: attributes! { for="description-input" },
+                        "Description"
+                    )
+                    field_description(
+                            "Write a short description about yourself"
+
+                    )
+                    textarea(
+                        attrs: attributes! {
+                            id="description-input"
+                            name="description"
+                        },
+                        (profile.as_ref().map(|p| p.description.as_ref()))
+                    )
                 )
-            </div>
-            <div class="flex flex-col gap-2">
-                label(attrs: attributes! { for="description-input" }, "Description:")
-                textarea(
-                    attrs: attributes! {
-                        id="description-input"
-                        placeholder="Write a short description about yourself"
-                        name="description"
-                    },
-                    (profile.as_ref().map(|p| p.description.as_ref()))
-                )
-            </div>
+            )
             button(attrs: attributes! { type="submit" }, "Update")
         </form>
     })
