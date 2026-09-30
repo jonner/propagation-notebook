@@ -85,15 +85,9 @@ pub(crate) async fn profile(cx: &Cx) -> topcoat::Result<impl View> {
                         attrs: attributes! { for="description-input" },
                         "Description"
                     )
-                    field_description(
-                            "Write a short description about yourself"
-
-                    )
+                    field_description("Write a short description about yourself")
                     textarea(
-                        attrs: attributes! {
-                            id="description-input"
-                            name="description"
-                        },
+                        attrs: attributes! { id="description-input" name="description" },
                         (profile.as_ref().map(|p| p.description.as_ref()))
                     )
                 )

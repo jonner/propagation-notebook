@@ -607,7 +607,8 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                 (taxon.rank.to_string())
             )
             if let Some(user) = user {
-                if user.has_permission(PermissionCode::TaxonSync) || user.has_permission(PermissionCode::RegionSync) {
+                if user.has_permission(PermissionCode::TaxonSync)
+                    || user.has_permission(PermissionCode::RegionSync) {
                     dropdown_menu(
                         attrs: attributes! { class="ms-auto" :open=$(menu_open.get()) },
                         dropdown_menu_trigger(icon(data: crate::mdi::DOTS_VERTICAL))
