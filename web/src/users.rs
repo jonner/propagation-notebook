@@ -15,7 +15,7 @@ use topcoat::{
 use uuid::Uuid;
 
 use crate::{
-    components::{button::button, field::*, input::input, label::label, textarea::textarea},
+    components::{button::button, field::*, input::input, textarea::textarea},
     context::{db, require_user},
 };
 
