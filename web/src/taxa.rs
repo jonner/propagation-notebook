@@ -584,7 +584,6 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
         .await
         .ok_or_not_found()?;
     let user = current_user(cx).await;
-    let menu_open = signal(cx, || false);
 
     Ok(view! {
         let ancestors = taxon
@@ -610,7 +609,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                 if user.has_permission(PermissionCode::TaxonSync)
                     || user.has_permission(PermissionCode::RegionSync) {
                     dropdown_menu(
-                        attrs: attributes! { class="ms-auto" :open=$(menu_open.get()) },
+                        attrs: attributes! { class="ms-auto" },
                         dropdown_menu_trigger(icon(data: crate::mdi::DOTS_VERTICAL))
                         dropdown_menu_content(
                             alignment: DropdownMenuAlignment::Right,
@@ -618,10 +617,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                                 dropdown_menu_item(
                                     attrs: attributes! {
                                         @click=$(async |e: Event| {
-                                            e.prevent_default();
-                                            let fut = sync_image(id);
-                                            menu_open.set(false);
-                                            fut.await;
+                                            sync_image(id).await;
                                         })
                                     },
                                     "Sync Image"
@@ -631,10 +627,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                                 dropdown_menu_item(
                                     attrs: attributes! {
                                         @click=$(async |e: Event| {
-                                            e.prevent_default();
-                                            let fut = sync_regions(id);
-                                            menu_open.set(false);
-                                            fut.await;
+                                            sync_regions(id).await;
                                         })
                                     },
                                     "Sync Regions"

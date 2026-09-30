@@ -20,7 +20,8 @@ use tracing::debug;
 
 use crate::{
     assets::{
-        FONT_BODY, FONT_HEAD, HEADER_IMAGES, HYDRASTIS_CANADENSIS, LEAFLET_CSS, LEAFLET_JS, mdi,
+        CLOSE_DROPDOWN_JS, FONT_BODY, FONT_HEAD, HEADER_IMAGES, HYDRASTIS_CANADENSIS, LEAFLET_CSS,
+        LEAFLET_JS, mdi,
     },
     auth::login,
     components::{
@@ -107,6 +108,7 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
                 <link rel="stylesheet" href=(tailwind::stylesheet!())>
                 <link rel="stylesheet" href=(LEAFLET_CSS)>
                 <script src=(LEAFLET_JS)></script>
+                <script src=(CLOSE_DROPDOWN_JS)></script>
                 topcoat::font::link(font: FONT_HEAD)
                 topcoat::font::link(font: FONT_BODY)
             </head>

@@ -290,7 +290,6 @@ pub async fn week_navigator(
 pub async fn user_menu(cx: &Cx) -> topcoat::Result<impl View> {
     let uri = uri(cx);
     let login_href = href!(login);
-    let menu_open = signal(cx, || false);
     Ok(view! {
         if !login_href.is_current(cx) {
             <li class="ml-auto">
@@ -302,15 +301,8 @@ pub async fn user_menu(cx: &Cx) -> topcoat::Result<impl View> {
                         class="hidden"
                     ></form>
                     dropdown_menu(
-                        attrs: attributes! { :open=$(menu_open.get()) },
                         dropdown_menu_trigger(
-                            attrs: attributes! {
-                                class="flex"
-                                @click=$(|e: Event| {
-                                    e.prevent_default();
-                                    menu_open.toggle();
-                                })
-                            },
+                            attrs: attributes! { class="flex" },
                             avatar(
                                 attrs: attributes! { class="me-2 bg-background/60" },
                                 size: AvatarSize::Sm,
@@ -326,20 +318,11 @@ pub async fn user_menu(cx: &Cx) -> topcoat::Result<impl View> {
                             )
                             dropdown_menu_separator()
                             dropdown_menu_navigation_item(
-                                attrs: attributes! {
-                                    href=(href!(users::profile))
-                                    type="button"
-                                    @click=$(|_e: Event| menu_open.set(false))
-                                },
+                                attrs: attributes! { href=(href!(users::profile)) type="button" },
                                 "Profile"
                             )
                             dropdown_menu_item(
-                                attrs: attributes! {
-                                    type="submit"
-                                    class="text-destructive"
-                                    form="logoutForm"
-                                    @click=$(|_e: Event| menu_open.set(false))
-                                },
+                                attrs: attributes! { type="submit" class="text-destructive" form="logoutForm" },
                                 "Log Out"
                             )
                         )

@@ -57,6 +57,7 @@ pub async fn dropdown_menu(
 ) -> Result<impl View> {
     Ok(view! {
         <details
+            data-dropdown-menu="true"
             class=(class!("group relative inline-block", attrs.remove("class")))
             (attrs)
         >
@@ -145,7 +146,13 @@ pub async fn dropdown_menu_item(
     #[default] child: Child<'_>,
 ) -> Result<impl View> {
     Ok(view! {
-        <button class=(class!(ITEM, attrs.remove("class"))) (attrs)>(child)</button>
+        <button
+            class=(class!(ITEM, attrs.remove("class")))
+            data-dropdown-close="true"
+            (attrs)
+        >
+            (child)
+        </button>
     })
 }
 
@@ -155,7 +162,17 @@ pub async fn dropdown_menu_navigation_item(
     #[default] mut attrs: Attributes,
     #[default] child: Child<'_>,
 ) -> Result<impl View> {
-    Ok(view! { <a class=(class!(ITEM, attrs.remove("class"))) (attrs)>(child)</a> })
+    Ok(
+        view! {
+            <a
+                class=(class!(ITEM, attrs.remove("class")))
+                data-dropdown-close="true"
+                (attrs)
+            >
+                (child)
+            </a>
+        },
+    )
 }
 
 /// A nested menu that opens from a row in the parent menu.

@@ -42,11 +42,10 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
             <h1 class="flex items-center">
                 "Citation Details"
                 if let Some(user) = user {
-                    let menu_open = signal(cx, || false);
                     if user.has_permission(PermissionCode::CitationEdit)
                         || user.has_permission(PermissionCode::CitationDelete) {
                         dropdown_menu(
-                            attrs: attributes! { class="ms-auto" :open=$(menu_open.get()) },
+                            attrs: attributes! { class="ms-auto" },
                             dropdown_menu_trigger(icon(data: mdi::DOTS_VERTICAL))
                             dropdown_menu_content(
                                 alignment: DropdownMenuAlignment::Right,
@@ -54,7 +53,6 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                                     dropdown_menu_navigation_item(
                                         attrs: attributes! {
                                             href=(href!(modify, CitationId(*id)))
-                                            @click=$(|_e: Event| menu_open.set(false))
                                         },
                                         "Modify"
                                     )
@@ -64,7 +62,6 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                                         attrs: attributes! {
                                             @click=$(|_e: topcoat::runtime::Event| {
                                                 delete_dialog_open.set(true);
-                                                menu_open.set(false);
                                             })
                                             class="text-destructive"
                                         },

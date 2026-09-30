@@ -41,3 +41,5 @@ pub(crate) const HEADER_IMAGES: &[&Asset] = &[
 
 pub(crate) const LEAFLET_JS: Asset = asset!("https://unpkg.com/leaflet@1.9.4/dist/leaflet.js", checksum:"sha256:db49d009c841f5ca34a888c96511ae936fd9f5533e90d8b2c4d57596f4e5641a");
 pub(crate) const LEAFLET_CSS: Asset = asset!("https://unpkg.com/leaflet@1.9.4/dist/leaflet.css", checksum:"sha256:a7837102824184820dfa198d1ebcd109ff6d0ff9a2672a074b9a1b4d147d04c6");
+
+pub(crate) const CLOSE_DROPDOWN_JS: Asset = asset!("assets/close-dropdown-menu.js");
