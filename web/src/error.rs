@@ -6,4 +6,6 @@ pub enum Error {
     Io(#[from] std::io::Error),
     #[error(transparent)]
     Propagation(#[from] libpropagation::error::Error),
+    #[error("Configuration error: {0}")]
+    Configuration(String),
 }

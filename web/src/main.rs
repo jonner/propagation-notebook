@@ -1,5 +1,6 @@
 use std::hash::{DefaultHasher, Hash, Hasher};
 
+use tokio::net::TcpListener;
 use topcoat::{
     asset::{Asset, AssetBundle, RouterBuilderAssetExt, asset_config},
     context::Cx,
@@ -29,6 +30,7 @@ use crate::{
         input::input,
         pn::{taxon_search_bar, user_menu},
     },
+    config::AppConfig,
     error::Error,
     tasks::background_tasks,
 };
@@ -37,6 +39,7 @@ mod assets;
 mod auth;
 mod citation;
 mod components;
+mod config;
 mod context;
 mod error;
 mod propagation;
@@ -50,21 +53,27 @@ mod util;
 async fn main() -> Result<(), Error> {
     tracing_subscriber::fmt::init();
     let db = libpropagation::db(true).await?;
-    if std::env::var("ENABLE_BACKGROUND_TASKS").is_ok() {
+    let config = AppConfig::load().map_err(|e| Error::Configuration(e.to_string()))?;
+
+    if config.enable_background_tasks {
         debug!("Enabling background tasks...");
         tokio::spawn(background_tasks(db.clone()));
     }
-    topcoat::start(
-        Router::builder()
-            .runtime()
-            .discover()
-            .assets(AssetBundle::load()?)
-            .app_context(db)
-            .cookies()
-            .sessions(SessionConfig::default())
-            .build(),
-    )
-    .await?;
+
+    let listener = TcpListener::bind((config.listen.host, config.listen.port)).await?;
+
+    let service = Router::builder()
+        .runtime()
+        .discover()
+        .assets(AssetBundle::load()?)
+        .app_context(db)
+        .cookies()
+        .sessions(SessionConfig::default())
+        .base_url(config.base_url.to_string())
+        .build();
+
+    topcoat::serve(listener, service).await?;
+
     Ok(())
 }
 
