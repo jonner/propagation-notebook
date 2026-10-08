@@ -79,8 +79,12 @@ async fn run() -> Result<(), Error> {
         .sessions(SessionConfig::default())
         .base_url(config.base_url.to_string());
 
-    if config.enable_compression {
-        service_builder = service_builder.compression(Compression::new());
+    if let Some(compression) = config.enable_compression {
+        service_builder = service_builder.compression(if compression {
+            Compression::default()
+        } else {
+            Compression::off()
+        });
     }
 
     let service = service_builder.build();

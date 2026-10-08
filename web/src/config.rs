@@ -16,8 +16,8 @@ pub(crate) struct AppConfig {
     pub(crate) base_url: url::Url,
     #[config(default = false, env = "PN_ENABLE_BACKGROUND_TASKS")]
     pub(crate) enable_background_tasks: bool,
-    #[config(default = false, env = "PN_ENABLE_COMPRESSION")]
-    pub(crate) enable_compression: bool,
+    #[config(env = "PN_ENABLE_COMPRESSION")]
+    pub(crate) enable_compression: Option<bool>,
 }
 
 #[derive(thiserror::Error, Debug)]
