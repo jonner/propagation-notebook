@@ -1,5 +1,6 @@
 use std::hash::{DefaultHasher, Hash, Hasher};
 
+use clap::Parser;
 use tokio::net::TcpListener;
 use topcoat::{
     asset::{Asset, AssetBundle, RouterBuilderAssetExt, asset_config},
@@ -49,16 +50,48 @@ mod taxa;
 mod users;
 mod util;
 
+#[derive(Debug, clap::Parser)]
+#[command(version)]
+pub struct Options {
+    #[command(subcommand)]
+    command: Option<Command>,
+}
+
+#[derive(Debug, clap::Subcommand)]
+pub enum Command {
+    #[command(about = "Run the web application")]
+    Run,
+    #[command(about = "Generate a new configuration file template")]
+    GenerateConfig,
+}
+
 #[tokio::main]
 async fn main() {
-    if let Err(err) = run().await {
+    tracing_subscriber::fmt::init();
+    let options = Options::parse();
+
+    let res = match options.command {
+        Some(Command::GenerateConfig) => {
+            let template =
+                confique::yaml::template::<AppConfig>(confique::yaml::FormatOptions::default());
+            println!("{template}");
+            Ok(())
+        }
+        None | Some(Command::Run) => run().await,
+    };
+
+    if let Err(err) = res {
         eprintln!("{}", err);
+        if let Error::Configuration(_) = err {
+            eprintln!(
+                "To generate a default configuration file template, re-run this program with the 'generate-config' command argument",
+            )
+        }
         std::process::exit(1);
     }
 }
 
 async fn run() -> Result<(), Error> {
-    tracing_subscriber::fmt::init();
     let db = libpropagation::db(true).await?;
     let config = AppConfig::load().map_err(|e| Error::Configuration(e.to_string()))?;
     debug!(?config);

@@ -20,6 +20,7 @@ uuid.workspace = true
 confique = { version = "0.4.0", features = ["yaml"] }
 directories.workspace = true
 url.workspace = true
+clap.workspace = true
 
 [build-dependencies]
 topcoat = { version = "0.9.0", default-features= false, features = ["tailwind", "icon-iconify"] }
