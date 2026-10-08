@@ -7,7 +7,7 @@ use topcoat::{
     cookie::RouterBuilderCookieExt,
     icon::icon,
     router::{
-        Router, RouterBuilderDiscoverExt, Slot,
+        Compression, Router, RouterBuilderDiscoverExt, Slot,
         error::{ForbiddenError, NotFoundError, UnauthorizedError},
         href, layout, not_found, page,
         request::uri,
@@ -54,6 +54,7 @@ async fn main() -> Result<(), Error> {
     tracing_subscriber::fmt::init();
     let db = libpropagation::db(true).await?;
     let config = AppConfig::load().map_err(|e| Error::Configuration(e.to_string()))?;
+    debug!(?config);
 
     if config.enable_background_tasks {
         debug!("Enabling background tasks...");
@@ -62,15 +63,20 @@ async fn main() -> Result<(), Error> {
 
     let listener = TcpListener::bind((config.listen.host, config.listen.port)).await?;
 
-    let service = Router::builder()
+    let mut service_builder = Router::builder()
         .runtime()
         .discover()
         .assets(AssetBundle::load()?)
         .app_context(db)
         .cookies()
         .sessions(SessionConfig::default())
-        .base_url(config.base_url.to_string())
-        .build();
+        .base_url(config.base_url.to_string());
+
+    if config.enable_compression {
+        service_builder = service_builder.compression(Compression::new());
+    }
+
+    let service = service_builder.build();
 
     topcoat::serve(listener, service).await?;
 
