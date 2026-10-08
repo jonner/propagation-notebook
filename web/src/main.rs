@@ -50,7 +50,14 @@ mod users;
 mod util;
 
 #[tokio::main]
-async fn main() -> Result<(), Error> {
+async fn main() {
+    if let Err(err) = run().await {
+        eprintln!("{}", err);
+        std::process::exit(1);
+    }
+}
+
+async fn run() -> Result<(), Error> {
     tracing_subscriber::fmt::init();
     let db = libpropagation::db(true).await?;
     let config = AppConfig::load().map_err(|e| Error::Configuration(e.to_string()))?;
