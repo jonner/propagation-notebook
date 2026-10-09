@@ -1,5 +1,4 @@
 use topcoat::{
-    context::Cx,
     router::href,
     view::{Attributes, Child, View, class, component, view},
 };
@@ -71,7 +70,6 @@ pub async fn harvest_timeline(
 //  single regional_status: the region we're displaying the table for
 #[component]
 pub async fn regional_taxa_table(
-    cx: &Cx,
     taxa: &[Taxon],
     #[default] current_doy: Option<i16>,
     #[default] attrs: Attributes,
@@ -112,7 +110,6 @@ pub async fn regional_taxa_table(
 
 #[component]
 pub async fn taxon_regional_table(
-    cx: &Cx,
     regions: &[(Region, RegionHarvestWindowSummary)],
     #[default] current_doy: Option<i16>,
     #[default] attrs: Attributes,

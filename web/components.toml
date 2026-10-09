@@ -44,10 +44,6 @@ file = "src/components/dropdown_menu.rs"
 hash = "sha256:17438c510d30440dfa2ca38f888cd5503e292c9475b5f09de59b45edd35ebac0"
 file = "src/components/field.rs"
 
-[registries.topcoat.components.hover_card]
-hash = "sha256:37484ded8b331803afb1532ec9f4824311495daef5ffbe14a7ae1cff0c7a6990"
-file = "src/components/hover_card.rs"
-
 [registries.topcoat.components.input]
 hash = "sha256:7fe8728a839a821af865711347189a00c29ba28b8b11dcc0d2ee06a053ca127c"
 file = "src/components/input.rs"
