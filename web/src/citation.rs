@@ -8,7 +8,7 @@ use topcoat::{
         error::{RouterErrorExt, SeeOther, see_other},
         href, page, path_param, route,
     },
-    runtime::{Event, procedure, signal},
+    runtime::{procedure, signal},
     view::{Attributes, Child, View, attributes, class, component, view},
 };
 

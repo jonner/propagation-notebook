@@ -14,7 +14,7 @@ use topcoat::{
         error::{RouterErrorExt, redirect},
         href, page, path_param, query_params,
     },
-    runtime::{Event, procedure, signal},
+    runtime::{Event, procedure},
     view::{View, attributes, component, error_boundary, suspense, view},
 };
 use tracing::{debug, trace, warn};
@@ -616,7 +616,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                             if user.has_permission(PermissionCode::TaxonSync) {
                                 dropdown_menu_item(
                                     attrs: attributes! {
-                                        @click=$(async |e: Event| {
+                                        @click=$(async |_e: Event| {
                                             sync_image(id).await;
                                         })
                                     },
@@ -626,7 +626,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                             if user.has_permission(PermissionCode::RegionSync) {
                                 dropdown_menu_item(
                                     attrs: attributes! {
-                                        @click=$(async |e: Event| {
+                                        @click=$(async |_e: Event| {
                                             sync_regions(id).await;
                                         })
                                     },
