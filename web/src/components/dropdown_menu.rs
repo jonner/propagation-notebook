@@ -162,17 +162,15 @@ pub async fn dropdown_menu_navigation_item(
     #[default] mut attrs: Attributes,
     #[default] child: Child<'_>,
 ) -> Result<impl View> {
-    Ok(
-        view! {
-            <a
-                class=(class!(ITEM, attrs.remove("class")))
-                data-dropdown-close="true"
-                (attrs)
-            >
-                (child)
-            </a>
-        },
-    )
+    Ok(view! {
+        <a
+            class=(class!(ITEM, attrs.remove("class")))
+            data-dropdown-close="true"
+            (attrs)
+        >
+            (child)
+        </a>
+    })
 }
 
 /// A nested menu that opens from a row in the parent menu.

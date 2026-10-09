@@ -51,9 +51,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                                 alignment: DropdownMenuAlignment::Right,
                                 if user.has_permission(PermissionCode::CitationDelete) {
                                     dropdown_menu_navigation_item(
-                                        attrs: attributes! {
-                                            href=(href!(modify, CitationId(*id)))
-                                        },
+                                        attrs: attributes! { href=(href!(modify, CitationId(*id))) },
                                         "Modify"
                                     )
                                 }
