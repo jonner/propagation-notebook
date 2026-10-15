@@ -16,7 +16,7 @@ use topcoat::{
     runtime::RouterBuilderRuntimeExt,
     session::{RouterBuilderSessionExt, SessionConfig},
     tailwind,
-    view::{View, ViewExt, attributes, error_boundary, view},
+    view::{Child, View, ViewExt, attributes, component, error_boundary, view},
 };
 use tracing::debug;
 
@@ -146,8 +146,7 @@ fn header_image_for_page(cx: &Cx) -> &Asset {
 not_found!("/");
 
 #[layout("/")]
-async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
-    let uri = uri(cx);
+async fn shell(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
     let header_bg = header_image_for_page(cx);
 
     Ok(view! {
@@ -173,130 +172,143 @@ async fn layout(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
             </head>
             <body>
                 <div class="main-content">
-                    <header
-                        class="dark flex flex-col items-start justify-between font-bold flex-wrap bg-(image:--background-image) bg-center bg-cover h-[8rem] md:h-[12rem]"
-                    >
-                        <nav
-                            class="text-foreground bg-background/70 w-full block shrink flex items-center gap-6 md:gap-4 px-3 md:px-6 py-2"
-                        >
-                            <ul class="contents">
-                                <li>
-                                    <a class="block" href=(href!(home))>
-                                        icon(
-                                            data: mdi::FLOWER_POPPY,
-                                            label: "Home",
-                                            attrs: attributes! { class="icon" }
-                                        )
-                                        <span class="caption">"Propagation Notebook"</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="block" href=(href!(taxa::explore))>
-                                        icon(
-                                            data: mdi::FORMAT_LIST_BULLETED,
-                                            label: "Taxonomy",
-                                            attrs: attributes! { class="icon" }
-                                        )
-                                        <span class="caption">"Taxonomy"</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="block" href=(href!(regions::list))>
-                                        icon(
-                                            data: mdi::GLOBE,
-                                            label: "Regions",
-                                            attrs: attributes! { class="icon" }
-                                        )
-                                        <span class="caption">"Regions"</span>
-                                    </a>
-                                </li>
-                                <li class="md:px-6 mx-auto grow lg:max-w-1/2">
-                                    taxon_search_bar()
-                                </li>
-                                user_menu()
-                            </ul>
-                        </nav>
-                    </header>
-                    <main class="m-3 md:m-6 grow">
-                        error_boundary(
-                            fallback: |error| {
-                                match error {
-                                    e if e.downcast_ref::<UnauthorizedError>().is_some() => {
-                                        Ok(
-                                            view! {
-                                                <h1>"401 — Unauthorized"</h1>
-                                                <div>
-                                                    "Sorry, you must be logged in to view this page. Please "
-                                                    <a href=(href!(login))>"log in"</a>
-                                                    " to continue."
-                                                </div>
-                                            }.boxed(
-
-                                            ),
-                                        )
-                                    }
-                                    e if e.downcast_ref::<ForbiddenError>().is_some() => {
-                                        Ok(
-                                            view! {
-                                                <h1>"403 — Access Denied"</h1>
-                                                <div>
-                                                    (format!(
-                                                        "Sorry, you do not have permission to access '{uri}' on this server.",
-                                                    ))
-                                                </div>
-                                            }.boxed(
-
-                                            ),
-                                        )
-                                    }
-                                    e if e.downcast_ref::<NotFoundError>().is_some() => {
-                                        Ok(
-                                            view! {
-                                                <h1>"404 Not Found"</h1>
-                                                <p>
-                                                    (format!(
-                                                        "We're sorry, but the page '{uri}' cannot be found. The link might be outdated, or the URL could have been a typo.",
-                                                    ))
-                                                </p>
-                                            }.boxed(
-
-                                            ),
-                                        )
-                                    }
-                                    e => Err(e),
-                                }
-                            },
-                            (slot)
-                        )
-                    </main>
-                    <footer
-                        class="dark bg-(image:--background-image) bg-center bg-cover mt-6 shadow-[0_-1rem_2rem_rgba(0,0,0,0.2)]"
-                    >
-                        <div
-                            class="text-foreground bg-linear-to-t from-background to-50% to-transparent block px-3 md:px-6 pt-50 pb-6"
-                        >
-                            "Developed with "
-                            icon(
-                                data: mdi::HEART,
-                                label: "Love",
-                                attrs: attributes! { class="text-red-300 inline-block" }
-                            )
-                            " by volunteers"
-                            <div class="opacity-60">
-                                <div>
-                                    "Taxonomy based on "
-                                    <a href="https://www.itis.gov">"ITIS"</a>
-                                </div>
-                                <div>
-                                    "Phenology data provided by "
-                                    <a href="https://inaturalist.org">"iNaturalist.org"</a>
-                                </div>
-                            </div>
-                        </div>
-                    </footer>
+                    if href!(login).is_current(cx) {
+                        (slot)
+                    } else {
+                        full_page_layout((slot))
+                    }
                 </div>
             </body>
         </html>
+    })
+}
+
+#[component]
+async fn full_page_layout(cx: &Cx, child: Child<'_>) -> topcoat::Result<impl View> {
+    let uri = uri(cx);
+
+    Ok(view! {
+        <header
+            class="dark flex flex-col items-start justify-between font-bold flex-wrap bg-(image:--background-image) bg-center bg-cover h-[8rem] md:h-[12rem]"
+        >
+            <nav
+                class="text-foreground bg-background/70 w-full block shrink flex items-center gap-6 md:gap-4 px-3 md:px-6 py-2"
+            >
+                <ul class="contents">
+                    <li>
+                        <a class="block" href=(href!(home))>
+                            icon(
+                                data: mdi::FLOWER_POPPY,
+                                label: "Home",
+                                attrs: attributes! { class="icon" }
+                            )
+                            <span class="caption">"Propagation Notebook"</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="block" href=(href!(taxa::explore))>
+                            icon(
+                                data: mdi::FORMAT_LIST_BULLETED,
+                                label: "Taxonomy",
+                                attrs: attributes! { class="icon" }
+                            )
+                            <span class="caption">"Taxonomy"</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="block" href=(href!(regions::list))>
+                            icon(
+                                data: mdi::GLOBE,
+                                label: "Regions",
+                                attrs: attributes! { class="icon" }
+                            )
+                            <span class="caption">"Regions"</span>
+                        </a>
+                    </li>
+                    <li class="md:px-6 mx-auto grow lg:max-w-1/2">
+                        taxon_search_bar()
+                    </li>
+                    user_menu()
+                </ul>
+            </nav>
+        </header>
+        <main class="m-3 md:m-6 grow">
+            error_boundary(
+                fallback: |error| {
+                    match error {
+                        e if e.downcast_ref::<UnauthorizedError>().is_some() => {
+                            Ok(
+                                view! {
+                                    <h1>"401 — Unauthorized"</h1>
+                                    <div>
+                                        "Sorry, you must be logged in to view this page. Please "
+                                        <a href=(href!(login))>"log in"</a>
+                                        " to continue."
+                                    </div>
+                                }.boxed(
+
+                                ),
+                            )
+                        }
+                        e if e.downcast_ref::<ForbiddenError>().is_some() => {
+                            Ok(
+                                view! {
+                                    <h1>"403 — Access Denied"</h1>
+                                    <div>
+                                        (format!(
+                                            "Sorry, you do not have permission to access '{uri}' on this server.",
+                                        ))
+                                    </div>
+                                }.boxed(
+
+                                ),
+                            )
+                        }
+                        e if e.downcast_ref::<NotFoundError>().is_some() => {
+                            Ok(
+                                view! {
+                                    <h1>"404 Not Found"</h1>
+                                    <p>
+                                        (format!(
+                                            "We're sorry, but the page '{uri}' cannot be found. The link might be outdated, or the URL could have been a typo.",
+                                        ))
+                                    </p>
+                                }.boxed(
+
+                                ),
+                            )
+                        }
+                        e => Err(e),
+                    }
+                },
+                (child)
+            )
+        </main>
+        <footer
+            class="dark bg-(image:--background-image) bg-center bg-cover mt-6 shadow-[0_-1rem_2rem_rgba(0,0,0,0.2)]"
+        >
+            <div
+                class="text-foreground bg-linear-to-t from-background to-50% to-transparent block px-3 md:px-6 pt-50 pb-6"
+            >
+                "Developed with "
+                icon(
+                    data: mdi::HEART,
+                    label: "Love",
+                    attrs: attributes! { class="text-red-300 inline-block" }
+                )
+                " by volunteers"
+                <div class="opacity-60">
+                    <div>
+                        "Taxonomy based on "
+                        <a href="https://www.itis.gov">"ITIS"</a>
+                    </div>
+                    <div>
+                        "Phenology data provided by "
+                        <a href="https://inaturalist.org">"iNaturalist.org"</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
     })
 }
 

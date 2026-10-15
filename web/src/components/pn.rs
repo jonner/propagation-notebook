@@ -288,57 +288,53 @@ pub async fn week_navigator(
 
 #[component]
 pub async fn user_menu(cx: &Cx) -> topcoat::Result<impl View> {
-    let uri = uri(cx);
-    let login_href = href!(login);
     Ok(view! {
-        if !login_href.is_current(cx) {
-            <li class="ml-auto">
-                if let Some(user) = current_user(cx).await {
-                    <form
-                        method="POST"
-                        action=(href!(do_logout))
-                        id="logoutForm"
-                        class="hidden"
-                    ></form>
-                    dropdown_menu(
-                        dropdown_menu_trigger(
-                            attrs: attributes! { class="flex" },
-                            avatar(
-                                attrs: attributes! { class="me-2 bg-background/60" },
-                                size: AvatarSize::Sm,
-                                avatar_fallback(icon(data: mdi::ACCOUNT))
-                            )
-                            <span class="hidden md:inline-block">(&user.username)</span>
+        <li class="ml-auto">
+            if let Some(user) = current_user(cx).await {
+                <form
+                    method="POST"
+                    action=(href!(do_logout))
+                    id="logoutForm"
+                    class="hidden"
+                ></form>
+                dropdown_menu(
+                    dropdown_menu_trigger(
+                        attrs: attributes! { class="flex" },
+                        avatar(
+                            attrs: attributes! { class="me-2 bg-background/60" },
+                            size: AvatarSize::Sm,
+                            avatar_fallback(icon(data: mdi::ACCOUNT))
                         )
-                        dropdown_menu_content(
-                            alignment: DropdownMenuAlignment::Right,
-                            dropdown_menu_label(
-                                "Logged in as "
-                                (&user.username)
-                            )
-                            dropdown_menu_separator()
-                            dropdown_menu_navigation_item(
-                                attrs: attributes! { href=(href!(users::profile)) type="button" },
-                                "Profile"
-                            )
-                            dropdown_menu_item(
-                                attrs: attributes! { type="submit" class="text-destructive" form="logoutForm" },
-                                "Log Out"
-                            )
+                        <span class="hidden md:inline-block">(&user.username)</span>
+                    )
+                    dropdown_menu_content(
+                        alignment: DropdownMenuAlignment::Right,
+                        dropdown_menu_label(
+                            "Logged in as "
+                            (&user.username)
+                        )
+                        dropdown_menu_separator()
+                        dropdown_menu_navigation_item(
+                            attrs: attributes! { href=(href!(users::profile)) type="button" },
+                            "Profile"
+                        )
+                        dropdown_menu_item(
+                            attrs: attributes! { type="submit" class="text-destructive" form="logoutForm" },
+                            "Log Out"
                         )
                     )
-                } else {
-                    <a
-                        class="flex"
-                        href=(login_href.query(
-                            LoginFormParams { redirect: Some(uri.to_string()) },
-                        ))
-                    >
-                        "Log in"
-                    </a>
-                }
-            </li>
-        }
+                )
+            } else {
+                <a
+                    class="flex"
+                    href=(href!(login).query(
+                        LoginFormParams { redirect: Some(uri(cx).to_string()) },
+                    ))
+                >
+                    "Log in"
+                </a>
+            }
+        </li>
     })
 }
 

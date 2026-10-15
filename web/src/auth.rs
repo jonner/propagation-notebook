@@ -11,6 +11,7 @@ use topcoat::{
 };
 
 use crate::{
+    assets::HYDRASTIS_CANADENSIS,
     components::{button::button, card::*, field::*, input::input},
     context::{current_user, db, delete_session, persist_session},
     home,
@@ -75,8 +76,10 @@ pub(crate) async fn login(cx: &Cx) -> topcoat::Result<impl View> {
 
     Ok(view! {
         card(
-            attrs: attributes! { class="w-full mx-auto my-12 lg:max-w-1/2" },
-            card_header(card_title("Log In"))
+            attrs: attributes! { class="mx-12 md:mx-auto my-auto overflow-hidden pt-0" },
+            <div class="relative h-48 w-full">
+                <img src=(HYDRASTIS_CANADENSIS) class="h-full w-full object-cover" />
+            </div>
             card_content(
                 attrs: attributes! { class="flex flex-col items-center" },
                 <form method="POST" class="w-full flex flex-col gap-6">
