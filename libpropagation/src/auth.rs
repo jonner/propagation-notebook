@@ -42,6 +42,16 @@ impl User {
         verify_password(password, &self.pwhash)
     }
 
+    /// Change the stored password for the given user to `new_password`. This
+    /// does not do any verification of the existing password, it is merely
+    /// a data update. The caller is tasked with verifying that the user is
+    /// allowed to change the password, etc.
+    pub async fn change_password(&mut self, db: &mut Db, new_password: &str) -> Result<(), Error> {
+        let new_hash = hash_password(new_password)?;
+        self.update().pwhash(new_hash).exec(db).await?;
+        Ok(())
+    }
+
     /// This doesn't validate the password or provide any security. It just
     /// marks the user as logged in. It is expected that the caller verifies the
     /// password before calling this function
