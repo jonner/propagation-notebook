@@ -20,7 +20,7 @@ use crate::{
 #[route(POST "/auth/logout")]
 pub(crate) async fn do_logout(cx: &Cx) -> topcoat::Result<SeeOther> {
     delete_session(cx).await?;
-    Ok(see_other(href!(login).resolve(cx)))
+    Ok(see_other(href!(home).resolve(cx)))
 }
 
 #[derive(Debug, Deserialize)]
@@ -33,7 +33,7 @@ struct LoginParams {
 #[page("/auth/logout")]
 pub(crate) async fn logout(cx: &Cx) -> topcoat::Result<impl View> {
     if current_user(cx).await.is_none() {
-        return Err(redirect(href!(login).resolve(cx)).into());
+        return Err(redirect(href!(home).resolve(cx)).into());
     };
 
     Ok(view! {
