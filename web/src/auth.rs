@@ -1,10 +1,11 @@
 use libpropagation::auth::User;
 use serde::{Deserialize, Serialize};
 use topcoat::{
-    context::Cx,
+    context::{Cx, try_request_context},
     router::{
+        Body, Method, StatusCode,
         content::Form,
-        error::{SeeOther, redirect, see_other},
+        error::{SeeOther, redirect, rewrite, see_other},
         href, page, query_params, route,
     },
     view::{View, attributes, view},
@@ -23,7 +24,7 @@ pub(crate) async fn do_logout(cx: &Cx) -> topcoat::Result<SeeOther> {
     Ok(see_other(href!(home).resolve(cx)))
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone, Default)]
 struct LoginParams {
     username: String,
     password: String,
@@ -46,18 +47,25 @@ pub(crate) async fn logout(cx: &Cx) -> topcoat::Result<impl View> {
     })
 }
 
+struct LoginRejected {
+    data: LoginParams,
+}
+
 #[route(POST "/auth/login")]
 pub(crate) async fn do_login(Form(data): Form<LoginParams>, cx: &Cx) -> topcoat::Result<SeeOther> {
-    let mut user = User::get_by_username(&mut db(cx), data.username).await?;
-    match user.verify_password(&data.password) {
-        Ok(()) => {
-            persist_session(cx, &mut user).await?;
-            Ok(see_other(
-                data.redirect.unwrap_or_else(|| href!(home).resolve(cx)),
-            ))
-        }
-        Err(e) => Err(e.into()),
+    if let Ok(mut user) = User::get_by_username(&mut db(cx), &data.username).await
+        && user.verify_password(&data.password).is_ok()
+    {
+        persist_session(cx, &mut user).await?;
+        return Ok(see_other(
+            data.redirect.unwrap_or_else(|| href!(home).resolve(cx)),
+        ));
     }
+
+    Err(rewrite(href!(login).resolve(cx), Body::empty())
+        .method(Method::GET)
+        .with(LoginRejected { data: data.clone() })
+        .into())
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -73,8 +81,13 @@ pub(crate) async fn login(cx: &Cx) -> topcoat::Result<impl View> {
     if user.is_some() {
         return Err(see_other(href!(crate::home).resolve(cx)).into());
     }
+    let rejected = try_request_context::<LoginRejected>(cx);
+    let data = rejected.map(|r| r.data.clone()).unwrap_or_default();
 
     Ok(view! {
+        if rejected.is_some() {
+            (StatusCode::UNAUTHORIZED)
+        }
         card(
             attrs: attributes! { class="mx-12 md:mx-auto my-auto overflow-hidden pt-0" },
             <div class="relative h-48 w-full">
@@ -90,7 +103,11 @@ pub(crate) async fn login(cx: &Cx) -> topcoat::Result<impl View> {
                                 "Username"
                             )
                             input(
-                                attrs: attributes! { id="username-input" name="username" }
+                                attrs: attributes! {
+                                    id="username-input"
+                                    name="username"
+                                    value=(data.username)
+                                }
                             )
                         )
                         field(
@@ -109,6 +126,9 @@ pub(crate) async fn login(cx: &Cx) -> topcoat::Result<impl View> {
                                 value=(params.redirect.as_ref())
                             }
                         )
+                        if rejected.is_some() {
+                            field_error("Failed to log in")
+                        }
                     )
                     button("Log In")
                 </form>
