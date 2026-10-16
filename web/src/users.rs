@@ -22,7 +22,6 @@ use crate::{
 
 #[derive(Deserialize, Debug)]
 struct UpdateProfileParams {
-    userid: Uuid,
     name: Option<String>,
     description: Option<String>,
 }
@@ -33,10 +32,7 @@ pub(crate) async fn update_profile(
     Form(params): Form<UpdateProfileParams>,
 ) -> topcoat::Result<SeeOther> {
     let user = require_user(cx).await.ok_or_unauthorized()?;
-    if params.userid != user.id {
-        return Err(forbidden().into());
-    }
-    UserProfile::upsert_by_user_id(params.userid)
+    UserProfile::upsert_by_user_id(user.id)
         .name(params.name)
         .description(params.description)
         .exec(&mut db(cx))
@@ -66,9 +62,6 @@ pub(crate) async fn profile(cx: &Cx) -> topcoat::Result<impl View> {
     Ok(view! {
         <h1>(&user.username)</h1>
         <form class="flex flex-col gap-6" method="POST" action=(href!(update_profile))>
-            input(
-                attrs: attributes! { type="hidden" name="userid" value=(user.id.to_string()) }
-            )
             field_set(
                 field(
                     field_label(attrs: attributes! { for="name-input" }, "Name")
@@ -175,9 +168,6 @@ pub(crate) async fn change_password(cx: &Cx) -> topcoat::Result<impl View> {
             method="POST"
             action=(href!(do_change_password))
         >
-            input(
-                attrs: attributes! { type="hidden" name="userid" value=(user.id.to_string()) }
-            )
             field_set(
                 field(
                     field_label(
