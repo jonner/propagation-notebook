@@ -26,6 +26,7 @@ tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 url = { workspace = true }
 uuid = { workspace = true }
+zxcvbn = "3.1.1"
 
 [dev-dependencies]
 divan = "0.1.21"

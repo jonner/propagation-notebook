@@ -2,6 +2,7 @@ use argon2::{Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
 use serde::Serialize;
 use toasty::{Db, Deferred};
 use uuid::Uuid;
+use zxcvbn::Score;
 
 use crate::error::{AuthError, Error};
 
@@ -37,6 +38,16 @@ pub struct User {
     pub emails: toasty::Deferred<Vec<UserEmail>>,
 }
 
+#[derive(Debug, thiserror::Error)]
+pub enum ChangePasswordError {
+    #[error(transparent)]
+    Db(#[from] toasty::Error),
+    #[error(transparent)]
+    Auth(#[from] AuthError),
+    #[error("Password doesn't meet requirements: {0}")]
+    InvalidPassword(String, Vec<String>),
+}
+
 impl User {
     pub fn verify_password(&self, password: &str) -> Result<(), AuthError> {
         verify_password(password, &self.pwhash)
@@ -46,7 +57,23 @@ impl User {
     /// does not do any verification of the existing password, it is merely
     /// a data update. The caller is tasked with verifying that the user is
     /// allowed to change the password, etc.
-    pub async fn change_password(&mut self, db: &mut Db, new_password: &str) -> Result<(), Error> {
+    pub async fn change_password(
+        &mut self,
+        db: &mut Db,
+        new_password: &str,
+    ) -> Result<(), ChangePasswordError> {
+        let entropy = zxcvbn::zxcvbn(new_password, &[&self.username]);
+        if entropy.score() < Score::Two {
+            let msg = entropy
+                .feedback()
+                .and_then(|f| f.warning().map(|w| w.to_string()))
+                .unwrap_or_else(|| "Password is too weak".to_string());
+            let suggestions = entropy
+                .feedback()
+                .map(|f| f.suggestions().iter().map(|s| s.to_string()).collect())
+                .unwrap_or_default();
+            return Err(ChangePasswordError::InvalidPassword(msg, suggestions));
+        }
         let new_hash = hash_password(new_password)?;
         self.update().pwhash(new_hash).exec(db).await?;
         Ok(())
