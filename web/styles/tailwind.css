@@ -270,18 +270,6 @@
     @apply italic
   }
 
-  table {
-    @apply border-separate border-spacing-x-6 bg-jaggery/5;
-  }
-
-  table thead {
-    @apply font-header font-bold;
-  }
-
-  td, th {
-    @apply text-start p-1;
-  }
-
   .badge {
     @apply px-1 rounded-lg text-xs font-bold;
   }

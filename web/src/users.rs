@@ -1,23 +1,21 @@
-use libpropagation::auth::{User, UserProfile};
+use libpropagation::auth::{UserEmail, UserProfile};
 use serde::Deserialize;
 use topcoat::{
     context::{Cx, try_request_context},
+    icon::icon,
     router::{
         Body, Method, StatusCode,
         content::Form,
-        error::{RouterErrorExt, SeeOther, forbidden, rewrite, see_other},
-        header::REFERER,
-        href, page,
-        request::headers,
-        route,
+        error::{RouterErrorExt, SeeOther, rewrite, see_other},
+        href, page, route,
     },
-    view::{View, attributes, view},
+    view::{Attributes, Child, View, attributes, class, component, view},
 };
-use uuid::Uuid;
 
 use crate::{
-    components::{button::button, field::*, input::input, textarea::textarea},
+    components::{avatar::*, button::button, card::*, field::*, input::input, textarea::textarea},
     context::{db, require_user},
+    mdi,
 };
 
 #[derive(Deserialize, Debug)]
@@ -37,18 +35,194 @@ pub(crate) async fn update_profile(
         .description(params.description)
         .exec(&mut db(cx))
         .await?;
-    Ok(see_other(
-        headers(cx)
-            .get(REFERER)
-            .and_then(|value| value.to_str().ok().map(|v| v.to_string()))
-            .unwrap_or_else(|| href!(profile).resolve(cx)),
-    ))
+    Ok(see_other(href!(account).resolve(cx)))
+}
+
+#[component]
+async fn edit_icon(#[default] mut attrs: Attributes) -> topcoat::Result<impl View> {
+    Ok(view! {
+        <a class=(class! { "mx-2", attrs.remove("class") }) (attrs)>
+            icon(
+                data: mdi::EDIT,
+                label: "Edit",
+                attrs: attributes! { class="inline-block" }
+            )
+        </a>
+    })
+}
+#[component]
+async fn setting_row(
+    #[default] mut attrs: Attributes,
+    #[default] child: Child<'_>,
+) -> topcoat::Result<impl View> {
+    Ok(view! {
+        <div class=(class! { "py-3", attrs.remove("class") }) (attrs)>(child)</div>
+    })
+}
+
+#[component]
+async fn setting_name(
+    #[default] mut attrs: Attributes,
+    #[default] child: Child<'_>,
+) -> topcoat::Result<impl View> {
+    Ok(view! {
+        <div class=(class! { "font-bold text-lg", attrs.remove("class") }) (attrs)>
+            (child)
+        </div>
+    })
+}
+
+#[component]
+async fn setting_value(
+    #[default] mut attrs: Attributes,
+    #[default] child: Child<'_>,
+) -> topcoat::Result<impl View> {
+    Ok(view! {
+        <div
+            class=(class! { "text-muted-foreground px-2", attrs.remove("class") })
+            (attrs)
+        >
+            (child)
+        </div>
+    })
+}
+
+#[component]
+async fn email_address(address: String, confirmed: bool) -> topcoat::Result<impl View> {
+    Ok(view! {
+        (address)
+        if confirmed {
+            icon(
+                data: mdi::CHECK_BOLD,
+                attrs: attributes! { class="inline-block text-leaf" },
+                label: "Confirmed"
+            )
+        }
+    })
+}
+
+#[page("/user/account")]
+pub(crate) async fn account(cx: &Cx) -> topcoat::Result<impl View> {
+    let user = require_user(cx).await?;
+    let prof = UserProfile::get_by_user_id(&mut db(cx), user.id)
+        .await
+        .map(Some)
+        .or_else(|e| {
+            if e.is_record_not_found() {
+                Ok(None)
+            } else {
+                Err(e)
+            }
+        })?;
+    let emails = UserEmail::filter_by_user_id(user.id)
+        .exec(&mut db(cx))
+        .await?;
+
+    Ok(view! {
+        <h1>"User Account"</h1>
+        <div class="flex flex-col gap-6">
+            <section>
+                card(
+                    card_header(
+                        card_title("Personal Information")
+                        card_description("Your personal profile on this website")
+                    )
+                    card_content(
+                        setting_row(
+                            setting_name("Display Name")
+                            setting_value(
+                                if let Some(s) = prof
+                                    .as_ref()
+                                    .and_then(|p| p.name.as_ref()) {
+                                    (&s)
+                                } else {
+                                    <span class="italic">"None"</span>
+                                }
+                                edit_icon(
+                                    attrs: attributes! { href=(href!(profile_edit)) }
+                                )
+                            )
+                        )
+                        setting_row(
+                            setting_name("Description")
+                            setting_value(
+                                if let Some(s) = prof
+                                    .as_ref()
+                                    .and_then(|p| p.description.as_ref()) {
+                                    (&s)
+                                } else {
+                                    <span class="italic">"None"</span>
+                                }
+                                edit_icon(
+                                    attrs: attributes! { href=(href!(profile_edit)) }
+                                )
+                            )
+                        )
+                        setting_row(
+                            setting_name("Picture")
+                            setting_value(
+                                avatar(
+                                    attrs: attributes! { class="inline-block" },
+                                    avatar_fallback(icon(data: mdi::ACCOUNT))
+                                )
+                            )
+                        )
+                    )
+                )
+            </section>
+            <section>
+                card(
+                    card_header(
+                        card_title("Account Security")
+                        card_description(
+                            "Information about how you log into the website"
+                        )
+                    )
+                    card_content(
+                        setting_row(
+                            setting_name("Username")
+                            setting_value((&user.username))
+                        )
+                        setting_row(
+                            setting_name("Password")
+                            setting_value(<a href=(href!(change_password))>"Change"</a>)
+                        )
+                    )
+                )
+            </section>
+            <section>
+                card(
+                    card_header(
+                        card_title("Contact Information")
+                        card_description("Ways to contact you")
+                    )
+                    card_content(
+                        setting_row(
+                            setting_name("Email Addresses")
+                            setting_value(
+                                if !emails.is_empty() {
+                                    for email in emails {
+                                        email_address(
+                                            address: email.address,
+                                            confirmed: email.confirmed
+                                        )
+                                    }
+                                } else {
+                                    <span class="italic">"None"</span>
+                                }
+                            )
+                        )
+                    )
+                )
+            </section>
+        </div>
+    })
 }
 
 #[page("/user/profile")]
-pub(crate) async fn profile(cx: &Cx) -> topcoat::Result<impl View> {
+pub(crate) async fn profile_edit(cx: &Cx) -> topcoat::Result<impl View> {
     let user = require_user(cx).await?;
-    let profile = UserProfile::get_by_user_id(&mut db(cx), user.id)
+    let prof = UserProfile::get_by_user_id(&mut db(cx), user.id)
         .await
         .map(Some)
         .or_else(|e| {
@@ -60,7 +234,7 @@ pub(crate) async fn profile(cx: &Cx) -> topcoat::Result<impl View> {
         })?;
 
     Ok(view! {
-        <h1>(&user.username)</h1>
+        <h1>"User Profile"</h1>
         <form class="flex flex-col gap-6" method="POST" action=(href!(update_profile))>
             field_set(
                 field(
@@ -70,7 +244,7 @@ pub(crate) async fn profile(cx: &Cx) -> topcoat::Result<impl View> {
                             id="name-input"
                             type="text"
                             name="name"
-                            value=(profile.as_ref().map(|p| p.name.as_ref()))
+                            value=(prof.as_ref().map(|p| p.name.as_ref()))
                         }
                     )
                 )
@@ -82,7 +256,7 @@ pub(crate) async fn profile(cx: &Cx) -> topcoat::Result<impl View> {
                     field_description("Write a short description about yourself")
                     textarea(
                         attrs: attributes! { id="description-input" name="description" },
-                        (profile.as_ref().map(|p| p.description.as_ref()))
+                        (prof.as_ref().map(|p| p.description.as_ref()))
                     )
                 )
             )
@@ -132,7 +306,7 @@ pub(crate) async fn do_change_password(
             .into());
     }
 
-    Ok(see_other(href!(profile).resolve(cx)))
+    Ok(see_other(href!(account).resolve(cx)))
 }
 
 #[derive(Debug, Default, Clone)]
@@ -152,7 +326,7 @@ impl ChangePasswordErrors {
 
 #[page("/user/password")]
 pub(crate) async fn change_password(cx: &Cx) -> topcoat::Result<impl View> {
-    let user = require_user(cx).await?;
+    let _user = require_user(cx).await?;
     let rejected = try_request_context::<ChangePasswordErrors>(cx);
     let errors = rejected.cloned().unwrap_or_default();
 
@@ -161,75 +335,79 @@ pub(crate) async fn change_password(cx: &Cx) -> topcoat::Result<impl View> {
             (StatusCode::UNPROCESSABLE_ENTITY)
         }
 
-        <h1>(&user.username)</h1>
-        <h2>"Change your password"</h2>
-        <form
-            class="flex flex-col gap-6"
-            method="POST"
-            action=(href!(do_change_password))
-        >
-            field_set(
-                field(
-                    field_label(
-                        attrs: attributes! { for="current-input" },
-                        "Current password"
-                    )
-                    input(
-                        attrs: attributes! {
-                            id="current-input"
-                            type="password"
-                            name="current_password"
-                        }
-                    )
-                    if let Some(msg) = errors.current_password {
-                        field_error((msg))
-                    }
-                )
-                field(
-                    field_label(
-                        attrs: attributes! { for="new-password-1-input" },
-                        "New password"
-                    )
-                    field_description("Enter a new password")
-                    input(
-                        attrs: attributes! {
-                            type="password"
-                            id="new-password-1-input"
-                            name="new_password"
-                        }
-                    )
-                    if let Some((msg, suggestions)) = errors.new_password {
-                        field_error(
-                            (msg)
-                            if !suggestions.is_empty() {
-                                <ul>
-                                    for suggestion in suggestions {
-                                        <li>(suggestion)</li>
-                                    }
-                                </ul>
+        <h1>"Change your password"</h1>
+        card(
+            attrs: attributes! { class="mx-9 md:mx-auto md:max-w-1/2" },
+            card_content(
+                <form
+                    class="flex flex-col gap-9"
+                    method="POST"
+                    action=(href!(do_change_password))
+                >
+                    field_set(
+                        field(
+                            field_label(
+                                attrs: attributes! { for="current-input" },
+                                "Current password"
+                            )
+                            input(
+                                attrs: attributes! {
+                                    id="current-input"
+                                    type="password"
+                                    name="current_password"
+                                }
+                            )
+                            if let Some(msg) = errors.current_password {
+                                field_error((msg))
                             }
                         )
-                    }
-                )
-                field(
-                    field_label(
-                        attrs: attributes! { for="new-password-2-input" },
-                        "Confirm new password"
+                        field(
+                            field_label(
+                                attrs: attributes! { for="new-password-1-input" },
+                                "New password"
+                            )
+                            field_description("Enter a new password")
+                            input(
+                                attrs: attributes! {
+                                    type="password"
+                                    id="new-password-1-input"
+                                    name="new_password"
+                                }
+                            )
+                            if let Some((msg, suggestions)) = errors.new_password {
+                                field_error(
+                                    (msg)
+                                    if !suggestions.is_empty() {
+                                        <ul>
+                                            for suggestion in suggestions {
+                                                <li>(suggestion)</li>
+                                            }
+                                        </ul>
+                                    }
+                                )
+                            }
+                        )
+                        field(
+                            field_label(
+                                attrs: attributes! { for="new-password-2-input" },
+                                "Confirm new password"
+                            )
+                            field_description("Re-enter your new password")
+                            input(
+                                attrs: attributes! {
+                                    type="password"
+                                    id="new-password-2-input"
+                                    name="new_password_confirm"
+                                }
+                            )
+                            if let Some(msg) = errors.new_password_confirm {
+                                field_error((msg))
+                            }
+                        )
                     )
-                    field_description("Re-enter your new password")
-                    input(
-                        attrs: attributes! {
-                            type="password"
-                            id="new-password-2-input"
-                            name="new_password_confirm"
-                        }
-                    )
-                    if let Some(msg) = errors.new_password_confirm {
-                        field_error((msg))
-                    }
-                )
+                    button(attrs: attributes! { type="submit" }, "Update")
+                </form>
             )
-            button(attrs: attributes! { type="submit" }, "Update")
-        </form>
+        )
     })
 }

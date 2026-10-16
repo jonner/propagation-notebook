@@ -315,8 +315,8 @@ pub async fn user_menu(cx: &Cx) -> topcoat::Result<impl View> {
                         )
                         dropdown_menu_separator()
                         dropdown_menu_navigation_item(
-                            attrs: attributes! { href=(href!(users::profile)) type="button" },
-                            "Profile"
+                            attrs: attributes! { href=(href!(users::account)) type="button" },
+                            "My Account"
                         )
                         dropdown_menu_item(
                             attrs: attributes! { type="submit" class="text-destructive" form="logoutForm" },
