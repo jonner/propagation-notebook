@@ -18,7 +18,7 @@ use url::Url;
 use crate::{
     components::{
         alert_dialog::*, breadcrumb::*, button::*, dialog::*, dropdown_menu::*, field::*,
-        input::input,
+        input::input, spinner::*,
     },
     context::{current_user, db, require_user_with_permission},
     mdi,
@@ -101,6 +101,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                 (date.to_string())
             }
         </dd>
+        let deleting = signal(cx, || false);
         alert_dialog(
             open: delete_dialog_open.get(),
             dialog_content(
@@ -123,12 +124,15 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                         attrs: attributes! {
                             @click=$(async |e: topcoat::runtime::Event| {
                                 e.prevent_default();
-                                delete_dialog_open.set(false);
+                                deleting.set(true);
                                 delete_citation(id).await;
+                                deleting.set(false);
+                                delete_dialog_open.set(false);
                                 //FIXME: Handle response
                             })
                         },
                         "Delete"
+                        spinner(attrs: attributes! { :hidden=$(!deleting.get()) })
                     )
                 )
             )
