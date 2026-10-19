@@ -12,7 +12,7 @@ use topcoat::{
     runtime::{procedure, signal},
     view::{Attributes, Child, View, attributes, class, component, view},
 };
-use tracing::{debug, warn};
+use tracing::debug;
 use url::Url;
 
 use crate::{
