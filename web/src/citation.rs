@@ -1,16 +1,19 @@
 use libpropagation::{auth::PermissionCode, citation::Citation};
 use serde::Deserialize;
 use topcoat::{
-    context::Cx,
+    context::{Cx, try_request_context},
     icon::icon,
     router::{
+        Body, Method, StatusCode,
         content::Form,
-        error::{RouterErrorExt, SeeOther, see_other},
+        error::{RouterErrorExt, SeeOther, rewrite, see_other},
         href, page, path_param, route,
     },
     runtime::{procedure, signal},
     view::{Attributes, Child, View, attributes, class, component, view},
 };
+use tracing::{debug, warn};
+use url::Url;
 
 use crate::{
     components::{
@@ -140,7 +143,7 @@ pub async fn delete_citation(cx: &Cx, id: u64) -> topcoat::Result<()> {
     Ok(())
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Default, Clone)]
 struct CitationParams {
     pub title: String,
     pub url: Option<String>,
@@ -151,11 +154,88 @@ struct CitationParams {
     pub doi: Option<String>,
 }
 
+impl CitationParams {
+    fn validate(&self) -> Option<CitationParamErrors> {
+        let mut errors = CitationParamErrors::default();
+        if self.title.trim().is_empty() {
+            errors.title = Some("Title cannot be empty".to_string())
+        }
+        if self.author.trim().is_empty() {
+            errors.author = Some("Author cannot be empty".to_string())
+        }
+        if let Some(url_str) = self.url.as_ref()
+            && let Err(e) = Url::parse(url_str)
+        {
+            errors.url = Some(e.to_string())
+        }
+        if errors.is_empty() {
+            None
+        } else {
+            Some(errors)
+        }
+    }
+}
+
+impl From<&Citation> for CitationParams {
+    fn from(value: &Citation) -> Self {
+        Self {
+            title: value.title.clone(),
+            url: value.url.clone(),
+            author: value.author.clone(),
+            access_date: value.access_date,
+            publication_year: value.publication_year,
+            container_title: value.container_title.clone(),
+            doi: value.doi.clone(),
+        }
+    }
+}
+
+#[derive(Deserialize, Debug, Default, Clone)]
+struct CitationParamErrors {
+    pub title: Option<String>,
+    pub url: Option<String>,
+    pub author: Option<String>,
+    pub access_date: Option<String>,
+    pub publication_year: Option<String>,
+    pub container_title: Option<String>,
+    pub doi: Option<String>,
+}
+
+impl CitationParamErrors {
+    fn is_empty(&self) -> bool {
+        self.title.is_none()
+            && self.url.is_none()
+            && self.author.is_none()
+            && self.access_date.is_none()
+            && self.publication_year.is_none()
+            && self.container_title.is_none()
+            && self.doi.is_none()
+    }
+}
+
+#[derive(Deserialize, Debug)]
+struct CitationRejected {
+    form: CitationParams,
+    errors: CitationParamErrors,
+}
+
 #[route(POST "/citations/create")]
 pub async fn do_create(cx: &Cx, Form(params): Form<CitationParams>) -> topcoat::Result<SeeOther> {
     let _user =
         require_user_with_permission(cx, libpropagation::auth::PermissionCode::CitationCreate)
             .await?;
+
+    if let Some(errors) = params.validate() {
+        debug!("Failed parameter validation");
+        return Err(rewrite(href!(create).resolve(cx), Body::empty())
+            .method(Method::GET)
+            .with(CitationRejected {
+                form: params,
+                errors,
+            })
+            .into());
+    };
+
     let citation = Citation::create()
         .title(params.title)
         .author(params.author)
@@ -172,6 +252,11 @@ pub async fn do_create(cx: &Cx, Form(params): Form<CitationParams>) -> topcoat::
 }
 
 #[component]
+pub async fn required() -> topcoat::Result<impl View> {
+    Ok(view! { <span class="text-destructive">"*"</span> })
+}
+
+#[component]
 pub async fn citation_form(
     cx: &Cx,
     #[default] citation: Option<&Citation>,
@@ -182,7 +267,16 @@ pub async fn citation_form(
     let author = signal(cx, || {
         citation.map(|c| c.author.clone()).unwrap_or_default()
     });
+    let rejected = try_request_context::<CitationRejected>(cx);
+    let errors = rejected.map(|r| r.errors.clone()).unwrap_or_default();
+    let values = rejected
+        .map(|r| r.form.clone())
+        .or_else(|| citation.map(|c| c.into()))
+        .unwrap_or_default();
     Ok(view! {
+        if rejected.is_some() {
+            (StatusCode::UNPROCESSABLE_ENTITY)
+        }
         <form class=(class!("flex flex-col gap-6", attrs.remove("class"))) (attrs)>
             field_set(
                 field_group(
@@ -190,6 +284,7 @@ pub async fn citation_form(
                         field_label(
                             attrs: attributes! { for="citation-title" },
                             "Title"
+                            required()
                         )
                         field_description(
                             "The title of the work being cited (e.g. article, web page, book, etc.)"
@@ -199,21 +294,21 @@ pub async fn citation_form(
                                 id="citation-title"
                                 type="text"
                                 name="title"
-                                value=(citation.map(|c| &c.title))
+                                value=(values.title)
                                 @input=$(|e: topcoat::runtime::Event| title.set(
                                         e.target.value,
                                     ))
                             }
                         )
-                        field_error(
-                            attrs: attributes! { :hidden=$(!title.get().trim().is_empty()) },
-                            "Please enter a title for the citation"
-                        )
+                        if let Some(error) = errors.title {
+                            field_error((error))
+                        }
                     )
                     field(
                         field_label(
                             attrs: attributes! { for="citation-author" },
                             "Author"
+                            required()
                         )
                         field_description("The author of the work being cited")
                         input(
@@ -221,16 +316,15 @@ pub async fn citation_form(
                                 id="citation-author"
                                 type="text"
                                 name="author"
-                                value=(citation.map(|c| &c.author))
+                                value=(values.author)
                                 @input=$(|e: topcoat::runtime::Event| author.set(
                                         e.target.value,
                                     ))
                             }
                         )
-                        field_error(
-                            attrs: attributes! { :hidden=$(!author.get().trim().is_empty()) },
-                            "Please enter an author for the citation"
-                        )
+                        if let Some(error) = errors.author {
+                            field_error((error))
+                        }
                     )
                     field(
                         field_label(
@@ -245,7 +339,7 @@ pub async fn citation_form(
                                 id="citation-container"
                                 type="text"
                                 name="container_title"
-                                value=(citation.and_then(|c| c.container_title.as_ref()))
+                                value=(values.container_title)
                             }
                         )
                     )
@@ -262,7 +356,7 @@ pub async fn citation_form(
                                 id="citation-publication"
                                 type="text"
                                 name="publication_year"
-                                value=(citation.and_then(|c| c.publication_year))
+                                value=(values.publication_year)
                             }
                         )
                     )
@@ -276,7 +370,7 @@ pub async fn citation_form(
                                 id="citation-url"
                                 type="text"
                                 name="url"
-                                value=(citation.and_then(|c| c.url.as_ref()))
+                                value=(values.url)
                             }
                         )
                     )
@@ -291,7 +385,7 @@ pub async fn citation_form(
                                 id="citation-doi"
                                 type="text"
                                 name="doi"
-                                value=(citation.and_then(|c| c.doi.as_ref()))
+                                value=(values.doi)
                             }
                         )
                     )
@@ -306,9 +400,7 @@ pub async fn citation_form(
                                 id="citation-accessdate"
                                 type="text"
                                 name="access_date"
-                                value=(citation.and_then(
-                                    |c| c.access_date.map(|d| d.to_string()),
-                                ))
+                                value=(values.access_date.map(|d| d.to_string()))
                             }
                         )
                     )
@@ -378,7 +470,20 @@ pub async fn do_modify(cx: &Cx, Form(params): Form<CitationParams>) -> topcoat::
     let _user =
         require_user_with_permission(cx, libpropagation::auth::PermissionCode::CitationEdit)
             .await?;
-    let id = path_param::<CitationId>(cx)?;
+
+    let id = *path_param::<CitationId>(cx)?;
+    if let Some(errors) = params.validate() {
+        return Err(
+            rewrite(href!(modify, CitationId(id)).resolve(cx), Body::empty())
+                .method(Method::GET)
+                .with(CitationRejected {
+                    form: params.clone(),
+                    errors,
+                })
+                .into(),
+        );
+    };
+
     Citation::update_by_id(id)
         .title(params.title)
         .author(params.author)
@@ -389,5 +494,5 @@ pub async fn do_modify(cx: &Cx, Form(params): Form<CitationParams>) -> topcoat::
         .doi(params.doi)
         .exec(&mut db(cx))
         .await?;
-    Ok(see_other(href!(details, CitationId(*id)).resolve(cx)))
+    Ok(see_other(href!(details, CitationId(id)).resolve(cx)))
 }
