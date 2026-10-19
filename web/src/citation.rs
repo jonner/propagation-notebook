@@ -27,7 +27,7 @@ path_param!(pub citation_id: u64, error = bad_request);
 pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
     let user = current_user(cx).await;
     let mut db = db(cx);
-    let id = path_param::<CitationId>(cx)?;
+    let id = *path_param::<CitationId>(cx)?;
     let citation = Citation::get_by_id(&mut db, id).await.ok_or_not_found()?;
     let delete_dialog_open = signal(cx, || false);
     Ok(view! {
@@ -51,7 +51,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                                 alignment: DropdownMenuAlignment::Right,
                                 if user.has_permission(PermissionCode::CitationDelete) {
                                     dropdown_menu_navigation_item(
-                                        attrs: attributes! { href=(href!(modify, CitationId(*id))) },
+                                        attrs: attributes! { href=(href!(modify, CitationId(id))) },
                                         "Modify"
                                     )
                                 }
@@ -121,7 +121,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                             @click=$(async |e: topcoat::runtime::Event| {
                                 e.prevent_default();
                                 delete_dialog_open.set(false);
-                                delete_citation(*id).await;
+                                delete_citation(id).await;
                                 //FIXME: Handle response
                             })
                         },
