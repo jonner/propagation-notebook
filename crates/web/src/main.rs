@@ -5,7 +5,7 @@ use tokio::net::TcpListener;
 use topcoat::{
     asset::{Asset, AssetBundle, RouterBuilderAssetExt, asset_config},
     context::Cx,
-    cookie::RouterBuilderCookieExt,
+    cookie::{Key, RouterBuilderCookieExt},
     icon::icon,
     router::{
         Compression, Router, RouterBuilderDiscoverExt, Slot,
@@ -43,6 +43,7 @@ mod components;
 mod config;
 mod context;
 mod error;
+mod flash;
 mod propagation;
 mod regions;
 mod tasks;
@@ -108,6 +109,7 @@ async fn run() -> Result<(), Error> {
         .discover()
         .assets(AssetBundle::load()?)
         .app_context(db)
+        .app_context(Key::generate())
         .cookies()
         .sessions(SessionConfig::default())
         .base_url(config.base_url.to_string());
@@ -186,6 +188,7 @@ async fn shell(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
 #[component]
 async fn full_page_layout(cx: &Cx, child: Child<'_>) -> topcoat::Result<impl View> {
     let uri = uri(cx);
+    let flash_msg = flash::pop_message(cx)?;
 
     Ok(view! {
         <header
@@ -233,6 +236,9 @@ async fn full_page_layout(cx: &Cx, child: Child<'_>) -> topcoat::Result<impl Vie
             </nav>
         </header>
         <main class="m-3 md:m-6 grow">
+            if let Some(msg) = flash_msg {
+                flash::flash_alert(attrs: attributes! { class="my-3" }, flash: &msg)
+            }
             error_boundary(
                 fallback: |error| {
                     match error {

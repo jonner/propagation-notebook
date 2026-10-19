@@ -1,3 +1,4 @@
+pub mod alert;
 pub mod alert_dialog;
 pub mod avatar;
 #[allow(dead_code)]
