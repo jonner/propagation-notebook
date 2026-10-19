@@ -1,9 +1,10 @@
 [workspace]
-members = ["inaturalist",
-  "itis",
-  "libpropagation",
-  "pn",
-  "web",
+members = [
+  "crates/inaturalist",
+  "crates/itis",
+  "crates/libpropagation",
+  "crates/pn",
+  "crates/web",
 ]
 resolver = "3"
 
@@ -22,9 +23,9 @@ indicatif = "0.18.4"
 demand = "2.0.3"
 itertools = "0.15.0"
 jiff = { version = "0.2.24", features = ["serde"] }
-itis = { path = "./itis" }
-libpropagation = { path = "./libpropagation" }
-inaturalist = { path = "./inaturalist" }
+itis = { path = "./crates/itis" }
+libpropagation = { path = "./crates/libpropagation" }
+inaturalist = { path = "./crates/inaturalist" }
 reqwest = { version = "0.13.4", features = ["json", "query"] }
 reqwest-middleware = { version = "0.5.2", features = ["json", "query"] }
 serde = { version = "1.0.228", features = ["derive"] }

@@ -17,7 +17,7 @@ pub fn models() -> ModelSet {
     toasty::models!(crate::*)
 }
 
-static MIGRATIONS: MigrationSet = embed_migrations!("../db");
+static MIGRATIONS: MigrationSet = embed_migrations!("../../db");
 pub async fn db(migrate: bool) -> Result<toasty::Db, Error> {
     let db_uri = match std::env::var("PN_DB_URI") {
         Ok(s) => Ok(s),
