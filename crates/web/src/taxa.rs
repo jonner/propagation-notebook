@@ -2,10 +2,9 @@ use std::{cmp::Ordering, collections::HashMap};
 
 use libpropagation::{
     auth::PermissionCode,
-    citation::Citation,
     cleaning::CleaningProcedure,
     region::{ConservationStatus, Origin, Region, RegionalHarvestWindow, RegionalTaxonStatus},
-    taxonomy::{Taxon, TaxonHierarchy, TaxonNote, TaxonNoteCategory, TaxonPropagationProcedure},
+    taxonomy::{Taxon, TaxonHierarchy, TaxonNote, TaxonNoteCategory},
 };
 use topcoat::{
     context::Cx,
@@ -39,10 +38,11 @@ use crate::{
     util::{ModifyOffset, PER_PAGE, PageState},
 };
 
+mod propagation;
+
 path_param!(pub cleaning_id: u64, error = bad_request);
 path_param!(pub taxon_id: u64, error = bad_request);
 path_param!(pub region_id: u64, error = bad_request);
-path_param!(pub propagation_id: u64, error = bad_request);
 path_param!(pub note_id: u64, error = bad_request);
 
 #[derive(Debug, Clone, Copy, serde::Deserialize, serde::Serialize)]
@@ -732,9 +732,9 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                                 <li>
                                     <a
                                         href=(href!(
-                                            propagation_details,
+                                            propagation::details,
                                             TaxonId(tp.taxon_id),
-                                            PropagationId(tp.propagation_id),
+                                            propagation::PropagationId(tp.propagation_id),
                                         ))
                                     >
                                         (&tp.propagation.get().name)
@@ -888,89 +888,6 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                             <li><a href=(&resource.url)>(&resource.name)</a></li>
                         }
                     </ul>
-                </div>
-            </section>
-        </div>
-    })
-}
-
-#[page("/taxa/{taxon_id}/propagation/{propagation_id}")]
-pub async fn propagation_details(cx: &Cx) -> topcoat::Result<impl View> {
-    let mut db = db(cx);
-    let taxon_id = path_param::<TaxonId>(cx)?;
-    let propagation_id = path_param::<PropagationId>(cx)?;
-    let tp =
-        TaxonPropagationProcedure::filter_by_taxon_id_and_propagation_id(taxon_id, propagation_id)
-            .include(
-                TaxonPropagationProcedure::fields()
-                    .propagation()
-                    .citations(),
-            )
-            .include(TaxonPropagationProcedure::fields().taxon())
-            .include(
-                TaxonPropagationProcedure::fields()
-                    .citation_links()
-                    .citation(),
-            )
-            .one()
-            .exec(&mut db)
-            .await
-            .ok_or_not_found()?;
-
-    Ok(view! {
-        let procedure = tp.propagation.get();
-        let taxon = tp.taxon.get();
-        <div class="flex flex-col gap-4">
-            <hgroup>
-                breadcrumb(
-                    breadcrumb_list(
-                        breadcrumb_item(
-                            breadcrumb_link(
-                                attrs: attributes! { href=(href!(details, TaxonId(taxon.id))) },
-                                (&taxon.complete_name)
-                            )
-                        )
-                        breadcrumb_separator()
-                        breadcrumb_item(
-                            breadcrumb_page(
-                                (format!("Propagation Procedure {}", tp.propagation_id))
-                            )
-                        )
-                    )
-                )
-                <h1>(&procedure.name)</h1>
-                <div>badge((procedure.r#type.to_string()))</div>
-            </hgroup>
-            <section>
-                <h2>"Instructions"</h2>
-                <div class="text-2xl">(&procedure.instructions)</div>
-            </section>
-            <section>
-                <h2>"Confidence"</h2>
-                <div>
-                    (tp.confidence.map(|v| v.to_string()).unwrap_or("Unknown".into()))
-                </div>
-            </section>
-            <section>
-                <h2>"Notes"</h2>
-                <div>(procedure.notes.as_deref().unwrap_or_default())</div>
-                if let Some(taxon_notes) = tp.notes {
-                    <div>(taxon_notes)</div>
-                }
-            </section>
-            <section>
-                <h2>"Citations"</h2>
-                <div>
-                    let citations: Vec<&Citation> = tp
-                        .citation_links
-                        .get()
-                        .iter()
-                        .map(|cl| cl.citation.get())
-                        .chain(procedure.citations.get().iter())
-                        .collect();
-                    if !citations.is_empty() {
-                        citation_list(citations: citations)
-                    }
                 </div>
             </section>
         </div>
