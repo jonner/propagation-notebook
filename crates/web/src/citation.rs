@@ -53,7 +53,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                             dropdown_menu_trigger(icon(data: mdi::DOTS_VERTICAL))
                             dropdown_menu_content(
                                 alignment: DropdownMenuAlignment::Right,
-                                if user.has_permission(PermissionCode::CitationDelete) {
+                                if user.has_permission(PermissionCode::CitationEdit) {
                                     dropdown_menu_navigation_item(
                                         attrs: attributes! { href=(href!(modify, CitationId(id))) },
                                         "Modify"
