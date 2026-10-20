@@ -8,7 +8,7 @@ use topcoat::{
     cookie::{Key, RouterBuilderCookieExt},
     icon::icon,
     router::{
-        Compression, Router, RouterBuilderDiscoverExt, Slot,
+        Compression, Router, RouterBuilderDiscoverExt, Slot, StatusCode,
         error::{ForbiddenError, NotFoundError, UnauthorizedError},
         href, layout, not_found, page,
         request::uri,
@@ -245,6 +245,7 @@ async fn full_page_layout(cx: &Cx, child: Child<'_>) -> topcoat::Result<impl Vie
                         e if e.downcast_ref::<UnauthorizedError>().is_some() => {
                             Ok(
                                 view! {
+                                    (StatusCode::UNAUTHORIZED)
                                     <h1>"401 — Unauthorized"</h1>
                                     <div>
                                         "Sorry, you must be logged in to view this page. Please "
@@ -259,6 +260,7 @@ async fn full_page_layout(cx: &Cx, child: Child<'_>) -> topcoat::Result<impl Vie
                         e if e.downcast_ref::<ForbiddenError>().is_some() => {
                             Ok(
                                 view! {
+                                    (StatusCode::FORBIDDEN)
                                     <h1>"403 — Access Denied"</h1>
                                     <div>
                                         (format!(
@@ -273,6 +275,7 @@ async fn full_page_layout(cx: &Cx, child: Child<'_>) -> topcoat::Result<impl Vie
                         e if e.downcast_ref::<NotFoundError>().is_some() => {
                             Ok(
                                 view! {
+                                    (StatusCode::NOT_FOUND)
                                     <h1>"404 Not Found"</h1>
                                     <p>
                                         (format!(
