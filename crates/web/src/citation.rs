@@ -9,7 +9,7 @@ use topcoat::{
         error::{RouterErrorExt, SeeOther, rewrite, see_other},
         href, page, path_param, route,
     },
-    runtime::{procedure, signal},
+    runtime::signal,
     view::{Attributes, Child, View, attributes, class, component, view},
 };
 use tracing::debug;
@@ -18,9 +18,10 @@ use url::Url;
 use crate::{
     components::{
         alert_dialog::*, breadcrumb::*, button::*, dialog::*, dropdown_menu::*, field::*,
-        input::input, spinner::*,
+        input::input,
     },
     context::{current_user, db, require_user_with_permission},
+    flash::{self, FlashMessage},
     mdi,
 };
 
@@ -101,7 +102,6 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                 (date.to_string())
             }
         </dd>
-        let deleting = signal(cx, || false);
         alert_dialog(
             open: delete_dialog_open.get(),
             dialog_content(
@@ -119,32 +119,36 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                         },
                         "Cancel"
                     )
-                    button(
-                        variant: ButtonVariant::Destructive,
-                        attrs: attributes! {
-                            @click=$(async |e: topcoat::runtime::Event| {
-                                e.prevent_default();
-                                deleting.set(true);
-                                delete_citation(id).await;
-                                deleting.set(false);
-                                delete_dialog_open.set(false);
-                                //FIXME: Handle response
-                            })
-                        },
-                        "Delete"
-                        spinner(attrs: attributes! { :hidden=$(!deleting.get()) })
-                    )
+                    <form action=(href!(delete_citation, CitationId(id))) method="POST">
+                        button(
+                            variant: ButtonVariant::Destructive,
+                            attrs: attributes! {},
+                            "Delete"
+                        )
+                    </form>
                 )
             )
         )
     })
 }
 
-#[procedure("/citations/delete")]
-pub async fn delete_citation(cx: &Cx, id: u64) -> topcoat::Result<()> {
+#[route(POST "/citations/delete/{citation_id}")]
+pub async fn delete_citation(cx: &Cx) -> topcoat::Result<SeeOther> {
     let _ = require_user_with_permission(cx, PermissionCode::CitationDelete).await?;
-    Citation::delete_by_id(&mut db(cx), id).await?;
-    Ok(())
+    let id = *path_param::<CitationId>(cx)?;
+    match Citation::delete_by_id(&mut db(cx), id).await {
+        Ok(_) => {
+            flash::push_message(cx, FlashMessage::Success(format!("Deleted citation {id}")))?;
+            Ok(see_other(href!(crate::home).resolve(cx)))
+        }
+        Err(e) => {
+            flash::push_message(
+                cx,
+                FlashMessage::Failure(format!("Failed to delete citation: {e}")),
+            )?;
+            Err(see_other(href!(details, CitationId(id)).resolve(cx)).into())
+        }
+    }
 }
 
 #[derive(Deserialize, Debug, Default, Clone)]
