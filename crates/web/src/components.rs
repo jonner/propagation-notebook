@@ -16,6 +16,7 @@ pub mod input;
 pub mod label;
 pub mod pagination;
 pub mod pn;
+pub mod radio_group;
 pub mod select;
 pub mod spinner;
 pub mod textarea;

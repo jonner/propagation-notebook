@@ -60,6 +60,10 @@ file = "src/components/label.rs"
 hash = "sha256:e3a01c26e38ad5b5c93c32f56cbd148f1e102d8691a107a837d1b80a15670cfb"
 file = "src/components/pagination.rs"
 
+[registries.topcoat.components.radio_group]
+hash = "sha256:cdc2833428c28897c5b35be5ce2b3583aefaf5dcd7b894d5316c4f9db6d97479"
+file = "src/components/radio_group.rs"
+
 [registries.topcoat.components.select]
 hash = "sha256:796d685bbefa46c8bb2d4f1404fbfbdaa1a61c0dc8260cceda7eed66b495413d"
 file = "src/components/select.rs"

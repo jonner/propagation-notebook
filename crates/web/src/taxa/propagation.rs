@@ -1,5 +1,6 @@
 use libpropagation::{
-    auth::PermissionCode, citation::Citation, propagation::PropagationProcedure,
+    auth::PermissionCode,
+    citation::{Citation, TaxonPropagationProcedureCitation},
     taxonomy::TaxonPropagationProcedure,
 };
 use serde::Deserialize;
@@ -12,21 +13,24 @@ use topcoat::{
         error::{RouterErrorExt, SeeOther, rewrite, see_other},
         href, page, path_param, route,
     },
-    runtime::signal,
-    view::{View, attributes, view},
+    runtime::{Event, shard, signal},
+    view::{Attributes, View, attributes, component, view},
 };
 
 use crate::{
     assets::mdi,
+    citation,
     components::{
-        alert_dialog::*, badge::badge, breadcrumb::*, button::*, citations::citation_list,
-        dialog::*, dropdown_menu::*, field::*, select::*, textarea::*,
+        alert_dialog::*, badge::badge, breadcrumb::*, button::*, card::*, citations::citation_list,
+        dialog::*, dropdown_menu::*, field::*, input::*, label::*, radio_group::*, select::*,
+        textarea::*,
     },
     context::{current_user, db, require_user_with_permission},
     taxa::{self, TaxonId},
 };
 
 path_param!(pub propagation_id: u64, error = bad_request);
+path_param!(pub citation_id: u64, error = bad_request);
 
 #[page("/taxa/{taxon_id}/propagation/{propagation_id}")]
 pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
@@ -188,9 +192,15 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
 
 #[page("/taxa/{taxon_id}/propagation/{propagation_id}/modify")]
 pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
+    let _ = require_user_with_permission(cx, PermissionCode::TaxonPropagationEdit).await?;
     let mut db = db(cx);
     let taxon_id = *path_param::<TaxonId>(cx)?;
     let propagation_id = *path_param::<PropagationId>(cx)?;
+    let add_citation_dialog_open = signal(cx, || false);
+    // FIXME: use element_id(cx) when upgrading to topcoat 0.11
+    let add_citation_form_id = "add-citation-form";
+    let delete_citation_data = signal(cx, || None::<(u64, String)>);
+
     let tp =
         TaxonPropagationProcedure::filter_by_taxon_id_and_propagation_id(taxon_id, propagation_id)
             .include(
@@ -220,82 +230,298 @@ pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
             (StatusCode::UNPROCESSABLE_ENTITY)
         }
         let taxon = tp.taxon.get();
-        <div class="flex flex-col gap-4">
-            <hgroup>
-                breadcrumb(
-                    breadcrumb_list(
-                        breadcrumb_item(
-                            breadcrumb_link(
-                                attrs: attributes! { href=(href!(taxa::details, TaxonId(taxon.id))) },
-                                (&taxon.complete_name)
+        <div class="flex flex-col gap-6">
+            <section>
+                <hgroup>
+                    breadcrumb(
+                        breadcrumb_list(
+                            breadcrumb_item(
+                                breadcrumb_link(
+                                    attrs: attributes! { href=(href!(taxa::details, TaxonId(taxon.id))) },
+                                    (&taxon.complete_name)
+                                )
                             )
-                        )
-                        breadcrumb_separator()
-                        breadcrumb_item(breadcrumb_page("Propagation Procedures"))
-                        breadcrumb_separator()
-                        breadcrumb_item(
-                            breadcrumb_link(
-                                attrs: attributes! {
-                                    href=(href!(
-                                        details,
-                                        TaxonId(taxon_id),
-                                        PropagationId(propagation_id),
-                                    ))
-                                },
-                                (tp.propagation_id)
+                            breadcrumb_separator()
+                            breadcrumb_item(breadcrumb_page("Propagation Procedures"))
+                            breadcrumb_separator()
+                            breadcrumb_item(
+                                breadcrumb_link(
+                                    attrs: attributes! {
+                                        href=(href!(
+                                            details,
+                                            TaxonId(taxon_id),
+                                            PropagationId(propagation_id),
+                                        ))
+                                    },
+                                    (tp.propagation_id)
+                                )
                             )
+                            breadcrumb_separator()
+                            breadcrumb_item(breadcrumb_page("Edit"))
                         )
                     )
-                )
-                <h1>"Edit Propagation Procedure"</h1>
-            </hgroup>
-            <form
-                action=(href!(
-                    do_modify,
-                    TaxonId(taxon_id),
-                    PropagationId(propagation_id),
-                ))
-                method="POST"
-                class="flex flex-col gap-6"
-            >
-                field_set(
-                    field(
-                        field_label("Propagation Procedure")
-                        (proc.id)
-                        ": "
-                        (&proc.name)
-                    )
-                )
-                field(
-                    field_label("Confidence")
-                    select(
-                        attrs: attributes! { name="confidence" },
-                        <option></option>
-                        for i in 0..=10 {
-                            <option
-                                value=(i)
-                                if params.confidence == Some(i) {
-                                    selected=(true)
+                    <h1>"Edit Propagation Procedure"</h1>
+                </hgroup>
+            </section>
+            <div class="flex gap-4 flex-wrap">
+                card(
+                    attrs: attributes! { class="grow" },
+                    card_header(card_title("Taxon procedure details"))
+                    card_content(
+                        <form
+                            action=(href!(
+                                do_modify,
+                                TaxonId(taxon_id),
+                                PropagationId(propagation_id),
+                            ))
+                            method="POST"
+                            class="flex flex-col gap-6"
+                        >
+                            field_set(
+                                field(
+                                    field_label("Propagation Procedure")
+                                    <span class="text-muted-foreground">
+                                        (proc.id)
+                                        ": "
+                                        (&proc.name)
+                                    </span>
+                                )
+                            )
+                            field(
+                                field_label("Confidence")
+                                select(
+                                    attrs: attributes! { name="confidence" },
+                                    <option></option>
+                                    for i in 0..=10 {
+                                        <option
+                                            value=(i)
+                                            if params.confidence == Some(i) {
+                                                selected=(true)
+                                            }
+                                        >
+                                            (i)
+                                        </option>
+                                    }
+                                )
+                                if let Some(msg) = errors.confidence {
+                                    field_error((msg))
                                 }
+                            )
+                            field(
+                                field_label("Taxon-specific procedure notes")
+                                textarea(
+                                    attrs: attributes! { name="notes" },
+                                    (params.notes)
+                                )
+                                if let Some(msg) = errors.notes {
+                                    field_error((msg))
+                                }
+                            )
+                            button("Update")
+                        </form>
+                    )
+                )
+                <section class="shrink min-w-0 md:w-md p-6">
+                    card_title("Citations")
+                    <ul class="ps-2 flex flex-col gap-2">
+                        let citations = tp.citation_links.get();
+                        for citation_link in citations {
+                            let citation = citation_link.citation.get();
+                            <li class="flex items-baseline gap-2">
+                                let citation_data = (citation.id, citation.format_cse());
+                                <a
+                                    class="text-destructive"
+                                    href="#"
+                                    @click=$(|e: Event| {
+                                        e.prevent_default();
+                                        delete_citation_data.set(Some(citation_data));
+                                    })
+                                >
+                                    icon(data: mdi::DELETE)
+                                </a>
+                                <span class="text-muted-foreground">
+                                    (citation.id)
+                                    "."
+                                </span>
+                                <span class="text-wrap">(citation.format_cse())</span>
+                            </li>
+                        }
+                        <li>
+                            <a
+                                class="flex items-baseline gap-2"
+                                href="#"
+                                @click=$(|e: Event| {
+                                    e.prevent_default();
+                                    add_citation_dialog_open.set(true);
+                                })
                             >
-                                (i)
-                            </option>
+                                icon(data: mdi::ADD)
+                                "Add citation"
+                            </a>
+                        </li>
+                    </ul>
+                </section>
+            </div>
+        </div>
+        dialog(
+            open: add_citation_dialog_open.get(),
+            dialog_content(
+                dialog_header(
+                    dialog_title(
+                        "Add a new citation for this taxon propagation procedure"
+                    )
+                )
+                add_citation_form(
+                    attrs: attributes! {
+                        id=(add_citation_form_id)
+                        method="POST"
+                        action=(href!(
+                            add_citation,
+                            TaxonId(taxon_id),
+                            PropagationId(propagation_id),
+                        ))
+                    }
+                )
+                dialog_footer(
+                    button(
+                        variant: ButtonVariant::Secondary,
+                        attrs: attributes! {
+                            @click=$(|e: topcoat::runtime::Event| {
+                                e.prevent_default();
+                                add_citation_dialog_open.set(false)
+                            })
+                        },
+                        "Cancel"
+                    )
+                    button(
+                        variant: ButtonVariant::Primary,
+                        attrs: attributes! { form=(add_citation_form_id) },
+                        "Add"
+                    )
+                )
+            )
+        )
+        dialog(
+            open: delete_citation_data.get().is_some(),
+            dialog_content(
+                if let Some((citation_id, citation_display)) = delete_citation_data.get() {
+                    dialog_header(
+                        dialog_title(
+                            (format!(
+                                "Remove citation {citation_id} from this propagation procedure?",
+                            ))
+                        )
+                        dialog_description("This action cannot be undone")
+                    )
+                    <div class="flex flex-col gap-3">
+                        <div>
+                            <div class="text-muted-foreground text-sm">"Taxon"</div>
+                            <div class="latin">(&taxon.complete_name)</div>
+                        </div>
+                        <div>
+                            <div class="text-muted-foreground text-sm">
+                                "Propagation Procedure"
+                            </div>
+                            <div class="latin">(&proc.name)</div>
+                        </div>
+                        <div>
+                            <div class="text-muted-foreground text-sm">"Citation"</div>
+                            <div>(&citation_display)</div>
+                        </div>
+                    </div>
+                    dialog_footer(
+                        button(
+                            variant: ButtonVariant::Secondary,
+                            attrs: attributes! {
+                                @click=$(|e: topcoat::runtime::Event| {
+                                    e.prevent_default();
+                                    delete_citation_data.set(None)
+                                })
+                            },
+                            "Cancel"
+                        )
+                        <form
+                            @submit=$(|_e| delete_citation_data.set(None))
+                            action=(href!(
+                                remove_citation,
+                                TaxonId(taxon_id),
+                                PropagationId(propagation_id),
+                                CitationId(citation_id),
+                            ))
+                            method="POST"
+                        >
+                            button(variant: ButtonVariant::Destructive, "Delete")
+                        </form>
+                    )
+                } else {
+                    "Something went wrong"
+                }
+            )
+        )
+    })
+}
+
+#[shard]
+async fn citation_options(cx: &Cx, query: String) -> topcoat::Result<impl View> {
+    let n_citations = Citation::all().count().exec(&mut db(cx)).await?;
+    let citations = if query.is_empty() {
+        Vec::default()
+    } else {
+        Citation::filter(
+            Citation::fields()
+                .title()
+                .like(format!("%{query}%"))
+                .or(Citation::fields().author().like(format!("%{query}%")))
+                .or(Citation::fields().url().like(format!("%{query}%")))
+                .or(Citation::fields()
+                    .container_title()
+                    .like(format!("%{query}%"))),
+        )
+        .exec(&mut db(cx))
+        .await?
+    };
+    Ok(view! {
+        <div>(format!("{} / {n_citations} results shown", citations.len()))</div>
+        if !citations.is_empty() {
+            radio_group(
+                for citation in citations {
+                    let id = format!("citation-{}", citation.id);
+                    <div class="flex items-center gap-2">
+                        radio_group_item(
+                            attrs: attributes! { id=(&id) name="citation_id" value=(citation.id) }
+                        )
+                        label(attrs: attributes! { for=(&id) }, (citation.format_cse()))
+                    </div>
+                }
+            )
+        }
+        <a class="inline-flex items-center gap-2" href=(href!(citation::create))>
+            icon(data: mdi::ADD)
+            "Create a new citation source"
+        </a>
+    })
+}
+
+#[component]
+async fn add_citation_form(cx: &Cx, #[default] attrs: Attributes) -> topcoat::Result<impl View> {
+    let query = signal(cx, String::new);
+    Ok(view! {
+        <form (attrs)>
+            field_set(
+                field(
+                    input(
+                        attrs: attributes! {
+                            type="text"
+                            name="query"
+                            value=(query.get())
+                            placeholder="Search for an existing citation"
+                            @input=$(|e: Event| query.set(e.target.value))
                         }
                     )
-                    if let Some(msg) = errors.confidence {
-                        field_error((msg))
-                    }
                 )
-                field(
-                    field_label("Taxon-specific procedure notes")
-                    textarea(attrs: attributes! { name="notes" }, (params.notes))
-                    if let Some(msg) = errors.notes {
-                        field_error((msg))
-                    }
-                )
-                button("Update")
-            </form>
-        </div>
+                field(citation_options(query: query.get()))
+            )
+        </form>
     })
 }
 
@@ -382,6 +608,50 @@ pub async fn do_modify(
         }
     }
 }
+
+#[derive(Debug, Deserialize)]
+struct AddCitationParams {
+    citation_id: u64,
+}
+
+#[route(POST "/taxa/{taxon_id}/propagation/{propagation_id}/citations")]
+pub async fn add_citation(
+    cx: &Cx,
+    Form(params): Form<AddCitationParams>,
+) -> topcoat::Result<SeeOther> {
+    let _ = require_user_with_permission(cx, PermissionCode::TaxonPropagationEdit).await?;
+
+    let taxon_id = *path_param::<TaxonId>(cx)?;
+    let propagation_id = *path_param::<PropagationId>(cx)?;
+    TaxonPropagationProcedureCitation::create()
+        .taxon_id(taxon_id)
+        .propagation_id(propagation_id)
+        .citation_id(params.citation_id)
+        .exec(&mut db(cx))
+        .await?;
+    Ok(see_other(
+        href!(modify, TaxonId(taxon_id), PropagationId(propagation_id)).resolve(cx),
+    ))
+}
+
+#[route(POST "/taxa/{taxon_id}/propagation/{propagation_id}/citations/{citation_id}/delete")]
+pub async fn remove_citation(cx: &Cx) -> topcoat::Result<SeeOther> {
+    let _ = require_user_with_permission(cx, PermissionCode::TaxonPropagationEdit).await?;
+    let taxon_id = *path_param::<TaxonId>(cx)?;
+    let propagation_id = *path_param::<PropagationId>(cx)?;
+    let citation_id = *path_param::<CitationId>(cx)?;
+    TaxonPropagationProcedureCitation::delete_by_citation_id_and_propagation_id_and_taxon_id(
+        &mut db(cx),
+        citation_id,
+        propagation_id,
+        taxon_id,
+    )
+    .await?;
+    Ok(see_other(
+        href!(modify, TaxonId(taxon_id), PropagationId(propagation_id)).resolve(cx),
+    ))
+}
+
 #[route(POST "/taxa/{taxon_id}/propagation/{propagation_id}/delete")]
 pub async fn delete(cx: &Cx) -> topcoat::Result<SeeOther> {
     let _ = require_user_with_permission(cx, PermissionCode::TaxonPropagationDelete).await?;
