@@ -60,6 +60,10 @@ file = "src/components/label.rs"
 hash = "sha256:e3a01c26e38ad5b5c93c32f56cbd148f1e102d8691a107a837d1b80a15670cfb"
 file = "src/components/pagination.rs"
 
+[registries.topcoat.components.select]
+hash = "sha256:796d685bbefa46c8bb2d4f1404fbfbdaa1a61c0dc8260cceda7eed66b495413d"
+file = "src/components/select.rs"
+
 [registries.topcoat.components.spinner]
 hash = "sha256:77506179aea385b0507bf9ddae18f7df19ca59e7e755b9f69f0f57c5e75c5c61"
 file = "src/components/spinner.rs"

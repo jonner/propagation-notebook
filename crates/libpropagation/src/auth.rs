@@ -265,6 +265,12 @@ pub enum PermissionCode {
     RegionDelete,
     #[column(variant = "region:edit")]
     RegionEdit,
+    #[column(variant = "taxonpropagation:create")]
+    TaxonPropagationCreate,
+    #[column(variant = "taxonpropagation:delete")]
+    TaxonPropagationDelete,
+    #[column(variant = "taxonpropagation:edit")]
+    TaxonPropagationEdit,
 }
 
 pub fn hash_password(pw: &str) -> Result<String, AuthError> {
