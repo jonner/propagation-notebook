@@ -206,8 +206,7 @@ pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
     let taxon_id = *path_param::<TaxonId>(cx)?;
     let propagation_id = *path_param::<PropagationId>(cx)?;
     let add_citation_dialog_open = signal(cx, || false);
-    // FIXME: use element_id(cx) when upgrading to topcoat 0.11
-    let add_citation_form_id = "add-citation-form";
+    let add_citation_form_id = element_id(cx);
     let delete_citation_data = signal(cx, || None::<(u64, String)>);
 
     let tp =
@@ -382,7 +381,7 @@ pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
                 )
                 add_citation_form(
                     attrs: attributes! {
-                        id=(add_citation_form_id)
+                        id=(&add_citation_form_id)
                         method="POST"
                         action=(href!(
                             add_citation,
@@ -404,7 +403,7 @@ pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
                     )
                     button(
                         variant: ButtonVariant::Primary,
-                        attrs: attributes! { form=(add_citation_form_id) },
+                        attrs: attributes! { form=(&add_citation_form_id) },
                         "Add"
                     )
                 )
