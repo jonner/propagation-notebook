@@ -14,7 +14,7 @@ use topcoat::{
         href, page, path_param, query_params,
     },
     runtime::{Event, procedure},
-    view::{View, attributes, component, error_boundary, suspense, view},
+    view::{View, attributes, component, element_id, error_boundary, suspense, view},
 };
 use tracing::{debug, trace, warn};
 
@@ -26,6 +26,7 @@ use crate::{
         button::button,
         citations::citation_list,
         dropdown_menu::*,
+        floating::FloatingAlign,
         harvest::taxon_regional_table,
         input::input,
         pn::{
@@ -584,6 +585,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
         .await
         .ok_or_not_found()?;
     let user = current_user(cx).await;
+    let menu = element_id(cx);
 
     Ok(view! {
         let ancestors = taxon
@@ -608,13 +610,18 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
             if let Some(user) = user {
                 if user.has_permission(PermissionCode::TaxonSync)
                     || user.has_permission(PermissionCode::RegionSync) {
+                        <div class="ms-auto">
                     dropdown_menu(
-                        attrs: attributes! { class="ms-auto" },
-                        dropdown_menu_trigger(icon(data: crate::mdi::DOTS_VERTICAL))
+                        dropdown_menu_trigger(
+                            target: &menu,
+                            icon(data: crate::mdi::DOTS_VERTICAL)
+                        )
                         dropdown_menu_content(
-                            alignment: DropdownMenuAlignment::Right,
+                            id: &menu,
+                            align: FloatingAlign::End,
                             if user.has_permission(PermissionCode::TaxonSync) {
                                 dropdown_menu_item(
+                                    close: Some(&menu),
                                     attrs: attributes! {
                                         @click=$(async |_e: Event| {
                                             sync_image(id).await;
@@ -625,6 +632,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                             }
                             if user.has_permission(PermissionCode::RegionSync) {
                                 dropdown_menu_item(
+                                    close: Some(&menu),
                                     attrs: attributes! {
                                         @click=$(async |_e: Event| {
                                             sync_regions(id).await;
@@ -635,6 +643,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                             }
                         )
                     )
+                    </div>
                 }
             }
         </h1>

@@ -11,6 +11,8 @@ pub mod dialog;
 pub mod dropdown_menu;
 #[allow(dead_code)]
 pub mod field;
+#[allow(dead_code)]
+pub mod floating;
 pub mod harvest;
 pub mod input;
 pub mod label;

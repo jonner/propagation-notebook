@@ -14,7 +14,7 @@ use topcoat::{
         href, page, path_param, route,
     },
     runtime::{Event, shard, signal},
-    view::{Attributes, View, attributes, component, view},
+    view::{Attributes, View, attributes, component, element_id, view},
 };
 
 use crate::{
@@ -22,8 +22,8 @@ use crate::{
     citation,
     components::{
         alert_dialog::*, badge::badge, breadcrumb::*, button::*, card::*, citations::citation_list,
-        dialog::*, dropdown_menu::*, field::*, input::*, label::*, radio_group::*, select::*,
-        textarea::*,
+        dialog::*, dropdown_menu::*, field::*, floating::FloatingAlign, input::*, label::*,
+        radio_group::*, select::*, textarea::*,
     },
     context::{current_user, db, require_user_with_permission},
     taxa::{self, TaxonId},
@@ -57,6 +57,8 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
             .await
             .ok_or_not_found()?;
 
+    let admin_menu = element_id(cx);
+
     Ok(view! {
         let procedure = tp.propagation.get();
         let taxon = tp.taxon.get();
@@ -83,38 +85,45 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                             || user.has_permission(
                                 PermissionCode::TaxonPropagationDelete,
                             ) {
-                            dropdown_menu(
-                                attrs: attributes! { class="ms-auto" },
-                                dropdown_menu_trigger(icon(data: mdi::DOTS_VERTICAL))
-                                dropdown_menu_content(
-                                    alignment: DropdownMenuAlignment::Right,
-                                    if user.has_permission(PermissionCode::TaxonPropagationEdit) {
-                                        dropdown_menu_navigation_item(
-                                            attrs: attributes! {
-                                                href=(href!(
-                                                    modify,
-                                                    TaxonId(taxon_id),
-                                                    PropagationId(propagation_id),
-                                                ))
-                                            },
-                                            "Modify"
-                                        )
-                                    }
-                                    if user.has_permission(
-                                        PermissionCode::TaxonPropagationDelete,
-                                    ) {
-                                        dropdown_menu_item(
-                                            attrs: attributes! {
-                                                @click=$(|_e: topcoat::runtime::Event| {
-                                                    delete_dialog_open.set(true);
-                                                })
-                                                class="text-destructive"
-                                            },
-                                            "Delete"
-                                        )
-                                    }
+                            <div class="ms-auto">
+                                dropdown_menu(
+                                    dropdown_menu_trigger(
+                                        target: &admin_menu,
+                                        icon(data: mdi::DOTS_VERTICAL)
+                                    )
+                                    dropdown_menu_content(
+                                        id: &admin_menu,
+                                        align: FloatingAlign::End,
+                                        if user.has_permission(PermissionCode::TaxonPropagationEdit) {
+                                            dropdown_menu_navigation_item(
+                                                close: Some(&admin_menu),
+                                                attrs: attributes! {
+                                                    href=(href!(
+                                                        modify,
+                                                        TaxonId(taxon_id),
+                                                        PropagationId(propagation_id),
+                                                    ))
+                                                },
+                                                "Modify"
+                                            )
+                                        }
+                                        if user.has_permission(
+                                            PermissionCode::TaxonPropagationDelete,
+                                        ) {
+                                            dropdown_menu_item(
+                                                close: Some(&admin_menu),
+                                                attrs: attributes! {
+                                                    @click=$(|_e: topcoat::runtime::Event| {
+                                                        delete_dialog_open.set(true);
+                                                    })
+                                                    class="text-destructive"
+                                                },
+                                                "Delete"
+                                            )
+                                        }
+                                    )
                                 )
-                            )
+                            </div>
                         }
                     }
                 </h1>

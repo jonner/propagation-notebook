@@ -10,7 +10,7 @@ use topcoat::{
         href, page, path_param, route,
     },
     runtime::signal,
-    view::{Attributes, Child, View, attributes, class, component, view},
+    view::{Attributes, Child, View, attributes, class, component, element_id, view},
 };
 use tracing::debug;
 use url::Url;
@@ -18,7 +18,7 @@ use url::Url;
 use crate::{
     components::{
         alert_dialog::*, breadcrumb::*, button::*, dialog::*, dropdown_menu::*, field::*,
-        input::input,
+        floating::FloatingAlign, input::input,
     },
     context::{current_user, db, require_user_with_permission},
     flash::{self, FlashMessage},
@@ -34,6 +34,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
     let id = *path_param::<CitationId>(cx)?;
     let citation = Citation::get_by_id(&mut db, id).await.ok_or_not_found()?;
     let delete_dialog_open = signal(cx, || false);
+    let admin_menu = element_id(cx);
     Ok(view! {
         <hgroup>
             breadcrumb(
@@ -46,33 +47,40 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
             <h1 class="flex items-center">
                 "Citation Details"
                 if let Some(user) = user {
-                    if user.has_permission(PermissionCode::CitationEdit)
-                        || user.has_permission(PermissionCode::CitationDelete) {
-                        dropdown_menu(
-                            attrs: attributes! { class="ms-auto" },
-                            dropdown_menu_trigger(icon(data: mdi::DOTS_VERTICAL))
-                            dropdown_menu_content(
-                                alignment: DropdownMenuAlignment::Right,
-                                if user.has_permission(PermissionCode::CitationEdit) {
-                                    dropdown_menu_navigation_item(
-                                        attrs: attributes! { href=(href!(modify, CitationId(id))) },
-                                        "Modify"
-                                    )
-                                }
-                                if user.has_permission(PermissionCode::CitationDelete) {
-                                    dropdown_menu_item(
-                                        attrs: attributes! {
-                                            @click=$(|_e: topcoat::runtime::Event| {
-                                                delete_dialog_open.set(true);
-                                            })
-                                            class="text-destructive"
-                                        },
-                                        "Delete"
-                                    )
-                                }
+                    <div class="ms-auto">
+                        if user.has_permission(PermissionCode::CitationEdit)
+                            || user.has_permission(PermissionCode::CitationDelete) {
+                            dropdown_menu(
+                                dropdown_menu_trigger(
+                                    target: &admin_menu,
+                                    icon(data: mdi::DOTS_VERTICAL)
+                                )
+                                dropdown_menu_content(
+                                    id: &admin_menu,
+                                    align: FloatingAlign::End,
+                                    if user.has_permission(PermissionCode::CitationEdit) {
+                                        dropdown_menu_navigation_item(
+                                            close: Some(&admin_menu),
+                                            attrs: attributes! { href=(href!(modify, CitationId(id))) },
+                                            "Modify"
+                                        )
+                                    }
+                                    if user.has_permission(PermissionCode::CitationDelete) {
+                                        dropdown_menu_item(
+                                            close: Some(&admin_menu),
+                                            attrs: attributes! {
+                                                @click=$(|_e: topcoat::runtime::Event| {
+                                                    delete_dialog_open.set(true);
+                                                })
+                                                class="text-destructive"
+                                            },
+                                            "Delete"
+                                        )
+                                    }
+                                )
                             )
-                        )
-                    }
+                        }
+                    </div>
                 }
             </h1>
         </hgroup>

@@ -11,7 +11,7 @@ use topcoat::{
     runtime::{Event, shard, signal},
     view::{
         AttributeValueViewParts, Attributes, Child, View, ViewExt, attributes, class, component,
-        view,
+        element_id, view,
     },
 };
 use uuid::Uuid;
@@ -19,8 +19,8 @@ use uuid::Uuid;
 use crate::{
     auth::{LoginFormParams, do_logout, login},
     components::{
-        avatar::*, badge::*, breadcrumb::*, dropdown_menu::*, input::input, pagination::*,
-        tooltip::*,
+        avatar::*, badge::*, breadcrumb::*, dropdown_menu::*, floating::FloatingAlign,
+        input::input, pagination::*, tooltip::*,
     },
     context::{current_user, db},
     mdi,
@@ -288,6 +288,7 @@ pub async fn week_navigator(
 
 #[component]
 pub async fn user_menu(cx: &Cx) -> topcoat::Result<impl View> {
+    let menu_id = element_id(cx);
     Ok(view! {
         <li class="ml-auto">
             if let Some(user) = current_user(cx).await {
@@ -299,6 +300,7 @@ pub async fn user_menu(cx: &Cx) -> topcoat::Result<impl View> {
                 ></form>
                 dropdown_menu(
                     dropdown_menu_trigger(
+                        target: &menu_id,
                         attrs: attributes! { class="flex" },
                         avatar(
                             attrs: attributes! { class="me-2 bg-background/60" },
@@ -308,17 +310,20 @@ pub async fn user_menu(cx: &Cx) -> topcoat::Result<impl View> {
                         <span class="hidden md:inline-block">(&user.username)</span>
                     )
                     dropdown_menu_content(
-                        alignment: DropdownMenuAlignment::Right,
+                        id: &menu_id,
+                        align: FloatingAlign::End,
                         dropdown_menu_label(
                             "Logged in as "
                             (&user.username)
                         )
                         dropdown_menu_separator()
                         dropdown_menu_navigation_item(
+                            close: Some(&menu_id),
                             attrs: attributes! { href=(href!(users::account)) type="button" },
                             "My Account"
                         )
                         dropdown_menu_item(
+                            close: Some(&menu_id),
                             attrs: attributes! { type="submit" class="text-destructive" form="logoutForm" },
                             "Log Out"
                         )
