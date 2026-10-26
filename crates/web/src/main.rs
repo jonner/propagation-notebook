@@ -36,6 +36,7 @@ use crate::{
     tasks::background_tasks,
 };
 
+mod actions;
 mod assets;
 mod auth;
 mod citation;

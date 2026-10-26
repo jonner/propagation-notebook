@@ -2,7 +2,6 @@ use libpropagation::{auth::PermissionCode, citation::Citation};
 use serde::Deserialize;
 use topcoat::{
     context::{Cx, try_request_context},
-    icon::icon,
     router::{
         Body, Method, StatusCode,
         content::Form,
@@ -10,31 +9,50 @@ use topcoat::{
         href, page, path_param, route,
     },
     runtime::signal,
-    view::{Attributes, Child, View, attributes, class, component, element_id, view},
+    view::{Attributes, Child, View, attributes, class, component, view},
 };
 use tracing::debug;
 use url::Url;
 
 use crate::{
+    actions::{Action, ActionItemType, permitted_actions},
     components::{
-        alert_dialog::*, breadcrumb::*, button::*, dialog::*, dropdown_menu::*, field::*,
-        floating::FloatingAlign, input::input,
+        action_menu::*, alert_dialog::*, breadcrumb::*, button::*, dialog::*, field::*,
+        input::input,
     },
     context::{current_user, db, require_user_with_permission},
     flash::{self, FlashMessage},
-    mdi,
 };
 
 path_param!(pub citation_id: u64, error = bad_request);
 
 #[page("/citations/{citation_id}")]
 pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
-    let user = current_user(cx).await;
     let mut db = db(cx);
     let id = *path_param::<CitationId>(cx)?;
     let citation = Citation::get_by_id(&mut db, id).await.ok_or_not_found()?;
     let delete_dialog_open = signal(cx, || false);
-    let admin_menu = element_id(cx);
+
+    let actions = [
+        Action {
+            name: "Modify".to_string(),
+            permission: Some(PermissionCode::CitationEdit),
+            item_type: ActionItemType::Link,
+            attrs: attributes! { href=(href!(modify, CitationId(id))) },
+        },
+        Action {
+            name: "Delete".to_string(),
+            permission: Some(PermissionCode::CitationDelete),
+            item_type: ActionItemType::Button,
+            attrs: attributes! {
+                @click=$(|_e: topcoat::runtime::Event| {
+                    delete_dialog_open.set(true);
+                })
+                class="text-destructive"
+            },
+        },
+    ];
+
     Ok(view! {
         <hgroup>
             breadcrumb(
@@ -46,41 +64,9 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
             )
             <h1 class="flex items-center">
                 "Citation Details"
-                if let Some(user) = user {
-                    <div class="ms-auto">
-                        if user.has_permission(PermissionCode::CitationEdit)
-                            || user.has_permission(PermissionCode::CitationDelete) {
-                            dropdown_menu(
-                                dropdown_menu_trigger(
-                                    target: &admin_menu,
-                                    icon(data: mdi::DOTS_VERTICAL)
-                                )
-                                dropdown_menu_content(
-                                    id: &admin_menu,
-                                    align: FloatingAlign::End,
-                                    if user.has_permission(PermissionCode::CitationEdit) {
-                                        dropdown_menu_navigation_item(
-                                            close: Some(&admin_menu),
-                                            attrs: attributes! { href=(href!(modify, CitationId(id))) },
-                                            "Modify"
-                                        )
-                                    }
-                                    if user.has_permission(PermissionCode::CitationDelete) {
-                                        dropdown_menu_item(
-                                            close: Some(&admin_menu),
-                                            attrs: attributes! {
-                                                @click=$(|_e: topcoat::runtime::Event| {
-                                                    delete_dialog_open.set(true);
-                                                })
-                                                class="text-destructive"
-                                            },
-                                            "Delete"
-                                        )
-                                    }
-                                )
-                            )
-                        }
-                    </div>
+                let actions = permitted_actions(current_user(cx).await, &actions);
+                if !actions.is_empty() {
+                    <div class="ms-auto">action_menu(actions: actions.as_slice())</div>
                 }
             </h1>
         </hgroup>

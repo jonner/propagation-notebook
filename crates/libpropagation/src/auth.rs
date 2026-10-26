@@ -243,7 +243,16 @@ pub struct Permission {
 }
 
 #[derive(
-    Debug, Clone, toasty::Embed, PartialEq, Eq, clap::ValueEnum, Serialize, strum::EnumIter, Hash,
+    Debug,
+    Clone,
+    Copy,
+    toasty::Embed,
+    PartialEq,
+    Eq,
+    clap::ValueEnum,
+    Serialize,
+    strum::EnumIter,
+    Hash,
 )]
 pub enum PermissionCode {
     // ideas: note:create, note:edit, note:vote, propagation:create,

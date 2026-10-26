@@ -14,19 +14,19 @@ use topcoat::{
         href, page, path_param, query_params,
     },
     runtime::{Event, procedure},
-    view::{View, attributes, component, element_id, error_boundary, suspense, view},
+    view::{View, attributes, component, error_boundary, suspense, view},
 };
 use tracing::{debug, trace, warn};
 
 use crate::{
+    actions::{Action, ActionItemType, permitted_actions},
     citation,
     components::{
+        action_menu::*,
         badge::{BadgeVariant, badge},
         breadcrumb::*,
         button::button,
         citations::citation_list,
-        dropdown_menu::*,
-        floating::FloatingAlign,
         harvest::taxon_regional_table,
         input::input,
         pn::{
@@ -584,8 +584,28 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
         .exec(&mut db)
         .await
         .ok_or_not_found()?;
-    let user = current_user(cx).await;
-    let menu = element_id(cx);
+    let menu_actions = [
+        Action {
+            name: "Sync Image".to_string(),
+            permission: Some(PermissionCode::TaxonSync),
+            item_type: ActionItemType::Button,
+            attrs: attributes! {
+                @click=$(async |_e: Event| {
+                    sync_image(id).await;
+                })
+            },
+        },
+        Action {
+            name: "Sync Regions".to_string(),
+            permission: Some(PermissionCode::TaxonSync),
+            item_type: ActionItemType::Button,
+            attrs: attributes! {
+                @click=$(async |_e: Event| {
+                    sync_regions(id).await;
+                })
+            },
+        },
+    ];
 
     Ok(view! {
         let ancestors = taxon
@@ -607,44 +627,9 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                 attrs: attributes! { class="mx-3" },
                 (taxon.rank.to_string())
             )
-            if let Some(user) = user {
-                if user.has_permission(PermissionCode::TaxonSync)
-                    || user.has_permission(PermissionCode::RegionSync) {
-                        <div class="ms-auto">
-                    dropdown_menu(
-                        dropdown_menu_trigger(
-                            target: &menu,
-                            icon(data: crate::mdi::DOTS_VERTICAL)
-                        )
-                        dropdown_menu_content(
-                            id: &menu,
-                            align: FloatingAlign::End,
-                            if user.has_permission(PermissionCode::TaxonSync) {
-                                dropdown_menu_item(
-                                    close: Some(&menu),
-                                    attrs: attributes! {
-                                        @click=$(async |_e: Event| {
-                                            sync_image(id).await;
-                                        })
-                                    },
-                                    "Sync Image"
-                                )
-                            }
-                            if user.has_permission(PermissionCode::RegionSync) {
-                                dropdown_menu_item(
-                                    close: Some(&menu),
-                                    attrs: attributes! {
-                                        @click=$(async |_e: Event| {
-                                            sync_regions(id).await;
-                                        })
-                                    },
-                                    "Sync Regions"
-                                )
-                            }
-                        )
-                    )
-                    </div>
-                }
+            let actions = permitted_actions(current_user(cx).await, &menu_actions);
+            if !actions.is_empty() {
+                <div class="ms-auto">action_menu(actions: actions.as_slice())</div>
             }
         </h1>
         <div class="flex flex-col gap-4">
