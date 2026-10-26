@@ -39,12 +39,12 @@ use crate::{
     util::{ModifyOffset, PER_PAGE, PageState},
 };
 
+mod note;
 mod propagation;
 
 path_param!(pub cleaning_id: u64, error = bad_request);
 path_param!(pub taxon_id: u64, error = bad_request);
 path_param!(pub region_id: u64, error = bad_request);
-path_param!(pub note_id: u64, error = bad_request);
 
 #[derive(Debug, Clone, Copy, serde::Deserialize, serde::Serialize)]
 #[serde(rename_all = "lowercase")]
@@ -606,6 +606,12 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
             },
         },
     ];
+    let note_actions = [Action {
+        name: "Add Note".to_string(),
+        permission: Some(PermissionCode::TaxonNoteCreate),
+        item_type: ActionItemType::Link,
+        attrs: attributes! { href=(href!(note::create, TaxonId(taxon.id))) },
+    }];
 
     Ok(view! {
         let ancestors = taxon
@@ -753,9 +759,20 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                     </div>
                 </section>
             }
-            if !taxon.notes.get().is_empty() {
-                <section>
-                    <h2>"Notes"</h2>
+            <section>
+                <h2 class="flex items-center">
+                    "Notes"
+                    let permitted = permitted_actions(
+                        current_user(cx).await,
+                        &note_actions,
+                    );
+                    if !permitted.is_empty() {
+                        <div class="ms-auto">
+                            action_menu(actions: permitted.as_slice())
+                        </div>
+                    }
+                </h2>
+                if !taxon.notes.get().is_empty() {
                     let notes: HashMap<TaxonNoteCategory, Vec<&TaxonNote>> = taxon
                         .notes
                         .get()
@@ -776,9 +793,9 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                                         <li>
                                             <a
                                                 href=(href!(
-                                                    note_details,
+                                                    note::details,
                                                     TaxonId(taxon.id),
-                                                    NoteId(note.id),
+                                                    note::NoteId(note.id),
                                                 ))
                                             >
                                                 (&note.title)
@@ -803,8 +820,8 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                             </div>
                         }
                     </div>
-                </section>
-            }
+                }
+            </section>
 
             <section>
                 <h2>"Regions"</h2>
@@ -953,53 +970,6 @@ pub async fn cleaning_details(cx: &Cx) -> topcoat::Result<impl View> {
                             .collect()
                     )
                 </div>
-            </section>
-        </div>
-    })
-}
-
-#[page("/taxa/{taxon_id}/note/{note_id}")]
-pub async fn note_details(cx: &Cx) -> topcoat::Result<impl View> {
-    let mut db = db(cx);
-    let _taxon_id = path_param::<TaxonId>(cx)?;
-    let note_id = path_param::<NoteId>(cx)?;
-    let note = TaxonNote::filter_by_id(note_id)
-        .include(TaxonNote::fields().taxon())
-        .include(TaxonNote::fields().citation_links().citation())
-        .one()
-        .exec(&mut db)
-        .await
-        .ok_or_not_found()?;
-    trace!(?note);
-
-    Ok(view! {
-        let taxon = note.taxon.get();
-        <div class="flex flex-col gap-4">
-            <section>
-                breadcrumb(
-                    breadcrumb_list(
-                        breadcrumb_item(
-                            breadcrumb_link(
-                                attrs: attributes! { href=(href!(details, TaxonId(taxon.id))) },
-                                (&taxon.complete_name)
-                            )
-                        )
-                        breadcrumb_separator()
-                        breadcrumb_item(breadcrumb_page((format!("Note {}", note.id))))
-                    )
-                )
-                <h1>(&note.title)</h1>
-                <div class="text-2xl">(note.text)</div>
-            </section>
-            <section>
-                citation_list(
-                    citations: note
-                        .citation_links
-                        .get()
-                        .iter()
-                        .map(|cl| cl.citation.get())
-                        .collect()
-                )
             </section>
         </div>
     })

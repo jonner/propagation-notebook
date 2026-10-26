@@ -4,23 +4,24 @@ version.workspace = true
 edition.workspace = true
 
 [dependencies]
+clap.workspace = true
+confique = { version = "0.4.0", features = ["yaml"] }
+directories.workspace = true
 geojson.workspace = true
 jiff.workspace = true
 libpropagation.workspace = true
-serde.workspace = true
-serde_urlencoded = "0.7.1"
 serde_json.workspace = true
+serde_urlencoded = "0.7.1"
+serde.workspace = true
+strum.workspace = true
 thiserror.workspace = true
 toasty.workspace = true
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
 topcoat = { version = "0.11.0", features = ["font-fontsource", "icon-iconify", "tailwind", "ui"] }
-tracing.workspace = true
 tracing-subscriber.workspace = true
-uuid.workspace = true
-confique = { version = "0.4.0", features = ["yaml"] }
-directories.workspace = true
+tracing.workspace = true
 url.workspace = true
-clap.workspace = true
+uuid.workspace = true
 
 [build-dependencies]
 topcoat = { version = "0.11.0", default-features= false, features = ["tailwind", "icon-iconify"] }

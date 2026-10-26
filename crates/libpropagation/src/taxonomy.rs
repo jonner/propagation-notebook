@@ -1,6 +1,6 @@
 use std::convert::Infallible;
 
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use toasty::Deferred;
 use tracing::trace;
 
@@ -557,7 +557,22 @@ pub struct TaxonPropagationProcedure {
     pub updated_at: jiff::Timestamp,
 }
 
-#[derive(Debug, Clone, Copy, toasty::Embed, Serialize, clap::ValueEnum, Hash, PartialEq, Eq)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    toasty::Embed,
+    Deserialize,
+    Serialize,
+    clap::ValueEnum,
+    Hash,
+    PartialEq,
+    Eq,
+    strum::EnumIter,
+    strum::IntoStaticStr,
+)]
+#[serde(rename_all = "snake_case")]
+#[strum(serialize_all = "snake_case")]
 pub enum TaxonNoteCategory {
     General,
     Ripening,

@@ -280,6 +280,12 @@ pub enum PermissionCode {
     TaxonPropagationDelete,
     #[column(variant = "taxonpropagation:edit")]
     TaxonPropagationEdit,
+    #[column(variant = "taxonnote:create")]
+    TaxonNoteCreate,
+    #[column(variant = "taxonnote:delete")]
+    TaxonNoteDelete,
+    #[column(variant = "taxonnote:edit")]
+    TaxonNoteEdit,
 }
 
 pub fn hash_password(pw: &str) -> Result<String, AuthError> {
