@@ -2,7 +2,6 @@ use std::{cmp::Ordering, collections::HashMap};
 
 use libpropagation::{
     auth::PermissionCode,
-    cleaning::CleaningProcedure,
     region::{ConservationStatus, Origin, Region, RegionalHarvestWindow, RegionalTaxonStatus},
     taxonomy::{Taxon, TaxonHierarchy, TaxonNote, TaxonNoteCategory},
 };
@@ -16,7 +15,7 @@ use topcoat::{
     runtime::{Event, procedure},
     view::{View, attributes, component, error_boundary, suspense, view},
 };
-use tracing::{debug, trace, warn};
+use tracing::{debug, warn};
 
 use crate::{
     actions::{Action, ActionItemType, permitted_actions},
@@ -26,7 +25,6 @@ use crate::{
         badge::{BadgeVariant, badge},
         breadcrumb::*,
         button::button,
-        citations::citation_list,
         harvest::taxon_regional_table,
         input::input,
         pn::{
@@ -39,10 +37,10 @@ use crate::{
     util::{ModifyOffset, PER_PAGE, PageState},
 };
 
+mod cleaning;
 mod note;
 mod propagation;
 
-path_param!(pub cleaning_id: u64, error = bad_request);
 path_param!(pub taxon_id: u64, error = bad_request);
 path_param!(pub region_id: u64, error = bad_request);
 
@@ -696,9 +694,9 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                                 <li>
                                     <a
                                         href=(href!(
-                                            cleaning_details,
+                                            cleaning::details,
                                             TaxonId(procedure.taxon_id),
-                                            CleaningId(procedure.id),
+                                            cleaning::CleaningId(procedure.id),
                                         ))
                                     >
                                         (&procedure.name)
@@ -899,76 +897,6 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                             <li><a href=(&resource.url)>(&resource.name)</a></li>
                         }
                     </ul>
-                </div>
-            </section>
-        </div>
-    })
-}
-
-#[page("/taxa/{taxon_id}/cleaning/{cleaning_id}")]
-pub async fn cleaning_details(cx: &Cx) -> topcoat::Result<impl View> {
-    let mut db = db(cx);
-    let taxon_id = path_param::<TaxonId>(cx)?;
-    let cleaning_id = path_param::<CleaningId>(cx)?;
-    let proc = CleaningProcedure::filter(
-        CleaningProcedure::fields()
-            .taxon_id()
-            .eq(taxon_id)
-            .and(CleaningProcedure::fields().id().eq(cleaning_id)),
-    )
-    .include(CleaningProcedure::fields().taxon())
-    .include(CleaningProcedure::fields().citation_links().citation())
-    .one()
-    .exec(&mut db)
-    .await
-    .ok_or_not_found()?;
-    trace!(?proc);
-
-    Ok(view! {
-        let taxon = proc.taxon.get();
-        <div class="flex flex-col gap-4">
-            <hgroup>
-                breadcrumb(
-                    breadcrumb_list(
-                        breadcrumb_item(
-                            breadcrumb_link(
-                                attrs: attributes! { href=(href!(details, TaxonId(taxon.id))) },
-                                (&taxon.complete_name)
-                            )
-                        )
-                        breadcrumb_separator()
-                        breadcrumb_item(
-                            breadcrumb_page((format!("Cleaning Procedure {}", proc.id)))
-                        )
-                    )
-                )
-                <h1>
-                    <span>(&proc.name)</span>
-                    " for "
-                    <span class="latin">(&taxon.complete_name)</span>
-                </h1>
-            </hgroup>
-            <section>
-                <h2>"Instructions"</h2>
-                <div class="text-2xl">(proc.instructions)</div>
-            </section>
-            if let Some(notes) = proc.notes {
-                <section>
-                    <h2>"Additional Notes"</h2>
-                    <div>(notes)</div>
-                </section>
-            }
-            <section>
-                <h2>"Citations"</h2>
-                <div>
-                    citation_list(
-                        citations: proc
-                            .citation_links
-                            .get()
-                            .iter()
-                            .map(|cl| cl.citation.get())
-                            .collect()
-                    )
                 </div>
             </section>
         </div>

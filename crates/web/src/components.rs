@@ -8,6 +8,7 @@ pub mod breadcrumb;
 pub mod button;
 pub mod card;
 pub mod citations;
+pub mod cited_object;
 pub mod dialog;
 pub mod dropdown_menu;
 #[allow(dead_code)]

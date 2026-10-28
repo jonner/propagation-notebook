@@ -13,18 +13,16 @@ use topcoat::{
         error::{RouterErrorExt, SeeOther, rewrite, see_other},
         href, page, path_param, route,
     },
-    runtime::{Event, shard, signal},
-    view::{Attributes, View, attributes, component, element_id, view},
+    runtime::{Event, signal},
+    view::{View, attributes, view},
 };
 
 use crate::{
     actions::{Action, ActionItemType, permitted_actions},
     assets::mdi,
-    citation,
     components::{
         action_menu::*, alert_dialog::*, badge::badge, breadcrumb::*, button::*, card::*,
-        citations::citation_list, dialog::*, field::*, input::*, label::*, radio_group::*,
-        select::*, textarea::*,
+        citations::citation_list, cited_object::*, dialog::*, field::*, select::*, textarea::*,
     },
     context::{current_user, db, require_user_with_permission},
     taxa::{self, TaxonId},
@@ -189,7 +187,6 @@ pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
     let taxon_id = *path_param::<TaxonId>(cx)?;
     let propagation_id = *path_param::<PropagationId>(cx)?;
     let add_citation_dialog_open = signal(cx, || false);
-    let add_citation_form_id = element_id(cx);
     let delete_citation_data = signal(cx, || None::<(u64, String)>);
 
     let tp =
@@ -254,9 +251,8 @@ pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
                     <h1>"Edit Propagation Procedure"</h1>
                 </hgroup>
             </section>
-            <div class="flex gap-4 flex-wrap">
-                card(
-                    attrs: attributes! { class="grow" },
+            cited_object_layout(
+                cited_object_main_content(
                     card_header(card_title("Taxon procedure details"))
                     card_content(
                         <form
@@ -312,207 +308,87 @@ pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
                         </form>
                     )
                 )
-                <section class="shrink min-w-0 md:w-md p-6">
-                    card_title("Citations")
-                    <ul class="ps-2 flex flex-col gap-2">
-                        let citations = tp.citation_links.get();
-                        for citation_link in citations {
-                            let citation = citation_link.citation.get();
-                            <li class="flex items-baseline gap-2">
-                                let citation_data = (citation.id, citation.format_cse());
-                                <a
-                                    class="text-destructive"
-                                    href="#"
-                                    @click=$(|e: Event| {
-                                        e.prevent_default();
-                                        delete_citation_data.set(Some(citation_data));
-                                    })
-                                >
-                                    icon(data: mdi::DELETE)
-                                </a>
-                                <span class="text-muted-foreground">
-                                    (citation.id)
-                                    "."
-                                </span>
-                                <span class="text-wrap">(citation.format_cse())</span>
-                            </li>
-                        }
-                        <li>
+                cited_object_citation_section(
+                    let citations = tp.citation_links.get();
+                    for citation_link in citations {
+                        let citation = citation_link.citation.get();
+                        cited_object_citation_item(
+                            let citation_data = (citation.id, citation.format_cse());
                             <a
-                                class="flex items-baseline gap-2"
+                                class="text-destructive"
                                 href="#"
                                 @click=$(|e: Event| {
                                     e.prevent_default();
-                                    add_citation_dialog_open.set(true);
+                                    delete_citation_data.set(Some(citation_data));
                                 })
                             >
-                                icon(data: mdi::ADD)
-                                "Add citation"
+                                icon(data: mdi::DELETE)
                             </a>
-                        </li>
-                    </ul>
-                </section>
-            </div>
-        </div>
-        dialog(
-            open: add_citation_dialog_open.get(),
-            dialog_content(
-                dialog_header(
-                    dialog_title(
-                        "Add a new citation for this taxon propagation procedure"
-                    )
-                )
-                add_citation_form(
-                    attrs: attributes! {
-                        id=(&add_citation_form_id)
-                        method="POST"
-                        action=(href!(
-                            add_citation,
-                            TaxonId(taxon_id),
-                            PropagationId(propagation_id),
-                        ))
+                            <span class="text-muted-foreground">
+                                (citation.id)
+                                "."
+                            </span>
+                            <span class="text-wrap">(citation.format_cse())</span>
+                        )
                     }
-                )
-                dialog_footer(
-                    button(
-                        variant: ButtonVariant::Secondary,
-                        attrs: attributes! {
-                            @click=$(|e: topcoat::runtime::Event| {
+                    cited_object_citation_item(
+                        <a
+                            class="flex items-baseline gap-2"
+                            href="#"
+                            @click=$(|e: Event| {
                                 e.prevent_default();
-                                add_citation_dialog_open.set(false)
+                                add_citation_dialog_open.set(true);
                             })
-                        },
-                        "Cancel"
-                    )
-                    button(
-                        variant: ButtonVariant::Primary,
-                        attrs: attributes! { form=(&add_citation_form_id) },
-                        "Add"
+                        >
+                            icon(data: mdi::ADD)
+                            "Add citation"
+                        </a>
                     )
                 )
             )
+        </div>
+        add_citation_dialog(
+            open_sig: add_citation_dialog_open.clone(),
+            form_attrs: attributes! {
+                method="POST"
+                action=(href!(
+                    add_citation,
+                    TaxonId(taxon_id),
+                    PropagationId(propagation_id),
+                ))
+            }
         )
-        dialog(
-            open: delete_citation_data.get().is_some(),
-            dialog_content(
-                if let Some((citation_id, citation_display)) = delete_citation_data.get() {
-                    dialog_header(
-                        dialog_title(
-                            (format!(
-                                "Remove citation {citation_id} from this propagation procedure?",
-                            ))
-                        )
-                        dialog_description("This action cannot be undone")
-                    )
-                    <div class="flex flex-col gap-3">
-                        <div>
-                            <div class="text-muted-foreground text-sm">"Taxon"</div>
-                            <div class="latin">(&taxon.complete_name)</div>
-                        </div>
-                        <div>
-                            <div class="text-muted-foreground text-sm">
-                                "Propagation Procedure"
-                            </div>
-                            <div class="latin">(&proc.name)</div>
-                        </div>
-                        <div>
-                            <div class="text-muted-foreground text-sm">"Citation"</div>
-                            <div>(&citation_display)</div>
-                        </div>
-                    </div>
-                    dialog_footer(
-                        button(
-                            variant: ButtonVariant::Secondary,
-                            attrs: attributes! {
-                                @click=$(|e: topcoat::runtime::Event| {
-                                    e.prevent_default();
-                                    delete_citation_data.set(None)
-                                })
-                            },
-                            "Cancel"
-                        )
-                        <form
-                            @submit=$(|_e| delete_citation_data.set(None))
-                            action=(href!(
+        remove_citation_dialog(
+            remove_signal: delete_citation_data.clone(),
+            form_attrs: attributes! {
+                method="POST"
+                action=(delete_citation_data
+                    .get()
+                    .map(
+                        |d| href!(
                                 remove_citation,
                                 TaxonId(taxon_id),
                                 PropagationId(propagation_id),
-                                CitationId(citation_id),
-                            ))
-                            method="POST"
-                        >
-                            button(variant: ButtonVariant::Destructive, "Delete")
-                        </form>
-                    )
-                } else {
-                    "Something went wrong"
-                }
-            )
-        )
-    })
-}
-
-#[shard]
-async fn citation_options(cx: &Cx, query: String) -> topcoat::Result<impl View> {
-    let n_citations = Citation::all().count().exec(&mut db(cx)).await?;
-    let citations = if query.is_empty() {
-        Vec::default()
-    } else {
-        Citation::filter(
-            Citation::fields()
-                .title()
-                .like(format!("%{query}%"))
-                .or(Citation::fields().author().like(format!("%{query}%")))
-                .or(Citation::fields().url().like(format!("%{query}%")))
-                .or(Citation::fields()
-                    .container_title()
-                    .like(format!("%{query}%"))),
-        )
-        .exec(&mut db(cx))
-        .await?
-    };
-    Ok(view! {
-        <div>(format!("{} / {n_citations} results shown", citations.len()))</div>
-        if !citations.is_empty() {
-            radio_group(
-                for citation in citations {
-                    let id = format!("citation-{}", citation.id);
-                    <div class="flex items-center gap-2">
-                        radio_group_item(
-                            attrs: attributes! { id=(&id) name="citation_id" value=(citation.id) }
-                        )
-                        label(attrs: attributes! { for=(&id) }, (citation.format_cse()))
-                    </div>
-                }
-            )
-        }
-        <a class="inline-flex items-center gap-2" href=(href!(citation::create))>
-            icon(data: mdi::ADD)
-            "Create a new citation source"
-        </a>
-    })
-}
-
-#[component]
-async fn add_citation_form(cx: &Cx, #[default] attrs: Attributes) -> topcoat::Result<impl View> {
-    let query = signal(cx, String::new);
-    Ok(view! {
-        <form (attrs)>
-            field_set(
-                field(
-                    input(
-                        attrs: attributes! {
-                            type="text"
-                            name="query"
-                            value=(query.get())
-                            placeholder="Search for an existing citation"
-                            @input=$(|e: Event| query.set(e.target.value))
-                        }
+                                CitationId(d.0),
+                            ),
+                    ))
+            },
+            remove_citation_dialog_context(
+                remove_citation_dialog_context_item(
+                    remove_citation_dialog_context_item_term("Taxon")
+                    remove_citation_dialog_context_item_value(
+                        attrs: attributes! { class="latin" },
+                        (&taxon.complete_name)
                     )
                 )
-                field(citation_options(query: query.get()))
+                remove_citation_dialog_context_item(
+                    remove_citation_dialog_context_item_term("Propagation Procedure")
+                    remove_citation_dialog_context_item_value(
+                        (format!("{}: {}", proc.id, proc.name))
+                    )
+                )
             )
-        </form>
+        )
     })
 }
 
