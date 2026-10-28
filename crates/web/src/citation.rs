@@ -221,7 +221,7 @@ struct CitationRejected {
     errors: CitationParamErrors,
 }
 
-#[route(POST "/citations/create")]
+#[route(POST "/citations/new")]
 pub async fn do_create(cx: &Cx, Form(params): Form<CitationParams>) -> topcoat::Result<SeeOther> {
     let _user =
         require_user_with_permission(cx, libpropagation::auth::PermissionCode::CitationCreate)
@@ -413,7 +413,7 @@ pub async fn citation_form(
     })
 }
 
-#[page("/citations/create")]
+#[page("/citations/new")]
 pub async fn create(cx: &Cx) -> topcoat::Result<impl View> {
     let _user =
         require_user_with_permission(cx, libpropagation::auth::PermissionCode::CitationCreate)
