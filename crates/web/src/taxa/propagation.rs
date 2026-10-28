@@ -57,7 +57,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
 
     let menu_actions = [
         Action {
-            name: "Modify".to_string(),
+            name: "Edit".to_string(),
             permission: Some(PermissionCode::TaxonPropagationEdit),
             attrs: attributes! {
                 href=(href!(modify, TaxonId(taxon_id), PropagationId(propagation_id)))
@@ -180,7 +180,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
     })
 }
 
-#[page("/taxa/{taxon_id}/propagation/{propagation_id}/modify")]
+#[page("/taxa/{taxon_id}/propagation/{propagation_id}/edit")]
 pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
     let _ = require_user_with_permission(cx, PermissionCode::TaxonPropagationEdit).await?;
     let mut db = db(cx);

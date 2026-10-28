@@ -52,7 +52,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
     trace!(?proc);
     let actions = [
         Action {
-            name: "Modify".to_string(),
+            name: "Edit".to_string(),
             permission: Some(PermissionCode::TaxonCleaningEdit),
             attrs: attributes! {
                 href=(href!(modify, TaxonId(proc.taxon_id), CleaningId(proc.id)))
@@ -163,7 +163,7 @@ async fn cleaning_procedure_form(
     })
 }
 
-#[page("/taxa/{taxon_id}/cleaning/{cleaning_id}/modify")]
+#[page("/taxa/{taxon_id}/cleaning/{cleaning_id}/edit")]
 pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
     let _ = require_user_with_permission(cx, PermissionCode::TaxonCleaningEdit).await?;
     let taxon_id = *path_param::<TaxonId>(cx)?;

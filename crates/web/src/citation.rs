@@ -35,7 +35,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
 
     let actions = [
         Action {
-            name: "Modify".to_string(),
+            name: "Edit".to_string(),
             permission: Some(PermissionCode::CitationEdit),
             item_type: ActionItemType::Link,
             attrs: attributes! { href=(href!(modify, CitationId(id))) },
@@ -436,7 +436,7 @@ pub async fn create(cx: &Cx) -> topcoat::Result<impl View> {
     })
 }
 
-#[page("/citations/{citation_id}/modify")]
+#[page("/citations/{citation_id}/edit")]
 pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
     let _user =
         require_user_with_permission(cx, libpropagation::auth::PermissionCode::CitationEdit)
@@ -454,10 +454,10 @@ pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
                         (id)
                     )
                     breadcrumb_separator()
-                    breadcrumb_item(breadcrumb_page("Modify"))
+                    breadcrumb_item(breadcrumb_page("Edit"))
                 )
             )
-            <h1>"Modify a Citation"</h1>
+            <h1>"Edit a Citation"</h1>
         </hgroup>
         citation_form(
             citation: Some(&citation),
