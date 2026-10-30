@@ -41,7 +41,7 @@ hash = "sha256:fb7cb8f77818fe9a76f62b0f705494a5e5a000de9b6a49d05cca973b028abf2d"
 file = "src/components/checkbox.rs"
 
 [registries.topcoat.components.dialog]
-hash = "sha256:df9073df351770ee0282b9c64b7724caa0422fb51d7823fd3615688f4d02ddf6"
+hash = "sha256:97494bc086959953eff0e1a28ba72be8268cd4c38d83b50259c13788a3931e3c"
 file = "src/components/dialog.rs"
 
 [registries.topcoat.components.dropdown_menu]
