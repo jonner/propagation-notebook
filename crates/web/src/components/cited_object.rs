@@ -17,6 +17,7 @@ use crate::{
         field::*,
         input::input,
         label::*,
+        pn::{item_term, item_value},
         radio_group::*,
     },
     context::db,
@@ -171,10 +172,8 @@ pub async fn remove_citation_dialog(
                     )
                     <section class="flex flex-col gap-3">
                         remove_citation_dialog_context_item(
-                            remove_citation_dialog_context_item_term("Citation")
-                            remove_citation_dialog_context_item_value(
-                                (citation_display)
-                            )
+                            item_term("Citation")
+                            item_value((citation_display))
                         )
                         (child)
                     </section>
@@ -219,28 +218,6 @@ pub async fn remove_citation_dialog_context(
 
 #[component]
 pub async fn remove_citation_dialog_context_item(
-    #[default] attrs: Attributes,
-    #[default] child: Child<'_>,
-) -> topcoat::Result<impl View> {
-    Ok(view! { <div (attrs)>(child)</div> })
-}
-
-#[component]
-pub async fn remove_citation_dialog_context_item_term(
-    #[default] mut attrs: Attributes,
-    #[default] child: Child<'_>,
-) -> topcoat::Result<impl View> {
-    Ok(view! {
-        <div
-            class=(class!("text-muted-foreground text-sm", attrs.remove("class")))
-            (attrs)
-        >
-            (child)
-        </div>
-    })
-}
-#[component]
-pub async fn remove_citation_dialog_context_item_value(
     #[default] attrs: Attributes,
     #[default] child: Child<'_>,
 ) -> topcoat::Result<impl View> {

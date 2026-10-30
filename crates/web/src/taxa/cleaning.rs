@@ -19,8 +19,15 @@ use crate::{
     actions::{Action, ActionItemType, permitted_actions},
     assets::mdi,
     components::{
-        action_menu::*, breadcrumb::*, card::*, citations::citation_list, cited_object::*,
-        field::*, input::*, textarea::*,
+        action_menu::*,
+        breadcrumb::*,
+        card::*,
+        citations::citation_list,
+        cited_object::*,
+        field::*,
+        input::*,
+        pn::{item_term, item_value},
+        textarea::*,
     },
     context::{current_user, db, require_user_with_permission},
     taxa::{self, TaxonId},
@@ -286,15 +293,15 @@ pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
             },
             remove_citation_dialog_context(
                 remove_citation_dialog_context_item(
-                    remove_citation_dialog_context_item_term("Taxon")
-                    remove_citation_dialog_context_item_value(
+                    item_term("Taxon")
+                    item_value(
                         attrs: attributes! { class="latin" },
                         (&taxon.complete_name)
                     )
                 )
                 remove_citation_dialog_context_item(
-                    remove_citation_dialog_context_item_term("Cleaning Procedure")
-                    remove_citation_dialog_context_item_value(
+                    item_term("Cleaning Procedure")
+                    item_value(
                         (format!(
                             "{}: {}",
                             cleaning_procedure.id,

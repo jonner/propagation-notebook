@@ -23,8 +23,18 @@ use crate::{
     actions::{Action, ActionItemType, permitted_actions},
     assets::mdi,
     components::{
-        action_menu::action_menu, alert_dialog::alert_dialog, breadcrumb::*, button::*, card::*,
-        citations::citation_list, cited_object::*, dialog::*, field::*, input::*, select::select,
+        action_menu::action_menu,
+        alert_dialog::alert_dialog,
+        breadcrumb::*,
+        button::*,
+        card::*,
+        citations::citation_list,
+        cited_object::*,
+        dialog::*,
+        field::*,
+        input::*,
+        pn::{item_term, item_value},
+        select::select,
         textarea::textarea,
     },
     context::{current_user, db, require_user_with_permission},
@@ -388,17 +398,15 @@ pub async fn edit(cx: &Cx) -> topcoat::Result<impl View> {
             },
             remove_citation_dialog_context(
                 remove_citation_dialog_context_item(
-                    remove_citation_dialog_context_item_term("Taxon")
-                    remove_citation_dialog_context_item_value(
+                    item_term("Taxon")
+                    item_value(
                         attrs: attributes! { class="latin" },
                         (&taxon.complete_name)
                     )
                 )
                 remove_citation_dialog_context_item(
-                    remove_citation_dialog_context_item_term("Note")
-                    remove_citation_dialog_context_item_value(
-                        (format!("{}: {}", note.id, note.title))
-                    )
+                    item_term("Note")
+                    item_value((format!("{}: {}", note.id, note.title)))
                 )
             )
         )

@@ -490,3 +490,25 @@ pub async fn taxon_search_bar(
         </div>
     })
 }
+
+#[component]
+pub async fn item_term(
+    #[default] mut attrs: Attributes,
+    #[default] child: Child<'_>,
+) -> topcoat::Result<impl View> {
+    Ok(view! {
+        <div
+            class=(class!("text-muted-foreground text-sm", attrs.remove("class")))
+            (attrs)
+        >
+            (child)
+        </div>
+    })
+}
+#[component]
+pub async fn item_value(
+    #[default] attrs: Attributes,
+    #[default] child: Child<'_>,
+) -> topcoat::Result<impl View> {
+    Ok(view! { <div (attrs)>(child)</div> })
+}

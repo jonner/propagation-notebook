@@ -21,8 +21,19 @@ use crate::{
     actions::{Action, ActionItemType, permitted_actions},
     assets::mdi,
     components::{
-        action_menu::*, alert_dialog::*, badge::badge, breadcrumb::*, button::*, card::*,
-        citations::citation_list, cited_object::*, dialog::*, field::*, select::*, textarea::*,
+        action_menu::*,
+        alert_dialog::*,
+        badge::badge,
+        breadcrumb::*,
+        button::*,
+        card::*,
+        citations::citation_list,
+        cited_object::*,
+        dialog::*,
+        field::*,
+        pn::{item_term, item_value},
+        select::*,
+        textarea::*,
     },
     context::{current_user, db, require_user_with_permission},
     taxa::{self, TaxonId},
@@ -375,17 +386,15 @@ pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
             },
             remove_citation_dialog_context(
                 remove_citation_dialog_context_item(
-                    remove_citation_dialog_context_item_term("Taxon")
-                    remove_citation_dialog_context_item_value(
+                    item_term("Taxon")
+                    item_value(
                         attrs: attributes! { class="latin" },
                         (&taxon.complete_name)
                     )
                 )
                 remove_citation_dialog_context_item(
-                    remove_citation_dialog_context_item_term("Propagation Procedure")
-                    remove_citation_dialog_context_item_value(
-                        (format!("{}: {}", proc.id, proc.name))
-                    )
+                    item_term("Propagation Procedure")
+                    item_value((format!("{}: {}", proc.id, proc.name)))
                 )
             )
         )
