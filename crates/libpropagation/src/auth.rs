@@ -1,5 +1,8 @@
+use std::collections::HashSet;
+
 use argon2::{Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
 use serde::Serialize;
+use strum::IntoEnumIterator;
 use toasty::{Db, Deferred};
 use uuid::Uuid;
 use zxcvbn::Score;
@@ -240,6 +243,31 @@ pub struct Permission {
     pub role_permissions: Deferred<Vec<RolePermission>>,
     #[has_many(via=role_permissions.role)]
     pub roles: Deferred<Vec<Role>>,
+}
+
+impl Permission {
+    pub async fn populate_database(db: &mut Db) -> Result<usize, Error> {
+        let db_permissions = Permission::all()
+            .exec(db)
+            .await?
+            .into_iter()
+            .map(|perm| perm.code)
+            .collect::<HashSet<_>>();
+        let all_codes = PermissionCode::iter().collect::<HashSet<_>>();
+        let missing = all_codes.difference(&db_permissions);
+        let mut query = Permission::create_many();
+        for code in missing {
+            query = query.item(
+                Permission::create()
+                    .code(code)
+                    .description(code.to_string()),
+            );
+        }
+        let mut tx = db.transaction().await?;
+        let perms = query.exec(&mut tx).await?;
+        tx.commit().await?;
+        Ok(perms.len())
+    }
 }
 
 #[derive(
