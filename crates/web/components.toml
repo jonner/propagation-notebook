@@ -89,5 +89,5 @@ hash = "sha256:2187e350ae708cc9fcf9935773dfc354ee740032a2a8893a4aa0d5ffbb432527"
 file = "src/components/textarea.rs"
 
 [registries.topcoat.components.tooltip]
-hash = "sha256:78a5dc28cfc2e6472ed7ad425cff7fd0c3640322f89729fff07d2c9ef08bdf1c"
+hash = "sha256:a38f87af652c7ceb518f53d83478cd9fa4cf3702ba9f9d0df188d0c28c79fab7"
 file = "src/components/tooltip.rs"
