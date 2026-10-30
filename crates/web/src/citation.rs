@@ -413,7 +413,7 @@ pub async fn citation_form(
     })
 }
 
-#[page("/citations/new")]
+#[page("/admin/citations/new")]
 pub async fn create(cx: &Cx) -> topcoat::Result<impl View> {
     let _user =
         require_user_with_permission(cx, libpropagation::auth::PermissionCode::CitationCreate)
