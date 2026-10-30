@@ -292,6 +292,70 @@ pub enum PermissionCode {
     TaxonCleaningDelete,
     #[column(variant = "taxoncleaning:edit")]
     TaxonCleaningEdit,
+    #[column(variant = "admin:console")]
+    AdminConsole,
+    #[column(variant = "user:list")]
+    UserList,
+    #[column(variant = "user:create")]
+    UserCreate,
+    #[column(variant = "user:edit")]
+    UserEdit,
+    #[column(variant = "user:delete")]
+    UserDelete,
+    #[column(variant = "user:roles")]
+    UserRoles,
+    #[column(variant = "role:create")]
+    RoleCreate,
+    #[column(variant = "role:edit")]
+    RoleEdit,
+    #[column(variant = "role:delete")]
+    RoleDelete,
+    #[column(variant = "permission:create")]
+    PermissionCreate,
+    #[column(variant = "permission:edit")]
+    PermissionEdit,
+    #[column(variant = "permission:delete")]
+    PermissionDelete,
+}
+
+impl std::fmt::Display for PermissionCode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                PermissionCode::TaxonSync => "taxon:sync",
+                PermissionCode::CitationCreate => "citation:create",
+                PermissionCode::CitationEdit => "citation:edit",
+                PermissionCode::CitationDelete => "citation:delete",
+                PermissionCode::RegionSync => "region:sync",
+                PermissionCode::RegionCreate => "region:create",
+                PermissionCode::RegionDelete => "region:delete",
+                PermissionCode::RegionEdit => "region:edit",
+                PermissionCode::TaxonPropagationCreate => "taxonpropagation:create",
+                PermissionCode::TaxonPropagationDelete => "taxonpropagation:delete",
+                PermissionCode::TaxonPropagationEdit => "taxonpropagation:edit",
+                PermissionCode::TaxonNoteCreate => "taxonnote:create",
+                PermissionCode::TaxonNoteDelete => "taxonnote:delete",
+                PermissionCode::TaxonNoteEdit => "taxonnote:edit",
+                PermissionCode::TaxonCleaningCreate => "taxoncleaning:create",
+                PermissionCode::TaxonCleaningDelete => "taxoncleaning:delete",
+                PermissionCode::TaxonCleaningEdit => "taxoncleaning:edit",
+                PermissionCode::AdminConsole => "admin:console",
+                PermissionCode::UserList => "user:list",
+                PermissionCode::UserCreate => "user:create",
+                PermissionCode::UserEdit => "user:edit",
+                PermissionCode::UserDelete => "user:delete",
+                PermissionCode::UserRoles => "user:roles",
+                PermissionCode::RoleCreate => "role:create",
+                PermissionCode::RoleEdit => "role:edit",
+                PermissionCode::RoleDelete => "role:delete",
+                PermissionCode::PermissionCreate => "permission:create",
+                PermissionCode::PermissionEdit => "permission:edit",
+                PermissionCode::PermissionDelete => "permission:delete",
+            }
+        )
+    }
 }
 
 pub fn hash_password(pw: &str) -> Result<String, AuthError> {
