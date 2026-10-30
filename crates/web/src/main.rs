@@ -37,6 +37,7 @@ use crate::{
 };
 
 mod actions;
+mod admin;
 mod assets;
 mod auth;
 mod citation;

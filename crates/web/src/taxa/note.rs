@@ -14,7 +14,7 @@ use topcoat::{
         error::{RouterErrorExt, SeeOther, rewrite, see_other},
         href, page, path_param, route,
     },
-    runtime::{Event, Signal, signal},
+    runtime::{Event, signal},
     view::{Attributes, Child, View, attributes, component, element_id, view},
 };
 use tracing::trace;

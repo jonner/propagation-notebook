@@ -19,9 +19,9 @@ use crate::{
 };
 
 #[derive(Deserialize, Debug)]
-struct UpdateProfileParams {
-    name: Option<String>,
-    description: Option<String>,
+pub struct UpdateProfileParams {
+    pub name: Option<String>,
+    pub description: Option<String>,
 }
 
 #[route(POST "/user/profile")]
@@ -219,6 +219,42 @@ pub(crate) async fn account(cx: &Cx) -> topcoat::Result<impl View> {
     })
 }
 
+#[component]
+pub async fn user_profile_form(
+    profile: Option<&UserProfile>,
+    #[default] attrs: Attributes,
+) -> topcoat::Result<impl View> {
+    Ok(view! {
+        <form (attrs)>
+            field_set(
+                field(
+                    field_label(attrs: attributes! { for="name-input" }, "Name")
+                    input(
+                        attrs: attributes! {
+                            id="name-input"
+                            type="text"
+                            name="name"
+                            value=(profile.as_ref().map(|p| p.name.as_ref()))
+                        }
+                    )
+                )
+                field(
+                    field_label(
+                        attrs: attributes! { for="description-input" },
+                        "Description"
+                    )
+                    field_description("Write a short description about yourself")
+                    textarea(
+                        attrs: attributes! { id="description-input" name="description" },
+                        (profile.as_ref().map(|p| p.description.as_ref()))
+                    )
+                )
+            )
+            button(attrs: attributes! { type="submit" }, "Update Profile")
+        </form>
+    })
+}
+
 #[page("/user/profile")]
 pub(crate) async fn profile_edit(cx: &Cx) -> topcoat::Result<impl View> {
     let user = require_user(cx).await?;
@@ -235,33 +271,14 @@ pub(crate) async fn profile_edit(cx: &Cx) -> topcoat::Result<impl View> {
 
     Ok(view! {
         <h1>"User Profile"</h1>
-        <form class="flex flex-col gap-6" method="POST" action=(href!(update_profile))>
-            field_set(
-                field(
-                    field_label(attrs: attributes! { for="name-input" }, "Name")
-                    input(
-                        attrs: attributes! {
-                            id="name-input"
-                            type="text"
-                            name="name"
-                            value=(prof.as_ref().map(|p| p.name.as_ref()))
-                        }
-                    )
-                )
-                field(
-                    field_label(
-                        attrs: attributes! { for="description-input" },
-                        "Description"
-                    )
-                    field_description("Write a short description about yourself")
-                    textarea(
-                        attrs: attributes! { id="description-input" name="description" },
-                        (prof.as_ref().map(|p| p.description.as_ref()))
-                    )
-                )
-            )
-            button(attrs: attributes! { type="submit" }, "Update")
-        </form>
+        user_profile_form(
+            attrs: attributes! {
+                class="flex flex-col gap-6"
+                method="POST"
+                action=(href!(update_profile))
+            },
+            profile: prof.as_ref()
+        )
     })
 }
 
