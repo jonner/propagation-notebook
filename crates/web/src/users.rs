@@ -1,4 +1,4 @@
-use libpropagation::auth::{UserEmail, UserProfile};
+use libpropagation::auth::{PermissionCode, UserEmail, UserProfile};
 use serde::Deserialize;
 use topcoat::{
     context::{Cx, try_request_context},
@@ -15,6 +15,7 @@ use topcoat::{
 };
 
 use crate::{
+    admin,
     auth::{LoginFormParams, do_logout, login},
     components::{
         avatar::*, button::button, card::*, dropdown_menu::*, field::*, floating::FloatingAlign,
@@ -472,6 +473,13 @@ pub async fn user_menu(cx: &Cx) -> topcoat::Result<impl View> {
                             attrs: attributes! { href=(href!(users::account)) type="button" },
                             "My Account"
                         )
+                        if user.has_permission(PermissionCode::AdminConsole) {
+                            dropdown_menu_navigation_item(
+                                close: Some(&menu_id),
+                                attrs: attributes! { href=(href!(admin::console)) },
+                                "Admin Console"
+                            )
+                        }
                         dropdown_menu_item(
                             close: Some(&menu_id),
                             attrs: attributes! { type="submit" class="text-destructive" form="logoutForm" },

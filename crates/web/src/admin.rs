@@ -31,6 +31,11 @@ pub async fn admin_shell(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> 
 }
 
 #[page("/admin")]
-pub async fn admin_console() -> topcoat::Result<impl View> {
-    Ok(view! { <section class="flex flex-col gap-2">"Dashboard contents"</section> })
+pub async fn console() -> topcoat::Result<impl View> {
+    Ok(view! {
+        <h1>"Administration Console"</h1>
+        <section class="flex flex-col gap-2">
+            "Please select a page from the navigation menu above (for now)."
+        </section>
+    })
 }
