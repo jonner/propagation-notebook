@@ -4,7 +4,7 @@ use topcoat::{
     icon::icon,
     router::href,
     runtime::{Event, Signal, shard, signal},
-    view::{Attributes, Child, View, attributes, class, component, element_id, view},
+    view::{Attributes, Child, View, attributes, component, element_id, view},
 };
 
 use crate::{
