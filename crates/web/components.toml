@@ -77,7 +77,7 @@ hash = "sha256:5b361cf4b59cbc7ee7e967b61c27820456327024e749f21a6319e3fb6aba90fd"
 file = "src/components/radio_group.rs"
 
 [registries.topcoat.components.select]
-hash = "sha256:796d685bbefa46c8bb2d4f1404fbfbdaa1a61c0dc8260cceda7eed66b495413d"
+hash = "sha256:044fb72b888ef18e16ed17feeb495010f9aaad8fde8b0933ff750e66d612c9ff"
 file = "src/components/select.rs"
 
 [registries.topcoat.components.spinner]
