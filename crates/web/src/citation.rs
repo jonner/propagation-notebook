@@ -18,7 +18,7 @@ use crate::{
     actions::{Action, ActionItemType, permitted_actions},
     components::{
         action_menu::*, alert_dialog::*, breadcrumb::*, button::*, dialog::*, field::*,
-        input::input,
+        input::input, pn::item_term, pn::item_value,
     },
     context::{current_user, db, require_user_with_permission},
     flash::{self, FlashMessage},
@@ -70,32 +70,50 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                 }
             </h1>
         </hgroup>
-        <dt>"Title"</dt>
-        <dd>(citation.title)</dd>
-        <dt>"Author"</dt>
-        <dd>(citation.author)</dd>
-        <dt>"Publication Year"</dt>
-        <dd>(citation.publication_year)</dd>
-        <dt>"Url"</dt>
-        <dd>
-            if let Some(url) = citation.url {
-                <a href=(&url)>(&url)</a>
-            }
-        </dd>
-        <dt>"Container Title"</dt>
-        <dd>(citation.container_title)</dd>
-        <dt>"doi"</dt>
-        <dd>
-            if let Some(doi) = citation.doi {
-                <a href=(format!("https://doi.org/{}", doi))>(doi)</a>
-            }
-        </dd>
-        <dt>"Access Date"</dt>
-        <dd>
-            if let Some(date) = citation.access_date {
-                (date.to_string())
-            }
-        </dd>
+        <section class="flex flex-col gap-6">
+            <div>
+                item_term("Title")
+                item_value((citation.title))
+            </div>
+            <div>
+                item_term("Author")
+                item_value((citation.author))
+            </div>
+            <div>
+                item_term("Publication Year")
+                item_value((citation.publication_year))
+            </div>
+            <div>
+                item_term("Url")
+                item_value(
+                    if let Some(url) = citation.url {
+                        <a href=(&url)>(&url)</a>
+                    } else {
+                        <span class="text-muted-foreground">"Not specified"</span>
+                    }
+                )
+            </div>
+            <div>
+                item_term("Container Title")
+                item_value((citation.container_title))
+            </div>
+            <div>
+                item_term("doi")
+                item_value(
+                    if let Some(doi) = citation.doi {
+                        <a href=(format!("https://doi.org/{}", doi))>(doi)</a>
+                    }
+                )
+            </div>
+            <div>
+                item_term("Access Date")
+                item_value(
+                    if let Some(date) = citation.access_date {
+                        (date.to_string())
+                    }
+                )
+            </div>
+        </section>
         alert_dialog(
             open: delete_dialog_open.get(),
             dialog_content(
