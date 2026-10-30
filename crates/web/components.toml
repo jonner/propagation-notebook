@@ -17,7 +17,7 @@ hash = "sha256:59329070384145eceb1ac54aab6143862415024a10d461892395c11bf927db38"
 file = "src/components/alert_dialog.rs"
 
 [registries.topcoat.components.avatar]
-hash = "sha256:606de70a794bea536dc2c419a9e0069a82537556da0829112a52a5934cc69c12"
+hash = "sha256:e44da5084ca4425a1e9b094ac698111777d19da637b1bdb016153e58e8741a51"
 file = "src/components/avatar.rs"
 
 [registries.topcoat.components.badge]
