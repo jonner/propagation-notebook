@@ -26,14 +26,11 @@ use crate::{
         LEAFLET_JS, mdi,
     },
     auth::login,
-    components::{
-        button::*,
-        input::input,
-        pn::{taxon_search_bar, user_menu},
-    },
+    components::{button::*, input::input, pn::taxon_search_bar},
     config::AppConfig,
     error::Error,
     tasks::background_tasks,
+    users::user_menu,
 };
 
 mod actions;

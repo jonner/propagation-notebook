@@ -7,15 +7,22 @@ use topcoat::{
         Body, Method, StatusCode,
         content::Form,
         error::{RouterErrorExt, SeeOther, rewrite, see_other},
-        href, page, route,
+        href, page,
+        request::uri,
+        route,
     },
-    view::{Attributes, Child, View, attributes, class, component, view},
+    view::{Attributes, Child, View, attributes, class, component, element_id, view},
 };
 
 use crate::{
-    components::{avatar::*, button::button, card::*, field::*, input::input, textarea::textarea},
+    auth::{LoginFormParams, do_logout, login},
+    components::{
+        avatar::*, button::button, card::*, dropdown_menu::*, field::*, floating::FloatingAlign,
+        input::input, textarea::textarea,
+    },
+    context::current_user,
     context::{db, require_user},
-    mdi,
+    mdi, users,
 };
 
 #[derive(Deserialize, Debug)]
@@ -426,5 +433,62 @@ pub(crate) async fn change_password(cx: &Cx) -> topcoat::Result<impl View> {
                 </form>
             )
         )
+    })
+}
+
+#[component]
+pub async fn user_menu(cx: &Cx) -> topcoat::Result<impl View> {
+    let menu_id = element_id(cx);
+    Ok(view! {
+        <li class="ml-auto">
+            if let Some(user) = current_user(cx).await {
+                <form
+                    method="POST"
+                    action=(href!(do_logout))
+                    id="logoutForm"
+                    class="hidden"
+                ></form>
+                dropdown_menu(
+                    dropdown_menu_trigger(
+                        target: &menu_id,
+                        attrs: attributes! { class="flex" },
+                        avatar(
+                            attrs: attributes! { class="me-2 bg-background/60" },
+                            size: AvatarSize::Sm,
+                            avatar_fallback(icon(data: mdi::ACCOUNT))
+                        )
+                        <span class="hidden md:inline-block">(&user.username)</span>
+                    )
+                    dropdown_menu_content(
+                        id: &menu_id,
+                        align: FloatingAlign::End,
+                        dropdown_menu_label(
+                            "Logged in as "
+                            (&user.username)
+                        )
+                        dropdown_menu_separator()
+                        dropdown_menu_navigation_item(
+                            close: Some(&menu_id),
+                            attrs: attributes! { href=(href!(users::account)) type="button" },
+                            "My Account"
+                        )
+                        dropdown_menu_item(
+                            close: Some(&menu_id),
+                            attrs: attributes! { type="submit" class="text-destructive" form="logoutForm" },
+                            "Log Out"
+                        )
+                    )
+                )
+            } else {
+                <a
+                    class="flex"
+                    href=(href!(login).query(
+                        LoginFormParams { redirect: Some(uri(cx).to_string()) },
+                    ))
+                >
+                    "Log in"
+                </a>
+            }
+        </li>
     })
 }
