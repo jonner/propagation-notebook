@@ -1,8 +1,6 @@
-use std::collections::HashSet;
-
 use crate::{
     cli::OutputFormat,
-    util::{dialog::confirm, enum_to_string},
+    util::dialog::confirm,
     views::{
         JsonView, YamlView,
         auth::{PermissionDetailsView, PermissionListView},
@@ -14,7 +12,6 @@ use libpropagation::auth::{
     dto::{PermissionCompact, PermissionDetails},
 };
 
-use strum::IntoEnumIterator;
 use toasty::Db;
 use uuid::Uuid;
 
@@ -97,24 +94,8 @@ impl PermissionCommands {
                 load_and_display_permission(id, db, format).await?;
             }
             PermissionCommands::Fill => {
-                let existing = Permission::all()
-                    .exec(db)
-                    .await?
-                    .into_iter()
-                    .map(|perm| perm.code)
-                    .collect::<HashSet<_>>();
-                let all_codes = PermissionCode::iter().collect::<HashSet<_>>();
-                let missing = all_codes.difference(&existing);
-                let mut query = Permission::create_many();
-                for code in missing {
-                    query = query.item(
-                        Permission::create()
-                            .code(code)
-                            .description(enum_to_string(&code)),
-                    );
-                }
-                let perms = query.exec(db).await?;
-                println!("Created {} rows", perms.len());
+                let nrows = Permission::populate_database(db).await?;
+                println!("Created {} rows", nrows);
             }
             PermissionCommands::Remove { id, assumeyes } => {
                 if *assumeyes || {

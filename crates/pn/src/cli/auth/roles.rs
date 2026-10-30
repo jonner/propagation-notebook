@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use crate::{
     cli::OutputFormat,
     util::{dialog::confirm, enum_to_string},
@@ -13,6 +15,7 @@ use libpropagation::auth::{
     dto::{RoleCompact, RoleDetails},
 };
 use toasty::Db;
+use tracing::debug;
 use uuid::Uuid;
 
 #[derive(Debug, clap::Subcommand)]
@@ -43,6 +46,10 @@ pub enum RoleCommands {
         id: Uuid,
         #[arg(short, long, help = "A permission ID")]
         permission: Uuid,
+    },
+    Fill {
+        #[arg(help = "A user ID")]
+        id: Uuid,
     },
     #[command(about = "Remove a permission from the role")]
     RemovePermission {
@@ -114,6 +121,36 @@ impl RoleCommands {
                     .permission(permission)
                     .exec(db)
                     .await?;
+                load_and_display_role(id, db, format).await?;
+            }
+            RoleCommands::Fill { id } => {
+                let nperms = Permission::populate_database(db).await?;
+                debug!("Added {nperms} new permissions to database");
+                let role = Role::filter_by_id(id)
+                    .include(Role::fields().permissions())
+                    .one()
+                    .exec(db)
+                    .await?;
+                let existing = role
+                    .permissions
+                    .get()
+                    .iter()
+                    .map(|perm| perm.id)
+                    .collect::<HashSet<_>>();
+                let missing = Permission::filter(
+                    Permission::fields()
+                        .id()
+                        .in_list(existing.into_iter().collect::<Vec<_>>())
+                        .not(),
+                )
+                .exec(db)
+                .await?;
+                let mut query = RolePermission::create_many();
+                for perm in missing {
+                    query = query.item(RolePermission::create().role_id(id).permission(perm));
+                }
+                let roleperms = query.exec(db).await?;
+                debug!("Added {} new permissions to role", roleperms.len());
                 load_and_display_role(id, db, format).await?;
             }
             RoleCommands::RemovePermission {
