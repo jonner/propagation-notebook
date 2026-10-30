@@ -29,7 +29,7 @@ hash = "sha256:c687399a226cf6cd05b015f95d5bbe00a314d7176c540f4362dadd9c0424e22c"
 file = "src/components/breadcrumb.rs"
 
 [registries.topcoat.components.button]
-hash = "sha256:260ed94b12414e4a0e625f75fae88aa51e20954171dcba65cb3cd1937a75ee4d"
+hash = "sha256:1b40f815a96997b28f35b8f385f5849d86ca53ba47fb752a3e795bfc24c3a55d"
 file = "src/components/button.rs"
 
 [registries.topcoat.components.card]
