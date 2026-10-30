@@ -126,7 +126,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
     })
 }
 
-#[route(POST "/citations/delete/{citation_id}")]
+#[route(POST "/admin/citations/delete/{citation_id}")]
 pub async fn delete_citation(cx: &Cx) -> topcoat::Result<SeeOther> {
     let _ = require_user_with_permission(cx, PermissionCode::CitationDelete).await?;
     let id = *path_param::<CitationId>(cx)?;
@@ -221,7 +221,7 @@ struct CitationRejected {
     errors: CitationParamErrors,
 }
 
-#[route(POST "/citations/new")]
+#[route(POST "/admin/citations/new")]
 pub async fn do_create(cx: &Cx, Form(params): Form<CitationParams>) -> topcoat::Result<SeeOther> {
     let _user =
         require_user_with_permission(cx, libpropagation::auth::PermissionCode::CitationCreate)
@@ -436,7 +436,7 @@ pub async fn create(cx: &Cx) -> topcoat::Result<impl View> {
     })
 }
 
-#[page("/citations/{citation_id}/edit")]
+#[page("/admin/citations/{citation_id}/edit")]
 pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
     let _user =
         require_user_with_permission(cx, libpropagation::auth::PermissionCode::CitationEdit)
@@ -467,7 +467,7 @@ pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
     })
 }
 
-#[route(POST "/citations/{citation_id}")]
+#[route(POST "/admin/citations/{citation_id}")]
 pub async fn do_modify(cx: &Cx, Form(params): Form<CitationParams>) -> topcoat::Result<SeeOther> {
     let _user =
         require_user_with_permission(cx, libpropagation::auth::PermissionCode::CitationEdit)
@@ -497,4 +497,38 @@ pub async fn do_modify(cx: &Cx, Form(params): Form<CitationParams>) -> topcoat::
         .exec(&mut db(cx))
         .await?;
     Ok(see_other(href!(details, CitationId(id)).resolve(cx)))
+}
+
+#[page("/admin/citations")]
+pub async fn admin(cx: &Cx) -> topcoat::Result<impl View> {
+    let user = require_user_with_permission(cx, PermissionCode::CitationEdit).await?;
+    let citations = Citation::all().exec(&mut db(cx)).await?;
+    Ok(view! {
+        <h2>"Edit Citations"</h2>
+        <ul class="flex flex-col gap-3">
+            for citation in citations {
+                <li class="flex items-baseline gap-2">
+                    <span>(citation.id)</span>
+                    <span>
+                        <a href=(href!(modify, CitationId(citation.id)))>
+                            (citation.format_cse())
+                        </a>
+                    </span>
+                </li>
+            }
+            if user.has_permission(PermissionCode::CitationCreate) {
+                <li>
+                    <a
+                        href=(href!(create))
+                        class=(button_variants(
+                            ButtonVariant::Primary,
+                            ButtonSize::default(),
+                        ))
+                    >
+                        "Create a new citation source"
+                    </a>
+                </li>
+            }
+        </ul>
+    })
 }

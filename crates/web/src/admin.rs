@@ -5,7 +5,7 @@ use topcoat::{
     view::{View, attributes, view},
 };
 
-use crate::{components::navigation_menu::*, context::require_user_with_permission};
+use crate::{citation, components::navigation_menu::*, context::require_user_with_permission};
 
 mod users;
 
@@ -16,8 +16,19 @@ pub async fn admin_shell(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> 
         navigation_menu(
             navigation_menu_list(
                 navigation_menu_item(
-                    navigation_menu_trigger("Objects")
+                    navigation_menu_trigger("Database")
                     navigation_menu_content(
+                        attrs: attributes! { class="min-w-sm" },
+                        navigation_menu_link(
+                            attrs: attributes! { href=(href!(citation::admin)) },
+                            "Citations"
+                        )
+                    )
+                )
+                navigation_menu_item(
+                    navigation_menu_trigger("Site administration")
+                    navigation_menu_content(
+                        attrs: attributes! { class="min-w-sm" },
                         navigation_menu_link(
                             attrs: attributes! { href=(href!(users::list)) },
                             "Users"
