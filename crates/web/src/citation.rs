@@ -57,13 +57,13 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
         <hgroup>
             breadcrumb(
                 breadcrumb_list(
-                    breadcrumb_item(breadcrumb_page("Citations"))
+                    breadcrumb_item(breadcrumb_page("Cited Works"))
                     breadcrumb_separator()
                     breadcrumb_item(breadcrumb_page((id)))
                 )
             )
             <h1 class="flex items-center">
-                "Citation Details"
+                "Cited Work"
                 let actions = permitted_actions(current_user(cx).await, &actions);
                 if !actions.is_empty() {
                     <div class="ms-auto">action_menu(actions: actions.as_slice())</div>
@@ -150,13 +150,16 @@ pub async fn delete_citation(cx: &Cx) -> topcoat::Result<SeeOther> {
     let id = *path_param::<CitationId>(cx)?;
     match Citation::delete_by_id(&mut db(cx), id).await {
         Ok(_) => {
-            flash::push_message(cx, FlashMessage::Success(format!("Deleted citation {id}")))?;
+            flash::push_message(
+                cx,
+                FlashMessage::Success(format!("Deleted cited work {id}")),
+            )?;
             Ok(see_other(href!(crate::home).resolve(cx)))
         }
         Err(e) => {
             flash::push_message(
                 cx,
-                FlashMessage::Failure(format!("Failed to delete citation: {e}")),
+                FlashMessage::Failure(format!("Failed to delete cited work: {e}")),
             )?;
             Err(see_other(href!(details, CitationId(id)).resolve(cx)).into())
         }
@@ -465,7 +468,7 @@ pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
         <hgroup>
             breadcrumb(
                 breadcrumb_list(
-                    breadcrumb_item(breadcrumb_page("Citations"))
+                    breadcrumb_item(breadcrumb_page("Cited Works"))
                     breadcrumb_separator()
                     breadcrumb_link(
                         attrs: attributes! { href=(href!(details, CitationId(*id))) },
@@ -475,7 +478,7 @@ pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
                     breadcrumb_item(breadcrumb_page("Edit"))
                 )
             )
-            <h1>"Edit a Citation"</h1>
+            <h1>"Edit a Cited Work"</h1>
         </hgroup>
         citation_form(
             citation: Some(&citation),
@@ -522,7 +525,7 @@ pub async fn admin(cx: &Cx) -> topcoat::Result<impl View> {
     let user = require_user_with_permission(cx, PermissionCode::CitationEdit).await?;
     let citations = Citation::all().exec(&mut db(cx)).await?;
     Ok(view! {
-        <h2>"Edit Citations"</h2>
+        <h2>"Edit Cited Works"</h2>
         <ul class="flex flex-col gap-3">
             for citation in citations {
                 <li class="flex items-baseline gap-2">
@@ -543,7 +546,7 @@ pub async fn admin(cx: &Cx) -> topcoat::Result<impl View> {
                             ButtonSize::default(),
                         ))
                     >
-                        "Create a new citation source"
+                        "Create a new cited work"
                     </a>
                 </li>
             }

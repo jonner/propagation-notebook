@@ -21,7 +21,7 @@ pub async fn admin_shell(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> 
                         attrs: attributes! { class="min-w-sm" },
                         navigation_menu_link(
                             attrs: attributes! { href=(href!(citation::admin)) },
-                            "Citations"
+                            "Cited Works"
                         )
                     )
                 )
