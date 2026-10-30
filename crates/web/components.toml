@@ -73,7 +73,7 @@ hash = "sha256:e3a01c26e38ad5b5c93c32f56cbd148f1e102d8691a107a837d1b80a15670cfb"
 file = "src/components/pagination.rs"
 
 [registries.topcoat.components.radio_group]
-hash = "sha256:cdc2833428c28897c5b35be5ce2b3583aefaf5dcd7b894d5316c4f9db6d97479"
+hash = "sha256:5b361cf4b59cbc7ee7e967b61c27820456327024e749f21a6319e3fb6aba90fd"
 file = "src/components/radio_group.rs"
 
 [registries.topcoat.components.select]
