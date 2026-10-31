@@ -7,6 +7,7 @@ use topcoat::{
 
 use crate::{citation, components::navigation_menu::*, context::require_user_with_permission};
 
+mod permissions;
 mod roles;
 mod users;
 
@@ -37,6 +38,10 @@ pub async fn admin_shell(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> 
                         navigation_menu_link(
                             attrs: attributes! { href=(href!(roles::list)) },
                             "Roles"
+                        )
+                        navigation_menu_link(
+                            attrs: attributes! { href=(href!(permissions::list)) },
+                            "Permissions"
                         )
                     )
                 )
