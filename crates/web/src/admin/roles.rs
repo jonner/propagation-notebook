@@ -1,6 +1,7 @@
 use std::collections::HashSet;
 
 use libpropagation::auth::{Permission, PermissionCode, Role, RolePermission};
+use serde::Deserialize;
 use topcoat::{
     context::Cx,
     router::{
@@ -8,15 +9,14 @@ use topcoat::{
         error::{RouterErrorExt, SeeOther, bad_request, see_other},
         href, page, path_param, route,
     },
-    view::{Attributes, View, attributes, component, view},
+    view::{Attributes, View, attributes, class, component, view},
 };
 use uuid::Uuid;
 
 use crate::{
     admin,
     components::{
-        breadcrumb::*, button::button, card::*, checkbox::*, field::*, input::*, label::*,
-        tooltip::*,
+        breadcrumb::*, button::*, card::*, checkbox::*, field::*, input::*, label::*, tooltip::*,
     },
     context::{db, require_user_with_permission},
 };
@@ -42,11 +42,51 @@ pub async fn list(cx: &Cx) -> topcoat::Result<impl View> {
             )
         )
         <h2>"Role List"</h2>
-        <ul>
+        <ul class="flex flex-col gap-2">
             for role in roles {
                 <li><a href=(href!(edit, RoleId(role.id)))>(role.name)</a></li>
             }
+            <li>
+                <a
+                    class=(button_variants(ButtonVariant::Primary, ButtonSize::default()))
+                    href=(href!(create))
+                >
+                    "New Role"
+                </a>
+            </li>
         </ul>
+    })
+}
+
+#[component]
+async fn role_details_form(
+    #[default] mut attrs: Attributes,
+    role: Option<&Role>,
+) -> topcoat::Result<impl View> {
+    Ok(view! {
+        <form class=(class!("flex flex-col gap-6", attrs.remove("class"))) (attrs)>
+            field_set(
+                field(
+                    field_label(attrs: attributes! { for="role-name-input" }, "Name")
+                    input(
+                        attrs: attributes! {
+                            type="text"
+                            name="name"
+                            value=(role.map(|r| &r.name))
+                            id="role-name-input"
+                        }
+                    )
+                )
+            )
+            button(
+                attrs: attributes! { type="submit" },
+                if role.is_some() {
+                    "Update"
+                } else {
+                    "Create"
+                }
+            )
+        </form>
     })
 }
 
@@ -82,29 +122,10 @@ pub async fn edit(cx: &Cx) -> topcoat::Result<impl View> {
             card(
                 card_header(card_title("Role Info"))
                 card_content(
-                    <form
-                        class="flex flex-col gap-6"
-                        method="POST"
-                        action=(href!(update, RoleId(role_id)))
-                    >
-                        field_set(
-                            field(
-                                field_label(
-                                    attrs: attributes! { for="role-name-input" },
-                                    "Name"
-                                )
-                                input(
-                                    attrs: attributes! {
-                                        type="text"
-                                        name="name"
-                                        value=(&role.name)
-                                        id="role-name-input"
-                                    }
-                                )
-                            )
-                        )
-                        button(attrs: attributes! { type="submit" }, "Update")
-                    </form>
+                    role_details_form(
+                        attrs: attributes! { method="POST" action=(href!(update, RoleId(role.id))) },
+                        role: Some(&role)
+                    )
                 )
             )
             card(
@@ -116,6 +137,41 @@ pub async fn edit(cx: &Cx) -> topcoat::Result<impl View> {
                             action=(href!(update_permissions, RoleId(role_id)))
                         },
                         role: &role
+                    )
+                )
+            )
+        </section>
+    })
+}
+#[page("/admin/roles/new")]
+pub async fn create(cx: &Cx) -> topcoat::Result<impl View> {
+    _ = require_user_with_permission(cx, PermissionCode::RoleCreate).await?;
+
+    Ok(view! {
+        breadcrumb(
+            breadcrumb_list(
+                breadcrumb_item(
+                    breadcrumb_link(
+                        attrs: attributes! { href=(href!(admin::console)) },
+                        "Admin console"
+                    )
+                )
+                breadcrumb_separator()
+                breadcrumb_item(
+                    breadcrumb_link(attrs: attributes! { href=(href!(list)) }, "Roles")
+                )
+                breadcrumb_separator()
+                breadcrumb_item(breadcrumb_page("New"))
+            )
+        )
+        <h2>"New Role"</h2>
+        <section class="flex flex-col gap-6">
+            card(
+                card_header(card_title("Role Info"))
+                card_content(
+                    role_details_form(
+                        attrs: attributes! { method="POST" action=(href!(do_create)) },
+                        role: None
                     )
                 )
             )
@@ -220,13 +276,28 @@ pub async fn update_permissions(
     Ok(see_other(href!(edit, RoleId(role_id)).resolve(cx)))
 }
 
+#[derive(Debug, Deserialize)]
+struct RoleDetailsParams {
+    name: String,
+}
+
 #[route(POST "/admin/roles/{role_id}")]
-pub async fn update(cx: &Cx, Form(name): Form<String>) -> topcoat::Result<SeeOther> {
+pub async fn update(cx: &Cx, Form(params): Form<RoleDetailsParams>) -> topcoat::Result<SeeOther> {
     _ = require_user_with_permission(cx, PermissionCode::RoleEdit).await?;
     let role_id = *path_param::<RoleId>(cx)?;
     Role::update_by_id(role_id)
-        .name(name)
+        .name(params.name)
         .exec(&mut db(cx))
         .await?;
     Ok(see_other(href!(edit, RoleId(role_id)).resolve(cx)))
+}
+
+#[route(POST "/admin/roles/new")]
+pub async fn do_create(
+    cx: &Cx,
+    Form(params): Form<RoleDetailsParams>,
+) -> topcoat::Result<SeeOther> {
+    _ = require_user_with_permission(cx, PermissionCode::RoleCreate).await?;
+    let role = Role::create().name(params.name).exec(&mut db(cx)).await?;
+    Ok(see_other(href!(edit, RoleId(role.id)).resolve(cx)))
 }
