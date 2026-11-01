@@ -236,7 +236,7 @@ pub async fn user_profile_form(
         <form (attrs)>
             field_set(
                 field(
-                    field_label(attrs: attributes! { for="name-input" }, "Name")
+                    field_label(attrs: attributes! { for="name-input" }, "Display Name")
                     input(
                         attrs: attributes! {
                             id="name-input"
