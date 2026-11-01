@@ -55,8 +55,9 @@ pub async fn list(cx: &Cx) -> topcoat::Result<impl View> {
     })
 }
 
-#[route(POST "/adming/permissions/populate")]
+#[route(POST "/admin/permissions/populate")]
 async fn populate_permissions(cx: &Cx) -> topcoat::Result<SeeOther> {
+    _ = require_user_with_permission(cx, PermissionCode::PermissionEdit).await?;
     _ = Permission::populate_database(&mut db(cx)).await?;
     Ok(see_other(href!(list).resolve(cx)))
 }
@@ -90,7 +91,7 @@ pub async fn edit(cx: &Cx) -> topcoat::Result<impl View> {
                 breadcrumb_item(breadcrumb_page((permission_id.to_string())))
             )
         )
-        <h2>"Edit Role"</h2>
+        <h2>"Edit Permission"</h2>
         <section class="flex flex-col gap-6">
             card(
                 card_header(card_title("Permission Info"))
@@ -142,7 +143,7 @@ pub async fn update(
     cx: &Cx,
     Form(params): Form<PermissionUpdateParams>,
 ) -> topcoat::Result<SeeOther> {
-    _ = require_user_with_permission(cx, PermissionCode::RoleEdit).await?;
+    _ = require_user_with_permission(cx, PermissionCode::PermissionEdit).await?;
     let permission_id = *path_param::<PermissionId>(cx)?;
     Permission::update_by_id(permission_id)
         .description(params.description)
