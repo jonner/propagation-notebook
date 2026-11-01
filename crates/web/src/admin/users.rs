@@ -13,6 +13,7 @@ use topcoat::{
 use uuid::Uuid;
 
 use crate::{
+    admin,
     components::{
         breadcrumb::*,
         button::button,
@@ -36,7 +37,10 @@ pub async fn list(cx: &Cx) -> topcoat::Result<impl View> {
     Ok(view! {
         breadcrumb(
             breadcrumb_list(
-                breadcrumb_item(breadcrumb_page("Admin console"))
+                breadcrumb_link(
+                    attrs: attributes! { href=(href!(admin::console)) },
+                    "Admin console"
+                )
                 breadcrumb_separator()
                 breadcrumb_item(breadcrumb_page("Users"))
             )
@@ -62,6 +66,20 @@ pub async fn edit(cx: &Cx) -> topcoat::Result<impl View> {
         .await?;
 
     Ok(view! {
+        breadcrumb(
+            breadcrumb_list(
+                breadcrumb_link(
+                    attrs: attributes! { href=(href!(admin::console)) },
+                    "Admin console"
+                )
+                breadcrumb_separator()
+                breadcrumb_item(
+                    breadcrumb_link(attrs: attributes! { href=(href!(list)) }, "Users")
+                )
+                breadcrumb_separator()
+                breadcrumb_item(breadcrumb_page((&user_to_edit.username)))
+            )
+        )
         <h2>"Edit User"</h2>
         <section class="flex flex-col gap-6">
             card(
