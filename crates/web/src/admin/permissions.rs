@@ -88,7 +88,7 @@ pub async fn edit(cx: &Cx) -> topcoat::Result<impl View> {
                     )
                 )
                 breadcrumb_separator()
-                breadcrumb_item(breadcrumb_page((permission_id.to_string())))
+                breadcrumb_item(breadcrumb_page((permission.code.to_string())))
             )
         )
         <h2>"Edit Permission"</h2>
