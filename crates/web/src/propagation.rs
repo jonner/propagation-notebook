@@ -26,7 +26,7 @@ pub async fn list(cx: &Cx) -> topcoat::Result<impl View> {
     })
 }
 
-path_param!(propagation_id: u64, error= bad_request);
+path_param!(pub propagation_id: u64, error= bad_request);
 
 #[page("/propagation/{propagation_id}")]
 pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {

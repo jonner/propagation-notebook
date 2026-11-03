@@ -1,7 +1,10 @@
-use libpropagation::{auth::PermissionCode, citation::Citation};
+use std::collections::HashMap;
+
+use libpropagation::{auth::PermissionCode, citation::Citation, taxonomy::Taxon};
 use serde::Deserialize;
 use topcoat::{
     context::{Cx, try_request_context},
+    icon::icon,
     router::{
         Body, Method, StatusCode,
         content::Form,
@@ -16,12 +19,14 @@ use url::Url;
 
 use crate::{
     actions::{Action, ActionItemType, permitted_actions},
+    assets::mdi,
     components::{
-        action_menu::*, alert_dialog::*, breadcrumb::*, button::*, dialog::*, field::*,
+        action_menu::*, alert_dialog::*, breadcrumb::*, button::*, card::*, dialog::*, field::*,
         input::input, pn::item_term, pn::item_value,
     },
     context::{current_user, db, require_user_with_permission},
     flash::{self, FlashMessage},
+    taxa,
 };
 
 path_param!(pub citation_id: u64, error = bad_request);
@@ -30,8 +35,43 @@ path_param!(pub citation_id: u64, error = bad_request);
 pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
     let mut db = db(cx);
     let id = *path_param::<CitationId>(cx)?;
-    let citation = Citation::get_by_id(&mut db, id).await.ok_or_not_found()?;
+    let citation = Citation::filter_by_id(id)
+        .include(Citation::fields().cleaning_procedures().cleaning().taxon())
+        .include(Citation::fields().propagation_procedures().propagation())
+        .include(Citation::fields().taxon_notes().note().taxon())
+        .include(
+            Citation::fields()
+                .taxon_propagation_procedures()
+                .taxon_propagation()
+                .taxon(),
+        )
+        .one()
+        .exec(&mut db)
+        .await
+        .ok_or_not_found()?;
     let delete_dialog_open = signal(cx, || false);
+
+    let mut cited_taxa: HashMap<u64, Taxon> = Default::default();
+    for cite in citation.taxon_notes.into_inner() {
+        let note = cite.note.into_inner();
+        cited_taxa.insert(note.taxon_id, note.taxon.into_inner());
+    }
+    for cite in citation.taxon_propagation_procedures.into_inner() {
+        cited_taxa.insert(
+            cite.taxon_id,
+            cite.taxon_propagation.into_inner().taxon.into_inner(),
+        );
+    }
+    for cite in citation.cleaning_procedures.into_inner() {
+        let cleaning = cite.cleaning.into_inner();
+        cited_taxa.insert(cleaning.taxon_id, cleaning.taxon.into_inner());
+    }
+    let cited_procedures = citation
+        .propagation_procedures
+        .into_inner()
+        .into_iter()
+        .map(|pp| pp.propagation.into_inner())
+        .collect::<Vec<_>>();
 
     let actions = [
         Action {
@@ -54,66 +94,114 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
     ];
 
     Ok(view! {
-        <hgroup>
-            breadcrumb(
-                breadcrumb_list(
-                    breadcrumb_item(breadcrumb_page("Cited Works"))
-                    breadcrumb_separator()
-                    breadcrumb_item(breadcrumb_page((id)))
+        <div class="flex flex-col gap-6">
+            <section>
+                <hgroup>
+                    breadcrumb(
+                        breadcrumb_list(
+                            breadcrumb_item(breadcrumb_page("Cited Works"))
+                            breadcrumb_separator()
+                            breadcrumb_item(breadcrumb_page((id)))
+                        )
+                    )
+                    <h1 class="flex items-center">
+                        "Cited Work"
+                        let actions = permitted_actions(current_user(cx).await, &actions);
+                        if !actions.is_empty() {
+                            <div class="ms-auto">
+                                action_menu(actions: actions.as_slice())
+                            </div>
+                        }
+                    </h1>
+                </hgroup>
+                card(
+                    card_content(
+                        <section class="flex flex-col gap-6">
+                            <div>
+                                item_term("Title")
+                                item_value((citation.title))
+                            </div>
+                            <div>
+                                item_term("Author")
+                                item_value((citation.author))
+                            </div>
+                            <div>
+                                item_term("Publication Year")
+                                item_value((citation.publication_year))
+                            </div>
+                            <div>
+                                item_term("Url")
+                                item_value(
+                                    if let Some(url) = citation.url {
+                                        <a href=(&url)>(&url)</a>
+                                    } else {
+                                        <span class="text-muted-foreground">"Not specified"</span>
+                                    }
+                                )
+                            </div>
+                            <div>
+                                item_term("Container Title")
+                                item_value((citation.container_title))
+                            </div>
+                            <div>
+                                item_term("doi")
+                                item_value(
+                                    if let Some(doi) = citation.doi {
+                                        <a href=(format!("https://doi.org/{}", doi))>(doi)</a>
+                                    }
+                                )
+                            </div>
+                            <div>
+                                item_term("Access Date")
+                                item_value(
+                                    if let Some(date) = citation.access_date {
+                                        (date.to_string())
+                                    }
+                                )
+                            </div>
+                        </section>
+                    )
                 )
-            )
-            <h1 class="flex items-center">
-                "Cited Work"
-                let actions = permitted_actions(current_user(cx).await, &actions);
-                if !actions.is_empty() {
-                    <div class="ms-auto">action_menu(actions: actions.as_slice())</div>
-                }
-            </h1>
-        </hgroup>
-        <section class="flex flex-col gap-6">
-            <div>
-                item_term("Title")
-                item_value((citation.title))
-            </div>
-            <div>
-                item_term("Author")
-                item_value((citation.author))
-            </div>
-            <div>
-                item_term("Publication Year")
-                item_value((citation.publication_year))
-            </div>
-            <div>
-                item_term("Url")
-                item_value(
-                    if let Some(url) = citation.url {
-                        <a href=(&url)>(&url)</a>
-                    } else {
-                        <span class="text-muted-foreground">"Not specified"</span>
+            </section>
+            <section class="flex flex-col gap-6">
+                <h2>"Citations"</h2>
+                <div class="empty:hidden px-3">
+                    if !cited_taxa.is_empty() {
+                        <div>
+                            <h3>"Taxa"</h3>
+                            <ul>
+                                for (id, taxon) in cited_taxa {
+                                    <li>
+                                        <a href=(href!(taxa::details, taxa::TaxonId(id)))>
+                                            (&taxon.complete_name)
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
                     }
-                )
-            </div>
-            <div>
-                item_term("Container Title")
-                item_value((citation.container_title))
-            </div>
-            <div>
-                item_term("doi")
-                item_value(
-                    if let Some(doi) = citation.doi {
-                        <a href=(format!("https://doi.org/{}", doi))>(doi)</a>
+                    if !cited_procedures.is_empty() {
+                        <div>
+                            <h3>"Propagation Procedures"</h3>
+                            <ul>
+                                for procedure in cited_procedures {
+                                    <li>
+                                        <a
+                                            href=(href!(
+                                                crate::propagation::details,
+                                                crate::propagation::PropagationId(procedure.id),
+                                            ))
+                                        >
+                                            (&procedure.name)
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
                     }
-                )
-            </div>
-            <div>
-                item_term("Access Date")
-                item_value(
-                    if let Some(date) = citation.access_date {
-                        (date.to_string())
-                    }
-                )
-            </div>
-        </section>
+                </div>
+            </section>
+        </div>
         alert_dialog(
             open: delete_dialog_open.get(),
             dialog_content(
@@ -525,14 +613,19 @@ pub async fn admin(cx: &Cx) -> topcoat::Result<impl View> {
     let user = require_user_with_permission(cx, PermissionCode::CitationEdit).await?;
     let citations = Citation::all().exec(&mut db(cx)).await?;
     Ok(view! {
-        <h2>"Edit Cited Works"</h2>
+        <h2>"Cited Works"</h2>
         <ul class="flex flex-col gap-3">
             for citation in citations {
                 <li class="flex items-baseline gap-2">
-                    <span>(citation.id)</span>
+                    <span>
+                        <a href=(href!(details, CitationId(citation.id)))>
+                            (citation.id)
+                        </a>
+                    </span>
+                    <span>(citation.format_cse())</span>
                     <span>
                         <a href=(href!(modify, CitationId(citation.id)))>
-                            (citation.format_cse())
+                            icon(data: mdi::EDIT)
                         </a>
                     </span>
                 </li>
