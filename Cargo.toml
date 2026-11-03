@@ -4,7 +4,7 @@ members = [
   "crates/itis",
   "crates/libpropagation",
   "crates/pn",
-  "crates/web",
+  "crates/web", "examples/prairie-moon-citations",
 ]
 resolver = "3"
 
