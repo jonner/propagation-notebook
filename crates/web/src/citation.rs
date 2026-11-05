@@ -19,6 +19,7 @@ use url::Url;
 
 use crate::{
     actions::{Action, ActionItemType, permitted_actions},
+    admin,
     assets::mdi,
     components::{
         action_menu::*, alert_dialog::*, breadcrumb::*, button::*, card::*, dialog::*, field::*,
@@ -609,10 +610,22 @@ pub async fn do_modify(cx: &Cx, Form(params): Form<CitationParams>) -> topcoat::
 }
 
 #[page("/admin/citations")]
-pub async fn admin(cx: &Cx) -> topcoat::Result<impl View> {
+pub async fn list(cx: &Cx) -> topcoat::Result<impl View> {
     let user = require_user_with_permission(cx, PermissionCode::CitationEdit).await?;
     let citations = Citation::all().exec(&mut db(cx)).await?;
     Ok(view! {
+        breadcrumb(
+            breadcrumb_list(
+                breadcrumb_item(
+                    breadcrumb_link(
+                        attrs: attributes! { href=(href!(admin::console)) },
+                        "Admin console"
+                    )
+                )
+                breadcrumb_separator()
+                breadcrumb_item(breadcrumb_page("Cited Works"))
+            )
+        )
         <h2>"Cited Works"</h2>
         <ul class="flex flex-col gap-3">
             for citation in citations {
@@ -622,11 +635,19 @@ pub async fn admin(cx: &Cx) -> topcoat::Result<impl View> {
                             (citation.id)
                         </a>
                     </span>
-                    <span>(citation.format_cse())</span>
                     <span>
-                        <a href=(href!(modify, CitationId(citation.id)))>
-                            icon(data: mdi::EDIT)
-                        </a>
+                        <span>(citation.format_cse())</span>
+                        <span class="inline-block mx-2">
+                            <a
+                                class=(button_variants(
+                                    ButtonVariant::Secondary,
+                                    ButtonSize::default(),
+                                ))
+                                href=(href!(modify, CitationId(citation.id)))
+                            >
+                                icon(data: mdi::EDIT)
+                            </a>
+                        </span>
                     </span>
                 </li>
             }
