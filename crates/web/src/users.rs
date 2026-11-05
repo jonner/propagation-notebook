@@ -3,6 +3,7 @@ use serde::Deserialize;
 use topcoat::{
     context::{Cx, try_context},
     icon::icon,
+    metadata::Metadata,
     router::{
         Body, Method, StatusCode,
         content::Form,
@@ -23,7 +24,7 @@ use crate::{
     },
     context::current_user,
     context::{db, require_user},
-    mdi, users,
+    mdi, page_title, users,
 };
 
 #[derive(Deserialize, Debug)]
@@ -112,7 +113,7 @@ async fn email_address(cx: &Cx, address: String, confirmed: bool) -> topcoat::Re
     })
 }
 
-#[page("/user/account")]
+#[page("/user/account", with(Metadata::new().title(page_title("User Account"))))]
 pub(crate) async fn account(cx: &Cx) -> topcoat::Result<impl View> {
     let user = require_user(cx).await?;
     let prof = UserProfile::get_by_user_id(&mut db(cx), user.id)
@@ -267,7 +268,7 @@ pub async fn user_profile_form(
     })
 }
 
-#[page("/user/profile")]
+#[page("/user/profile", with(Metadata::new().title(page_title("Edit User Profile"))))]
 pub(crate) async fn profile_edit(cx: &Cx) -> topcoat::Result<impl View> {
     let user = require_user(cx).await?;
     let prof = UserProfile::get_by_user_id(&mut db(cx), user.id)
@@ -353,7 +354,7 @@ impl ChangePasswordErrors {
     }
 }
 
-#[page("/user/password")]
+#[page("/user/password", with(Metadata::new().title(page_title("Change password"))))]
 pub(crate) async fn change_password(cx: &Cx) -> topcoat::Result<impl View> {
     let _user = require_user(cx).await?;
     let rejected = try_context::<ChangePasswordErrors>(cx);

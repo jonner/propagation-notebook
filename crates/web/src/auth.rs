@@ -2,6 +2,7 @@ use libpropagation::auth::User;
 use serde::{Deserialize, Serialize};
 use topcoat::{
     context::{Cx, try_context},
+    metadata::Metadata,
     router::{
         Body, Method, StatusCode,
         content::Form,
@@ -15,7 +16,7 @@ use crate::{
     assets::HYDRASTIS_CANADENSIS,
     components::{button::button, card::*, field::*, input::input},
     context::{current_user, db, delete_session, persist_session},
-    home,
+    home, page_title,
 };
 
 #[route(POST "/auth/logout")]
@@ -31,7 +32,7 @@ struct LoginParams {
     redirect: Option<String>,
 }
 
-#[page("/auth/logout")]
+#[page("/auth/logout", with(Metadata::new().title(page_title("Log out"))))]
 pub(crate) async fn logout(cx: &Cx) -> topcoat::Result<impl View> {
     if current_user(cx).await.is_none() {
         return Err(redirect(href!(home).resolve(cx)).into());
@@ -74,7 +75,7 @@ pub struct LoginFormParams {
     pub redirect: Option<String>,
 }
 
-#[page("/auth/login")]
+#[page("/auth/login", with(Metadata::new().title(page_title("Log in"))))]
 pub(crate) async fn login(cx: &Cx) -> topcoat::Result<impl View> {
     let user = current_user(cx).await;
     let params = query_params::<LoginFormParams>(cx)?;
