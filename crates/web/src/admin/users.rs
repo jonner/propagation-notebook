@@ -27,7 +27,7 @@ use crate::{
     users::{UpdateProfileParams, user_profile_form},
 };
 
-path_param!(user_id: Uuid, error = bad_request);
+path_param!(user_id: Uuid else bad_request);
 
 #[page("/admin/users")]
 pub async fn list(cx: &Cx) -> topcoat::Result<impl View> {

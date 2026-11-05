@@ -46,6 +46,7 @@ impl FlashMessage {
 
 #[component]
 pub async fn flash_alert(
+    cx: &Cx,
     flash: &FlashMessage,
     #[default] attrs: Attributes,
 ) -> topcoat::Result<impl View> {

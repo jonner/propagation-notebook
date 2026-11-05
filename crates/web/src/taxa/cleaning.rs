@@ -33,8 +33,8 @@ use crate::{
     taxa::{self, TaxonId},
 };
 
-path_param!(pub cleaning_id: u64, error = bad_request);
-path_param!(pub citation_id: u64, error = bad_request);
+path_param!(pub cleaning_id: u64 else bad_request);
+path_param!(pub citation_id: u64 else bad_request);
 
 #[page("/taxa/{taxon_id}/cleaning/{cleaning_id}")]
 pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {

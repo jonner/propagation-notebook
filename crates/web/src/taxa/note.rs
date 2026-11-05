@@ -6,7 +6,7 @@ use libpropagation::{
 use serde::Deserialize;
 use strum::IntoEnumIterator;
 use topcoat::{
-    context::{Cx, try_request_context},
+    context::{Cx, try_context},
     icon::icon,
     router::{
         Body, Method,
@@ -41,8 +41,8 @@ use crate::{
     taxa::{self, TaxonId},
 };
 
-path_param!(pub note_id: u64, error = bad_request);
-path_param!(pub citation_id: u64, error = bad_request);
+path_param!(pub note_id: u64 else bad_request);
+path_param!(pub citation_id: u64 else bad_request);
 
 #[page("/taxa/{taxon_id}/note/{note_id}")]
 pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
@@ -216,7 +216,7 @@ pub async fn note_form(
     note: Option<&TaxonNote>,
     child: Child<'_>,
 ) -> topcoat::Result<impl View> {
-    let rejected = try_request_context::<TaxonNoteRejected>(cx);
+    let rejected = try_context::<TaxonNoteRejected>(cx);
     let db_params: Option<NoteParams> = note.map(|n| n.into());
     let errors = rejected.map(|rej| &rej.errors);
     let params = rejected.map(|rej| rej.form.clone()).or(db_params);

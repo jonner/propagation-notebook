@@ -52,7 +52,7 @@ pub async fn admin_shell(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> 
 }
 
 #[page("/admin")]
-pub async fn console() -> topcoat::Result<impl View> {
+pub async fn console(cx: &Cx) -> topcoat::Result<impl View> {
     Ok(view! {
         <h1>"Administration Console"</h1>
         <section class="flex flex-col gap-2">

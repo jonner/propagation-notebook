@@ -1,14 +1,14 @@
 use jiff::SignedDuration;
 use libpropagation::auth::{PermissionCode, Session, User};
 use topcoat::{
-    context::{Cx, app_context, memoize},
+    context::{Cx, context, memoize},
     router::error::{RouterErrorExt, UnauthorizedError, forbidden},
     session,
 };
 use tracing::{debug, warn};
 
 pub fn db(cx: &Cx) -> toasty::Db {
-    app_context::<toasty::Db>(cx).clone()
+    context::<toasty::Db>(cx).clone()
 }
 
 pub async fn current_user(cx: &Cx) -> Option<&User> {

@@ -1,4 +1,5 @@
 use topcoat::{
+    context::Cx,
     router::href,
     view::{Attributes, Child, View, class, component, view},
 };
@@ -18,6 +19,7 @@ use crate::{
 /// harvest window highlight and a vertical line showing the current day/week.
 #[component]
 pub async fn harvest_timeline(
+    cx: &Cx,
     timeline: &RegionalHarvestWindow,
     #[default] current_doy: Option<i16>,
     #[default] mut attrs: Attributes,
@@ -70,6 +72,7 @@ pub async fn harvest_timeline(
 //  single regional_status: the region we're displaying the table for
 #[component]
 pub async fn regional_taxa_table(
+    cx: &Cx,
     taxa: &[Taxon],
     #[default] current_doy: Option<i16>,
     #[default] attrs: Attributes,
@@ -110,6 +113,7 @@ pub async fn regional_taxa_table(
 
 #[component]
 pub async fn taxon_regional_table(
+    cx: &Cx,
     regions: &[(Region, RegionHarvestWindowSummary)],
     #[default] current_doy: Option<i16>,
     #[default] attrs: Attributes,
@@ -152,6 +156,7 @@ pub async fn taxon_regional_table(
 
 #[component]
 pub async fn harvest_table_row(
+    cx: &Cx,
     #[default] mut attrs: Attributes,
     #[default] child: Child<'_>,
 ) -> topcoat::Result<impl View> {
@@ -167,6 +172,7 @@ pub async fn harvest_table_row(
 
 #[component]
 pub async fn harvest_table_row_header(
+    cx: &Cx,
     #[default] mut attrs: Attributes,
     #[default] child: Child<'_>,
 ) -> topcoat::Result<impl View> {
@@ -182,6 +188,7 @@ pub async fn harvest_table_row_header(
 
 #[component]
 pub async fn harvest_table_row_timeline(
+    cx: &Cx,
     timeline: &RegionalHarvestWindow,
     #[default] current_doy: Option<i16>,
     #[default] mut attrs: Attributes,
@@ -205,6 +212,7 @@ pub async fn harvest_table_row_timeline(
 
 #[component]
 pub async fn harvest_table(
+    cx: &Cx,
     #[default] mut attrs: Attributes,
     #[default] child: Child<'_>,
 ) -> topcoat::Result<impl View> {

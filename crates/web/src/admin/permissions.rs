@@ -17,7 +17,7 @@ use crate::{
     context::{db, require_user_with_permission},
 };
 
-path_param!(permission_id: Uuid, error = bad_request);
+path_param!(permission_id: Uuid else bad_request);
 
 #[page("/admin/permissions")]
 pub async fn list(cx: &Cx) -> topcoat::Result<impl View> {

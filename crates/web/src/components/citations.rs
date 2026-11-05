@@ -1,5 +1,6 @@
 use libpropagation::citation::Citation;
 use topcoat::{
+    context::Cx,
     router::href,
     view::{Attributes, View, class, component, view},
 };
@@ -7,7 +8,7 @@ use topcoat::{
 use crate::citation;
 
 #[component]
-pub async fn citation_link(citation: &Citation) -> topcoat::Result<impl View> {
+pub async fn citation_link(cx: &Cx, citation: &Citation) -> topcoat::Result<impl View> {
     Ok(view! {
         <a href=(href!(citation::details, citation::CitationId(citation.id)))>
             (citation.format_cse())
@@ -17,6 +18,7 @@ pub async fn citation_link(citation: &Citation) -> topcoat::Result<impl View> {
 
 #[component]
 pub async fn citation_list(
+    cx: &Cx,
     citations: Vec<&Citation>,
     #[default] mut attrs: Attributes,
 ) -> topcoat::Result<impl View> {

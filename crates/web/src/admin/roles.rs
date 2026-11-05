@@ -21,7 +21,7 @@ use crate::{
     context::{db, require_user_with_permission},
 };
 
-path_param!(role_id: Uuid, error = bad_request);
+path_param!(role_id: Uuid else bad_request);
 
 #[page("/admin/roles")]
 pub async fn list(cx: &Cx) -> topcoat::Result<impl View> {
@@ -60,6 +60,7 @@ pub async fn list(cx: &Cx) -> topcoat::Result<impl View> {
 
 #[component]
 async fn role_details_form(
+    cx: &Cx,
     #[default] mut attrs: Attributes,
     role: Option<&Role>,
 ) -> topcoat::Result<impl View> {

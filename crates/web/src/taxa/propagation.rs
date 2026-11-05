@@ -5,7 +5,7 @@ use libpropagation::{
 };
 use serde::Deserialize;
 use topcoat::{
-    context::{Cx, try_request_context},
+    context::{Cx, try_context},
     icon::icon,
     router::{
         Body, Method, StatusCode,
@@ -39,8 +39,8 @@ use crate::{
     taxa::{self, TaxonId},
 };
 
-path_param!(pub propagation_id: u64, error = bad_request);
-path_param!(pub citation_id: u64, error = bad_request);
+path_param!(pub propagation_id: u64 else bad_request);
+path_param!(pub citation_id: u64 else bad_request);
 
 #[page("/taxa/{taxon_id}/propagation/{propagation_id}")]
 pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
@@ -217,7 +217,7 @@ pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
             .exec(&mut db)
             .await
             .ok_or_not_found()?;
-    let rejected = try_request_context::<TaxonPropagationRejected>(cx);
+    let rejected = try_context::<TaxonPropagationRejected>(cx);
     let errors = rejected.map(|r| r.errors.clone()).unwrap_or_default();
     let params = rejected
         .map(|r| r.form.clone())
@@ -510,7 +510,9 @@ pub async fn add_citation(
     ))
 }
 
-#[route(POST "/taxa/{taxon_id}/propagation/{propagation_id}/citations/{citation_id}/delete")]
+#[route(
+    POST "/taxa/{taxon_id}/propagation/{propagation_id}/citations/{citation_id}/delete"
+)]
 pub async fn remove_citation(cx: &Cx) -> topcoat::Result<SeeOther> {
     let _ = require_user_with_permission(cx, PermissionCode::TaxonPropagationEdit).await?;
     let taxon_id = *path_param::<TaxonId>(cx)?;

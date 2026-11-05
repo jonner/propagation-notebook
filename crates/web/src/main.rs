@@ -107,11 +107,11 @@ async fn run() -> Result<(), Error> {
         .runtime()
         .discover()
         .assets(AssetBundle::load()?)
-        .app_context(db)
-        .app_context(Key::generate())
         .cookies()
         .sessions(SessionConfig::default())
-        .base_url(config.base_url.to_string());
+        .base_url(config.base_url.to_string())
+        .with(db)
+        .with(Key::generate());
 
     if let Some(compression) = config.enable_compression {
         service_builder = service_builder.compression(if compression {
@@ -155,7 +155,7 @@ async fn shell(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
         <html
             style=(format!(
                 "--background-image:url('{}')",
-                asset_config(cx).resolve(*header_bg),
+                asset_config(cx).resolve(cx, *header_bg),
             ))
         >
             <head>
@@ -321,7 +321,7 @@ async fn full_page_layout(cx: &Cx, child: Child<'_>) -> topcoat::Result<impl Vie
 }
 
 #[page("/")]
-async fn home() -> topcoat::Result<impl View> {
+async fn home(cx: &Cx) -> topcoat::Result<impl View> {
     Ok(view! {
         <div class="flex flex-col gap-4">
             <hgroup>
@@ -362,7 +362,7 @@ async fn home() -> topcoat::Result<impl View> {
 }
 
 #[page("/about")]
-async fn about() -> topcoat::Result<impl View> {
+async fn about(cx: &Cx) -> topcoat::Result<impl View> {
     Ok(view! {
         <h1>"About This Site"</h1>
         <div id="content" class="flex flex-col gap-4 text-lg">

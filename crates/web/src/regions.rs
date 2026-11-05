@@ -27,7 +27,7 @@ use crate::{
     util::{ModifyOffset, PER_PAGE, PageState},
 };
 
-path_param!(pub region_id: u64, error = bad_request);
+path_param!(pub region_id: u64 else bad_request);
 
 const SEED_DISCLAIMER: &str = "Seed dates are based on data retrieved from iNaturalist.org. If a species does not have any information about its seed-bearing window shown here, it is likely that either iNaturalist doesn't have enough observations of the species within the given area, or too few observations are annotated to indicate the presence of seeds. We periodically import new data from iNaturalist, so any new or newly-annotated observations should improve these dates over time.";
 
@@ -626,7 +626,7 @@ pub async fn fruiting_all(cx: &Cx) -> topcoat::Result<impl View> {
     })
 }
 
-path_param!(taxon_id: u64, error = bad_request);
+path_param!(taxon_id: u64 else bad_request);
 
 #[page("/regions/{region_id}/taxa/{taxon_id}")]
 pub async fn taxon_status(cx: &Cx) -> topcoat::Result<impl View> {

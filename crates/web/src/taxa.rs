@@ -41,8 +41,8 @@ mod cleaning;
 mod note;
 mod propagation;
 
-path_param!(pub taxon_id: u64, error = bad_request);
-path_param!(pub region_id: u64, error = bad_request);
+path_param!(pub taxon_id: u64 else bad_request);
+path_param!(pub region_id: u64 else bad_request);
 
 #[derive(Debug, Clone, Copy, serde::Deserialize, serde::Serialize)]
 #[serde(rename_all = "lowercase")]

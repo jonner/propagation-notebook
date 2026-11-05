@@ -26,6 +26,7 @@ use crate::{
 
 #[component]
 pub async fn origin_badge(
+    cx: &Cx,
     origin: Origin,
     #[default] mut attrs: Attributes,
 ) -> topcoat::Result<impl View> {
@@ -51,6 +52,7 @@ pub async fn origin_badge(
 
 #[component]
 pub async fn conservation_status_badge(
+    cx: &Cx,
     status: ConservationStatus,
     #[default] mut attrs: Attributes,
 ) -> topcoat::Result<impl View> {
@@ -71,6 +73,7 @@ pub async fn conservation_status_badge(
 
 #[component]
 pub async fn ancestor_breadcrumbs<L, P>(
+    cx: &Cx,
     items: &[&Taxon],
     link_fn: L,
     #[default] link_final: bool,
@@ -197,6 +200,7 @@ fn pagination_pages(state: &PageState, context: Option<usize>) -> Vec<Pagination
 
 #[component]
 pub async fn pagination_control<T: ModifyOffset + Clone + Sync + Send>(
+    cx: &Cx,
     state: &PageState,
     params: T,
     #[default(Some(2))] context: Option<usize>,
@@ -257,6 +261,7 @@ pub async fn pagination_control<T: ModifyOffset + Clone + Sync + Send>(
 
 #[component]
 pub async fn week_navigator(
+    cx: &Cx,
     date: jiff::civil::Date,
     #[default] attrs: Attributes,
 ) -> topcoat::Result<impl View> {
@@ -285,6 +290,7 @@ const LEAFLET_INIT_SCRIPT: Asset = asset!("assets/leaflet-initialize.js");
 
 #[component]
 pub async fn leaflet_map(
+    cx: &Cx,
     geometry: &geojson::Geometry,
     #[default] attrs: Attributes,
 ) -> topcoat::Result<impl View> {
@@ -302,6 +308,7 @@ pub async fn leaflet_map(
 
 #[component]
 pub async fn taxa_grid(
+    cx: &Cx,
     #[default] mut attrs: Attributes,
     #[default] child: Child<'_>,
 ) -> topcoat::Result<impl View> {
@@ -311,6 +318,7 @@ pub async fn taxa_grid(
 }
 #[component]
 pub async fn taxa_grid_item(
+    cx: &Cx,
     #[default] mut attrs: Attributes,
     #[default] child: Child<'_>,
 ) -> topcoat::Result<impl View> {
@@ -329,6 +337,7 @@ pub async fn taxa_grid_item(
 
 #[component]
 pub async fn taxon_icon(
+    cx: &Cx,
     url: Option<&String>,
     #[default] mut attrs: Attributes,
 ) -> topcoat::Result<impl View> {
@@ -431,6 +440,7 @@ pub async fn taxon_search_bar(
 
 #[component]
 pub async fn item_term(
+    cx: &Cx,
     #[default] mut attrs: Attributes,
     #[default] child: Child<'_>,
 ) -> topcoat::Result<impl View> {
@@ -445,6 +455,7 @@ pub async fn item_term(
 }
 #[component]
 pub async fn item_value(
+    cx: &Cx,
     #[default] attrs: Attributes,
     #[default] child: Child<'_>,
 ) -> topcoat::Result<impl View> {

@@ -24,12 +24,15 @@ use crate::{
 };
 
 #[component]
-pub async fn cited_object_main_content(child: Child<'_>) -> topcoat::Result<impl View> {
+pub async fn cited_object_main_content(cx: &Cx, child: Child<'_>) -> topcoat::Result<impl View> {
     Ok(view! { card(attrs: attributes! { class="grow" }, (child)) })
 }
 
 #[component]
-pub async fn cited_object_citation_section(child: Child<'_>) -> topcoat::Result<impl View> {
+pub async fn cited_object_citation_section(
+    cx: &Cx,
+    child: Child<'_>,
+) -> topcoat::Result<impl View> {
     Ok(view! {
         <section class="shrink min-w-0 md:w-md p-6">
             card_title("Citations")
@@ -39,12 +42,12 @@ pub async fn cited_object_citation_section(child: Child<'_>) -> topcoat::Result<
 }
 
 #[component]
-pub async fn cited_object_citation_item(child: Child<'_>) -> topcoat::Result<impl View> {
+pub async fn cited_object_citation_item(cx: &Cx, child: Child<'_>) -> topcoat::Result<impl View> {
     Ok(view! { <li class="flex items-baseline gap-2">(child)</li> })
 }
 
 #[component]
-pub async fn cited_object_layout(child: Child<'_>) -> topcoat::Result<impl View> {
+pub async fn cited_object_layout(cx: &Cx, child: Child<'_>) -> topcoat::Result<impl View> {
     Ok(view! { <div class="flex gap-4 flex-wrap">(child)</div> })
 }
 
@@ -155,6 +158,7 @@ pub async fn add_citation_dialog(
 
 #[component]
 pub async fn remove_citation_dialog(
+    cx: &Cx,
     remove_signal: Signal<Option<(u64, String)>>,
     #[default] form_attrs: Attributes,
     #[default] child: Child<'_>,
@@ -205,6 +209,7 @@ pub async fn remove_citation_dialog(
 
 #[component]
 pub async fn remove_citation_dialog_context(
+    cx: &Cx,
     #[default] attrs: Attributes,
     #[default] child: Child<'_>,
 ) -> topcoat::Result<impl View> {
@@ -218,6 +223,7 @@ pub async fn remove_citation_dialog_context(
 
 #[component]
 pub async fn remove_citation_dialog_context_item(
+    cx: &Cx,
     #[default] attrs: Attributes,
     #[default] child: Child<'_>,
 ) -> topcoat::Result<impl View> {

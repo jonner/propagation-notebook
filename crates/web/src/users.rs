@@ -1,7 +1,7 @@
 use libpropagation::auth::{PermissionCode, UserEmail, UserProfile};
 use serde::Deserialize;
 use topcoat::{
-    context::{Cx, try_request_context},
+    context::{Cx, try_context},
     icon::icon,
     router::{
         Body, Method, StatusCode,
@@ -47,7 +47,7 @@ pub(crate) async fn update_profile(
 }
 
 #[component]
-async fn edit_icon(#[default] mut attrs: Attributes) -> topcoat::Result<impl View> {
+async fn edit_icon(cx: &Cx, #[default] mut attrs: Attributes) -> topcoat::Result<impl View> {
     Ok(view! {
         <a class=(class! { "mx-2", attrs.remove("class") }) (attrs)>
             icon(
@@ -60,6 +60,7 @@ async fn edit_icon(#[default] mut attrs: Attributes) -> topcoat::Result<impl Vie
 }
 #[component]
 async fn setting_row(
+    cx: &Cx,
     #[default] mut attrs: Attributes,
     #[default] child: Child<'_>,
 ) -> topcoat::Result<impl View> {
@@ -70,6 +71,7 @@ async fn setting_row(
 
 #[component]
 async fn setting_name(
+    cx: &Cx,
     #[default] mut attrs: Attributes,
     #[default] child: Child<'_>,
 ) -> topcoat::Result<impl View> {
@@ -82,6 +84,7 @@ async fn setting_name(
 
 #[component]
 async fn setting_value(
+    cx: &Cx,
     #[default] mut attrs: Attributes,
     #[default] child: Child<'_>,
 ) -> topcoat::Result<impl View> {
@@ -96,7 +99,7 @@ async fn setting_value(
 }
 
 #[component]
-async fn email_address(address: String, confirmed: bool) -> topcoat::Result<impl View> {
+async fn email_address(cx: &Cx, address: String, confirmed: bool) -> topcoat::Result<impl View> {
     Ok(view! {
         (address)
         if confirmed {
@@ -229,6 +232,7 @@ pub(crate) async fn account(cx: &Cx) -> topcoat::Result<impl View> {
 
 #[component]
 pub async fn user_profile_form(
+    cx: &Cx,
     profile: Option<&UserProfile>,
     #[default] attrs: Attributes,
 ) -> topcoat::Result<impl View> {
@@ -352,7 +356,7 @@ impl ChangePasswordErrors {
 #[page("/user/password")]
 pub(crate) async fn change_password(cx: &Cx) -> topcoat::Result<impl View> {
     let _user = require_user(cx).await?;
-    let rejected = try_request_context::<ChangePasswordErrors>(cx);
+    let rejected = try_context::<ChangePasswordErrors>(cx);
     let errors = rejected.cloned().unwrap_or_default();
 
     Ok(view! {

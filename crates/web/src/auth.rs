@@ -1,7 +1,7 @@
 use libpropagation::auth::User;
 use serde::{Deserialize, Serialize};
 use topcoat::{
-    context::{Cx, try_request_context},
+    context::{Cx, try_context},
     router::{
         Body, Method, StatusCode,
         content::Form,
@@ -52,7 +52,7 @@ struct LoginRejected {
 }
 
 #[route(POST "/auth/login")]
-pub(crate) async fn do_login(Form(data): Form<LoginParams>, cx: &Cx) -> topcoat::Result<SeeOther> {
+pub(crate) async fn do_login(cx: &Cx, Form(data): Form<LoginParams>) -> topcoat::Result<SeeOther> {
     if let Ok(mut user) = User::get_by_username(&mut db(cx), &data.username).await
         && user.verify_password(&data.password).is_ok()
     {
@@ -81,7 +81,7 @@ pub(crate) async fn login(cx: &Cx) -> topcoat::Result<impl View> {
     if user.is_some() {
         return Err(see_other(href!(crate::home).resolve(cx)).into());
     }
-    let rejected = try_request_context::<LoginRejected>(cx);
+    let rejected = try_context::<LoginRejected>(cx);
     let data = rejected.map(|r| r.data.clone()).unwrap_or_default();
 
     Ok(view! {

@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use libpropagation::{auth::PermissionCode, citation::Citation, taxonomy::Taxon};
 use serde::Deserialize;
 use topcoat::{
-    context::{Cx, try_request_context},
+    context::{Cx, try_context},
     icon::icon,
     router::{
         Body, Method, StatusCode,
@@ -29,7 +29,7 @@ use crate::{
     taxa,
 };
 
-path_param!(pub citation_id: u64, error = bad_request);
+path_param!(pub citation_id: u64 else bad_request);
 
 #[page("/citations/{citation_id}")]
 pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
@@ -363,7 +363,7 @@ pub async fn do_create(cx: &Cx, Form(params): Form<CitationParams>) -> topcoat::
 }
 
 #[component]
-pub async fn required() -> topcoat::Result<impl View> {
+pub async fn required(cx: &Cx) -> topcoat::Result<impl View> {
     Ok(view! { <span class="text-destructive">"*"</span> })
 }
 
@@ -378,7 +378,7 @@ pub async fn citation_form(
     let author = signal(cx, || {
         citation.map(|c| c.author.clone()).unwrap_or_default()
     });
-    let rejected = try_request_context::<CitationRejected>(cx);
+    let rejected = try_context::<CitationRejected>(cx);
     let errors = rejected.map(|r| r.errors.clone()).unwrap_or_default();
     let values = rejected
         .map(|r| r.form.clone())
