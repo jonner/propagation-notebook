@@ -6,8 +6,9 @@ use libpropagation::{
     taxonomy::{Taxon, TaxonHierarchy, TaxonNote, TaxonNoteCategory},
 };
 use topcoat::{
-    context::Cx,
+    context::{Cx, memoize},
     icon::icon,
+    metadata::Metadata,
     router::{
         error::{RouterErrorExt, redirect},
         href, page, path_param, query_params,
@@ -33,7 +34,7 @@ use crate::{
         },
     },
     context::{current_user, db, require_user_with_permission},
-    mdi,
+    mdi, page_title,
     util::{ModifyOffset, PER_PAGE, PageState},
 };
 
@@ -66,7 +67,7 @@ impl ModifyOffset for TaxaListParams {
     }
 }
 
-#[page("/taxa/explore")]
+#[page("/taxa/explore", with(Metadata::new().title(page_title("Taxonomy Explorer"))))]
 pub(crate) async fn explore(cx: &Cx) -> topcoat::Result<impl View> {
     let mut db = db(cx);
     let params = query_params::<TaxaListParams>(cx)?;
@@ -305,7 +306,7 @@ impl ModifyOffset for TaxaSearchParams {
     }
 }
 
-#[page("/taxa/search")]
+#[page("/taxa/search", with(Metadata::new().title(page_title("Taxon Search"))))]
 pub(crate) async fn search(cx: &Cx) -> topcoat::Result<impl View> {
     let mut db = db(cx);
     let params = query_params::<TaxaSearchParams>(cx)?;
@@ -408,19 +409,36 @@ pub(crate) async fn search(cx: &Cx) -> topcoat::Result<impl View> {
     })
 }
 
-#[page("/taxa/{taxon_id}/photo/default")]
-pub async fn default_photo(cx: &Cx) -> topcoat::Result<impl View> {
-    let mut db = db(cx);
+#[memoize(as_ref)]
+pub async fn taxon(cx: &Cx) -> topcoat::Result<Taxon> {
     let id = path_param::<TaxonId>(cx)?;
-    let taxon = Taxon::filter_by_id(id)
+    Ok(
+    Taxon::filter_by_id(id)
         .include(Taxon::fields().photo())
         .include(Taxon::fields().ancestor_links().ancestor())
         .one()
-        .exec(&mut db)
+        .exec(&mut db(cx))
         .await
-        .ok_or_not_found()?;
-    let photo = taxon.photo.into_inner().ok_or_not_found()?;
-    let photo_url = photo.original_url.ok_or_not_found()?;
+        .ok_or_not_found()?)
+}
+
+#[page(
+    "/taxa/{taxon_id}/photo/default",
+    with(Metadata::from_fn(
+        async |cx| {
+            let taxon = taxon(cx).await?;
+            Ok(
+                Metadata::new().title(
+                    page_title(format!("{} photo", taxon.complete_name)),
+                ),
+            )
+        },
+    ))
+)]
+pub async fn default_photo(cx: &Cx) -> topcoat::Result<impl View> {
+    let taxon = taxon(cx).await?;
+    let photo = taxon.photo.get().as_ref().ok_or_not_found()?;
+    let photo_url = photo.original_url.as_ref().ok_or_not_found()?;
 
     Ok(view! {
         let ancestors = taxon
@@ -557,11 +575,10 @@ pub async fn descendant_region_statuses(cx: &Cx, parent_id: u64) -> topcoat::Res
     Ok(view! { taxon_regional_table(regions: &regions) })
 }
 
-#[page("/taxa/{taxon_id}")]
-pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
-    let mut db = db(cx);
+#[memoize(as_ref)]
+async fn detailed_taxon(cx: &Cx) -> topcoat::Result<Taxon> {
     let id = *path_param::<TaxonId>(cx)?;
-    let taxon = Taxon::filter_by_id(id)
+    Ok(Taxon::filter_by_id(id)
         .include(Taxon::fields().vernaculars())
         .include(Taxon::fields().parent())
         .include(Taxon::fields().synonyms())
@@ -579,9 +596,23 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
         .include(Taxon::fields().ancestor_links().ancestor())
         .include(Taxon::fields().resources())
         .one()
-        .exec(&mut db)
+        .exec(&mut db(cx))
         .await
-        .ok_or_not_found()?;
+        .ok_or_not_found()?)
+}
+
+#[page(
+    "/taxa/{taxon_id}",
+    with(Metadata::from_fn(
+        async |cx| {
+            let taxon = detailed_taxon(cx).await?;
+            Ok(Metadata::new().title(page_title(&taxon.complete_name)))
+        },
+    ))
+)]
+pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
+    let taxon = detailed_taxon(cx).await?;
+    let id = taxon.id;
     let menu_actions = [
         Action {
             name: "Sync Image".to_string(),

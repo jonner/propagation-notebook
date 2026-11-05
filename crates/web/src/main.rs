@@ -7,6 +7,7 @@ use topcoat::{
     context::Cx,
     cookie::{Key, RouterBuilderCookieExt},
     icon::icon,
+    metadata::{self, Metadata},
     router::{
         Compression, Router, RouterBuilderDiscoverExt, Slot, StatusCode,
         error::{ForbiddenError, NotFoundError, UnauthorizedError},
@@ -63,6 +64,12 @@ pub enum Command {
     Run,
     #[command(about = "Generate a new configuration file template")]
     GenerateConfig,
+}
+
+const SITE_NAME: &str = "Propagation Notebook";
+
+pub fn page_title<S: AsRef<str>>(title: S) -> String {
+    format!("{} | {SITE_NAME}", title.as_ref())
 }
 
 #[tokio::main]
@@ -146,7 +153,14 @@ fn header_image_for_page(cx: &Cx) -> &Asset {
 
 not_found!("/");
 
-#[layout("/")]
+#[layout(
+    "/",
+    with(Metadata::new()
+        .title(SITE_NAME)
+        .description(
+            "A comprehensive reference guide for growing and collecting native plants for ecological restoration",
+        ))
+)]
 async fn shell(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
     let header_bg = header_image_for_page(cx);
 
@@ -163,7 +177,7 @@ async fn shell(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
                 topcoat::dev::script()
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <meta charset="UTF-8">
-                <title>"Propagation Notebook"</title>
+                metadata::tags()
                 <link rel="stylesheet" href=(tailwind::stylesheet!())>
                 <link rel="stylesheet" href=(LEAFLET_CSS)>
                 <script src=(LEAFLET_JS)></script>

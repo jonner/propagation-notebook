@@ -4,7 +4,8 @@ use libpropagation::{
 };
 use serde::Serialize;
 use topcoat::{
-    context::Cx,
+    context::{Cx, memoize},
+    metadata::Metadata,
     router::{error::RouterErrorExt, href, page, path_param, query_params},
     view::{View, attributes, view},
 };
@@ -23,6 +24,7 @@ use crate::{
         },
     },
     context::db,
+    page_title,
     taxa::{self, TaxaListParams},
     util::{ModifyOffset, PER_PAGE, PageState},
 };
@@ -31,7 +33,7 @@ path_param!(pub region_id: u64 else bad_request);
 
 const SEED_DISCLAIMER: &str = "Seed dates are based on data retrieved from iNaturalist.org. If a species does not have any information about its seed-bearing window shown here, it is likely that either iNaturalist doesn't have enough observations of the species within the given area, or too few observations are annotated to indicate the presence of seeds. We periodically import new data from iNaturalist, so any new or newly-annotated observations should improve these dates over time.";
 
-#[page("/regions")]
+#[page("/regions", with(Metadata::new().title(page_title("Regions"))))]
 pub async fn list(cx: &Cx) -> topcoat::Result<impl View> {
     let mut db = db(cx);
     let mut region_types = Vec::default();
@@ -103,17 +105,30 @@ pub async fn list(cx: &Cx) -> topcoat::Result<impl View> {
     })
 }
 
-#[page("/regions/{region_id}")]
-pub(crate) async fn overview(cx: &Cx) -> topcoat::Result<impl View> {
+#[memoize(as_ref)]
+async fn region(cx: &Cx) -> topcoat::Result<Region> {
     let id = path_param::<RegionId>(cx)?;
-    let mut db = db(cx);
-    const N: usize = 10;
-    let region = Region::filter_by_id(id)
+    Ok(Region::filter_by_id(id)
         .include(Region::fields().taxon_statuses())
         .one()
-        .exec(&mut db)
+        .exec(&mut db(cx))
         .await
-        .ok_or_not_found()?;
+        .ok_or_not_found()?)
+}
+
+#[page(
+    "/regions/{region_id}",
+    with(Metadata::from_fn(
+        async |cx| {
+            let region = region(cx).await?;
+            Ok(Metadata::new().title(page_title(&region.name)))
+        },
+    ))
+)]
+pub(crate) async fn overview(cx: &Cx) -> topcoat::Result<impl View> {
+    const N: usize = 10;
+    let region = region(cx).await?;
+    let id = region.id;
 
     let nspecies = Taxon::filter(
         Taxon::fields().rank().eq(Rank::Species).and(
@@ -126,11 +141,11 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result<impl View> {
         ),
     )
     .count()
-    .exec(&mut db)
+    .exec(&mut db(cx))
     .await?;
     let (n_fruiting, _) = region
         .get_taxa(
-            &mut db,
+            &mut db(cx),
             None,
             Some(OriginFilter::NativeOnly),
             Some(HarvestFilter::ReadyNow),
@@ -140,7 +155,7 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result<impl View> {
         .await?;
     let (n_ending, _) = region
         .get_taxa(
-            &mut db,
+            &mut db(cx),
             None,
             Some(OriginFilter::NativeOnly),
             Some(HarvestFilter::EndingSoon {
@@ -153,7 +168,7 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result<impl View> {
         .await?;
     let (n_starting, _) = region
         .get_taxa(
-            &mut db,
+            &mut db(cx),
             None,
             Some(OriginFilter::NativeOnly),
             Some(HarvestFilter::StartingSoon {
@@ -302,22 +317,27 @@ impl ModifyOffset for HarvestParams {
     }
 }
 
-#[page("/regions/{region_id}/fruiting/soon")]
+#[page(
+    "/regions/{region_id}/fruiting/soon",
+    with(Metadata::from_fn(
+        async |cx| {
+            let region = region(cx).await?;
+            Ok(
+                Metadata::new().title(
+                    page_title(format!("{}: Fruiting soon", region.name)),
+                ),
+            )
+        },
+    ))
+)]
 pub(crate) async fn fruiting_soon(cx: &Cx) -> topcoat::Result<impl View> {
-    let id = path_param::<RegionId>(cx)?;
-    let mut db = db(cx);
     let params = query_params::<HarvestParams>(cx)?;
-    let region = Region::filter_by_id(id)
-        .include(Region::fields().taxon_statuses())
-        .one()
-        .exec(&mut db)
-        .await
-        .ok_or_not_found()?;
+    let region = region(cx).await?;
     let date = params.date.unwrap_or_else(|| jiff::Zoned::now().date());
     let doy = date.day_of_year();
     let (total, starting_soon) = region
         .get_taxa(
-            &mut db,
+            &mut db(cx),
             None,
             Some(OriginFilter::NativeOnly),
             Some(HarvestFilter::StartingSoon {
@@ -345,7 +365,7 @@ pub(crate) async fn fruiting_soon(cx: &Cx) -> topcoat::Result<impl View> {
                         breadcrumb_item(
                             breadcrumb_link(
                                 attrs: attributes! { href=(href!(overview, RegionId(region.id))) },
-                                (region.name)
+                                (&region.name)
                             )
                         )
                         breadcrumb_separator()
@@ -377,22 +397,27 @@ pub(crate) async fn fruiting_soon(cx: &Cx) -> topcoat::Result<impl View> {
     })
 }
 
-#[page("/regions/{region_id}/fruiting/done")]
+#[page(
+    "/regions/{region_id}/fruiting/done",
+    with(Metadata::from_fn(
+        async |cx| {
+            let region = region(cx).await?;
+            Ok(
+                Metadata::new().title(
+                    page_title(format!("{}: Fruiting ending", region.name)),
+                ),
+            )
+        },
+    ))
+)]
 pub(crate) async fn fruiting_done(cx: &Cx) -> topcoat::Result<impl View> {
-    let id = path_param::<RegionId>(cx)?;
     let params = query_params::<HarvestParams>(cx)?;
-    let mut db = db(cx);
-    let region = Region::filter_by_id(id)
-        .include(Region::fields().taxon_statuses())
-        .one()
-        .exec(&mut db)
-        .await
-        .ok_or_not_found()?;
+    let region = region(cx).await?;
     let date = params.date.unwrap_or_else(|| jiff::Zoned::now().date());
     let doy = date.day_of_year();
     let (total, ending) = region
         .get_taxa(
-            &mut db,
+            &mut db(cx),
             None,
             Some(OriginFilter::NativeOnly),
             Some(HarvestFilter::EndingSoon {
@@ -420,7 +445,7 @@ pub(crate) async fn fruiting_done(cx: &Cx) -> topcoat::Result<impl View> {
                         breadcrumb_item(
                             breadcrumb_link(
                                 attrs: attributes! { href=(href!(overview, RegionId(region.id))) },
-                                (region.name)
+                                (&region.name)
                             )
                         )
                         breadcrumb_separator()
@@ -452,22 +477,27 @@ pub(crate) async fn fruiting_done(cx: &Cx) -> topcoat::Result<impl View> {
     })
 }
 
-#[page("/regions/{region_id}/fruiting/now")]
+#[page(
+    "/regions/{region_id}/fruiting/now",
+    with(Metadata::from_fn(
+        async |cx| {
+            let region = region(cx).await?;
+            Ok(
+                Metadata::new().title(
+                    page_title(format!("{}: Fruiting now", region.name)),
+                ),
+            )
+        },
+    ))
+)]
 pub(crate) async fn fruiting_now(cx: &Cx) -> topcoat::Result<impl View> {
-    let id = path_param::<RegionId>(cx)?;
     let params = query_params::<HarvestParams>(cx)?;
-    let mut db = db(cx);
-    let region = Region::filter_by_id(id)
-        .include(Region::fields().taxon_statuses())
-        .one()
-        .exec(&mut db)
-        .await
-        .ok_or_not_found()?;
+    let region = region(cx).await?;
     let date = params.date.unwrap_or_else(|| jiff::Zoned::now().date());
     let doy = date.day_of_year();
     let (total, ending) = region
         .get_taxa(
-            &mut db,
+            &mut db(cx),
             None,
             Some(OriginFilter::NativeOnly),
             Some(HarvestFilter::ReadyOnDoy(date.day_of_year())),
@@ -492,7 +522,7 @@ pub(crate) async fn fruiting_now(cx: &Cx) -> topcoat::Result<impl View> {
                         breadcrumb_item(
                             breadcrumb_link(
                                 attrs: attributes! { href=(href!(overview, RegionId(region.id))) },
-                                (region.name)
+                                (&region.name)
                             )
                         )
                         breadcrumb_separator()
@@ -542,17 +572,25 @@ impl ModifyOffset for RegionalTaxaListParams {
     }
 }
 
-#[page("/regions/{region_id}/fruiting")]
+#[page(
+    "/regions/{region_id}/fruiting",
+    with(Metadata::from_fn(
+        async |cx| {
+            let region = region(cx).await?;
+            Ok(
+                Metadata::new().title(
+                    page_title(format!("{}: Fruiting dates", region.name)),
+                ),
+            )
+        },
+    ))
+)]
 pub async fn fruiting_all(cx: &Cx) -> topcoat::Result<impl View> {
-    let mut db = db(cx);
-    let region_id = path_param::<RegionId>(cx)?;
     let params = query_params::<RegionalTaxaListParams>(cx)?;
-    let region = Region::get_by_id(&mut db, region_id)
-        .await
-        .ok_or_not_found()?;
+    let region = region(cx).await?;
     let (total, taxa) = region
         .get_taxa(
-            &mut db,
+            &mut db(cx),
             params.q.as_ref(),
             if Some(true) == params.native {
                 Some(OriginFilter::NativeOnly)
@@ -628,17 +666,41 @@ pub async fn fruiting_all(cx: &Cx) -> topcoat::Result<impl View> {
 
 path_param!(taxon_id: u64 else bad_request);
 
-#[page("/regions/{region_id}/taxa/{taxon_id}")]
-pub async fn taxon_status(cx: &Cx) -> topcoat::Result<impl View> {
-    let mut db = db(cx);
+#[memoize(as_ref)]
+async fn regional_taxon_status(cx: &Cx) -> topcoat::Result<RegionalTaxonStatus> {
     let region_id = path_param::<RegionId>(cx).ok_or_not_found()?;
     let taxon_id = path_param::<TaxonId>(cx).ok_or_not_found()?;
-    let rts = RegionalTaxonStatus::filter_by_taxon_id_and_region_id(taxon_id, region_id)
-        .include(RegionalTaxonStatus::fields().region())
-        .include(RegionalTaxonStatus::fields().taxon().vernaculars())
-        .one()
-        .exec(&mut db)
-        .await?;
+    Ok(
+        RegionalTaxonStatus::filter_by_taxon_id_and_region_id(taxon_id, region_id)
+            .include(RegionalTaxonStatus::fields().region())
+            .include(RegionalTaxonStatus::fields().taxon().vernaculars())
+            .one()
+            .exec(&mut db(cx))
+            .await?,
+    )
+}
+
+#[page(
+    "/regions/{region_id}/taxa/{taxon_id}",
+    with(Metadata::from_fn(
+        async |cx| {
+            let rts = regional_taxon_status(cx).await?;
+            Ok(
+                Metadata::new().title(
+                    page_title(
+                        format!(
+                            "{} in {}",
+                            rts.taxon.get().complete_name,
+                            rts.region.get().name,
+                        ),
+                    ),
+                ),
+            )
+        },
+    ))
+)]
+pub async fn taxon_status(cx: &Cx) -> topcoat::Result<impl View> {
+    let rts = regional_taxon_status(cx).await?;
 
     Ok(view! {
         let region = rts.region.get();
