@@ -1,7 +1,8 @@
 use libpropagation::auth::{Permission, PermissionCode};
 use serde::Deserialize;
 use topcoat::{
-    context::Cx,
+    context::{Cx, memoize},
+    metadata::Metadata,
     router::{
         content::Form,
         error::{SeeOther, see_other},
@@ -12,14 +13,17 @@ use topcoat::{
 use uuid::Uuid;
 
 use crate::{
-    admin,
+    Subtitle, admin,
     components::{breadcrumb::*, button::button, card::*, field::*, input::*},
     context::{db, require_user_with_permission},
 };
 
 path_param!(permission_id: Uuid else bad_request);
 
-#[page("/admin/permissions")]
+#[page(
+    "/admin/permissions",
+    with(Metadata::new().subtitle("Permissions | Administration Console"))
+)]
 pub async fn list(cx: &Cx) -> topcoat::Result<impl View> {
     _ = require_user_with_permission(cx, PermissionCode::PermissionEdit).await?;
     let permissions = Permission::all().exec(&mut db(cx)).await?;
@@ -62,14 +66,31 @@ async fn populate_permissions(cx: &Cx) -> topcoat::Result<SeeOther> {
     Ok(see_other(href!(list).resolve(cx)))
 }
 
-#[page("/admin/permissions/{permission_id}")]
-pub async fn edit(cx: &Cx) -> topcoat::Result<impl View> {
-    _ = require_user_with_permission(cx, PermissionCode::PermissionEdit).await?;
+#[memoize(as_ref)]
+async fn permission(cx: &Cx) -> topcoat::Result<Permission> {
     let permission_id = *path_param::<PermissionId>(cx)?;
-    let permission = Permission::filter_by_id(permission_id)
+    Ok(Permission::filter_by_id(permission_id)
         .one()
         .exec(&mut db(cx))
-        .await?;
+        .await?)
+}
+
+#[page(
+    "/admin/permissions/{permission_id}",
+    with(Metadata::from_fn(
+        async |cx| {
+            let perm = permission(cx).await?;
+            Ok(
+                Metadata::new().subtitle(
+                    format!("Permission '{}' | Administration Console", perm.code),
+                ),
+            )
+        },
+    ))
+)]
+pub async fn edit(cx: &Cx) -> topcoat::Result<impl View> {
+    _ = require_user_with_permission(cx, PermissionCode::PermissionEdit).await?;
+    let permission = permission(cx).await?;
 
     Ok(view! {
         breadcrumb(
@@ -99,7 +120,7 @@ pub async fn edit(cx: &Cx) -> topcoat::Result<impl View> {
                     <form
                         class="flex flex-col gap-6"
                         method="POST"
-                        action=(href!(update, PermissionId(permission_id)))
+                        action=(href!(update, PermissionId(permission.id)))
                     >
                         field_set(
                             field(

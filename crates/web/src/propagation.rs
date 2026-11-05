@@ -3,15 +3,16 @@ use libpropagation::{
     taxonomy::{Taxon, TaxonPropagationProcedure},
 };
 use topcoat::{
-    context::Cx,
+    context::{Cx, memoize},
+    metadata::Metadata,
     router::{href, page, path_param},
     view::{View, view},
 };
 use tracing::trace;
 
-use crate::{components::citations::citation_list, context::db, taxa};
+use crate::{Subtitle, components::citations::citation_list, context::db, taxa};
 
-#[page("/propagation")]
+#[page("/propagation", with(Metadata::new().subtitle("Propagation procedures")))]
 pub async fn list(cx: &Cx) -> topcoat::Result<impl View> {
     let mut db = db(cx);
     let procedures = PropagationProcedure::all().exec(&mut db).await?;
@@ -28,31 +29,43 @@ pub async fn list(cx: &Cx) -> topcoat::Result<impl View> {
 
 path_param!(pub propagation_id: u64 else bad_request);
 
-#[page("/propagation/{propagation_id}")]
-pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
-    let mut db = db(cx);
+#[memoize(as_ref)]
+async fn propagation_procedure(cx: &Cx) -> topcoat::Result<PropagationProcedure> {
     let propagation_id = path_param::<PropagationId>(cx)?;
-    let procedure = PropagationProcedure::filter_by_id(propagation_id)
+    Ok(PropagationProcedure::filter_by_id(propagation_id)
         .include(PropagationProcedure::fields().citations())
         .one()
-        .exec(&mut db)
-        .await?;
+        .exec(&mut db(cx))
+        .await?)
+}
+
+#[page(
+    "/propagation/{propagation_id}",
+    with(Metadata::from_fn(
+        async |cx| {
+            let proc = propagation_procedure(cx).await?;
+            Ok(Metadata::new().subtitle(&proc.name))
+        },
+    ))
+)]
+pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
+    let procedure = propagation_procedure(cx).await?;
     // including the Taxa in the PropagationProcedure query is very slow, so fetch them separately
     let taxa = Taxon::filter(
         Taxon::fields().propagation_procedures().any(
             TaxonPropagationProcedure::fields()
                 .propagation_id()
-                .eq(propagation_id),
+                .eq(procedure.id),
         ),
     )
     .include(
         Taxon::fields().propagation_procedures().filter(
             TaxonPropagationProcedure::fields()
                 .propagation_id()
-                .eq(propagation_id),
+                .eq(procedure.id),
         ),
     )
-    .exec(&mut db)
+    .exec(&mut db(cx))
     .await?;
     trace!(?procedure);
     Ok(view! {

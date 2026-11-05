@@ -13,10 +13,11 @@ use topcoat::{
 };
 
 use crate::{
+    Subtitle,
     assets::HYDRASTIS_CANADENSIS,
     components::{button::button, card::*, field::*, input::input},
     context::{current_user, db, delete_session, persist_session},
-    home, page_title,
+    home,
 };
 
 #[route(POST "/auth/logout")]
@@ -32,7 +33,7 @@ struct LoginParams {
     redirect: Option<String>,
 }
 
-#[page("/auth/logout", with(Metadata::new().title(page_title("Log out"))))]
+#[page("/auth/logout", with(Metadata::new().subtitle("Log out")))]
 pub(crate) async fn logout(cx: &Cx) -> topcoat::Result<impl View> {
     if current_user(cx).await.is_none() {
         return Err(redirect(href!(home).resolve(cx)).into());
@@ -75,7 +76,7 @@ pub struct LoginFormParams {
     pub redirect: Option<String>,
 }
 
-#[page("/auth/login", with(Metadata::new().title(page_title("Log in"))))]
+#[page("/auth/login", with(Metadata::new().subtitle("Log in")))]
 pub(crate) async fn login(cx: &Cx) -> topcoat::Result<impl View> {
     let user = current_user(cx).await;
     let params = query_params::<LoginFormParams>(cx)?;

@@ -3,7 +3,8 @@ use std::collections::HashSet;
 use libpropagation::auth::{Permission, PermissionCode, Role, RolePermission};
 use serde::Deserialize;
 use topcoat::{
-    context::Cx,
+    context::{Cx, memoize},
+    metadata::Metadata,
     router::{
         content::Form,
         error::{RouterErrorExt, SeeOther, bad_request, see_other},
@@ -14,7 +15,7 @@ use topcoat::{
 use uuid::Uuid;
 
 use crate::{
-    admin,
+    Subtitle, admin,
     components::{
         breadcrumb::*, button::*, card::*, checkbox::*, field::*, input::*, label::*, tooltip::*,
     },
@@ -23,7 +24,7 @@ use crate::{
 
 path_param!(role_id: Uuid else bad_request);
 
-#[page("/admin/roles")]
+#[page("/admin/roles", with(Metadata::new().subtitle("Roles | Administration Console")))]
 pub async fn list(cx: &Cx) -> topcoat::Result<impl View> {
     _ = require_user_with_permission(cx, PermissionCode::RoleEdit).await?;
     let roles = Role::all().exec(&mut db(cx)).await?;
@@ -91,15 +92,32 @@ async fn role_details_form(
     })
 }
 
-#[page("/admin/roles/{role_id}")]
-pub async fn edit(cx: &Cx) -> topcoat::Result<impl View> {
-    _ = require_user_with_permission(cx, PermissionCode::RoleEdit).await?;
+#[memoize(as_ref)]
+async fn role(cx: &Cx) -> topcoat::Result<Role> {
     let role_id = *path_param::<RoleId>(cx)?;
-    let role = Role::filter_by_id(role_id)
+    Ok(Role::filter_by_id(role_id)
         .include(Role::fields().permissions())
         .one()
         .exec(&mut db(cx))
-        .await?;
+        .await?)
+}
+
+#[page(
+    "/admin/roles/{role_id}",
+    with(Metadata::from_fn(
+        async |cx| {
+            let role = role(cx).await?;
+            Ok(
+                Metadata::new().subtitle(
+                    format!("Role '{}' | Administration Console", role.name),
+                ),
+            )
+        },
+    ))
+)]
+pub async fn edit(cx: &Cx) -> topcoat::Result<impl View> {
+    _ = require_user_with_permission(cx, PermissionCode::RoleEdit).await?;
+    let role = role(cx).await?;
 
     Ok(view! {
         breadcrumb(
@@ -115,7 +133,7 @@ pub async fn edit(cx: &Cx) -> topcoat::Result<impl View> {
                     breadcrumb_link(attrs: attributes! { href=(href!(list)) }, "Roles")
                 )
                 breadcrumb_separator()
-                breadcrumb_item(breadcrumb_page((role_id.to_string())))
+                breadcrumb_item(breadcrumb_page((role.id.to_string())))
             )
         )
         <h2>"Edit Role"</h2>
@@ -125,7 +143,7 @@ pub async fn edit(cx: &Cx) -> topcoat::Result<impl View> {
                 card_content(
                     role_details_form(
                         attrs: attributes! { method="POST" action=(href!(update, RoleId(role.id))) },
-                        role: Some(&role)
+                        role: Some(role)
                     )
                 )
             )
@@ -135,16 +153,19 @@ pub async fn edit(cx: &Cx) -> topcoat::Result<impl View> {
                     role_permissions_form(
                         attrs: attributes! {
                             method="POST"
-                            action=(href!(update_permissions, RoleId(role_id)))
+                            action=(href!(update_permissions, RoleId(role.id)))
                         },
-                        role: &role
+                        role: role
                     )
                 )
             )
         </section>
     })
 }
-#[page("/admin/roles/new")]
+#[page(
+    "/admin/roles/new",
+    with(Metadata::new().subtitle("New Role | Administration Console"))
+)]
 pub async fn create(cx: &Cx) -> topcoat::Result<impl View> {
     _ = require_user_with_permission(cx, PermissionCode::RoleCreate).await?;
 

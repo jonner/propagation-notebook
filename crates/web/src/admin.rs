@@ -1,11 +1,14 @@
 use libpropagation::auth::PermissionCode;
 use topcoat::{
     context::Cx,
+    metadata::Metadata,
     router::{Slot, href, layout, page},
     view::{View, attributes, view},
 };
 
-use crate::{citation, components::navigation_menu::*, context::require_user_with_permission};
+use crate::{
+    Subtitle, citation, components::navigation_menu::*, context::require_user_with_permission,
+};
 
 mod permissions;
 mod roles;
@@ -51,7 +54,7 @@ pub async fn admin_shell(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> 
     })
 }
 
-#[page("/admin")]
+#[page("/admin", with(Metadata::new().subtitle("Administration Console")))]
 pub async fn console(cx: &Cx) -> topcoat::Result<impl View> {
     Ok(view! {
         <h1>"Administration Console"</h1>

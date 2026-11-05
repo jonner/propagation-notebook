@@ -12,6 +12,7 @@ use topcoat::{
 use tracing::trace;
 
 use crate::{
+    Subtitle,
     components::{
         breadcrumb::*,
         button::button,
@@ -24,7 +25,6 @@ use crate::{
         },
     },
     context::db,
-    page_title,
     taxa::{self, TaxaListParams},
     util::{ModifyOffset, PER_PAGE, PageState},
 };
@@ -33,7 +33,7 @@ path_param!(pub region_id: u64 else bad_request);
 
 const SEED_DISCLAIMER: &str = "Seed dates are based on data retrieved from iNaturalist.org. If a species does not have any information about its seed-bearing window shown here, it is likely that either iNaturalist doesn't have enough observations of the species within the given area, or too few observations are annotated to indicate the presence of seeds. We periodically import new data from iNaturalist, so any new or newly-annotated observations should improve these dates over time.";
 
-#[page("/regions", with(Metadata::new().title(page_title("Regions"))))]
+#[page("/regions", with(Metadata::new().subtitle("Regions")))]
 pub async fn list(cx: &Cx) -> topcoat::Result<impl View> {
     let mut db = db(cx);
     let mut region_types = Vec::default();
@@ -121,7 +121,7 @@ async fn region(cx: &Cx) -> topcoat::Result<Region> {
     with(Metadata::from_fn(
         async |cx| {
             let region = region(cx).await?;
-            Ok(Metadata::new().title(page_title(&region.name)))
+            Ok(Metadata::new().subtitle(&region.name))
         },
     ))
 )]
@@ -322,11 +322,7 @@ impl ModifyOffset for HarvestParams {
     with(Metadata::from_fn(
         async |cx| {
             let region = region(cx).await?;
-            Ok(
-                Metadata::new().title(
-                    page_title(format!("{}: Fruiting soon", region.name)),
-                ),
-            )
+            Ok(Metadata::new().subtitle(format!("{}: Fruiting soon", region.name)))
         },
     ))
 )]
@@ -402,11 +398,7 @@ pub(crate) async fn fruiting_soon(cx: &Cx) -> topcoat::Result<impl View> {
     with(Metadata::from_fn(
         async |cx| {
             let region = region(cx).await?;
-            Ok(
-                Metadata::new().title(
-                    page_title(format!("{}: Fruiting ending", region.name)),
-                ),
-            )
+            Ok(Metadata::new().subtitle(format!("{}: Fruiting ending", region.name)))
         },
     ))
 )]
@@ -482,11 +474,7 @@ pub(crate) async fn fruiting_done(cx: &Cx) -> topcoat::Result<impl View> {
     with(Metadata::from_fn(
         async |cx| {
             let region = region(cx).await?;
-            Ok(
-                Metadata::new().title(
-                    page_title(format!("{}: Fruiting now", region.name)),
-                ),
-            )
+            Ok(Metadata::new().subtitle(format!("{}: Fruiting now", region.name)))
         },
     ))
 )]
@@ -577,11 +565,7 @@ impl ModifyOffset for RegionalTaxaListParams {
     with(Metadata::from_fn(
         async |cx| {
             let region = region(cx).await?;
-            Ok(
-                Metadata::new().title(
-                    page_title(format!("{}: Fruiting dates", region.name)),
-                ),
-            )
+            Ok(Metadata::new().subtitle(format!("{}: Fruiting dates", region.name)))
         },
     ))
 )]
@@ -686,13 +670,11 @@ async fn regional_taxon_status(cx: &Cx) -> topcoat::Result<RegionalTaxonStatus> 
         async |cx| {
             let rts = regional_taxon_status(cx).await?;
             Ok(
-                Metadata::new().title(
-                    page_title(
-                        format!(
-                            "{} in {}",
-                            rts.taxon.get().complete_name,
-                            rts.region.get().name,
-                        ),
+                Metadata::new().subtitle(
+                    format!(
+                        "{} in {}",
+                        rts.taxon.get().complete_name,
+                        rts.region.get().name,
                     ),
                 ),
             )

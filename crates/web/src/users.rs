@@ -16,7 +16,7 @@ use topcoat::{
 };
 
 use crate::{
-    admin,
+    Subtitle, admin,
     auth::{LoginFormParams, do_logout, login},
     components::{
         avatar::*, button::button, card::*, dropdown_menu::*, field::*, floating::FloatingAlign,
@@ -24,7 +24,7 @@ use crate::{
     },
     context::current_user,
     context::{db, require_user},
-    mdi, page_title, users,
+    mdi, users,
 };
 
 #[derive(Deserialize, Debug)]
@@ -113,7 +113,7 @@ async fn email_address(cx: &Cx, address: String, confirmed: bool) -> topcoat::Re
     })
 }
 
-#[page("/user/account", with(Metadata::new().title(page_title("User Account"))))]
+#[page("/user/account", with(Metadata::new().subtitle("User Account")))]
 pub(crate) async fn account(cx: &Cx) -> topcoat::Result<impl View> {
     let user = require_user(cx).await?;
     let prof = UserProfile::get_by_user_id(&mut db(cx), user.id)
@@ -268,7 +268,7 @@ pub async fn user_profile_form(
     })
 }
 
-#[page("/user/profile", with(Metadata::new().title(page_title("Edit User Profile"))))]
+#[page("/user/profile", with(Metadata::new().subtitle("Edit User Profile")))]
 pub(crate) async fn profile_edit(cx: &Cx) -> topcoat::Result<impl View> {
     let user = require_user(cx).await?;
     let prof = UserProfile::get_by_user_id(&mut db(cx), user.id)
@@ -354,7 +354,7 @@ impl ChangePasswordErrors {
     }
 }
 
-#[page("/user/password", with(Metadata::new().title(page_title("Change password"))))]
+#[page("/user/password", with(Metadata::new().subtitle("Change password")))]
 pub(crate) async fn change_password(cx: &Cx) -> topcoat::Result<impl View> {
     let _user = require_user(cx).await?;
     let rejected = try_context::<ChangePasswordErrors>(cx);

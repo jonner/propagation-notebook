@@ -68,8 +68,14 @@ pub enum Command {
 
 const SITE_NAME: &str = "Propagation Notebook";
 
-pub fn page_title<S: AsRef<str>>(title: S) -> String {
-    format!("{} | {SITE_NAME}", title.as_ref())
+impl Subtitle for Metadata {
+    fn subtitle<S: AsRef<str>>(self, title: S) -> Self {
+        self.title(format!("{} | {SITE_NAME}", title.as_ref()))
+    }
+}
+
+trait Subtitle {
+    fn subtitle<S: AsRef<str>>(self, title: S) -> Self;
 }
 
 #[tokio::main]

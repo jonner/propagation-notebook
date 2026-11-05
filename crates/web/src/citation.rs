@@ -3,8 +3,9 @@ use std::collections::HashMap;
 use libpropagation::{auth::PermissionCode, citation::Citation, taxonomy::Taxon};
 use serde::Deserialize;
 use topcoat::{
-    context::{Cx, try_context},
+    context::{Cx, memoize, try_context},
     icon::icon,
+    metadata::Metadata,
     router::{
         Body, Method, StatusCode,
         content::Form,
@@ -18,11 +19,19 @@ use tracing::debug;
 use url::Url;
 
 use crate::{
+    Subtitle,
     actions::{Action, ActionItemType, permitted_actions},
     assets::mdi,
     components::{
-        action_menu::*, alert_dialog::*, breadcrumb::*, button::*, card::*, dialog::*, field::*,
-        input::input, pn::item_term, pn::item_value,
+        action_menu::*,
+        alert_dialog::*,
+        breadcrumb::*,
+        button::*,
+        card::*,
+        dialog::*,
+        field::*,
+        input::input,
+        pn::{item_term, item_value},
     },
     context::{current_user, db, require_user_with_permission},
     flash::{self, FlashMessage},
@@ -31,11 +40,10 @@ use crate::{
 
 path_param!(pub citation_id: u64 else bad_request);
 
-#[page("/citations/{citation_id}")]
-pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
-    let mut db = db(cx);
+#[memoize(as_ref)]
+async fn citation(cx: &Cx) -> topcoat::Result<Citation> {
     let id = *path_param::<CitationId>(cx)?;
-    let citation = Citation::filter_by_id(id)
+    Ok(Citation::filter_by_id(id)
         .include(Citation::fields().cleaning_procedures().cleaning().taxon())
         .include(Citation::fields().propagation_procedures().propagation())
         .include(Citation::fields().taxon_notes().note().taxon())
@@ -46,31 +54,41 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                 .taxon(),
         )
         .one()
-        .exec(&mut db)
+        .exec(&mut db(cx))
         .await
-        .ok_or_not_found()?;
+        .ok_or_not_found()?)
+}
+
+#[page(
+    "/citations/{citation_id}",
+    with(Metadata::from_fn(
+        async |cx| {
+            let citation = citation(cx).await?;
+            Ok(Metadata::new().subtitle(&citation.title))
+        },
+    ))
+)]
+pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
+    let citation = citation(cx).await?;
     let delete_dialog_open = signal(cx, || false);
 
-    let mut cited_taxa: HashMap<u64, Taxon> = Default::default();
-    for cite in citation.taxon_notes.into_inner() {
-        let note = cite.note.into_inner();
-        cited_taxa.insert(note.taxon_id, note.taxon.into_inner());
+    let mut cited_taxa: HashMap<u64, &Taxon> = Default::default();
+    for cite in citation.taxon_notes.get() {
+        let note = cite.note.get();
+        cited_taxa.insert(note.taxon_id, note.taxon.get());
     }
-    for cite in citation.taxon_propagation_procedures.into_inner() {
-        cited_taxa.insert(
-            cite.taxon_id,
-            cite.taxon_propagation.into_inner().taxon.into_inner(),
-        );
+    for cite in citation.taxon_propagation_procedures.get() {
+        cited_taxa.insert(cite.taxon_id, cite.taxon_propagation.get().taxon.get());
     }
-    for cite in citation.cleaning_procedures.into_inner() {
-        let cleaning = cite.cleaning.into_inner();
-        cited_taxa.insert(cleaning.taxon_id, cleaning.taxon.into_inner());
+    for cite in citation.cleaning_procedures.get() {
+        let cleaning = cite.cleaning.get();
+        cited_taxa.insert(cleaning.taxon_id, cleaning.taxon.get());
     }
     let cited_procedures = citation
         .propagation_procedures
-        .into_inner()
-        .into_iter()
-        .map(|pp| pp.propagation.into_inner())
+        .get()
+        .iter()
+        .map(|pp| pp.propagation.get())
         .collect::<Vec<_>>();
 
     let actions = [
@@ -78,7 +96,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
             name: "Edit".to_string(),
             permission: Some(PermissionCode::CitationEdit),
             item_type: ActionItemType::Link,
-            attrs: attributes! { href=(href!(modify, CitationId(id))) },
+            attrs: attributes! { href=(href!(modify, CitationId(citation.id))) },
         },
         Action {
             name: "Delete".to_string(),
@@ -101,7 +119,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                         breadcrumb_list(
                             breadcrumb_item(breadcrumb_page("Cited Works"))
                             breadcrumb_separator()
-                            breadcrumb_item(breadcrumb_page((id)))
+                            breadcrumb_item(breadcrumb_page((citation.id)))
                         )
                     )
                     <h1 class="flex items-center">
@@ -119,11 +137,11 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                         <section class="flex flex-col gap-6">
                             <div>
                                 item_term("Title")
-                                item_value((citation.title))
+                                item_value((&citation.title))
                             </div>
                             <div>
                                 item_term("Author")
-                                item_value((citation.author))
+                                item_value((&citation.author))
                             </div>
                             <div>
                                 item_term("Publication Year")
@@ -132,7 +150,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                             <div>
                                 item_term("Url")
                                 item_value(
-                                    if let Some(url) = citation.url {
+                                    if let Some(url) = citation.url.as_ref() {
                                         <a href=(&url)>(&url)</a>
                                     } else {
                                         <span class="text-muted-foreground">"Not specified"</span>
@@ -141,12 +159,12 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                             </div>
                             <div>
                                 item_term("Container Title")
-                                item_value((citation.container_title))
+                                item_value((citation.container_title.as_ref()))
                             </div>
                             <div>
                                 item_term("doi")
                                 item_value(
-                                    if let Some(doi) = citation.doi {
+                                    if let Some(doi) = citation.doi.as_ref() {
                                         <a href=(format!("https://doi.org/{}", doi))>(doi)</a>
                                     }
                                 )
@@ -219,7 +237,10 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                         },
                         "Cancel"
                     )
-                    <form action=(href!(delete_citation, CitationId(id))) method="POST">
+                    <form
+                        action=(href!(delete_citation, CitationId(citation.id)))
+                        method="POST"
+                    >
                         button(
                             variant: ButtonVariant::Destructive,
                             attrs: attributes! {},
@@ -522,7 +543,7 @@ pub async fn citation_form(
     })
 }
 
-#[page("/admin/citations/new")]
+#[page("/admin/citations/new", with(Metadata::new().subtitle("New cited work")))]
 pub async fn create(cx: &Cx) -> topcoat::Result<impl View> {
     let _user =
         require_user_with_permission(cx, libpropagation::auth::PermissionCode::CitationCreate)
@@ -545,7 +566,19 @@ pub async fn create(cx: &Cx) -> topcoat::Result<impl View> {
     })
 }
 
-#[page("/admin/citations/{citation_id}/edit")]
+#[page(
+    "/admin/citations/{citation_id}/edit",
+    with(Metadata::from_fn(
+        async |cx| {
+            let citation = citation(cx).await?;
+            Ok(
+                Metadata::new().subtitle(
+                    format!("{} | Administration Console", citation.title),
+                ),
+            )
+        },
+    ))
+)]
 pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
     let _user =
         require_user_with_permission(cx, libpropagation::auth::PermissionCode::CitationEdit)
@@ -608,7 +641,7 @@ pub async fn do_modify(cx: &Cx, Form(params): Form<CitationParams>) -> topcoat::
     Ok(see_other(href!(details, CitationId(id)).resolve(cx)))
 }
 
-#[page("/admin/citations")]
+#[page("/admin/citations", with(Metadata::new().subtitle("Cited Works")))]
 pub async fn admin(cx: &Cx) -> topcoat::Result<impl View> {
     let user = require_user_with_permission(cx, PermissionCode::CitationEdit).await?;
     let citations = Citation::all().exec(&mut db(cx)).await?;

@@ -19,6 +19,7 @@ use topcoat::{
 use tracing::{debug, warn};
 
 use crate::{
+    Subtitle,
     actions::{Action, ActionItemType, permitted_actions},
     citation,
     components::{
@@ -34,7 +35,7 @@ use crate::{
         },
     },
     context::{current_user, db, require_user_with_permission},
-    mdi, page_title,
+    mdi,
     util::{ModifyOffset, PER_PAGE, PageState},
 };
 
@@ -67,7 +68,7 @@ impl ModifyOffset for TaxaListParams {
     }
 }
 
-#[page("/taxa/explore", with(Metadata::new().title(page_title("Taxonomy Explorer"))))]
+#[page("/taxa/explore", with(Metadata::new().subtitle("Taxonomy Explorer")))]
 pub(crate) async fn explore(cx: &Cx) -> topcoat::Result<impl View> {
     let mut db = db(cx);
     let params = query_params::<TaxaListParams>(cx)?;
@@ -306,7 +307,7 @@ impl ModifyOffset for TaxaSearchParams {
     }
 }
 
-#[page("/taxa/search", with(Metadata::new().title(page_title("Taxon Search"))))]
+#[page("/taxa/search", with(Metadata::new().subtitle("Taxon Search")))]
 pub(crate) async fn search(cx: &Cx) -> topcoat::Result<impl View> {
     let mut db = db(cx);
     let params = query_params::<TaxaSearchParams>(cx)?;
@@ -412,8 +413,7 @@ pub(crate) async fn search(cx: &Cx) -> topcoat::Result<impl View> {
 #[memoize(as_ref)]
 pub async fn taxon(cx: &Cx) -> topcoat::Result<Taxon> {
     let id = path_param::<TaxonId>(cx)?;
-    Ok(
-    Taxon::filter_by_id(id)
+    Ok(Taxon::filter_by_id(id)
         .include(Taxon::fields().photo())
         .include(Taxon::fields().ancestor_links().ancestor())
         .one()
@@ -428,9 +428,9 @@ pub async fn taxon(cx: &Cx) -> topcoat::Result<Taxon> {
         async |cx| {
             let taxon = taxon(cx).await?;
             Ok(
-                Metadata::new().title(
-                    page_title(format!("{} photo", taxon.complete_name)),
-                ),
+                Metadata::new().
+                    subtitle(format!("{} photo", taxon.complete_name)),
+                
             )
         },
     ))
@@ -606,7 +606,7 @@ async fn detailed_taxon(cx: &Cx) -> topcoat::Result<Taxon> {
     with(Metadata::from_fn(
         async |cx| {
             let taxon = detailed_taxon(cx).await?;
-            Ok(Metadata::new().title(page_title(&taxon.complete_name)))
+            Ok(Metadata::new().subtitle(&taxon.complete_name))
         },
     ))
 )]

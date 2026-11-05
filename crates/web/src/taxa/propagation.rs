@@ -5,8 +5,9 @@ use libpropagation::{
 };
 use serde::Deserialize;
 use topcoat::{
-    context::{Cx, try_context},
+    context::{Cx, memoize, try_context},
     icon::icon,
+    metadata::Metadata,
     router::{
         Body, Method, StatusCode,
         content::Form,
@@ -18,6 +19,7 @@ use topcoat::{
 };
 
 use crate::{
+    Subtitle,
     actions::{Action, ActionItemType, permitted_actions},
     assets::mdi,
     components::{
@@ -42,13 +44,11 @@ use crate::{
 path_param!(pub propagation_id: u64 else bad_request);
 path_param!(pub citation_id: u64 else bad_request);
 
-#[page("/taxa/{taxon_id}/propagation/{propagation_id}")]
-pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
-    let mut db = db(cx);
+#[memoize(as_ref)]
+async fn taxon_propagation_procedure(cx: &Cx) -> topcoat::Result<TaxonPropagationProcedure> {
     let taxon_id = *path_param::<TaxonId>(cx)?;
     let propagation_id = *path_param::<PropagationId>(cx)?;
-    let delete_dialog_open = signal(cx, || false);
-    let tp =
+    Ok(
         TaxonPropagationProcedure::filter_by_taxon_id_and_propagation_id(taxon_id, propagation_id)
             .include(
                 TaxonPropagationProcedure::fields()
@@ -62,16 +62,42 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                     .citation(),
             )
             .one()
-            .exec(&mut db)
+            .exec(&mut db(cx))
             .await
-            .ok_or_not_found()?;
+            .ok_or_not_found()?,
+    )
+}
+#[page(
+    "/taxa/{taxon_id}/propagation/{propagation_id}",
+    with(Metadata::from_fn(
+        async |cx| {
+            let tp = taxon_propagation_procedure(cx).await?;
+            Ok(
+                Metadata::new().subtitle(
+                    format!(
+                        "Propagation procedure {} for {}",
+                        tp.propagation_id,
+                        tp.taxon.get().complete_name,
+                    ),
+                ),
+            )
+        },
+    ))
+)]
+pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
+    let delete_dialog_open = signal(cx, || false);
+    let tp = taxon_propagation_procedure(cx).await?;
 
     let menu_actions = [
         Action {
             name: "Edit".to_string(),
             permission: Some(PermissionCode::TaxonPropagationEdit),
             attrs: attributes! {
-                href=(href!(modify, TaxonId(taxon_id), PropagationId(propagation_id)))
+                href=(href!(
+                    modify,
+                    TaxonId(tp.taxon_id),
+                    PropagationId(tp.propagation_id),
+                ))
             },
             item_type: ActionItemType::Link,
         },
@@ -134,7 +160,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
             <section>
                 <h2>"Notes"</h2>
                 <div>(procedure.notes.as_deref().unwrap_or_default())</div>
-                if let Some(taxon_notes) = tp.notes {
+                if let Some(taxon_notes) = tp.notes.as_ref() {
                     <div>(taxon_notes)</div>
                 }
             </section>
@@ -174,8 +200,8 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                     <form
                         action=(href!(
                             delete,
-                            TaxonId(taxon_id),
-                            PropagationId(propagation_id),
+                            TaxonId(tp.taxon_id),
+                            PropagationId(tp.propagation_id),
                         ))
                         method="POST"
                     >
@@ -191,37 +217,33 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
     })
 }
 
-#[page("/taxa/{taxon_id}/propagation/{propagation_id}/edit")]
+#[page(
+    "/taxa/{taxon_id}/propagation/{propagation_id}/edit",
+    with(Metadata::from_fn(
+        async |cx| {
+            let tp = taxon_propagation_procedure(cx).await?;
+            Ok(
+                Metadata::new().subtitle(
+                    format!(
+                        "Edit propagation procedure {} for {}",
+                        tp.propagation_id,
+                        tp.taxon.get().complete_name,
+                    ),
+                ),
+            )
+        },
+    ))
+)]
 pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
     let _ = require_user_with_permission(cx, PermissionCode::TaxonPropagationEdit).await?;
-    let mut db = db(cx);
-    let taxon_id = *path_param::<TaxonId>(cx)?;
-    let propagation_id = *path_param::<PropagationId>(cx)?;
     let add_citation_dialog_open = signal(cx, || false);
     let delete_citation_data = signal(cx, || None::<(u64, String)>);
-
-    let tp =
-        TaxonPropagationProcedure::filter_by_taxon_id_and_propagation_id(taxon_id, propagation_id)
-            .include(
-                TaxonPropagationProcedure::fields()
-                    .propagation()
-                    .citations(),
-            )
-            .include(TaxonPropagationProcedure::fields().taxon())
-            .include(
-                TaxonPropagationProcedure::fields()
-                    .citation_links()
-                    .citation(),
-            )
-            .one()
-            .exec(&mut db)
-            .await
-            .ok_or_not_found()?;
+    let tp = taxon_propagation_procedure(cx).await?;
     let rejected = try_context::<TaxonPropagationRejected>(cx);
     let errors = rejected.map(|r| r.errors.clone()).unwrap_or_default();
     let params = rejected
         .map(|r| r.form.clone())
-        .unwrap_or_else(|| (&tp).into());
+        .unwrap_or_else(|| tp.into());
 
     Ok(view! {
         let proc = tp.propagation.get();
@@ -248,8 +270,8 @@ pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
                                     attrs: attributes! {
                                         href=(href!(
                                             details,
-                                            TaxonId(taxon_id),
-                                            PropagationId(propagation_id),
+                                            TaxonId(tp.taxon_id),
+                                            PropagationId(tp.propagation_id),
                                         ))
                                     },
                                     (tp.propagation_id)
@@ -269,8 +291,8 @@ pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
                         <form
                             action=(href!(
                                 do_modify,
-                                TaxonId(taxon_id),
-                                PropagationId(propagation_id),
+                                TaxonId(tp.taxon_id),
+                                PropagationId(tp.propagation_id),
                             ))
                             method="POST"
                             class="flex flex-col gap-6"
@@ -364,8 +386,8 @@ pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
                 method="POST"
                 action=(href!(
                     add_citation,
-                    TaxonId(taxon_id),
-                    PropagationId(propagation_id),
+                    TaxonId(tp.taxon_id),
+                    PropagationId(tp.propagation_id),
                 ))
             }
         )
@@ -378,8 +400,8 @@ pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
                     .map(
                         |d| href!(
                                 remove_citation,
-                                TaxonId(taxon_id),
-                                PropagationId(propagation_id),
+                                TaxonId(tp.taxon_id),
+                                PropagationId(tp.propagation_id),
                                 CitationId(d.0),
                             ),
                     ))

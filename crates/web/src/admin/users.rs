@@ -2,7 +2,8 @@ use std::collections::HashSet;
 
 use libpropagation::auth::{PermissionCode, Role, User, UserProfile, UserRole};
 use topcoat::{
-    context::Cx,
+    context::{Cx, memoize},
+    metadata::Metadata,
     router::{
         content::Form,
         error::{RouterErrorExt, SeeOther, bad_request, see_other},
@@ -13,7 +14,7 @@ use topcoat::{
 use uuid::Uuid;
 
 use crate::{
-    admin,
+    Subtitle, admin,
     components::{
         breadcrumb::*,
         button::button,
@@ -29,7 +30,7 @@ use crate::{
 
 path_param!(user_id: Uuid else bad_request);
 
-#[page("/admin/users")]
+#[page("/admin/users", with(Metadata::new().subtitle("User administration")))]
 pub async fn list(cx: &Cx) -> topcoat::Result<impl View> {
     _ = require_user_with_permission(cx, PermissionCode::UserList).await?;
     let users = User::all().exec(&mut db(cx)).await?;
@@ -54,16 +55,33 @@ pub async fn list(cx: &Cx) -> topcoat::Result<impl View> {
     })
 }
 
-#[page("/admin/users/{user_id}")]
-pub async fn edit(cx: &Cx) -> topcoat::Result<impl View> {
-    let user = require_user_with_permission(cx, PermissionCode::UserEdit).await?;
+#[memoize(as_ref)]
+async fn user_from_id(cx: &Cx) -> topcoat::Result<User> {
     let user_id = *path_param::<UserId>(cx)?;
-    let user_to_edit = User::filter_by_id(user_id)
+    Ok(User::filter_by_id(user_id)
         .include(User::fields().profile())
         .include(User::fields().roles())
         .one()
         .exec(&mut db(cx))
-        .await?;
+        .await?)
+}
+
+#[page(
+    "/admin/users/{user_id}",
+    with(Metadata::from_fn(
+        async |cx| {
+            let user = user_from_id(cx).await?;
+            Ok(
+                Metadata::new().subtitle(
+                    format!("User {} | Administration Console", user.username),
+                ),
+            )
+        },
+    ))
+)]
+pub async fn edit(cx: &Cx) -> topcoat::Result<impl View> {
+    let user = require_user_with_permission(cx, PermissionCode::UserEdit).await?;
+    let user_to_edit = user_from_id(cx).await?;
 
     Ok(view! {
         breadcrumb(
@@ -88,7 +106,7 @@ pub async fn edit(cx: &Cx) -> topcoat::Result<impl View> {
                     attrs: attributes! { class="flex flex-col gap-6" },
                     <div>
                         item_term("User ID")
-                        item_value((user_id.to_string()))
+                        item_value((user.id.to_string()))
                     </div>
                     <div>
                         item_term("Username")
@@ -103,7 +121,7 @@ pub async fn edit(cx: &Cx) -> topcoat::Result<impl View> {
                         attrs: attributes! {
                             class="flex flex-col gap-4"
                             method="POST"
-                            action=(href!(update_profile, UserId(user_id)))
+                            action=(href!(update_profile, UserId(user.id)))
                         },
                         profile: user_to_edit.profile.get().as_ref()
                     )
@@ -116,7 +134,7 @@ pub async fn edit(cx: &Cx) -> topcoat::Result<impl View> {
                         user_roles_form(
                             attrs: attributes! {
                                 method="POST"
-                                action=(href!(update_roles, UserId(user_id)))
+                                action=(href!(update_roles, UserId(user.id)))
                             },
                             user: &user_to_edit
                         )

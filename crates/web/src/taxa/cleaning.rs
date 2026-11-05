@@ -3,8 +3,9 @@ use libpropagation::{
 };
 use serde::Deserialize;
 use topcoat::{
-    context::Cx,
+    context::{Cx, memoize},
     icon::icon,
+    metadata::Metadata,
     router::{
         content::Form,
         error::{RouterErrorExt, SeeOther, see_other},
@@ -16,6 +17,7 @@ use topcoat::{
 use tracing::trace;
 
 use crate::{
+    Subtitle,
     actions::{Action, ActionItemType, permitted_actions},
     assets::mdi,
     components::{
@@ -36,15 +38,11 @@ use crate::{
 path_param!(pub cleaning_id: u64 else bad_request);
 path_param!(pub citation_id: u64 else bad_request);
 
-#[page("/taxa/{taxon_id}/cleaning/{cleaning_id}")]
-pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
-    let user = current_user(cx).await;
-    let mut db = db(cx);
-    let taxon_id = path_param::<TaxonId>(cx)?;
-    let cleaning_id = path_param::<CleaningId>(cx)?;
-    let delete_dialog_open = signal(cx, || false);
-
-    let proc = CleaningProcedure::filter(
+#[memoize(as_ref)]
+async fn cleaning_procedure(cx: &Cx) -> topcoat::Result<CleaningProcedure> {
+    let taxon_id = *path_param::<TaxonId>(cx)?;
+    let cleaning_id = *path_param::<CleaningId>(cx)?;
+    Ok(CleaningProcedure::filter(
         CleaningProcedure::fields()
             .taxon_id()
             .eq(taxon_id)
@@ -53,9 +51,33 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
     .include(CleaningProcedure::fields().taxon())
     .include(CleaningProcedure::fields().citation_links().citation())
     .one()
-    .exec(&mut db)
+    .exec(&mut db(cx))
     .await
-    .ok_or_not_found()?;
+    .ok_or_not_found()?)
+}
+
+#[page(
+    "/taxa/{taxon_id}/cleaning/{cleaning_id}",
+    with(Metadata::from_fn(
+        async |cx| {
+            let proc = cleaning_procedure(cx).await?;
+            Ok(
+                Metadata::new().subtitle(
+                    format!(
+                        "Cleaning procedure {} for {}",
+                        proc.id,
+                        proc.taxon.get().complete_name,
+                    ),
+                ),
+            )
+        },
+    ))
+)]
+pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
+    let user = current_user(cx).await;
+    let delete_dialog_open = signal(cx, || false);
+
+    let proc = cleaning_procedure(cx).await?;
     trace!(?proc);
     let actions = [
         Action {
@@ -113,9 +135,9 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
             </hgroup>
             <section>
                 <h2>"Instructions"</h2>
-                <div class="text-2xl">(proc.instructions)</div>
+                <div class="text-2xl">(&proc.instructions)</div>
             </section>
-            if let Some(notes) = proc.notes {
+            if let Some(notes) = proc.notes.as_ref() {
                 <section>
                     <h2>"Additional Notes"</h2>
                     <div>(notes)</div>
@@ -170,23 +192,26 @@ async fn cleaning_procedure_form(
     })
 }
 
-#[page("/taxa/{taxon_id}/cleaning/{cleaning_id}/edit")]
+#[page(
+    "/taxa/{taxon_id}/cleaning/{cleaning_id}/edit",
+    with(Metadata::from_fn(
+        async |cx| {
+            let proc = cleaning_procedure(cx).await?;
+            Ok(
+                Metadata::new().subtitle(
+                    format!(
+                        "Edit cleaning procedure {} for {}",
+                        proc.id,
+                        proc.taxon.get().complete_name,
+                    ),
+                ),
+            )
+        },
+    ))
+)]
 pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
     let _ = require_user_with_permission(cx, PermissionCode::TaxonCleaningEdit).await?;
-    let taxon_id = *path_param::<TaxonId>(cx)?;
-    let cleaning_id = *path_param::<CleaningId>(cx)?;
-    let cleaning_procedure = CleaningProcedure::filter(
-        CleaningProcedure::fields()
-            .taxon_id()
-            .eq(taxon_id)
-            .and(CleaningProcedure::fields().id().eq(cleaning_id)),
-    )
-    .include(CleaningProcedure::fields().citation_links().citation())
-    .include(CleaningProcedure::fields().taxon())
-    .one()
-    .exec(&mut db(cx))
-    .await
-    .ok_or_not_found()?;
+    let cleaning_procedure = cleaning_procedure(cx).await?;
 
     let delete_citation_data = signal(cx, || None::<(u64, String)>);
     let add_citation_dialog_open = signal(cx, || false);
@@ -199,7 +224,7 @@ pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
                     breadcrumb_list(
                         breadcrumb_item(
                             breadcrumb_link(
-                                attrs: attributes! { href=(href!(taxa::details, TaxonId(taxon_id))) },
+                                attrs: attributes! { href=(href!(taxa::details, TaxonId(taxon.id))) },
                                 (&taxon.complete_name)
                             )
                         )
@@ -211,11 +236,11 @@ pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
                                 attrs: attributes! {
                                     href=(href!(
                                         details,
-                                        TaxonId(taxon_id),
-                                        CleaningId(cleaning_id),
+                                        TaxonId(taxon.id),
+                                        CleaningId(cleaning_procedure.id),
                                     ))
                                 },
-                                (cleaning_id)
+                                (cleaning_procedure.id)
                             )
                         )
                         breadcrumb_separator()
@@ -271,7 +296,11 @@ pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
             open_sig: add_citation_dialog_open.clone(),
             form_attrs: attributes! {
                 method="POST"
-                action=(href!(add_citation, TaxonId(taxon_id), CleaningId(cleaning_id)))
+                action=(href!(
+                    add_citation,
+                    TaxonId(taxon.id),
+                    CleaningId(cleaning_procedure.id),
+                ))
             }
         )
         remove_citation_dialog(
@@ -283,8 +312,8 @@ pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
                         |d| Some(
                                 href!(
                                     remove_citation,
-                                    TaxonId(taxon_id),
-                                    CleaningId(cleaning_id),
+                                    TaxonId(taxon.id),
+                                    CleaningId(cleaning_procedure.id),
                                     CitationId(d.0),
                                 ),
                             ),

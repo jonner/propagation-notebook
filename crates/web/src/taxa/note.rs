@@ -6,8 +6,9 @@ use libpropagation::{
 use serde::Deserialize;
 use strum::IntoEnumIterator;
 use topcoat::{
-    context::{Cx, try_context},
+    context::{Cx, memoize, try_context},
     icon::icon,
+    metadata::Metadata,
     router::{
         Body, Method,
         content::Form,
@@ -20,6 +21,7 @@ use topcoat::{
 use tracing::trace;
 
 use crate::{
+    Subtitle,
     actions::{Action, ActionItemType, permitted_actions},
     assets::mdi,
     components::{
@@ -44,20 +46,41 @@ use crate::{
 path_param!(pub note_id: u64 else bad_request);
 path_param!(pub citation_id: u64 else bad_request);
 
-#[page("/taxa/{taxon_id}/note/{note_id}")]
-pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
-    let mut db = db(cx);
-    let taxon_id = *path_param::<TaxonId>(cx)?;
+#[memoize(as_ref)]
+async fn taxon(cx: &Cx) -> topcoat::Result<Taxon> {
+    let id = *path_param::<TaxonId>(cx)?;
+    Ok(Taxon::get_by_id(&mut db(cx), id).await.ok_or_not_found()?)
+}
+
+#[memoize(as_ref)]
+async fn taxon_note(cx: &Cx) -> topcoat::Result<TaxonNote> {
     let note_id = *path_param::<NoteId>(cx)?;
-    let note = TaxonNote::filter_by_id(note_id)
+    Ok(TaxonNote::filter_by_id(note_id)
         .include(TaxonNote::fields().taxon())
         .include(TaxonNote::fields().citation_links().citation())
         .one()
-        .exec(&mut db)
+        .exec(&mut db(cx))
         .await
-        .ok_or_not_found()?;
+        .ok_or_not_found()?)
+}
 
+#[page(
+    "/taxa/{taxon_id}/note/{note_id}",
+    with(Metadata::from_fn(
+        async |cx| {
+            let note = taxon_note(cx).await?;
+            Ok(
+                Metadata::new().subtitle(
+                    format!("Note {} for {}", note.id, note.taxon.get().complete_name),
+                ),
+            )
+        },
+    ))
+)]
+pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
     let delete_dialog_open = signal(cx, || false);
+    let note = taxon_note(cx).await?;
+    let taxon_id = *path_param::<TaxonId>(cx)?;
 
     trace!(?note);
 
@@ -65,7 +88,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
         Action {
             name: "Edit".to_string(),
             permission: Some(PermissionCode::TaxonNoteEdit),
-            attrs: attributes! { href=(href!(edit, TaxonId(taxon_id), NoteId(note_id))) },
+            attrs: attributes! { href=(href!(edit, TaxonId(taxon_id), NoteId(note.id))) },
             item_type: ActionItemType::Link,
         },
         Action {
@@ -108,7 +131,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                         <div class="ms-auto">action_menu(actions: &actions)</div>
                     }
                 </h1>
-                <div class="text-2xl">(note.text)</div>
+                <div class="text-2xl">(&note.text)</div>
             </section>
             <section>
                 citation_list(
@@ -139,7 +162,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                         "Cancel"
                     )
                     <form
-                        action=(href!(delete, TaxonId(taxon_id), NoteId(note_id)))
+                        action=(href!(delete, TaxonId(taxon_id), NoteId(note.id)))
                         method="POST"
                     >
                         button(
@@ -271,19 +294,26 @@ pub async fn note_form(
     })
 }
 
-#[page("/taxa/{taxon_id}/note/{note_id}/edit")]
+#[page(
+    "/taxa/{taxon_id}/note/{note_id}/edit",
+    with(Metadata::from_fn(
+        async |cx| {
+            let note = taxon_note(cx).await?;
+            Ok(
+                Metadata::new().subtitle(
+                    format!(
+                        "Edit note {} for {}",
+                        note.id,
+                        note.taxon.get().complete_name,
+                    ),
+                ),
+            )
+        },
+    ))
+)]
 pub async fn edit(cx: &Cx) -> topcoat::Result<impl View> {
     _ = require_user_with_permission(cx, PermissionCode::TaxonNoteEdit).await?;
-    let mut db = db(cx);
-    let taxon_id = *path_param::<TaxonId>(cx)?;
-    let note_id = *path_param::<NoteId>(cx)?;
-    let note = TaxonNote::filter_by_id(note_id)
-        .include(TaxonNote::fields().taxon())
-        .include(TaxonNote::fields().citation_links().citation())
-        .one()
-        .exec(&mut db)
-        .await
-        .ok_or_not_found()?;
+    let note = taxon_note(cx).await?;
     let form_id = element_id(cx);
     let add_citation_dialog_open = signal(cx, || false);
     let remove_citation_data = signal(cx, || None::<(u64, String)>);
@@ -304,7 +334,7 @@ pub async fn edit(cx: &Cx) -> topcoat::Result<impl View> {
                         breadcrumb_item(
                             breadcrumb_link(
                                 attrs: attributes! {
-                                    href=(href!(details, TaxonId(taxon.id), NoteId(note_id)))
+                                    href=(href!(details, TaxonId(taxon.id), NoteId(note.id)))
                                 },
                                 (format!("Note {}", note.id))
                             )
@@ -324,10 +354,14 @@ pub async fn edit(cx: &Cx) -> topcoat::Result<impl View> {
                         attrs: attributes! {
                             class="flex flex-col gap-6"
                             id=(&form_id)
-                            action=(href!(update, TaxonId(taxon_id), NoteId(note_id)))
+                            action=(href!(
+                                update,
+                                TaxonId(note.taxon.get().id),
+                                NoteId(note.id),
+                            ))
                             method="POST"
                         },
-                        note: Some(&note),
+                        note: Some(note),
                         button(
                             attrs: attributes! { form=(&form_id) type="submit" },
                             "Update"
@@ -376,7 +410,11 @@ pub async fn edit(cx: &Cx) -> topcoat::Result<impl View> {
             open_sig: add_citation_dialog_open.clone(),
             form_attrs: attributes! {
                 method="POST"
-                action=(href!(add_citation, TaxonId(taxon_id), NoteId(note_id)))
+                action=(href!(
+                    add_citation,
+                    TaxonId(note.taxon.get().id),
+                    NoteId(note.id),
+                ))
             }
         )
         remove_citation_dialog(
@@ -388,8 +426,8 @@ pub async fn edit(cx: &Cx) -> topcoat::Result<impl View> {
                         |d| Some(
                                 href!(
                                     remove_citation,
-                                    TaxonId(taxon_id),
-                                    NoteId(note_id),
+                                    TaxonId(note.taxon.get().id),
+                                    NoteId(note.id),
                                     CitationId(d.0),
                                 ),
                             ),
@@ -446,12 +484,19 @@ pub async fn update(cx: &Cx, Form(params): Form<NoteParams>) -> topcoat::Result<
     }
 }
 
-#[page("/taxa/{taxon_id}/note/new")]
+#[page(
+    "/taxa/{taxon_id}/note/new",
+    with(Metadata::from_fn(
+        async |cx| {
+            let taxon = taxon(cx).await?;
+            Ok(Metadata::new().subtitle(format!("New note for {}", taxon.complete_name)))
+        },
+    ))
+)]
 pub async fn create(cx: &Cx) -> topcoat::Result<impl View> {
     _ = require_user_with_permission(cx, PermissionCode::TaxonNoteCreate).await?;
-    let taxon_id = *path_param::<TaxonId>(cx)?;
     let form_id = element_id(cx);
-    let taxon = Taxon::get_by_id(&mut db(cx), taxon_id).await?;
+    let taxon = taxon(cx).await?;
 
     Ok(view! {
         breadcrumb(
@@ -471,7 +516,7 @@ pub async fn create(cx: &Cx) -> topcoat::Result<impl View> {
             attrs: attributes! {
                 class="flex flex-col gap-6"
                 id=(&form_id)
-                action=(href!(do_create, TaxonId(taxon_id)))
+                action=(href!(do_create, TaxonId(taxon.id)))
                 method="POST"
             },
             note: None,
