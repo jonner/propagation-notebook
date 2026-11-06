@@ -6,7 +6,7 @@ use serde::Serialize;
 use topcoat::{
     context::{Cx, memoize},
     metadata::Metadata,
-    router::{error::RouterErrorExt, href, page, path_param, query_params},
+    router::{Slot, error::RouterErrorExt, href, layout, page, path_param, query_params},
     view::{View, attributes, view},
 };
 use tracing::trace;
@@ -14,7 +14,6 @@ use tracing::trace;
 use crate::{
     Subtitle,
     components::{
-        breadcrumb::*,
         button::button,
         card::*,
         harvest::{harvest_timeline, regional_taxa_table},
@@ -25,6 +24,7 @@ use crate::{
         },
     },
     context::db,
+    crumb::{Crumb, crumbs},
     taxa::{self, TaxaListParams},
     util::{ModifyOffset, PER_PAGE, PageState},
 };
@@ -32,6 +32,14 @@ use crate::{
 path_param!(pub region_id: u64 else bad_request);
 
 const SEED_DISCLAIMER: &str = "Seed dates are based on data retrieved from iNaturalist.org. If a species does not have any information about its seed-bearing window shown here, it is likely that either iNaturalist doesn't have enough observations of the species within the given area, or too few observations are annotated to indicate the presence of seeds. We periodically import new data from iNaturalist, so any new or newly-annotated observations should improve these dates over time.";
+
+#[layout(
+    "/regions",
+    with(Crumb::new(async |cx| { Ok(("Regions".into(), Some(href!(list).resolve(cx)))) }))
+)]
+pub async fn region_list_shell(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
+    Ok(view! { (slot) })
+}
 
 #[page("/regions", with(Metadata::new().subtitle("Regions")))]
 pub async fn list(cx: &Cx) -> topcoat::Result<impl View> {
@@ -84,7 +92,10 @@ pub async fn list(cx: &Cx) -> topcoat::Result<impl View> {
         })?;
     trace!(?region_types);
     Ok(view! {
-        <h1>"Regions"</h1>
+        <hgroup>
+            crumbs()
+            <h1>"Regions"</h1>
+        </hgroup>
         <div class="flex flex-col gap-4">
             for t in region_types {
                 let regions = t.1;
@@ -114,6 +125,24 @@ async fn region(cx: &Cx) -> topcoat::Result<Region> {
         .exec(&mut db(cx))
         .await
         .ok_or_not_found()?)
+}
+
+#[layout(
+    "/regions/{region_id}",
+    with(Crumb::new(
+        async |cx| {
+            let region = region(cx).await?;
+            Ok(
+                (
+                    region.name.clone(),
+                    Some(href!(overview, RegionId(region.id)).resolve(cx)),
+                ),
+            )
+        },
+    ))
+)]
+pub async fn region_shell(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
+    Ok(view! { (slot) })
 }
 
 #[page(
@@ -183,18 +212,7 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result<impl View> {
     Ok(view! {
         <div class="flex flex-col gap-6">
             <hgroup>
-                breadcrumb(
-                    breadcrumb_list(
-                        breadcrumb_item(
-                            breadcrumb_link(
-                                attrs: attributes! { href=(href!(list)) },
-                                "Region"
-                            )
-                        )
-                        breadcrumb_separator()
-                        breadcrumb_item(breadcrumb_page("Overview"))
-                    )
-                )
+                crumbs()
                 <h1>(&region.name)</h1>
                 <p>(region.notes.as_deref().unwrap_or_default())</p>
             </hgroup>
@@ -317,6 +335,24 @@ impl ModifyOffset for HarvestParams {
     }
 }
 
+#[layout(
+    "/regions/{region_id}/fruiting",
+    with(Crumb::new(
+        async |cx| {
+            let region_id = *path_param::<RegionId>(cx)?;
+            Ok(
+                (
+                    "Seed windows".to_string(),
+                    Some(href!(fruiting_all, RegionId(region_id)).resolve(cx)),
+                ),
+            )
+        },
+    ))
+)]
+pub async fn fruiting_shell(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
+    Ok(view! { (slot) })
+}
+
 #[page(
     "/regions/{region_id}/fruiting/soon",
     with(Metadata::from_fn(
@@ -324,7 +360,8 @@ impl ModifyOffset for HarvestParams {
             let region = region(cx).await?;
             Ok(Metadata::new().subtitle(format!("{}: Fruiting soon", region.name)))
         },
-    ))
+    )),
+    with(Crumb::new(async |_cx| Ok(("Soon".to_string(), None))))
 )]
 pub(crate) async fn fruiting_soon(cx: &Cx) -> topcoat::Result<impl View> {
     let params = query_params::<HarvestParams>(cx)?;
@@ -349,32 +386,7 @@ pub(crate) async fn fruiting_soon(cx: &Cx) -> topcoat::Result<impl View> {
     Ok(view! {
         <div class="flex flex-col gap-6">
             <hgroup>
-                breadcrumb(
-                    breadcrumb_list(
-                        breadcrumb_item(
-                            breadcrumb_link(
-                                attrs: attributes! { href=(href!(list)) },
-                                "Region"
-                            )
-                        )
-                        breadcrumb_separator()
-                        breadcrumb_item(
-                            breadcrumb_link(
-                                attrs: attributes! { href=(href!(overview, RegionId(region.id))) },
-                                (&region.name)
-                            )
-                        )
-                        breadcrumb_separator()
-                        breadcrumb_item(
-                            breadcrumb_link(
-                                attrs: attributes! { href=(href!(fruiting_all, RegionId(region.id))) },
-                                "Seed-bearing"
-                            )
-                        )
-                        breadcrumb_separator()
-                        breadcrumb_item(breadcrumb_page("Soon"))
-                    )
-                )
+                crumbs()
                 <h1>"Taxa beginning to bear fruit"</h1>
                 <p>
                     "The following species should be starting to bear fruit on the given date."
@@ -400,7 +412,8 @@ pub(crate) async fn fruiting_soon(cx: &Cx) -> topcoat::Result<impl View> {
             let region = region(cx).await?;
             Ok(Metadata::new().subtitle(format!("{}: Fruiting ending", region.name)))
         },
-    ))
+    )),
+    with(Crumb::new(async |_cx| Ok(("Ending".to_string(), None))))
 )]
 pub(crate) async fn fruiting_done(cx: &Cx) -> topcoat::Result<impl View> {
     let params = query_params::<HarvestParams>(cx)?;
@@ -425,32 +438,7 @@ pub(crate) async fn fruiting_done(cx: &Cx) -> topcoat::Result<impl View> {
     Ok(view! {
         <div class="flex flex-col gap-6">
             <hgroup>
-                breadcrumb(
-                    breadcrumb_list(
-                        breadcrumb_item(
-                            breadcrumb_link(
-                                attrs: attributes! { href=(href!(list)) },
-                                "Region"
-                            )
-                        )
-                        breadcrumb_separator()
-                        breadcrumb_item(
-                            breadcrumb_link(
-                                attrs: attributes! { href=(href!(overview, RegionId(region.id))) },
-                                (&region.name)
-                            )
-                        )
-                        breadcrumb_separator()
-                        breadcrumb_item(
-                            breadcrumb_link(
-                                attrs: attributes! { href=(href!(fruiting_all, RegionId(region.id))) },
-                                "Seed-bearing"
-                            )
-                        )
-                        breadcrumb_separator()
-                        breadcrumb_item(breadcrumb_page("Ending"))
-                    )
-                )
+                crumbs()
                 <h1>"Last chance to harvest"</h1>
                 <p>
                     ("These species are nearly done bearing fruit soon on the given date.")
@@ -476,7 +464,8 @@ pub(crate) async fn fruiting_done(cx: &Cx) -> topcoat::Result<impl View> {
             let region = region(cx).await?;
             Ok(Metadata::new().subtitle(format!("{}: Fruiting now", region.name)))
         },
-    ))
+    )),
+    with(Crumb::new(async |_cx| Ok(("Now".to_string(), None))))
 )]
 pub(crate) async fn fruiting_now(cx: &Cx) -> topcoat::Result<impl View> {
     let params = query_params::<HarvestParams>(cx)?;
@@ -498,32 +487,7 @@ pub(crate) async fn fruiting_now(cx: &Cx) -> topcoat::Result<impl View> {
     Ok(view! {
         <div class="flex flex-col gap-6">
             <hgroup>
-                breadcrumb(
-                    breadcrumb_list(
-                        breadcrumb_item(
-                            breadcrumb_link(
-                                attrs: attributes! { href=(href!(list)) },
-                                "Region"
-                            )
-                        )
-                        breadcrumb_separator()
-                        breadcrumb_item(
-                            breadcrumb_link(
-                                attrs: attributes! { href=(href!(overview, RegionId(region.id))) },
-                                (&region.name)
-                            )
-                        )
-                        breadcrumb_separator()
-                        breadcrumb_item(
-                            breadcrumb_link(
-                                attrs: attributes! { href=(href!(fruiting_all, RegionId(region.id))) },
-                                "Seed-bearing"
-                            )
-                        )
-                        breadcrumb_separator()
-                        breadcrumb_item(breadcrumb_page("Now"))
-                    )
-                )
+                crumbs()
                 <h1>"Currently fruiting"</h1>
                 <p>
                     ("These species are likely to be bearing seeds on the given date. Note that this does not necessarily mean that the seed is 'ripe' or viable yet.")
@@ -595,25 +559,7 @@ pub async fn fruiting_all(cx: &Cx) -> topcoat::Result<impl View> {
     Ok(view! {
         <div class="flex flex-col gap-6">
             <hgroup>
-                breadcrumb(
-                    breadcrumb_list(
-                        breadcrumb_item(
-                            breadcrumb_link(
-                                attrs: attributes! { href=(href!(list)) },
-                                "Region"
-                            )
-                        )
-                        breadcrumb_separator()
-                        breadcrumb_item(
-                            breadcrumb_link(
-                                attrs: attributes! { href=(href!(overview, RegionId(region.id))) },
-                                (&region.name)
-                            )
-                        )
-                        breadcrumb_separator()
-                        breadcrumb_item(breadcrumb_page("Seed-bearing"))
-                    )
-                )
+                crumbs()
                 <h1>(format!("Seed-bearing status for plants in {}", &region.name))</h1>
                 <p>
                     "Seed-bearing timeline for all plants within the region. The bar graph represents a full year. A green background indicates that seeds may be present at that time of year. The vertical bar represents today."
