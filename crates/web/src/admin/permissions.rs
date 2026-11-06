@@ -4,21 +4,33 @@ use topcoat::{
     context::{Cx, memoize},
     metadata::Metadata,
     router::{
+        Slot,
         content::Form,
         error::{SeeOther, see_other},
-        href, page, path_param, route,
+        href, layout, page, path_param, route,
     },
     view::{View, attributes, view},
 };
 use uuid::Uuid;
 
 use crate::{
-    Subtitle, admin,
-    components::{breadcrumb::*, button::button, card::*, field::*, input::*},
+    Subtitle,
+    components::{button::button, card::*, field::*, input::*},
     context::{db, require_user_with_permission},
+    crumb::{Crumb, crumbs},
 };
 
 path_param!(permission_id: Uuid else bad_request);
+
+#[layout(
+    "/admin/permissions",
+    with(Crumb::new(
+        async |cx| { Ok(("Permissions".into(), Some(href!(list).resolve(cx)))) },
+    ))
+)]
+pub async fn permissions_shell(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
+    Ok(view! { (slot) })
+}
 
 #[page(
     "/admin/permissions",
@@ -29,18 +41,7 @@ pub async fn list(cx: &Cx) -> topcoat::Result<impl View> {
     let permissions = Permission::all().exec(&mut db(cx)).await?;
 
     Ok(view! {
-        breadcrumb(
-            breadcrumb_list(
-                breadcrumb_item(
-                    breadcrumb_link(
-                        attrs: attributes! { href=(href!(admin::console)) },
-                        "Admin console"
-                    )
-                )
-                breadcrumb_separator()
-                breadcrumb_item(breadcrumb_page("Permissions"))
-            )
-        )
+        crumbs()
         <h2>"Permission List"</h2>
         <section class="flex flex-col gap-2">
             <ul class="contents">
@@ -86,6 +87,12 @@ async fn permission(cx: &Cx) -> topcoat::Result<Permission> {
                 ),
             )
         },
+    )),
+    with(Crumb::new(
+        async |cx| {
+            let perm = permission(cx).await?;
+            Ok((perm.code.to_string(), None))
+        },
     ))
 )]
 pub async fn edit(cx: &Cx) -> topcoat::Result<impl View> {
@@ -93,25 +100,7 @@ pub async fn edit(cx: &Cx) -> topcoat::Result<impl View> {
     let permission = permission(cx).await?;
 
     Ok(view! {
-        breadcrumb(
-            breadcrumb_list(
-                breadcrumb_item(
-                    breadcrumb_link(
-                        attrs: attributes! { href=(href!(admin::console)) },
-                        "Admin console"
-                    )
-                )
-                breadcrumb_separator()
-                breadcrumb_item(
-                    breadcrumb_link(
-                        attrs: attributes! { href=(href!(list)) },
-                        "Permissions"
-                    )
-                )
-                breadcrumb_separator()
-                breadcrumb_item(breadcrumb_page((permission.code.to_string())))
-            )
-        )
+        crumbs()
         <h2>"Edit Permission"</h2>
         <section class="flex flex-col gap-6">
             card(

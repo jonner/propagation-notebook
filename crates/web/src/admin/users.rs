@@ -5,18 +5,18 @@ use topcoat::{
     context::{Cx, memoize},
     metadata::Metadata,
     router::{
+        Slot,
         content::Form,
         error::{RouterErrorExt, SeeOther, bad_request, see_other},
-        href, page, path_param, route,
+        href, layout, page, path_param, route,
     },
     view::{Attributes, View, attributes, component, view},
 };
 use uuid::Uuid;
 
 use crate::{
-    Subtitle, admin,
+    Subtitle,
     components::{
-        breadcrumb::*,
         button::button,
         card::*,
         checkbox::*,
@@ -25,10 +25,19 @@ use crate::{
         tooltip::*,
     },
     context::{db, require_user_with_permission},
+    crumb::{Crumb, crumbs},
     users::{UpdateProfileParams, user_profile_form},
 };
 
 path_param!(user_id: Uuid else bad_request);
+
+#[layout(
+    "/admin/users",
+    with(Crumb::new(async |cx| { Ok(("Users".into(), Some(href!(list).resolve(cx)))) }))
+)]
+pub async fn users_shell(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
+    Ok(view! { (slot) })
+}
 
 #[page("/admin/users", with(Metadata::new().subtitle("User administration")))]
 pub async fn list(cx: &Cx) -> topcoat::Result<impl View> {
@@ -36,16 +45,7 @@ pub async fn list(cx: &Cx) -> topcoat::Result<impl View> {
     let users = User::all().exec(&mut db(cx)).await?;
 
     Ok(view! {
-        breadcrumb(
-            breadcrumb_list(
-                breadcrumb_link(
-                    attrs: attributes! { href=(href!(admin::console)) },
-                    "Admin console"
-                )
-                breadcrumb_separator()
-                breadcrumb_item(breadcrumb_page("Users"))
-            )
-        )
+        crumbs()
         <h2>"User List"</h2>
         <ul>
             for user in users {
@@ -77,6 +77,12 @@ async fn user_from_id(cx: &Cx) -> topcoat::Result<User> {
                 ),
             )
         },
+    )),
+    with(Crumb::new(
+        async |cx| {
+            let user = user_from_id(cx).await?;
+            Ok((user.username.clone(), None))
+        },
     ))
 )]
 pub async fn edit(cx: &Cx) -> topcoat::Result<impl View> {
@@ -84,20 +90,7 @@ pub async fn edit(cx: &Cx) -> topcoat::Result<impl View> {
     let user_to_edit = user_from_id(cx).await?;
 
     Ok(view! {
-        breadcrumb(
-            breadcrumb_list(
-                breadcrumb_link(
-                    attrs: attributes! { href=(href!(admin::console)) },
-                    "Admin console"
-                )
-                breadcrumb_separator()
-                breadcrumb_item(
-                    breadcrumb_link(attrs: attributes! { href=(href!(list)) }, "Users")
-                )
-                breadcrumb_separator()
-                breadcrumb_item(breadcrumb_page((&user_to_edit.username)))
-            )
-        )
+        crumbs()
         <h2>"Edit User"</h2>
         <section class="flex flex-col gap-6">
             card(

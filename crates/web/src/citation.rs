@@ -7,10 +7,10 @@ use topcoat::{
     icon::icon,
     metadata::Metadata,
     router::{
-        Body, Method, StatusCode,
+        Body, Method, Slot, StatusCode,
         content::Form,
         error::{RouterErrorExt, SeeOther, rewrite, see_other},
-        href, page, path_param, route,
+        href, layout, page, path_param, route,
     },
     runtime::signal,
     view::{Attributes, Child, View, attributes, class, component, view},
@@ -34,6 +34,7 @@ use crate::{
         pn::{item_term, item_value},
     },
     context::{current_user, db, require_user_with_permission},
+    crumb::{Crumb, crumbs},
     flash::{self, FlashMessage},
     taxa,
 };
@@ -543,20 +544,28 @@ pub async fn citation_form(
     })
 }
 
-#[page("/admin/citations/new", with(Metadata::new().subtitle("New cited work")))]
+#[layout(
+    "/admin/citations",
+    with(Crumb::new(
+        async |cx| Ok(("Cited Works".to_string(), Some(href!(admin).resolve(cx)))),
+    ))
+)]
+pub async fn citation_admin_shell(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
+    Ok(view! { (slot) })
+}
+
+#[page(
+    "/admin/citations/new",
+    with(Metadata::new().subtitle("New cited work")),
+    with(Crumb::new(async |_cx| Ok(("New".to_string(), None))))
+)]
 pub async fn create(cx: &Cx) -> topcoat::Result<impl View> {
     let _user =
         require_user_with_permission(cx, libpropagation::auth::PermissionCode::CitationCreate)
             .await?;
     Ok(view! {
         <hgroup>
-            breadcrumb(
-                breadcrumb_list(
-                    breadcrumb_item(breadcrumb_page("Citations"))
-                    breadcrumb_separator()
-                    breadcrumb_item(breadcrumb_page("Create"))
-                )
-            )
+            crumbs()
             <h1>"Create a new citation"</h1>
         </hgroup>
         citation_form(
@@ -577,6 +586,12 @@ pub async fn create(cx: &Cx) -> topcoat::Result<impl View> {
                 ),
             )
         },
+    )),
+    with(Crumb::new(
+        async |cx| {
+            let citation = citation(cx).await?;
+            Ok((citation.id.to_string(), None))
+        },
     ))
 )]
 pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
@@ -587,18 +602,7 @@ pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
     let citation = Citation::get_by_id(&mut db(cx), id).await?;
     Ok(view! {
         <hgroup>
-            breadcrumb(
-                breadcrumb_list(
-                    breadcrumb_item(breadcrumb_page("Cited Works"))
-                    breadcrumb_separator()
-                    breadcrumb_link(
-                        attrs: attributes! { href=(href!(details, CitationId(*id))) },
-                        (id)
-                    )
-                    breadcrumb_separator()
-                    breadcrumb_item(breadcrumb_page("Edit"))
-                )
-            )
+            crumbs()
             <h1>"Edit a Cited Work"</h1>
         </hgroup>
         citation_form(
@@ -646,6 +650,7 @@ pub async fn admin(cx: &Cx) -> topcoat::Result<impl View> {
     let user = require_user_with_permission(cx, PermissionCode::CitationEdit).await?;
     let citations = Citation::all().exec(&mut db(cx)).await?;
     Ok(view! {
+        crumbs()
         <h2>"Cited Works"</h2>
         <ul class="flex flex-col gap-3">
             for citation in citations {

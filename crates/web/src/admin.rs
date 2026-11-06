@@ -7,14 +7,24 @@ use topcoat::{
 };
 
 use crate::{
-    Subtitle, citation, components::navigation_menu::*, context::require_user_with_permission,
+    Subtitle, citation,
+    components::navigation_menu::*,
+    context::require_user_with_permission,
+    crumb::{Crumb, crumbs},
 };
 
 mod permissions;
 mod roles;
 mod users;
 
-#[layout("/admin")]
+#[layout(
+    "/admin",
+    with(Crumb::new(
+        async |cx| {
+            Ok(("Administration Console".into(), Some(href!(console).resolve(cx))))
+        },
+    ))
+)]
 pub async fn admin_shell(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
     let _user = require_user_with_permission(cx, PermissionCode::AdminConsole).await?;
     Ok(view! {
@@ -57,6 +67,7 @@ pub async fn admin_shell(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> 
 #[page("/admin", with(Metadata::new().subtitle("Administration Console")))]
 pub async fn console(cx: &Cx) -> topcoat::Result<impl View> {
     Ok(view! {
+        crumbs()
         <h1>"Administration Console"</h1>
         <section class="flex flex-col gap-2">
             "Please select a page from the navigation menu above (for now)."

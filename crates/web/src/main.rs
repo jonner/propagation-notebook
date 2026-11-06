@@ -42,6 +42,7 @@ mod citation;
 mod components;
 mod config;
 mod context;
+mod crumb;
 mod error;
 mod flash;
 mod propagation;

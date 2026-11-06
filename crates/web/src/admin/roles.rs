@@ -6,23 +6,31 @@ use topcoat::{
     context::{Cx, memoize},
     metadata::Metadata,
     router::{
+        Slot,
         content::Form,
         error::{RouterErrorExt, SeeOther, bad_request, see_other},
-        href, page, path_param, route,
+        href, layout, page, path_param, route,
     },
     view::{Attributes, View, attributes, class, component, view},
 };
 use uuid::Uuid;
 
 use crate::{
-    Subtitle, admin,
-    components::{
-        breadcrumb::*, button::*, card::*, checkbox::*, field::*, input::*, label::*, tooltip::*,
-    },
+    Subtitle,
+    components::{button::*, card::*, checkbox::*, field::*, input::*, label::*, tooltip::*},
     context::{db, require_user_with_permission},
+    crumb::{Crumb, crumbs},
 };
 
 path_param!(role_id: Uuid else bad_request);
+
+#[layout(
+    "/admin/roles",
+    with(Crumb::new(async |cx| { Ok(("Roles".into(), Some(href!(list).resolve(cx)))) }))
+)]
+pub async fn roles_shell(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
+    Ok(view! { (slot) })
+}
 
 #[page("/admin/roles", with(Metadata::new().subtitle("Roles | Administration Console")))]
 pub async fn list(cx: &Cx) -> topcoat::Result<impl View> {
@@ -30,18 +38,7 @@ pub async fn list(cx: &Cx) -> topcoat::Result<impl View> {
     let roles = Role::all().exec(&mut db(cx)).await?;
 
     Ok(view! {
-        breadcrumb(
-            breadcrumb_list(
-                breadcrumb_item(
-                    breadcrumb_link(
-                        attrs: attributes! { href=(href!(admin::console)) },
-                        "Admin console"
-                    )
-                )
-                breadcrumb_separator()
-                breadcrumb_item(breadcrumb_page("Roles"))
-            )
-        )
+        crumbs()
         <h2>"Role List"</h2>
         <ul class="flex flex-col gap-2">
             for role in roles {
@@ -113,6 +110,12 @@ async fn role(cx: &Cx) -> topcoat::Result<Role> {
                 ),
             )
         },
+    )),
+    with(Crumb::new(
+        async |cx| {
+            let role = role(cx).await?;
+            Ok((role.id.to_string(), None))
+        },
     ))
 )]
 pub async fn edit(cx: &Cx) -> topcoat::Result<impl View> {
@@ -120,22 +123,7 @@ pub async fn edit(cx: &Cx) -> topcoat::Result<impl View> {
     let role = role(cx).await?;
 
     Ok(view! {
-        breadcrumb(
-            breadcrumb_list(
-                breadcrumb_item(
-                    breadcrumb_link(
-                        attrs: attributes! { href=(href!(admin::console)) },
-                        "Admin console"
-                    )
-                )
-                breadcrumb_separator()
-                breadcrumb_item(
-                    breadcrumb_link(attrs: attributes! { href=(href!(list)) }, "Roles")
-                )
-                breadcrumb_separator()
-                breadcrumb_item(breadcrumb_page((role.id.to_string())))
-            )
-        )
+        crumbs()
         <h2>"Edit Role"</h2>
         <section class="flex flex-col gap-6">
             card(
@@ -164,28 +152,14 @@ pub async fn edit(cx: &Cx) -> topcoat::Result<impl View> {
 }
 #[page(
     "/admin/roles/new",
-    with(Metadata::new().subtitle("New Role | Administration Console"))
+    with(Metadata::new().subtitle("New Role | Administration Console")),
+    with(Crumb::new(async |_cx| Ok(("New".to_string(), None))))
 )]
 pub async fn create(cx: &Cx) -> topcoat::Result<impl View> {
     _ = require_user_with_permission(cx, PermissionCode::RoleCreate).await?;
 
     Ok(view! {
-        breadcrumb(
-            breadcrumb_list(
-                breadcrumb_item(
-                    breadcrumb_link(
-                        attrs: attributes! { href=(href!(admin::console)) },
-                        "Admin console"
-                    )
-                )
-                breadcrumb_separator()
-                breadcrumb_item(
-                    breadcrumb_link(attrs: attributes! { href=(href!(list)) }, "Roles")
-                )
-                breadcrumb_separator()
-                breadcrumb_item(breadcrumb_page("New"))
-            )
-        )
+        crumbs()
         <h2>"New Role"</h2>
         <section class="flex flex-col gap-6">
             card(
