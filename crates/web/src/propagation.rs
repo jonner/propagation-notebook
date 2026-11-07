@@ -39,18 +39,6 @@ use crate::{
 
 path_param!(pub propagation_id: u64 else bad_request);
 
-#[layout(
-    "/admin/propagation",
-    with(Crumb::new(
-        async |cx| Ok(
-                ("Propagation Procedures".to_string(), Some(href!(list).resolve(cx))),
-            ),
-    ))
-)]
-pub async fn propagation_admin_shell(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
-    Ok(view! { (slot) })
-}
-
 #[page("/admin/propagation", with(Metadata::new().subtitle("Propagation procedures")))]
 pub async fn list(cx: &Cx) -> topcoat::Result<impl View> {
     let _user = require_user_with_permission(cx, PermissionCode::PropagationEdit).await?;

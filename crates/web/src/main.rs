@@ -120,10 +120,10 @@ async fn run() -> Result<(), Error> {
         .discover()
         .assets(AssetBundle::load()?)
         .with(db)
-        .with(RuntimeLayer::new())
-        .with(CookieLayer::new())
         .with(Key::generate())
-        .with(BaseUrl::new(config.base_url));
+        .with(BaseUrl::new(config.base_url))
+        .layer(RuntimeLayer::new())
+        .layer(CookieLayer::new());
 
     if let Some(compression) = config.enable_compression {
         service_builder = service_builder.with(if compression {
