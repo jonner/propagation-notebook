@@ -10,19 +10,19 @@ use topcoat::{
     icon::icon,
     metadata::Metadata,
     router::{
+        Slot,
         content::Form,
         error::{SeeOther, see_other},
-        href, page, path_param, route,
+        href, layout, page, path_param, route,
     },
     view::{Attributes, Child, View, attributes, class, component, view},
 };
 use tracing::trace;
 
 use crate::{
-    Subtitle, admin,
+    Subtitle,
     assets::mdi,
     components::{
-        breadcrumb::*,
         button::*,
         card::*,
         citations::citation_list,
@@ -33,31 +33,33 @@ use crate::{
         textarea::*,
     },
     context::{db, require_user_with_permission},
+    crumb::{Crumb, crumbs},
     flash::{FlashMessage, push_message},
     taxa,
 };
 
 path_param!(pub propagation_id: u64 else bad_request);
 
-#[page("/admin/propagation", with(Metadata::new().subtitle("Propagation procedures")))]
+#[layout(
+    "/admin/propagation",
+    with(Crumb::new(
+        async |cx| Ok(
+                ("Propagation Procedures".to_string(), Some(href!(list).resolve(cx))),
+            ),
+    ))
+)]
+pub async fn propagation_admin_shell(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
+    Ok(view! { (slot) })
+}
+
+#[page("/admin/propagation", with(Metadata::new().subtitle("Propagation Procedures")))]
 pub async fn list(cx: &Cx) -> topcoat::Result<impl View> {
     let _user = require_user_with_permission(cx, PermissionCode::PropagationEdit).await?;
     let mut db = db(cx);
     let procedures = PropagationProcedure::all().exec(&mut db).await?;
     trace!(?procedures);
     Ok(view! {
-        breadcrumb(
-            breadcrumb_list(
-                breadcrumb_item(
-                    breadcrumb_link(
-                        attrs: attributes! { href=(href!(admin::console)) },
-                        "Admin console"
-                    )
-                )
-                breadcrumb_separator()
-                breadcrumb_item(breadcrumb_page("Propagation Procedures"))
-            )
-        )
+        crumbs()
         <h1>"Propagation Procedures"</h1>
         <ul>
             for p in procedures {
@@ -86,7 +88,7 @@ pub async fn list(cx: &Cx) -> topcoat::Result<impl View> {
                     href=(href!(new))
                     class=(button_variants(ButtonVariant::Primary, ButtonSize::Md))
                 >
-                    "Create a new Propagation Procedure"
+                    "New Propagation Procedure"
                 </a>
             </li>
         </ul>
@@ -203,32 +205,23 @@ async fn propagation_procedure_form(
     })
 }
 
-#[page("/admin/propagation/{propagation_id}")]
+#[page(
+    "/admin/propagation/{propagation_id}",
+    with(Metadata::from_fn(
+        async |cx| {
+            let id = path_param::<PropagationId>(cx)?;
+            Ok(Metadata::new().subtitle(format!("Edit Propagation Procedure {id}")))
+        },
+    )),
+    with(Crumb::new(async |cx| Ok((path_param::<PropagationId>(cx)?.to_string(), None))))
+)]
 pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
     let _user = require_user_with_permission(cx, PermissionCode::PropagationEdit).await?;
     let id = *path_param::<PropagationId>(cx)?;
     let propagation = PropagationProcedure::get_by_id(&mut db(cx), id).await?;
     Ok(view! {
         <hgroup>
-            breadcrumb(
-                breadcrumb_list(
-                    breadcrumb_item(
-                        breadcrumb_link(
-                            attrs: attributes! { href=(href!(admin::console)) },
-                            "Admin console"
-                        )
-                    )
-                    breadcrumb_separator()
-                    breadcrumb_item(
-                        breadcrumb_link(
-                            attrs: attributes! { href=(href!(list)) },
-                            "Propagation Procedures"
-                        )
-                    )
-                    breadcrumb_separator()
-                    breadcrumb_page((id))
-                )
-            )
+            crumbs()
             <h1>"Edit a Propagation Procedure"</h1>
         </hgroup>
         propagation_procedure_form(
@@ -242,31 +235,17 @@ pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
     })
 }
 
-#[page("/admin/propagation/new")]
+#[page(
+    "/admin/propagation/new",
+    with(Metadata::new().subtitle("New Propagation Procedure")),
+    with(Crumb::new(async |_cx| Ok(("New".to_string(), None))))
+)]
 pub async fn new(cx: &Cx) -> topcoat::Result<impl View> {
     let _user = require_user_with_permission(cx, PermissionCode::PropagationCreate).await?;
     Ok(view! {
         <hgroup>
-            breadcrumb(
-                breadcrumb_list(
-                    breadcrumb_item(
-                        breadcrumb_link(
-                            attrs: attributes! { href=(href!(admin::console)) },
-                            "Admin console"
-                        )
-                    )
-                    breadcrumb_separator()
-                    breadcrumb_item(
-                        breadcrumb_link(
-                            attrs: attributes! { href=(href!(list)) },
-                            "Propagation Procedures"
-                        )
-                    )
-                    breadcrumb_separator()
-                    breadcrumb_page("New")
-                )
-            )
-            <h1>"Create a New Propagation Procedure"</h1>
+            crumbs()
+            <h1>"New Propagation Procedure"</h1>
         </hgroup>
         propagation_procedure_form(
             procedure: None,
