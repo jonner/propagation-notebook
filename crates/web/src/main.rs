@@ -4,8 +4,8 @@ use clap::Parser;
 use tokio::net::TcpListener;
 use topcoat::{
     asset::{Asset, AssetBundle, RouterBuilderAssetExt, asset_config},
-    context::Cx,
-    cookie::{Key, RouterBuilderCookieExt},
+    context::{BaseUrl, Cx},
+    cookie::{CookieLayer, Key},
     icon::icon,
     metadata::{self, Metadata},
     router::{
@@ -14,8 +14,7 @@ use topcoat::{
         href, layout, not_found, page,
         request::uri,
     },
-    runtime::RouterBuilderRuntimeExt,
-    session::{RouterBuilderSessionExt, SessionConfig},
+    runtime::RuntimeLayer,
     tailwind,
     view::{Child, View, ViewExt, attributes, component, error_boundary, view},
 };
@@ -118,17 +117,16 @@ async fn run() -> Result<(), Error> {
     let listener = TcpListener::bind((config.listen.host, config.listen.port)).await?;
 
     let mut service_builder = Router::builder()
-        .runtime()
         .discover()
         .assets(AssetBundle::load()?)
-        .cookies()
-        .sessions(SessionConfig::default())
-        .base_url(config.base_url.to_string())
         .with(db)
-        .with(Key::generate());
+        .with(RuntimeLayer::new())
+        .with(CookieLayer::new())
+        .with(Key::generate())
+        .with(BaseUrl::new(config.base_url));
 
     if let Some(compression) = config.enable_compression {
-        service_builder = service_builder.compression(if compression {
+        service_builder = service_builder.with(if compression {
             Compression::default()
         } else {
             Compression::off()
