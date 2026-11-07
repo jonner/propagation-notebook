@@ -5,7 +5,9 @@ use topcoat::{
     view::{View, attributes, view},
 };
 
-use crate::{citation, components::navigation_menu::*, context::require_user_with_permission};
+use crate::{
+    citation, components::navigation_menu::*, context::require_user_with_permission, propagation,
+};
 
 mod permissions;
 mod roles;
@@ -24,6 +26,10 @@ pub async fn admin_shell(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> 
                         navigation_menu_link(
                             attrs: attributes! { href=(href!(citation::list)) },
                             "Cited Works"
+                        )
+                        navigation_menu_link(
+                            attrs: attributes! { href=(href!(propagation::list)) },
+                            "Propagation Procedures"
                         )
                     )
                 )

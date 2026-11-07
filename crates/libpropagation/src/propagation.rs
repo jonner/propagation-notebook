@@ -9,7 +9,15 @@ use toasty::Deferred;
 pub mod dto;
 
 #[derive(
-    Debug, Clone, Copy, toasty::Embed, clap::ValueEnum, strum::Display, Deserialize, Serialize,
+    Debug,
+    Clone,
+    Copy,
+    toasty::Embed,
+    clap::ValueEnum,
+    strum::Display,
+    strum::EnumIter,
+    Deserialize,
+    Serialize,
 )]
 #[clap(rename_all = "kebab-case")]
 #[serde(rename_all = "kebab-case")]

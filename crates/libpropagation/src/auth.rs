@@ -344,6 +344,12 @@ pub enum PermissionCode {
     PermissionEdit,
     #[column(variant = "permission:delete")]
     PermissionDelete,
+    #[column(variant = "propagation:create")]
+    PropagationCreate,
+    #[column(variant = "propagation:delete")]
+    PropagationDelete,
+    #[column(variant = "propagation:edit")]
+    PropagationEdit,
 }
 
 impl std::fmt::Display for PermissionCode {
@@ -381,6 +387,9 @@ impl std::fmt::Display for PermissionCode {
                 PermissionCode::PermissionCreate => "permission:create",
                 PermissionCode::PermissionEdit => "permission:edit",
                 PermissionCode::PermissionDelete => "permission:delete",
+                PermissionCode::PropagationCreate => "propagation:create",
+                PermissionCode::PropagationDelete => "propagation:delete",
+                PermissionCode::PropagationEdit => "propagation:edit",
             }
         )
     }
