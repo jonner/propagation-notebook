@@ -660,11 +660,19 @@ pub async fn admin(cx: &Cx) -> topcoat::Result<impl View> {
                             (citation.id)
                         </a>
                     </span>
-                    <span>(citation.format_cse())</span>
                     <span>
-                        <a href=(href!(modify, CitationId(citation.id)))>
-                            icon(data: mdi::EDIT)
-                        </a>
+                        <span>(citation.format_cse())</span>
+                        <span class="inline-block mx-2">
+                            <a
+                                class=(button_variants(
+                                    ButtonVariant::Secondary,
+                                    ButtonSize::default(),
+                                ))
+                                href=(href!(modify, CitationId(citation.id)))
+                            >
+                                icon(data: mdi::EDIT)
+                            </a>
+                        </span>
                     </span>
                 </li>
             }
