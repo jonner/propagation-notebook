@@ -427,11 +427,7 @@ pub async fn taxon(cx: &Cx) -> topcoat::Result<Taxon> {
     with(Metadata::from_fn(
         async |cx| {
             let taxon = taxon(cx).await?;
-            Ok(
-                Metadata::new().
-                    subtitle(format!("{} photo", taxon.complete_name)),
-                
-            )
+            Ok(Metadata::new().subtitle(format!("{} photo", taxon.complete_name)))
         },
     ))
 )]
