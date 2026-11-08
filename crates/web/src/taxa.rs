@@ -19,6 +19,7 @@ use tracing::{debug, warn};
 
 use crate::{
     actions::{Action, ActionItemType, permitted_actions},
+    assets::mdi,
     citation,
     components::{
         action_menu::*,
@@ -33,7 +34,6 @@ use crate::{
         },
     },
     context::{current_user, db, require_user_with_permission},
-    mdi,
     util::{ModifyOffset, PER_PAGE, PageState},
 };
 

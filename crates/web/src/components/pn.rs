@@ -5,10 +5,7 @@ use libpropagation::{
 };
 use topcoat::{
     asset::{Asset, asset},
-    context::Cx,
     icon::icon,
-    router::href,
-    runtime::{Event, shard, signal},
     view::{
         AttributeValueViewParts, Attributes, Child, View, ViewExt, attributes, class, component,
         view,
@@ -17,10 +14,8 @@ use topcoat::{
 use uuid::Uuid;
 
 use crate::{
-    components::{badge::*, breadcrumb::*, input::input, pagination::*, tooltip::*},
-    context::db,
-    mdi,
-    taxa::{self, TaxonId},
+    assets::mdi,
+    components::{badge::*, breadcrumb::*, pagination::*, tooltip::*},
     util::{ModifyOffset, PageState},
 };
 
@@ -342,90 +337,6 @@ pub async fn taxon_icon(
         } else {
             icon(data: mdi::LEAF_CIRCLE, size: 75, label: "Missing Image")
         }
-    })
-}
-
-#[shard("/taxa/search/results")]
-pub async fn taxon_search_results(
-    cx: &Cx,
-    query_string: String,
-    visible: bool,
-) -> topcoat::Result<impl View> {
-    let nothing = view! {}.boxed();
-    if !visible || query_string.len() < 2 {
-        return Ok(nothing);
-    }
-    let mut db = db(cx);
-    const LIMIT: u64 = 40;
-    let query = Taxon::filter(Taxon::search_filter(&query_string))
-        .include(Taxon::fields().photo())
-        .order_by((
-            Taxon::fields().sequence().asc(),
-            Taxon::fields().complete_name().asc(),
-        ));
-    let total = query.clone().count().exec(&mut db).await?;
-    let taxa = query.limit(LIMIT as usize).exec(&mut db).await?;
-    if taxa.is_empty() {
-        return Ok(nothing);
-    }
-    Ok(view! {
-        <div
-            class="flex flex-col p-3 gap-2
-                fixed left-3 right-3
-                md:absolute md:left-0 md:right-0 md:mx-0
-                max-h-100 overflow-y-auto
-                text-sm text-foreground bg-background/80 z-50
-                rounded-xl border border-border shadow-sm"
-        >
-            <ul class="contents">
-                for taxon in taxa.iter() {
-                    <li class="py-1">
-                        <span class="latin">
-                            <a href=(href!(taxa::details, TaxonId(taxon.id)))>
-                                (&taxon.complete_name)
-                            </a>
-                        </span>
-                    </li>
-                }
-                if total > LIMIT {
-                    <li>(format!("...and {} more", total - LIMIT))</li>
-                }
-            </ul>
-        </div>
-    }
-    .boxed())
-}
-
-#[component]
-pub async fn taxon_search_bar(
-    cx: &Cx,
-    #[default] mut attrs: Attributes,
-) -> topcoat::Result<impl View> {
-    let query_string = signal(cx, String::new);
-    let search_focus = signal(cx, || false);
-    Ok(view! {
-        <div
-            @focusin=$(|_e: Event| search_focus.set(true))
-            @focusout=$(|_e: Event| search_focus.set(false))
-            class=(class!("relative", attrs.remove("class")))
-            (attrs)
-        >
-            <form method="get" action=(href!(taxa::search)) class="contents">
-                input(
-                    attrs: attributes! {
-                        type="text"
-                        name="q"
-                        placeholder="Search for a taxon"
-                        autocomplete="off"
-                        @input=$(|e: Event| query_string.set(e.target.value))
-                    }
-                )
-                taxon_search_results(
-                    query_string: $(query_string.get()),
-                    visible: $(search_focus.get())
-                )
-            </form>
-        </div>
     })
 }
 
