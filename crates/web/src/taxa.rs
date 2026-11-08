@@ -13,7 +13,9 @@ use topcoat::{
         href, page, path_param, query_params,
     },
     runtime::{Event, procedure},
-    view::{View, attributes, component, error_boundary, suspense, view},
+    view::{
+        AttributeValueViewParts, Child, View, attributes, component, error_boundary, suspense, view,
+    },
 };
 use tracing::{debug, warn};
 
@@ -28,10 +30,7 @@ use crate::{
         button::button,
         harvest::taxon_regional_table,
         input::input,
-        pn::{
-            ancestor_breadcrumbs, origin_badge, pagination_control, taxa_grid, taxa_grid_item,
-            taxon_icon,
-        },
+        pn::{origin_badge, pagination_control, taxa_grid, taxa_grid_item, taxon_icon},
     },
     context::{current_user, db, require_user_with_permission},
     util::{ModifyOffset, PER_PAGE, PageState},
@@ -43,6 +42,95 @@ mod propagation;
 
 path_param!(pub taxon_id: u64, error = bad_request);
 path_param!(pub region_id: u64, error = bad_request);
+
+#[component]
+pub async fn ancestor_breadcrumbs<L, P>(
+    items: &[&Taxon],
+    link_fn: L,
+    #[default] link_final: bool,
+    #[default(Some(2))] ellipsize: Option<usize>,
+    #[default] child: Child<'_>,
+) -> topcoat::Result<impl View>
+where
+    L: Fn(&Taxon) -> P + Send + Sync,
+    P: AttributeValueViewParts,
+{
+    let mut item_iter = items.iter();
+    let last = item_iter.next_back();
+    let root = item_iter.next();
+    let middle_items: Vec<_> = item_iter.collect();
+
+    let total_len = items.len();
+    let do_ellipsize = ellipsize.map(|limit| total_len > limit).unwrap_or(false);
+
+    let middle_to_render = if do_ellipsize {
+        if let Some(limit) = ellipsize {
+            middle_items
+                .iter()
+                .rev()
+                .take(limit.saturating_sub(1))
+                .rev()
+                .copied()
+                .collect()
+        } else {
+            middle_items
+        }
+    } else {
+        middle_items
+    };
+
+    Ok(view! {
+        breadcrumb(
+            breadcrumb_list(
+                if let Some(taxon) = root {
+                    breadcrumb_item(
+                        breadcrumb_link(
+                            attrs: attributes! { href=(link_fn(taxon)) },
+                            (&taxon.complete_name)
+                        )
+                    )
+                }
+                if do_ellipsize {
+                    breadcrumb_separator()
+                    breadcrumb_ellipsis()
+                }
+                for taxon in middle_to_render {
+                    breadcrumb_separator()
+                    breadcrumb_item(
+                        breadcrumb_link(
+                            attrs: attributes! { href=(link_fn(taxon)) },
+                            (&taxon.complete_name)
+                        )
+                    )
+                }
+
+                if let Some(taxon) = last {
+                    if root.is_some() {
+                        breadcrumb_separator()
+                    }
+                    breadcrumb_item(
+                        if link_final {
+                            breadcrumb_link(
+                                attrs: attributes! { href=(link_fn(taxon)) },
+                                (&taxon.complete_name)
+                            )
+                        } else {
+                            breadcrumb_page(
+                                (&taxon.complete_name)
+                                badge(
+                                    variant: BadgeVariant::Secondary,
+                                    attrs: attributes! { class="mx-3" },
+                                    (taxon.rank.to_string())
+                                )
+                            )
+                        }
+                    )
+                }
+                (child)
+            )
+        )
+    })
+}
 
 #[derive(Debug, Clone, Copy, serde::Deserialize, serde::Serialize)]
 #[serde(rename_all = "lowercase")]

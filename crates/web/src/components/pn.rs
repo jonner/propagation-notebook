@@ -1,21 +1,15 @@
 use jiff::ToSpan;
-use libpropagation::{
-    region::{ConservationStatus, Origin},
-    taxonomy::Taxon,
-};
+use libpropagation::region::{ConservationStatus, Origin};
 use topcoat::{
     asset::{Asset, asset},
     icon::icon,
-    view::{
-        AttributeValueViewParts, Attributes, Child, View, ViewExt, attributes, class, component,
-        view,
-    },
+    view::{Attributes, Child, View, ViewExt, attributes, class, component, view},
 };
 use uuid::Uuid;
 
 use crate::{
     assets::mdi,
-    components::{badge::*, breadcrumb::*, pagination::*, tooltip::*},
+    components::{pagination::*, tooltip::*},
     util::{ModifyOffset, PageState},
 };
 
@@ -60,95 +54,6 @@ pub async fn conservation_status_badge(
                 (text)
             </div>
             tooltip_content((tooltip_text))
-        )
-    })
-}
-
-#[component]
-pub async fn ancestor_breadcrumbs<L, P>(
-    items: &[&Taxon],
-    link_fn: L,
-    #[default] link_final: bool,
-    #[default(Some(2))] ellipsize: Option<usize>,
-    #[default] child: Child<'_>,
-) -> topcoat::Result<impl View>
-where
-    L: Fn(&Taxon) -> P + Send + Sync,
-    P: AttributeValueViewParts,
-{
-    let mut item_iter = items.iter();
-    let last = item_iter.next_back();
-    let root = item_iter.next();
-    let middle_items: Vec<_> = item_iter.collect();
-
-    let total_len = items.len();
-    let do_ellipsize = ellipsize.map(|limit| total_len > limit).unwrap_or(false);
-
-    let middle_to_render = if do_ellipsize {
-        if let Some(limit) = ellipsize {
-            middle_items
-                .iter()
-                .rev()
-                .take(limit.saturating_sub(1))
-                .rev()
-                .copied()
-                .collect()
-        } else {
-            middle_items
-        }
-    } else {
-        middle_items
-    };
-
-    Ok(view! {
-        breadcrumb(
-            breadcrumb_list(
-                if let Some(taxon) = root {
-                    breadcrumb_item(
-                        breadcrumb_link(
-                            attrs: attributes! { href=(link_fn(taxon)) },
-                            (&taxon.complete_name)
-                        )
-                    )
-                }
-                if do_ellipsize {
-                    breadcrumb_separator()
-                    breadcrumb_ellipsis()
-                }
-                for taxon in middle_to_render {
-                    breadcrumb_separator()
-                    breadcrumb_item(
-                        breadcrumb_link(
-                            attrs: attributes! { href=(link_fn(taxon)) },
-                            (&taxon.complete_name)
-                        )
-                    )
-                }
-
-                if let Some(taxon) = last {
-                    if root.is_some() {
-                        breadcrumb_separator()
-                    }
-                    breadcrumb_item(
-                        if link_final {
-                            breadcrumb_link(
-                                attrs: attributes! { href=(link_fn(taxon)) },
-                                (&taxon.complete_name)
-                            )
-                        } else {
-                            breadcrumb_page(
-                                (&taxon.complete_name)
-                                badge(
-                                    variant: BadgeVariant::Secondary,
-                                    attrs: attributes! { class="mx-3" },
-                                    (taxon.rank.to_string())
-                                )
-                            )
-                        }
-                    )
-                }
-                (child)
-            )
         )
     })
 }
