@@ -19,6 +19,7 @@ pub mod floating;
 pub mod harvest;
 pub mod input;
 pub mod label;
+pub mod map;
 pub mod navigation_menu;
 pub mod pagination;
 pub mod pn;

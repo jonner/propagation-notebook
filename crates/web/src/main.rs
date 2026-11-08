@@ -1,36 +1,21 @@
-use std::hash::{DefaultHasher, Hash, Hasher};
-
 use clap::Parser;
 use tokio::net::TcpListener;
 use topcoat::{
-    asset::{Asset, AssetBundle, RouterBuilderAssetExt, asset_config},
+    asset::{AssetBundle, RouterBuilderAssetExt},
     context::{BaseUrl, Cx},
     cookie::{CookieLayer, Key},
-    icon::icon,
-    metadata::{self, Metadata},
-    router::{
-        Compression, Router, RouterBuilderDiscoverExt, Slot, StatusCode,
-        error::{ForbiddenError, NotFoundError, UnauthorizedError},
-        href, layout, not_found, page,
-        request::uri,
-    },
+    metadata::Metadata,
+    router::{Compression, Router, RouterBuilderDiscoverExt, href, not_found, page},
     runtime::RuntimeLayer,
-    tailwind,
-    view::{Child, View, ViewExt, attributes, component, error_boundary, view},
+    view::{View, attributes, view},
 };
 use tracing::debug;
 
 use crate::{
-    assets::{
-        CLOSE_DROPDOWN_JS, FONT_BODY, FONT_HEAD, HEADER_IMAGES, HYDRASTIS_CANADENSIS, LEAFLET_CSS,
-        LEAFLET_JS, mdi,
-    },
-    auth::login,
-    components::{button::*, input::input, pn::taxon_search_bar},
+    components::{button::*, input::input},
     config::AppConfig,
     error::Error,
     tasks::background_tasks,
-    users::user_menu,
 };
 
 mod actions;
@@ -46,6 +31,7 @@ mod error;
 mod flash;
 mod propagation;
 mod regions;
+mod shell;
 mod tasks;
 mod taxa;
 mod users;
@@ -140,204 +126,7 @@ async fn run() -> Result<(), Error> {
     Ok(())
 }
 
-// get a stable but "random" header image for each page so we have a variety of
-// headers but the header of a particular page won't change on reload. Hash the
-// url and convert it to an integer and use that to index into the header image
-// collection. Special case the landing pages (home, login) to a particular
-// image.
-fn header_image_for_page(cx: &Cx) -> &Asset {
-    let uri = uri(cx);
-    if href!(home).is_current(cx) || href!(login).is_current(cx) {
-        return &HYDRASTIS_CANADENSIS;
-    }
-    let mut hasher = DefaultHasher::new();
-    uri.hash(&mut hasher);
-    let hash_value = hasher.finish();
-    HEADER_IMAGES[(hash_value as usize) % HEADER_IMAGES.len()]
-}
-
 not_found!("/");
-
-#[layout(
-    "/",
-    with(Metadata::new()
-        .title(SITE_NAME)
-        .description(
-            "A comprehensive reference guide for growing and collecting native plants for ecological restoration",
-        ))
-)]
-async fn shell(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
-    let header_bg = header_image_for_page(cx);
-
-    Ok(view! {
-        <!DOCTYPE html>
-        <html
-            style=(format!(
-                "--background-image:url('{}')",
-                asset_config(cx).resolve(cx, *header_bg),
-            ))
-        >
-            <head>
-                topcoat::runtime::script()
-                topcoat::dev::script()
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <meta charset="UTF-8">
-                metadata::tags()
-                <link rel="stylesheet" href=(tailwind::stylesheet!())>
-                <link rel="stylesheet" href=(LEAFLET_CSS)>
-                <script src=(LEAFLET_JS)></script>
-                <script src=(CLOSE_DROPDOWN_JS)></script>
-                topcoat::font::link(font: FONT_HEAD)
-                topcoat::font::link(font: FONT_BODY)
-            </head>
-            <body>
-                <div class="main-content">
-                    if href!(login).is_current(cx) {
-                        (slot)
-                    } else {
-                        full_page_layout((slot))
-                    }
-                </div>
-            </body>
-        </html>
-    })
-}
-
-#[component]
-async fn full_page_layout(cx: &Cx, child: Child<'_>) -> topcoat::Result<impl View> {
-    let uri = uri(cx);
-    let flash_msg = flash::pop_message(cx)?;
-
-    Ok(view! {
-        <header
-            class="dark flex flex-col items-start justify-between font-bold flex-wrap bg-(image:--background-image) bg-center bg-cover h-[8rem] md:h-[12rem]"
-        >
-            <nav
-                class="text-foreground bg-background/70 w-full block shrink flex items-center gap-6 md:gap-4 px-3 md:px-6 py-2"
-            >
-                <ul class="contents">
-                    <li>
-                        <a class="block" href=(href!(home))>
-                            icon(
-                                data: mdi::FLOWER_POPPY,
-                                label: "Home",
-                                attrs: attributes! { class="icon" }
-                            )
-                            <span class="caption">"Propagation Notebook"</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a class="block" href=(href!(taxa::explore))>
-                            icon(
-                                data: mdi::FORMAT_LIST_BULLETED,
-                                label: "Taxonomy",
-                                attrs: attributes! { class="icon" }
-                            )
-                            <span class="caption">"Taxonomy"</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a class="block" href=(href!(regions::list))>
-                            icon(
-                                data: mdi::GLOBE,
-                                label: "Regions",
-                                attrs: attributes! { class="icon" }
-                            )
-                            <span class="caption">"Regions"</span>
-                        </a>
-                    </li>
-                    <li class="md:px-6 mx-auto grow lg:max-w-1/2">
-                        taxon_search_bar()
-                    </li>
-                    user_menu()
-                </ul>
-            </nav>
-        </header>
-        <main class="m-3 md:m-6 grow">
-            if let Some(msg) = flash_msg {
-                flash::flash_alert(attrs: attributes! { class="my-3" }, flash: &msg)
-            }
-            error_boundary(
-                fallback: |error| {
-                    match error {
-                        e if e.downcast_ref::<UnauthorizedError>().is_some() => {
-                            Ok(
-                                view! {
-                                    (StatusCode::UNAUTHORIZED)
-                                    <h1>"401 — Unauthorized"</h1>
-                                    <div>
-                                        "Sorry, you must be logged in to view this page. Please "
-                                        <a href=(href!(login))>"log in"</a>
-                                        " to continue."
-                                    </div>
-                                }.boxed(
-
-                                ),
-                            )
-                        }
-                        e if e.downcast_ref::<ForbiddenError>().is_some() => {
-                            Ok(
-                                view! {
-                                    (StatusCode::FORBIDDEN)
-                                    <h1>"403 — Access Denied"</h1>
-                                    <div>
-                                        (format!(
-                                            "Sorry, you do not have permission to access '{uri}' on this server.",
-                                        ))
-                                    </div>
-                                }.boxed(
-
-                                ),
-                            )
-                        }
-                        e if e.downcast_ref::<NotFoundError>().is_some() => {
-                            Ok(
-                                view! {
-                                    (StatusCode::NOT_FOUND)
-                                    <h1>"404 Not Found"</h1>
-                                    <p>
-                                        (format!(
-                                            "We're sorry, but the page '{uri}' cannot be found. The link might be outdated, or the URL could have been a typo.",
-                                        ))
-                                    </p>
-                                }.boxed(
-
-                                ),
-                            )
-                        }
-                        e => Err(e),
-                    }
-                },
-                (child)
-            )
-        </main>
-        <footer
-            class="dark bg-(image:--background-image) bg-center bg-cover mt-6 shadow-[0_-1rem_2rem_rgba(0,0,0,0.2)]"
-        >
-            <div
-                class="text-foreground bg-linear-to-t from-background to-50% to-transparent block px-3 md:px-6 pt-50 pb-6"
-            >
-                "Developed with "
-                icon(
-                    data: mdi::HEART,
-                    label: "Love",
-                    attrs: attributes! { class="text-red-300 inline-block" }
-                )
-                " by volunteers"
-                <div class="opacity-60">
-                    <div>
-                        "Taxonomy based on "
-                        <a href="https://www.itis.gov">"ITIS"</a>
-                    </div>
-                    <div>
-                        "Phenology data provided by "
-                        <a href="https://inaturalist.org">"iNaturalist.org"</a>
-                    </div>
-                </div>
-            </div>
-        </footer>
-    })
-}
 
 #[page("/")]
 async fn home(cx: &Cx) -> topcoat::Result<impl View> {

@@ -1,3 +1,4 @@
+use jiff::ToSpan;
 use libpropagation::{
     region::{HarvestFilter, OriginFilter, Region, RegionCategory, RegionalTaxonStatus},
     taxonomy::{Rank, Taxon, TaxonHierarchy},
@@ -7,7 +8,7 @@ use topcoat::{
     context::{Cx, memoize},
     metadata::Metadata,
     router::{Slot, error::RouterErrorExt, href, layout, page, path_param, query_params},
-    view::{View, attributes, view},
+    view::{Attributes, View, attributes, component, view},
 };
 use tracing::trace;
 
@@ -18,10 +19,9 @@ use crate::{
         card::*,
         harvest::{harvest_timeline, regional_taxa_table},
         input::input,
-        pn::{
-            conservation_status_badge, leaflet_map, origin_badge, pagination_control,
-            week_navigator,
-        },
+        map::leaflet_map,
+        pagination::*,
+        pn::{conservation_status_badge, origin_badge, pagination_control},
     },
     context::db,
     crumb::{Crumb, crumbs},
@@ -32,6 +32,33 @@ use crate::{
 path_param!(pub region_id: u64 else bad_request);
 
 const SEED_DISCLAIMER: &str = "Seed dates are based on data retrieved from iNaturalist.org. If a species does not have any information about its seed-bearing window shown here, it is likely that either iNaturalist doesn't have enough observations of the species within the given area, or too few observations are annotated to indicate the presence of seeds. We periodically import new data from iNaturalist, so any new or newly-annotated observations should improve these dates over time.";
+
+#[component]
+pub async fn week_navigator(
+    cx: &Cx,
+    date: jiff::civil::Date,
+    #[default] attrs: Attributes,
+) -> topcoat::Result<impl View> {
+    let fmt = |dt: jiff::civil::Date| dt.strftime("%b %d").to_string();
+    let prev_date = date - 7.days();
+    let prev_link = format!("?date={}", prev_date);
+    let next_date = date + 7.days();
+    let next_link = format!("?date={}", next_date);
+    Ok(view! {
+        pagination(
+            attrs: attrs,
+            pagination_content(
+                pagination_item(
+                    pagination_previous(attrs: attributes! { href=(prev_link) })
+                )
+                pagination_item(pagination_link(active: true, (fmt(date))))
+                pagination_item(
+                    pagination_next(attrs: attributes! { href=(next_link) })
+                )
+            )
+        )
+    })
+}
 
 #[layout(
     "/regions",
