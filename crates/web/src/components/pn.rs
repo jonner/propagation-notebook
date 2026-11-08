@@ -153,33 +153,6 @@ pub async fn pagination_control<T: ModifyOffset + Clone + Sync + Send>(
 }
 
 #[component]
-pub async fn taxa_grid(
-    #[default] mut attrs: Attributes,
-    #[default] child: Child<'_>,
-) -> topcoat::Result<impl View> {
-    Ok(view! {
-        <div class=(class!("results-grid", attrs.remove("class"))) (attrs)>(child)</div>
-    })
-}
-#[component]
-pub async fn taxa_grid_item(
-    #[default] mut attrs: Attributes,
-    #[default] child: Child<'_>,
-) -> topcoat::Result<impl View> {
-    Ok(view! {
-        <div
-            class=(class!(
-                "p-6 h-full flex flex-col items-center text-center justify-center",
-                attrs.remove("class"),
-            ))
-            (attrs)
-        >
-            (child)
-        </div>
-    })
-}
-
-#[component]
 pub async fn taxon_icon(
     url: Option<&String>,
     #[default] mut attrs: Attributes,

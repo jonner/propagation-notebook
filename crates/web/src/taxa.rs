@@ -14,7 +14,8 @@ use topcoat::{
     },
     runtime::{Event, procedure},
     view::{
-        AttributeValueViewParts, Child, View, attributes, component, error_boundary, suspense, view,
+        AttributeValueViewParts, Attributes, Child, View, attributes, class, component,
+        error_boundary, suspense, view,
     },
 };
 use tracing::{debug, warn};
@@ -30,7 +31,7 @@ use crate::{
         button::button,
         harvest::taxon_regional_table,
         input::input,
-        pn::{origin_badge, pagination_control, taxa_grid, taxa_grid_item, taxon_icon},
+        pn::{origin_badge, pagination_control, taxon_icon},
     },
     context::{current_user, db, require_user_with_permission},
     util::{ModifyOffset, PER_PAGE, PageState},
@@ -42,6 +43,33 @@ mod propagation;
 
 path_param!(pub taxon_id: u64, error = bad_request);
 path_param!(pub region_id: u64, error = bad_request);
+
+#[component]
+pub async fn taxa_grid(
+    #[default] mut attrs: Attributes,
+    #[default] child: Child<'_>,
+) -> topcoat::Result<impl View> {
+    Ok(view! {
+        <div class=(class!("results-grid", attrs.remove("class"))) (attrs)>(child)</div>
+    })
+}
+#[component]
+pub async fn taxa_grid_item(
+    #[default] mut attrs: Attributes,
+    #[default] child: Child<'_>,
+) -> topcoat::Result<impl View> {
+    Ok(view! {
+        <div
+            class=(class!(
+                "p-6 h-full flex flex-col items-center text-center justify-center",
+                attrs.remove("class"),
+            ))
+            (attrs)
+        >
+            (child)
+        </div>
+    })
+}
 
 #[component]
 pub async fn ancestor_breadcrumbs<L, P>(
