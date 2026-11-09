@@ -115,7 +115,7 @@ async fn run() -> Result<(), Error> {
         service_builder = service_builder.with(if compression {
             Compression::default()
         } else {
-            Compression::off()
+            Compression::disable()
         });
     }
 
