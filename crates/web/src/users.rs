@@ -20,6 +20,8 @@ use crate::{
     context::{db, require_user},
 };
 
+pub(crate) mod admin;
+
 #[derive(Deserialize, Debug)]
 pub struct UpdateProfileParams {
     pub name: Option<String>,

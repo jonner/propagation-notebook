@@ -11,13 +11,11 @@ use crate::{
     components::navigation_menu::*,
     context::require_user_with_permission,
     crumb::{Crumb, crumbs},
-    propagation,
+    propagation, users,
 };
 
 mod permissions;
 mod roles;
-mod users;
-
 #[layout(
     "/admin",
     with(Crumb::new(
@@ -50,7 +48,7 @@ pub async fn admin_shell(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> 
                     navigation_menu_content(
                         attrs: attributes! { class="min-w-sm" },
                         navigation_menu_link(
-                            attrs: attributes! { href=(href!(users::list)) },
+                            attrs: attributes! { href=(href!(users::admin::list)) },
                             "Users"
                         )
                         navigation_menu_link(
