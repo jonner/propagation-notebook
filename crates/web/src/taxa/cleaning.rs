@@ -32,7 +32,7 @@ use crate::{
         textarea::*,
     },
     context::{current_user, db, require_user_with_permission},
-    taxa::{self, TaxonId},
+    taxa,
 };
 
 path_param!(pub cleaning_id: u64 else bad_request);
@@ -40,8 +40,8 @@ path_param!(pub citation_id: u64 else bad_request);
 
 #[memoize(as_ref)]
 async fn cleaning_procedure(cx: &Cx) -> topcoat::Result<CleaningProcedure> {
-    let taxon_id = *path_param::<TaxonId>(cx)?;
-    let cleaning_id = *path_param::<CleaningId>(cx)?;
+    let taxon_id = *taxa::taxon_id(cx)?;
+    let cleaning_id = *cleaning_id(cx)?;
     Ok(CleaningProcedure::filter(
         CleaningProcedure::fields()
             .taxon_id()
@@ -84,7 +84,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
             name: "Edit".to_string(),
             permission: Some(PermissionCode::TaxonCleaningEdit),
             attrs: attributes! {
-                href=(href!(modify, TaxonId(proc.taxon_id), CleaningId(proc.id)))
+                href=(href!(modify, taxa::taxon_id: proc.taxon_id, cleaning_id: proc.id))
             },
             item_type: ActionItemType::Link,
         },
@@ -109,7 +109,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                     breadcrumb_list(
                         breadcrumb_item(
                             breadcrumb_link(
-                                attrs: attributes! { href=(href!(taxa::details, TaxonId(taxon.id))) },
+                                attrs: attributes! { href=(href!(taxa::details, taxa::taxon_id: taxon.id)) },
                                 (&taxon.complete_name)
                             )
                         )
@@ -224,7 +224,7 @@ pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
                     breadcrumb_list(
                         breadcrumb_item(
                             breadcrumb_link(
-                                attrs: attributes! { href=(href!(taxa::details, TaxonId(taxon.id))) },
+                                attrs: attributes! { href=(href!(taxa::details, taxa::taxon_id: taxon.id)) },
                                 (&taxon.complete_name)
                             )
                         )
@@ -236,8 +236,8 @@ pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
                                 attrs: attributes! {
                                     href=(href!(
                                         details,
-                                        TaxonId(taxon.id),
-                                        CleaningId(cleaning_procedure.id),
+                                        taxa::taxon_id: taxon.id,
+                                        cleaning_id: cleaning_procedure.id,
                                     ))
                                 },
                                 (cleaning_procedure.id)
@@ -298,8 +298,8 @@ pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
                 method="POST"
                 action=(href!(
                     add_citation,
-                    TaxonId(taxon.id),
-                    CleaningId(cleaning_procedure.id),
+                    taxa::taxon_id: taxon.id,
+                    cleaning_id: cleaning_procedure.id,
                 ))
             }
         )
@@ -312,9 +312,9 @@ pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
                         |d| Some(
                                 href!(
                                     remove_citation,
-                                    TaxonId(taxon.id),
-                                    CleaningId(cleaning_procedure.id),
-                                    CitationId(d.0),
+                                    taxa::taxon_id: taxon.id,
+                                    cleaning_id: cleaning_procedure.id,
+                                    citation_id: d.0,
                                 ),
                             ),
                     ))
@@ -355,24 +355,24 @@ pub async fn add_citation(
 ) -> topcoat::Result<SeeOther> {
     let _ = require_user_with_permission(cx, PermissionCode::TaxonCleaningEdit).await?;
 
-    let taxon_id = *path_param::<TaxonId>(cx)?;
-    let cleaning_id = *path_param::<CleaningId>(cx)?;
+    let taxon_id = *taxa::taxon_id(cx)?;
+    let cleaning_id = *cleaning_id(cx)?;
     CleaningProcedureCitation::create()
         .cleaning_id(cleaning_id)
         .citation_id(params.citation_id)
         .exec(&mut db(cx))
         .await?;
     Ok(see_other(
-        href!(modify, TaxonId(taxon_id), CleaningId(cleaning_id)).resolve(cx),
+        href!(modify, taxa::taxon_id: taxon_id, cleaning_id: cleaning_id).resolve(cx),
     ))
 }
 
 #[route(POST "/taxa/{taxon_id}/cleaning/{cleaning_id}/citations/{citation_id}/delete")]
 pub async fn remove_citation(cx: &Cx) -> topcoat::Result<SeeOther> {
     let _ = require_user_with_permission(cx, PermissionCode::TaxonCleaningEdit).await?;
-    let taxon_id = *path_param::<TaxonId>(cx)?;
-    let cleaning_id = *path_param::<CleaningId>(cx)?;
-    let citation_id = *path_param::<CitationId>(cx)?;
+    let taxon_id = *taxa::taxon_id(cx)?;
+    let cleaning_id = *cleaning_id(cx)?;
+    let citation_id = *citation_id(cx)?;
     CleaningProcedureCitation::delete_by_citation_id_and_cleaning_id(
         &mut db(cx),
         citation_id,
@@ -380,6 +380,6 @@ pub async fn remove_citation(cx: &Cx) -> topcoat::Result<SeeOther> {
     )
     .await?;
     Ok(see_other(
-        href!(modify, TaxonId(taxon_id), CleaningId(cleaning_id)).resolve(cx),
+        href!(modify, taxa::taxon_id: taxon_id, cleaning_id: cleaning_id).resolve(cx),
     ))
 }

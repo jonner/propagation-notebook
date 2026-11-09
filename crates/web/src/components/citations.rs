@@ -10,7 +10,7 @@ use crate::citation;
 #[component]
 pub async fn citation_link(cx: &Cx, citation: &Citation) -> topcoat::Result<impl View> {
     Ok(view! {
-        <a href=(href!(citation::details, citation::CitationId(citation.id)))>
+        <a href=(href!(citation::details, citation::citation_id: citation.id))>
             (citation.format_cse())
         </a>
     })

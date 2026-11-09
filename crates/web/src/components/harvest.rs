@@ -86,7 +86,7 @@ pub async fn regional_taxa_table(
                     harvest_table_row(
                         harvest_table_row_header(
                             <span class="latin">
-                                <a href=(href!(taxa::details, taxa::TaxonId(taxon.id)))>
+                                <a href=(href!(taxa::details, taxa::taxon_id: taxon.id))>
                                     (&taxon.complete_name)
                                 </a>
                             </span>
@@ -129,7 +129,7 @@ pub async fn taxon_regional_table(
                     harvest_table_row(
                         harvest_table_row_header(
                             <a
-                                href=(href!(regions::overview, regions::RegionId(region.id)))
+                                href=(href!(regions::overview, regions::region_id: region.id))
                             >
                                 (&region.name)
                             </a>

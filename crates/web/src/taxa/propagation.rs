@@ -38,7 +38,7 @@ use crate::{
         textarea::*,
     },
     context::{current_user, db, require_user_with_permission},
-    taxa::{self, TaxonId},
+    taxa,
 };
 
 path_param!(pub propagation_id: u64 else bad_request);
@@ -46,8 +46,8 @@ path_param!(pub citation_id: u64 else bad_request);
 
 #[memoize(as_ref)]
 async fn taxon_propagation_procedure(cx: &Cx) -> topcoat::Result<TaxonPropagationProcedure> {
-    let taxon_id = *path_param::<TaxonId>(cx)?;
-    let propagation_id = *path_param::<PropagationId>(cx)?;
+    let taxon_id = *taxa::taxon_id(cx)?;
+    let propagation_id = *propagation_id(cx)?;
     Ok(
         TaxonPropagationProcedure::filter_by_taxon_id_and_propagation_id(taxon_id, propagation_id)
             .include(
@@ -95,8 +95,8 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
             attrs: attributes! {
                 href=(href!(
                     modify,
-                    TaxonId(tp.taxon_id),
-                    PropagationId(tp.propagation_id),
+                    taxa::taxon_id: tp.taxon_id,
+                    propagation_id: tp.propagation_id,
                 ))
             },
             item_type: ActionItemType::Link,
@@ -123,7 +123,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                     breadcrumb_list(
                         breadcrumb_item(
                             breadcrumb_link(
-                                attrs: attributes! { href=(href!(taxa::details, TaxonId(taxon.id))) },
+                                attrs: attributes! { href=(href!(taxa::details, taxa::taxon_id: taxon.id)) },
                                 (&taxon.complete_name)
                             )
                         )
@@ -200,8 +200,8 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                     <form
                         action=(href!(
                             delete,
-                            TaxonId(tp.taxon_id),
-                            PropagationId(tp.propagation_id),
+                            taxa::taxon_id: tp.taxon_id,
+                            propagation_id: tp.propagation_id,
                         ))
                         method="POST"
                     >
@@ -258,7 +258,7 @@ pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
                         breadcrumb_list(
                             breadcrumb_item(
                                 breadcrumb_link(
-                                    attrs: attributes! { href=(href!(taxa::details, TaxonId(taxon.id))) },
+                                    attrs: attributes! { href=(href!(taxa::details, taxa::taxon_id: taxon.id)) },
                                     (&taxon.complete_name)
                                 )
                             )
@@ -270,8 +270,8 @@ pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
                                     attrs: attributes! {
                                         href=(href!(
                                             details,
-                                            TaxonId(tp.taxon_id),
-                                            PropagationId(tp.propagation_id),
+                                            taxa::taxon_id: tp.taxon_id,
+                                            propagation_id: tp.propagation_id,
                                         ))
                                     },
                                     (tp.propagation_id)
@@ -291,8 +291,8 @@ pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
                         <form
                             action=(href!(
                                 do_modify,
-                                TaxonId(tp.taxon_id),
-                                PropagationId(tp.propagation_id),
+                                taxa::taxon_id: tp.taxon_id,
+                                propagation_id: tp.propagation_id,
                             ))
                             method="POST"
                             class="flex flex-col gap-6"
@@ -386,8 +386,8 @@ pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
                 method="POST"
                 action=(href!(
                     add_citation,
-                    TaxonId(tp.taxon_id),
-                    PropagationId(tp.propagation_id),
+                    taxa::taxon_id: tp.taxon_id,
+                    propagation_id: tp.propagation_id,
                 ))
             }
         )
@@ -398,11 +398,12 @@ pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
                 action=(delete_citation_data
                     .get()
                     .map(
-                        |d| href!(
+                        |d|
+                            href!(
                                 remove_citation,
-                                TaxonId(tp.taxon_id),
-                                PropagationId(tp.propagation_id),
-                                CitationId(d.0),
+                                taxa::taxon_id: tp.taxon_id,
+                                propagation_id: tp.propagation_id,
+                                citation_id: d.0,
                             ),
                     ))
             },
@@ -478,11 +479,11 @@ pub async fn do_modify(
     Form(params): Form<TaxonPropagationParams>,
 ) -> topcoat::Result<SeeOther> {
     let _ = require_user_with_permission(cx, PermissionCode::TaxonPropagationEdit).await?;
-    let taxon_id = *path_param::<TaxonId>(cx)?;
-    let propagation_id = *path_param::<PropagationId>(cx)?;
+    let taxon_id = *taxa::taxon_id(cx)?;
+    let propagation_id = *propagation_id(cx)?;
     match params.validate() {
         Some(errors) => Err(rewrite(
-            href!(modify, TaxonId(taxon_id), PropagationId(propagation_id)).resolve(cx),
+            href!(modify, taxa::taxon_id: taxon_id, propagation_id: propagation_id).resolve(cx),
             Body::empty(),
         )
         .with(TaxonPropagationRejected {
@@ -501,7 +502,8 @@ pub async fn do_modify(
             .exec(&mut db(cx))
             .await?;
             Ok(see_other(
-                href!(details, TaxonId(taxon_id), PropagationId(propagation_id)).resolve(cx),
+                href!(details, taxa::taxon_id: taxon_id, propagation_id: propagation_id)
+                    .resolve(cx),
             ))
         }
     }
@@ -519,8 +521,8 @@ pub async fn add_citation(
 ) -> topcoat::Result<SeeOther> {
     let _ = require_user_with_permission(cx, PermissionCode::TaxonPropagationEdit).await?;
 
-    let taxon_id = *path_param::<TaxonId>(cx)?;
-    let propagation_id = *path_param::<PropagationId>(cx)?;
+    let taxon_id = *taxa::taxon_id(cx)?;
+    let propagation_id = *propagation_id(cx)?;
     TaxonPropagationProcedureCitation::create()
         .taxon_id(taxon_id)
         .propagation_id(propagation_id)
@@ -528,7 +530,7 @@ pub async fn add_citation(
         .exec(&mut db(cx))
         .await?;
     Ok(see_other(
-        href!(modify, TaxonId(taxon_id), PropagationId(propagation_id)).resolve(cx),
+        href!(modify, taxa::taxon_id: taxon_id, propagation_id: propagation_id).resolve(cx),
     ))
 }
 
@@ -537,9 +539,9 @@ pub async fn add_citation(
 )]
 pub async fn remove_citation(cx: &Cx) -> topcoat::Result<SeeOther> {
     let _ = require_user_with_permission(cx, PermissionCode::TaxonPropagationEdit).await?;
-    let taxon_id = *path_param::<TaxonId>(cx)?;
-    let propagation_id = *path_param::<PropagationId>(cx)?;
-    let citation_id = *path_param::<CitationId>(cx)?;
+    let taxon_id = *taxa::taxon_id(cx)?;
+    let propagation_id = *propagation_id(cx)?;
+    let citation_id = *citation_id(cx)?;
     TaxonPropagationProcedureCitation::delete_by_citation_id_and_propagation_id_and_taxon_id(
         &mut db(cx),
         citation_id,
@@ -548,15 +550,15 @@ pub async fn remove_citation(cx: &Cx) -> topcoat::Result<SeeOther> {
     )
     .await?;
     Ok(see_other(
-        href!(modify, TaxonId(taxon_id), PropagationId(propagation_id)).resolve(cx),
+        href!(modify, taxa::taxon_id: taxon_id, propagation_id: propagation_id).resolve(cx),
     ))
 }
 
 #[route(POST "/taxa/{taxon_id}/propagation/{propagation_id}/delete")]
 pub async fn delete(cx: &Cx) -> topcoat::Result<SeeOther> {
     let _ = require_user_with_permission(cx, PermissionCode::TaxonPropagationDelete).await?;
-    let taxon_id = *path_param::<TaxonId>(cx)?;
-    let propagation_id = *path_param::<PropagationId>(cx)?;
+    let taxon_id = *taxa::taxon_id(cx)?;
+    let propagation_id = *propagation_id(cx)?;
     TaxonPropagationProcedure::delete_by_taxon_id_and_propagation_id(
         &mut db(cx),
         taxon_id,
@@ -564,6 +566,6 @@ pub async fn delete(cx: &Cx) -> topcoat::Result<SeeOther> {
     )
     .await?;
     Ok(see_other(
-        href!(taxa::details, TaxonId(taxon_id)).resolve(cx),
+        href!(taxa::details, taxa::taxon_id: taxon_id).resolve(cx),
     ))
 }

@@ -131,7 +131,7 @@ pub async fn list(cx: &Cx) -> topcoat::Result<impl View> {
                     <ul class="contents">
                         for region in regions {
                             <li>
-                                <a href=(href!(overview, RegionId(region.id)))>
+                                <a href=(href!(overview, region_id: region.id))>
                                     (region.name)
                                 </a>
                             </li>
@@ -145,7 +145,7 @@ pub async fn list(cx: &Cx) -> topcoat::Result<impl View> {
 
 #[memoize(as_ref)]
 async fn region(cx: &Cx) -> topcoat::Result<Region> {
-    let id = path_param::<RegionId>(cx)?;
+    let id = region_id(cx)?;
     Ok(Region::filter_by_id(id)
         .include(Region::fields().taxon_statuses())
         .one()
@@ -162,7 +162,7 @@ async fn region(cx: &Cx) -> topcoat::Result<Region> {
             Ok(
                 (
                     region.name.clone(),
-                    Some(href!(overview, RegionId(region.id)).resolve(cx)),
+                    Some(href!(overview, region_id: region.id).resolve(cx)),
                 ),
             )
         },
@@ -246,7 +246,7 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result<impl View> {
             <section>
                 <form
                     method="get"
-                    action=(href!(fruiting_all, RegionId(region.id)))
+                    action=(href!(fruiting_all, region_id: region.id))
                     class="flex w-full"
                 >
                     input(
@@ -319,26 +319,26 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result<impl View> {
                             <div class="flex flex-col gap-3">
                                 <div>
                                     <h4>"Currently Fruiting"</h4>
-                                    <a href=(href!(fruiting_now, RegionId(region.id)))>
+                                    <a href=(href!(fruiting_now, region_id: region.id))>
                                         (n_fruiting)
                                     </a>
                                 </div>
                                 <div>
                                     <h4>"Winding down..."</h4>
-                                    <a href=(href!(fruiting_done, RegionId(region.id)))>
+                                    <a href=(href!(fruiting_done, region_id: region.id))>
                                         (n_ending)
                                     </a>
                                 </div>
                                 <div>
                                     <h4>"Ramping up..."</h4>
-                                    <a href=(href!(fruiting_soon, RegionId(region.id)))>
+                                    <a href=(href!(fruiting_soon, region_id: region.id))>
                                         (n_starting)
                                     </a>
                                 </div>
                             </div>
                         )
                         card_footer(
-                            <a href=(href!(fruiting_all, RegionId(region.id)))>
+                            <a href=(href!(fruiting_all, region_id: region.id))>
                                 "All seed-bearing statuses"
                             </a>
                         )
@@ -366,11 +366,11 @@ impl ModifyOffset for HarvestParams {
     "/regions/{region_id}/fruiting",
     with(Crumb::new(
         async |cx| {
-            let region_id = *path_param::<RegionId>(cx)?;
+            let region_id = *region_id(cx)?;
             Ok(
                 (
                     "Seed windows".to_string(),
-                    Some(href!(fruiting_all, RegionId(region_id)).resolve(cx)),
+                    Some(href!(fruiting_all, region_id: region_id).resolve(cx)),
                 ),
             )
         },
@@ -625,8 +625,8 @@ path_param!(taxon_id: u64 else bad_request);
 
 #[memoize(as_ref)]
 async fn regional_taxon_status(cx: &Cx) -> topcoat::Result<RegionalTaxonStatus> {
-    let region_id = path_param::<RegionId>(cx).ok_or_not_found()?;
-    let taxon_id = path_param::<TaxonId>(cx).ok_or_not_found()?;
+    let region_id = region_id(cx).ok_or_not_found()?;
+    let taxon_id = taxa::taxon_id(cx).ok_or_not_found()?;
     Ok(
         RegionalTaxonStatus::filter_by_taxon_id_and_region_id(taxon_id, region_id)
             .include(RegionalTaxonStatus::fields().region())
@@ -668,13 +668,13 @@ pub async fn taxon_status(cx: &Cx) -> topcoat::Result<impl View> {
         <dt>"Taxon"</dt>
         <dd>
             <span class="latin">
-                <a href=(href!(taxa::details, taxa::TaxonId(taxon.id)))>
+                <a href=(href!(taxa::details, taxa::taxon_id: taxon.id))>
                     (&taxon.complete_name)
                 </a>
             </span>
         </dd>
         <dt>"Region"</dt>
-        <dd><a href=(href!(overview, RegionId(region.id)))>(&region.name)</a></dd>
+        <dd><a href=(href!(overview, region_id: region.id))>(&region.name)</a></dd>
         <dt>"Origin"</dt>
         <dd>
             if let Some(origin) = rts.origin {

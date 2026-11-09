@@ -42,7 +42,7 @@ pub async fn list(cx: &Cx) -> topcoat::Result<impl View> {
         <h2>"Role List"</h2>
         <ul class="flex flex-col gap-2">
             for role in roles {
-                <li><a href=(href!(edit, RoleId(role.id)))>(role.name)</a></li>
+                <li><a href=(href!(edit, role_id: role.id))>(role.name)</a></li>
             }
             <li>
                 <a
@@ -91,7 +91,7 @@ async fn role_details_form(
 
 #[memoize(as_ref)]
 async fn role(cx: &Cx) -> topcoat::Result<Role> {
-    let role_id = *path_param::<RoleId>(cx)?;
+    let role_id = *role_id(cx)?;
     Ok(Role::filter_by_id(role_id)
         .include(Role::fields().permissions())
         .one()
@@ -130,7 +130,7 @@ pub async fn edit(cx: &Cx) -> topcoat::Result<impl View> {
                 card_header(card_title("Role Info"))
                 card_content(
                     role_details_form(
-                        attrs: attributes! { method="POST" action=(href!(update, RoleId(role.id))) },
+                        attrs: attributes! { method="POST" action=(href!(update, role_id: role.id)) },
                         role: Some(role)
                     )
                 )
@@ -141,7 +141,7 @@ pub async fn edit(cx: &Cx) -> topcoat::Result<impl View> {
                     role_permissions_form(
                         attrs: attributes! {
                             method="POST"
-                            action=(href!(update_permissions, RoleId(role.id)))
+                            action=(href!(update_permissions, role_id: role.id))
                         },
                         role: role
                     )
@@ -231,7 +231,7 @@ pub async fn update_permissions(
         .collect::<Result<Vec<Uuid>, _>>()
         .ok_or_bad_request("Could not parse form value as UUID")?;
     let mut db = db(cx);
-    let role_id = *path_param::<RoleId>(cx)?;
+    let role_id = *role_id(cx)?;
     let role = Role::filter_by_id(role_id)
         .include(Role::fields().permissions())
         .one()
@@ -269,7 +269,7 @@ pub async fn update_permissions(
     toasty::batch(remove_queries).exec(&mut txn).await?;
     txn.commit().await?;
 
-    Ok(see_other(href!(edit, RoleId(role_id)).resolve(cx)))
+    Ok(see_other(href!(edit, role_id: role_id).resolve(cx)))
 }
 
 #[derive(Debug, Deserialize)]
@@ -280,12 +280,12 @@ struct RoleDetailsParams {
 #[route(POST "/admin/roles/{role_id}")]
 pub async fn update(cx: &Cx, Form(params): Form<RoleDetailsParams>) -> topcoat::Result<SeeOther> {
     _ = require_user_with_permission(cx, PermissionCode::RoleEdit).await?;
-    let role_id = *path_param::<RoleId>(cx)?;
+    let role_id = *role_id(cx)?;
     Role::update_by_id(role_id)
         .name(params.name)
         .exec(&mut db(cx))
         .await?;
-    Ok(see_other(href!(edit, RoleId(role_id)).resolve(cx)))
+    Ok(see_other(href!(edit, role_id: role_id).resolve(cx)))
 }
 
 #[route(POST "/admin/roles/new")]
@@ -295,5 +295,5 @@ pub async fn do_create(
 ) -> topcoat::Result<SeeOther> {
     _ = require_user_with_permission(cx, PermissionCode::RoleCreate).await?;
     let role = Role::create().name(params.name).exec(&mut db(cx)).await?;
-    Ok(see_other(href!(edit, RoleId(role.id)).resolve(cx)))
+    Ok(see_other(href!(edit, role_id: role.id).resolve(cx)))
 }

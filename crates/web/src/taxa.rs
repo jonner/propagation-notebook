@@ -233,7 +233,7 @@ pub(crate) async fn explore(cx: &Cx) -> topcoat::Result<impl View> {
         .exec(&mut db)
         .await?;
     if taxa.is_empty() {
-        return Err(redirect(href!(details, TaxonId(parent_id)).resolve(cx)).into());
+        return Err(redirect(href!(details, taxon_id: parent_id).resolve(cx)).into());
     }
     let ancestors = TaxonHierarchy::filter(TaxonHierarchy::fields().descendant_id().eq(parent_id))
         .include(TaxonHierarchy::fields().ancestor())
@@ -353,7 +353,7 @@ pub(crate) async fn explore(cx: &Cx) -> topcoat::Result<impl View> {
                                     if let Some(origin) = taxon.origin {
                                         origin_badge(origin: origin)
                                     }
-                                    <a href=(href!(details, TaxonId(taxon.id)))>
+                                    <a href=(href!(details, taxon_id: taxon.id))>
                                         icon(data: mdi::INFORMATION, label: "Information")
                                     </a>
                                 </span>
@@ -397,7 +397,7 @@ pub(crate) async fn explore(cx: &Cx) -> topcoat::Result<impl View> {
                                         )
                                     }
                                 </span>
-                                <a class="p-3" href=(href!(details, TaxonId(taxon.id)))>
+                                <a class="p-3" href=(href!(details, taxon_id: taxon.id))>
                                     icon(data: mdi::INFORMATION_OUTLINE, label: "Information")
                                 </a>
                             )
@@ -489,7 +489,7 @@ pub(crate) async fn search(cx: &Cx) -> topcoat::Result<impl View> {
                                     for taxon in taxa.iter() {
                                         taxa_grid_item(
                                             <a
-                                                href=(href!(details, TaxonId(taxon.id)))
+                                                href=(href!(details, taxon_id: taxon.id))
                                                 class="flex flex-col items-center text-center"
                                             >
                                                 taxon_icon(
@@ -510,7 +510,7 @@ pub(crate) async fn search(cx: &Cx) -> topcoat::Result<impl View> {
                                     for taxon in taxa.iter() {
                                         <li class="py-1">
                                             <span class="latin">
-                                                <a href=(href!(details, TaxonId(taxon.id)))>
+                                                <a href=(href!(details, taxon_id: taxon.id))>
                                                     (&taxon.complete_name)
                                                 </a>
                                             </span>
@@ -531,7 +531,7 @@ pub(crate) async fn search(cx: &Cx) -> topcoat::Result<impl View> {
 
 #[memoize(as_ref)]
 pub async fn taxon(cx: &Cx) -> topcoat::Result<Taxon> {
-    let id = path_param::<TaxonId>(cx)?;
+    let id = taxon_id(cx)?;
     Ok(Taxon::filter_by_id(id)
         .include(Taxon::fields().photo())
         .include(Taxon::fields().ancestor_links().ancestor())
@@ -565,7 +565,7 @@ pub async fn default_photo(cx: &Cx) -> topcoat::Result<impl View> {
             .collect::<Vec<_>>();
         ancestor_breadcrumbs(
             items: &ancestors,
-            link_fn: |taxon| { href!(crate::taxa::details, TaxonId(taxon.id)) },
+            link_fn: |taxon| { href!(crate::taxa::details, taxon_id: taxon.id) },
             ellipsize: Some(1),
             link_final: true,
             breadcrumb_separator()
@@ -692,7 +692,7 @@ pub async fn descendant_region_statuses(cx: &Cx, parent_id: u64) -> topcoat::Res
 
 #[memoize(as_ref)]
 async fn detailed_taxon(cx: &Cx) -> topcoat::Result<Taxon> {
-    let id = *path_param::<TaxonId>(cx)?;
+    let id = *taxon_id(cx)?;
     Ok(Taxon::filter_by_id(id)
         .include(Taxon::fields().vernaculars())
         .include(Taxon::fields().parent())
@@ -754,7 +754,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
         name: "Add Note".to_string(),
         permission: Some(PermissionCode::TaxonNoteCreate),
         item_type: ActionItemType::Link,
-        attrs: attributes! { href=(href!(note::create, TaxonId(taxon.id))) },
+        attrs: attributes! { href=(href!(note::create, taxon_id: taxon.id)) },
     }];
 
     Ok(view! {
@@ -767,7 +767,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
             .collect::<Vec<_>>();
         ancestor_breadcrumbs(
             items: &ancestors,
-            link_fn: |taxon| { href!(crate::taxa::details, TaxonId(taxon.id)) },
+            link_fn: |taxon| { href!(crate::taxa::details, taxon_id: taxon.id) },
             link_final: true
         )
         <h1 class="flex items-center">
@@ -790,7 +790,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                         href=(photo
                             .original_url
                             .is_some()
-                            .then(|| href!(default_photo, TaxonId(id))))
+                            .then(|| href!(default_photo, taxon_id: id)))
                     >
                         <figure class="taxon-photo">
                             <img src=(photo_url) alt=(&taxon.complete_name)>
@@ -820,7 +820,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                             for child in taxon.children.get() {
                                 <li>
                                     <span class="latin">
-                                        <a href=(href!(details, TaxonId(child.id)))>
+                                        <a href=(href!(details, taxon_id: child.id))>
                                             (&child.complete_name)
                                         </a>
                                     </span>
@@ -841,8 +841,8 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                                     <a
                                         href=(href!(
                                             cleaning::details,
-                                            TaxonId(procedure.taxon_id),
-                                            cleaning::CleaningId(procedure.id),
+                                            taxon_id: procedure.taxon_id,
+                                            cleaning::cleaning_id: procedure.id,
                                         ))
                                     >
                                         (&procedure.name)
@@ -853,7 +853,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                                             <a
                                                 href=(href!(
                                                     citation::details,
-                                                    citation::CitationId(citation.citation_id),
+                                                    citation::citation_id: citation.citation_id,
                                                 ))
                                             >
                                                 (citation.citation_id)
@@ -877,8 +877,8 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                                     <a
                                         href=(href!(
                                             propagation::details,
-                                            TaxonId(tp.taxon_id),
-                                            propagation::PropagationId(tp.propagation_id),
+                                            taxon_id: tp.taxon_id,
+                                            propagation::propagation_id: tp.propagation_id,
                                         ))
                                     >
                                         (&tp.propagation.get().name)
@@ -889,7 +889,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                                             <a
                                                 href=(href!(
                                                     citation::details,
-                                                    citation::CitationId(citation.citation_id),
+                                                    citation::citation_id: citation.citation_id,
                                                 ))
                                             >
                                                 (citation.citation_id)
@@ -938,8 +938,8 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                                             <a
                                                 href=(href!(
                                                     note::details,
-                                                    TaxonId(taxon.id),
-                                                    note::NoteId(note.id),
+                                                    taxon_id: taxon.id,
+                                                    note::note_id: note.id,
                                                 ))
                                             >
                                                 (&note.title)
@@ -950,7 +950,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                                                     <a
                                                         href=(href!(
                                                             citation::details,
-                                                            citation::CitationId(citation.citation_id),
+                                                            citation::citation_id: citation.citation_id,
                                                         ))
                                                     >
                                                         (citation.citation_id)

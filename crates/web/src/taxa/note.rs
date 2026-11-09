@@ -40,7 +40,7 @@ use crate::{
         textarea::textarea,
     },
     context::{current_user, db, require_user_with_permission},
-    taxa::{self, TaxonId},
+    taxa,
 };
 
 path_param!(pub note_id: u64 else bad_request);
@@ -48,13 +48,13 @@ path_param!(pub citation_id: u64 else bad_request);
 
 #[memoize(as_ref)]
 async fn taxon(cx: &Cx) -> topcoat::Result<Taxon> {
-    let id = *path_param::<TaxonId>(cx)?;
+    let id = *taxa::taxon_id(cx)?;
     Ok(Taxon::get_by_id(&mut db(cx), id).await.ok_or_not_found()?)
 }
 
 #[memoize(as_ref)]
 async fn taxon_note(cx: &Cx) -> topcoat::Result<TaxonNote> {
-    let note_id = *path_param::<NoteId>(cx)?;
+    let note_id = *note_id(cx)?;
     Ok(TaxonNote::filter_by_id(note_id)
         .include(TaxonNote::fields().taxon())
         .include(TaxonNote::fields().citation_links().citation())
@@ -80,7 +80,7 @@ async fn taxon_note(cx: &Cx) -> topcoat::Result<TaxonNote> {
 pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
     let delete_dialog_open = signal(cx, || false);
     let note = taxon_note(cx).await?;
-    let taxon_id = *path_param::<TaxonId>(cx)?;
+    let taxon_id = *taxa::taxon_id(cx)?;
 
     trace!(?note);
 
@@ -88,7 +88,9 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
         Action {
             name: "Edit".to_string(),
             permission: Some(PermissionCode::TaxonNoteEdit),
-            attrs: attributes! { href=(href!(edit, TaxonId(taxon_id), NoteId(note.id))) },
+            attrs: attributes! {
+                href=(href!(edit, taxa::taxon_id: taxon_id, note_id: note.id))
+            },
             item_type: ActionItemType::Link,
         },
         Action {
@@ -113,7 +115,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                     breadcrumb_list(
                         breadcrumb_item(
                             breadcrumb_link(
-                                attrs: attributes! { href=(href!(taxa::details, TaxonId(taxon.id))) },
+                                attrs: attributes! { href=(href!(taxa::details, taxa::taxon_id: taxon.id)) },
                                 (&taxon.complete_name)
                             )
                         )
@@ -162,7 +164,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                         "Cancel"
                     )
                     <form
-                        action=(href!(delete, TaxonId(taxon_id), NoteId(note.id)))
+                        action=(href!(delete, taxa::taxon_id: taxon_id, note_id: note.id))
                         method="POST"
                     >
                         button(
@@ -326,7 +328,7 @@ pub async fn edit(cx: &Cx) -> topcoat::Result<impl View> {
                     breadcrumb_list(
                         breadcrumb_item(
                             breadcrumb_link(
-                                attrs: attributes! { href=(href!(taxa::details, TaxonId(taxon.id))) },
+                                attrs: attributes! { href=(href!(taxa::details, taxa::taxon_id: taxon.id)) },
                                 (&taxon.complete_name)
                             )
                         )
@@ -334,7 +336,7 @@ pub async fn edit(cx: &Cx) -> topcoat::Result<impl View> {
                         breadcrumb_item(
                             breadcrumb_link(
                                 attrs: attributes! {
-                                    href=(href!(details, TaxonId(taxon.id), NoteId(note.id)))
+                                    href=(href!(details, taxa::taxon_id: taxon.id, note_id: note.id))
                                 },
                                 (format!("Note {}", note.id))
                             )
@@ -356,8 +358,8 @@ pub async fn edit(cx: &Cx) -> topcoat::Result<impl View> {
                             id=(&form_id)
                             action=(href!(
                                 update,
-                                TaxonId(note.taxon.get().id),
-                                NoteId(note.id),
+                                taxa::taxon_id: note.taxon.get().id,
+                                note_id: note.id,
                             ))
                             method="POST"
                         },
@@ -412,8 +414,8 @@ pub async fn edit(cx: &Cx) -> topcoat::Result<impl View> {
                 method="POST"
                 action=(href!(
                     add_citation,
-                    TaxonId(note.taxon.get().id),
-                    NoteId(note.id),
+                    taxa::taxon_id: note.taxon.get().id,
+                    note_id: note.id,
                 ))
             }
         )
@@ -426,9 +428,9 @@ pub async fn edit(cx: &Cx) -> topcoat::Result<impl View> {
                         |d| Some(
                                 href!(
                                     remove_citation,
-                                    TaxonId(note.taxon.get().id),
-                                    NoteId(note.id),
-                                    CitationId(d.0),
+                                    taxa::taxon_id: note.taxon.get().id,
+                                    note_id: note.id,
+                                    citation_id: d.0,
                                 ),
                             ),
                     ))
@@ -455,14 +457,14 @@ pub async fn edit(cx: &Cx) -> topcoat::Result<impl View> {
 pub async fn update(cx: &Cx, Form(params): Form<NoteParams>) -> topcoat::Result<SeeOther> {
     _ = require_user_with_permission(cx, PermissionCode::TaxonNoteEdit).await?;
     let mut db = db(cx);
-    let taxon_id = *path_param::<TaxonId>(cx)?;
-    let note_id = *path_param::<NoteId>(cx)?;
+    let taxon_id = *taxa::taxon_id(cx)?;
+    let note_id = *note_id(cx)?;
     _ = TaxonNote::get_by_id(&mut db, note_id)
         .await
         .ok_or_not_found()?;
     if let Some(errors) = params.validate() {
         Err(rewrite(
-            href!(edit, TaxonId(taxon_id), NoteId(note_id)).resolve(cx),
+            href!(edit, taxa::taxon_id: taxon_id, note_id: note_id).resolve(cx),
             Body::empty(),
         )
         .method(Method::GET)
@@ -479,7 +481,7 @@ pub async fn update(cx: &Cx, Form(params): Form<NoteParams>) -> topcoat::Result<
             .exec(&mut db)
             .await?;
         Ok(see_other(
-            href!(details, TaxonId(taxon_id), NoteId(note_id)).resolve(cx),
+            href!(details, taxa::taxon_id: taxon_id, note_id: note_id).resolve(cx),
         ))
     }
 }
@@ -503,7 +505,7 @@ pub async fn create(cx: &Cx) -> topcoat::Result<impl View> {
             breadcrumb_list(
                 breadcrumb_item(
                     breadcrumb_link(
-                        attrs: attributes! { href=(href!(taxa::details, TaxonId(taxon.id))) },
+                        attrs: attributes! { href=(href!(taxa::details, taxa::taxon_id: taxon.id)) },
                         (&taxon.complete_name)
                     )
                 )
@@ -516,7 +518,7 @@ pub async fn create(cx: &Cx) -> topcoat::Result<impl View> {
             attrs: attributes! {
                 class="flex flex-col gap-6"
                 id=(&form_id)
-                action=(href!(do_create, TaxonId(taxon.id)))
+                action=(href!(do_create, taxa::taxon_id: taxon.id))
                 method="POST"
             },
             note: None,
@@ -529,7 +531,7 @@ pub async fn create(cx: &Cx) -> topcoat::Result<impl View> {
 pub async fn do_create(cx: &Cx, Form(params): Form<NoteParams>) -> topcoat::Result<SeeOther> {
     _ = require_user_with_permission(cx, PermissionCode::TaxonNoteCreate).await?;
     let mut db = db(cx);
-    let taxon_id = *path_param::<TaxonId>(cx)?;
+    let taxon_id = *taxa::taxon_id(cx)?;
     let new_note = TaxonNote::create()
         .taxon_id(taxon_id)
         .title(params.title)
@@ -538,7 +540,7 @@ pub async fn do_create(cx: &Cx, Form(params): Form<NoteParams>) -> topcoat::Resu
         .exec(&mut db)
         .await?;
     Ok(see_other(
-        href!(details, TaxonId(taxon_id), NoteId(new_note.id)).resolve(cx),
+        href!(details, taxa::taxon_id: taxon_id, note_id: new_note.id).resolve(cx),
     ))
 }
 
@@ -546,14 +548,14 @@ pub async fn do_create(cx: &Cx, Form(params): Form<NoteParams>) -> topcoat::Resu
 pub async fn delete(cx: &Cx) -> topcoat::Result<SeeOther> {
     _ = require_user_with_permission(cx, PermissionCode::TaxonNoteDelete).await?;
     let mut db = db(cx);
-    let taxon_id = *path_param::<TaxonId>(cx)?;
-    let note_id = *path_param::<NoteId>(cx)?;
+    let taxon_id = *taxa::taxon_id(cx)?;
+    let note_id = *note_id(cx)?;
     _ = TaxonNote::get_by_id(&mut db, note_id)
         .await
         .ok_or_not_found()?;
     TaxonNote::delete_by_id(&mut db, note_id).await?;
     Ok(see_other(
-        href!(taxa::details, TaxonId(taxon_id)).resolve(cx),
+        href!(taxa::details, taxa::taxon_id: taxon_id).resolve(cx),
     ))
 }
 
@@ -569,26 +571,26 @@ pub async fn add_citation(
 ) -> topcoat::Result<SeeOther> {
     let _ = require_user_with_permission(cx, PermissionCode::TaxonCleaningEdit).await?;
 
-    let taxon_id = *path_param::<TaxonId>(cx)?;
-    let note_id = *path_param::<NoteId>(cx)?;
+    let taxon_id = *taxa::taxon_id(cx)?;
+    let note_id = *note_id(cx)?;
     TaxonNoteCitation::create()
         .note_id(note_id)
         .citation_id(params.citation_id)
         .exec(&mut db(cx))
         .await?;
     Ok(see_other(
-        href!(edit, TaxonId(taxon_id), NoteId(note_id)).resolve(cx),
+        href!(edit, taxa::taxon_id: taxon_id, note_id: note_id).resolve(cx),
     ))
 }
 
 #[route(POST "/taxa/{taxon_id}/note/{note_id}/citations/{citation_id}/delete")]
 pub async fn remove_citation(cx: &Cx) -> topcoat::Result<SeeOther> {
     let _ = require_user_with_permission(cx, PermissionCode::TaxonCleaningEdit).await?;
-    let taxon_id = *path_param::<TaxonId>(cx)?;
-    let note_id = *path_param::<NoteId>(cx)?;
-    let citation_id = *path_param::<CitationId>(cx)?;
+    let taxon_id = *taxa::taxon_id(cx)?;
+    let note_id = *note_id(cx)?;
+    let citation_id = *citation_id(cx)?;
     TaxonNoteCitation::delete_by_citation_id_and_note_id(&mut db(cx), citation_id, note_id).await?;
     Ok(see_other(
-        href!(edit, TaxonId(taxon_id), NoteId(note_id)).resolve(cx),
+        href!(edit, taxa::taxon_id: taxon_id, note_id: note_id).resolve(cx),
     ))
 }

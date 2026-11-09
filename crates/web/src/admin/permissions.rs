@@ -47,7 +47,7 @@ pub async fn list(cx: &Cx) -> topcoat::Result<impl View> {
             <ul class="contents">
                 for permission in permissions {
                     <li>
-                        <a href=(href!(edit, PermissionId(permission.id)))>
+                        <a href=(href!(edit, permission_id: permission.id))>
                             (permission.code.to_string())
                         </a>
                     </li>
@@ -69,7 +69,7 @@ async fn populate_permissions(cx: &Cx) -> topcoat::Result<SeeOther> {
 
 #[memoize(as_ref)]
 async fn permission(cx: &Cx) -> topcoat::Result<Permission> {
-    let permission_id = *path_param::<PermissionId>(cx)?;
+    let permission_id = *permission_id(cx)?;
     Ok(Permission::filter_by_id(permission_id)
         .one()
         .exec(&mut db(cx))
@@ -109,7 +109,7 @@ pub async fn edit(cx: &Cx) -> topcoat::Result<impl View> {
                     <form
                         class="flex flex-col gap-6"
                         method="POST"
-                        action=(href!(update, PermissionId(permission.id)))
+                        action=(href!(update, permission_id: permission.id))
                     >
                         field_set(
                             field(
@@ -154,12 +154,12 @@ pub async fn update(
     Form(params): Form<PermissionUpdateParams>,
 ) -> topcoat::Result<SeeOther> {
     _ = require_user_with_permission(cx, PermissionCode::PermissionEdit).await?;
-    let permission_id = *path_param::<PermissionId>(cx)?;
+    let permission_id = *permission_id(cx)?;
     Permission::update_by_id(permission_id)
         .description(params.description)
         .exec(&mut db(cx))
         .await?;
     Ok(see_other(
-        href!(edit, PermissionId(permission_id)).resolve(cx),
+        href!(edit, permission_id: permission_id).resolve(cx),
     ))
 }

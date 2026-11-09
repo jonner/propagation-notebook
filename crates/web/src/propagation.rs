@@ -65,7 +65,7 @@ pub async fn list(cx: &Cx) -> topcoat::Result<impl View> {
             for p in procedures {
                 <li class="flex items-baseline gap-2">
                     <span>
-                        <a href=(href!(details, PropagationId(p.id)))>(p.id)</a>
+                        <a href=(href!(details, propagation_id: p.id))>(p.id)</a>
                     </span>
                     <span>
                         <span>(&p.name)</span>
@@ -75,7 +75,7 @@ pub async fn list(cx: &Cx) -> topcoat::Result<impl View> {
                                     ButtonVariant::Secondary,
                                     ButtonSize::default(),
                                 ))
-                                href=(href!(modify, PropagationId(p.id)))
+                                href=(href!(modify, propagation_id: p.id))
                             >
                                 icon(data: mdi::EDIT)
                             </a>
@@ -113,7 +113,7 @@ pub async fn do_modify(
     Form(params): Form<PropagationProcedureParams>,
 ) -> topcoat::Result<SeeOther> {
     let _user = require_user_with_permission(cx, PermissionCode::PropagationEdit).await?;
-    let id = *path_param::<PropagationId>(cx)?;
+    let id = *propagation_id(cx)?;
 
     PropagationProcedure::update_by_id(id)
         .name(params.name)
@@ -127,7 +127,7 @@ pub async fn do_modify(
         FlashMessage::Success(format!("Updated propagation procedure {id}")),
     )?;
 
-    Ok(see_other(href!(details, PropagationId(id)).resolve(cx)))
+    Ok(see_other(href!(details, propagation_id: id).resolve(cx)))
 }
 
 #[route(POST "/admin/propagation/new")]
@@ -150,7 +150,7 @@ pub async fn do_create(
     )?;
 
     Ok(see_other(
-        href!(details, PropagationId(proc.id)).resolve(cx),
+        href!(details, propagation_id: proc.id).resolve(cx),
     ))
 }
 
@@ -209,15 +209,15 @@ async fn propagation_procedure_form(
     "/admin/propagation/{propagation_id}",
     with(Metadata::from_fn(
         async |cx| {
-            let id = path_param::<PropagationId>(cx)?;
+            let id = propagation_id(cx)?;
             Ok(Metadata::new().subtitle(format!("Edit Propagation Procedure {id}")))
         },
     )),
-    with(Crumb::new(async |cx| Ok((path_param::<PropagationId>(cx)?.to_string(), None))))
+    with(Crumb::new(async |cx| Ok((propagation_id(cx)?.to_string(), None))))
 )]
 pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
     let _user = require_user_with_permission(cx, PermissionCode::PropagationEdit).await?;
-    let id = *path_param::<PropagationId>(cx)?;
+    let id = *propagation_id(cx)?;
     let propagation = PropagationProcedure::get_by_id(&mut db(cx), id).await?;
     Ok(view! {
         <hgroup>
@@ -228,7 +228,7 @@ pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
             procedure: Some(&propagation),
             attrs: attributes! {
                 method="POST"
-                action=(href!(do_modify, PropagationId(id)))
+                action=(href!(do_modify, propagation_id: id))
             },
             button("Update")
         )
@@ -257,7 +257,7 @@ pub async fn new(cx: &Cx) -> topcoat::Result<impl View> {
 
 #[memoize(as_ref)]
 async fn propagation_procedure(cx: &Cx) -> topcoat::Result<PropagationProcedure> {
-    let propagation_id = path_param::<PropagationId>(cx)?;
+    let propagation_id = propagation_id(cx)?;
     Ok(PropagationProcedure::filter_by_id(propagation_id)
         .include(PropagationProcedure::fields().citations())
         .one()
@@ -335,7 +335,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                                     <li class="flex items-baseline gap-2">
                                         <span>(taxon.id)</span>
                                         <span class="latin">
-                                            <a href=(href!(taxa::details, taxa::TaxonId(taxon.id)))>
+                                            <a href=(href!(taxa::details, taxa::taxon_id: taxon.id))>
                                                 (&taxon.complete_name)
                                             </a>
                                         </span>

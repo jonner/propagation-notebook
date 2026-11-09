@@ -36,14 +36,14 @@ use crate::{
     context::{current_user, db, require_user_with_permission},
     crumb::{Crumb, crumbs},
     flash::{self, FlashMessage},
-    taxa,
+    propagation, taxa,
 };
 
 path_param!(pub citation_id: u64 else bad_request);
 
 #[memoize(as_ref)]
 async fn citation(cx: &Cx) -> topcoat::Result<Citation> {
-    let id = *path_param::<CitationId>(cx)?;
+    let id = *citation_id(cx)?;
     Ok(Citation::filter_by_id(id)
         .include(Citation::fields().cleaning_procedures().cleaning().taxon())
         .include(Citation::fields().propagation_procedures().propagation())
@@ -97,7 +97,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
             name: "Edit".to_string(),
             permission: Some(PermissionCode::CitationEdit),
             item_type: ActionItemType::Link,
-            attrs: attributes! { href=(href!(modify, CitationId(citation.id))) },
+            attrs: attributes! { href=(href!(modify, citation_id: citation.id)) },
         },
         Action {
             name: "Delete".to_string(),
@@ -191,7 +191,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                             <ul>
                                 for (id, taxon) in cited_taxa {
                                     <li>
-                                        <a href=(href!(taxa::details, taxa::TaxonId(id)))>
+                                        <a href=(href!(taxa::details, taxa::taxon_id: id))>
                                             (&taxon.complete_name)
                                         </a>
                                     </li>
@@ -207,8 +207,8 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                                     <li>
                                         <a
                                             href=(href!(
-                                                crate::propagation::details,
-                                                crate::propagation::PropagationId(procedure.id),
+                                                propagation::details,
+                                                propagation::propagation_id: procedure.id,
                                             ))
                                         >
                                             (&procedure.name)
@@ -239,7 +239,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                         "Cancel"
                     )
                     <form
-                        action=(href!(delete_citation, CitationId(citation.id)))
+                        action=(href!(delete_citation, citation_id: citation.id))
                         method="POST"
                     >
                         button(
@@ -257,7 +257,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
 #[route(POST "/admin/citations/delete/{citation_id}")]
 pub async fn delete_citation(cx: &Cx) -> topcoat::Result<SeeOther> {
     let _ = require_user_with_permission(cx, PermissionCode::CitationDelete).await?;
-    let id = *path_param::<CitationId>(cx)?;
+    let id = *citation_id(cx)?;
     match Citation::delete_by_id(&mut db(cx), id).await {
         Ok(_) => {
             flash::push_message(
@@ -271,7 +271,7 @@ pub async fn delete_citation(cx: &Cx) -> topcoat::Result<SeeOther> {
                 cx,
                 FlashMessage::Failure(format!("Failed to delete cited work: {e}")),
             )?;
-            Err(see_other(href!(details, CitationId(id)).resolve(cx)).into())
+            Err(see_other(href!(details, citation_id: id).resolve(cx)).into())
         }
     }
 }
@@ -380,7 +380,7 @@ pub async fn do_create(cx: &Cx, Form(params): Form<CitationParams>) -> topcoat::
         .exec(&mut db(cx))
         .await?;
     Ok(see_other(
-        href!(details, CitationId(citation.id)).resolve(cx),
+        href!(details, citation_id: citation.id).resolve(cx),
     ))
 }
 
@@ -598,7 +598,7 @@ pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
     let _user =
         require_user_with_permission(cx, libpropagation::auth::PermissionCode::CitationEdit)
             .await?;
-    let id = path_param::<CitationId>(cx)?;
+    let id = *citation_id(cx)?;
     let citation = Citation::get_by_id(&mut db(cx), id).await?;
     Ok(view! {
         <hgroup>
@@ -607,7 +607,7 @@ pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
         </hgroup>
         citation_form(
             citation: Some(&citation),
-            attrs: attributes! { method="POST" action=(href!(do_modify, CitationId(*id))) },
+            attrs: attributes! { method="POST" action=(href!(do_modify, citation_id: id)) },
             button("Update")
         )
     })
@@ -619,10 +619,10 @@ pub async fn do_modify(cx: &Cx, Form(params): Form<CitationParams>) -> topcoat::
         require_user_with_permission(cx, libpropagation::auth::PermissionCode::CitationEdit)
             .await?;
 
-    let id = *path_param::<CitationId>(cx)?;
+    let id = *citation_id(cx)?;
     if let Some(errors) = params.validate() {
         return Err(
-            rewrite(href!(modify, CitationId(id)).resolve(cx), Body::empty())
+            rewrite(href!(modify, citation_id: id).resolve(cx), Body::empty())
                 .method(Method::GET)
                 .with(CitationRejected {
                     form: params.clone(),
@@ -642,7 +642,7 @@ pub async fn do_modify(cx: &Cx, Form(params): Form<CitationParams>) -> topcoat::
         .doi(params.doi)
         .exec(&mut db(cx))
         .await?;
-    Ok(see_other(href!(details, CitationId(id)).resolve(cx)))
+    Ok(see_other(href!(details, citation_id: id).resolve(cx)))
 }
 
 #[page("/admin/citations", with(Metadata::new().subtitle("Cited Works")))]
@@ -656,7 +656,7 @@ pub async fn admin(cx: &Cx) -> topcoat::Result<impl View> {
             for citation in citations {
                 <li class="flex items-baseline gap-2">
                     <span>
-                        <a href=(href!(details, CitationId(citation.id)))>
+                        <a href=(href!(details, citation_id: citation.id))>
                             (citation.id)
                         </a>
                     </span>
@@ -668,7 +668,7 @@ pub async fn admin(cx: &Cx) -> topcoat::Result<impl View> {
                                     ButtonVariant::Secondary,
                                     ButtonSize::default(),
                                 ))
-                                href=(href!(modify, CitationId(citation.id)))
+                                href=(href!(modify, citation_id: citation.id))
                             >
                                 icon(data: mdi::EDIT)
                             </a>

@@ -29,9 +29,7 @@ use crate::{
     auth,
     components::{avatar::*, dropdown_menu::*, floating::FloatingAlign, input::input},
     context::{current_user, db},
-    flash, home, regions,
-    taxa::{self, TaxonId},
-    users,
+    flash, home, regions, taxa, users,
 };
 
 // get a stable but "random" header image for each page so we have a variety of
@@ -86,7 +84,7 @@ pub async fn taxon_search_results(
                 for taxon in taxa.iter() {
                     <li class="py-1">
                         <span class="latin">
-                            <a href=(href!(taxa::details, TaxonId(taxon.id)))>
+                            <a href=(href!(taxa::details, taxa::taxon_id: taxon.id))>
                                 (&taxon.complete_name)
                             </a>
                         </span>

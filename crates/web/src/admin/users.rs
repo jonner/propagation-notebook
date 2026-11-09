@@ -49,7 +49,7 @@ pub async fn list(cx: &Cx) -> topcoat::Result<impl View> {
         <h2>"User List"</h2>
         <ul>
             for user in users {
-                <li><a href=(href!(edit, UserId(user.id)))>(user.username)</a></li>
+                <li><a href=(href!(edit, user_id: user.id))>(user.username)</a></li>
             }
         </ul>
     })
@@ -57,7 +57,7 @@ pub async fn list(cx: &Cx) -> topcoat::Result<impl View> {
 
 #[memoize(as_ref)]
 async fn user_from_id(cx: &Cx) -> topcoat::Result<User> {
-    let user_id = *path_param::<UserId>(cx)?;
+    let user_id = *user_id(cx)?;
     Ok(User::filter_by_id(user_id)
         .include(User::fields().profile())
         .include(User::fields().roles())
@@ -114,7 +114,7 @@ pub async fn edit(cx: &Cx) -> topcoat::Result<impl View> {
                         attrs: attributes! {
                             class="flex flex-col gap-4"
                             method="POST"
-                            action=(href!(update_profile, UserId(user.id)))
+                            action=(href!(update_profile, user_id: user.id))
                         },
                         profile: user_to_edit.profile.get().as_ref()
                     )
@@ -127,7 +127,7 @@ pub async fn edit(cx: &Cx) -> topcoat::Result<impl View> {
                         user_roles_form(
                             attrs: attributes! {
                                 method="POST"
-                                action=(href!(update_roles, UserId(user.id)))
+                                action=(href!(update_roles, user_id: user.id))
                             },
                             user: &user_to_edit
                         )
@@ -195,7 +195,7 @@ pub async fn update_roles(
         .collect::<Result<Vec<Uuid>, _>>()
         .ok_or_bad_request("Could not parse form value as UUID")?;
     let mut db = db(cx);
-    let user_id = *path_param::<UserId>(cx)?;
+    let user_id = *user_id(cx)?;
     let user_to_edit = User::filter_by_id(user_id)
         .include(User::fields().roles())
         .one()
@@ -233,7 +233,7 @@ pub async fn update_roles(
     toasty::batch(remove_queries).exec(&mut txn).await?;
     txn.commit().await?;
 
-    Ok(see_other(href!(edit, UserId(user_id)).resolve(cx)))
+    Ok(see_other(href!(edit, user_id: user_id).resolve(cx)))
 }
 
 #[route(POST "/admin/users/{user_id}")]
@@ -242,11 +242,11 @@ pub async fn update_profile(
     Form(params): Form<UpdateProfileParams>,
 ) -> topcoat::Result<SeeOther> {
     _ = require_user_with_permission(cx, PermissionCode::UserEdit).await?;
-    let user_id = *path_param::<UserId>(cx)?;
+    let user_id = *user_id(cx)?;
     UserProfile::upsert_by_user_id(user_id)
         .name(params.name)
         .description(params.description)
         .exec(&mut db(cx))
         .await?;
-    Ok(see_other(href!(edit, UserId(user_id)).resolve(cx)))
+    Ok(see_other(href!(edit, user_id: user_id).resolve(cx)))
 }
