@@ -12,6 +12,9 @@ use topcoat::{
     view::{View, attributes, view},
 };
 
+pub(crate) mod permissions;
+pub(crate) mod roles;
+
 use crate::{
     Subtitle,
     assets::HYDRASTIS_CANADENSIS,

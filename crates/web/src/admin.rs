@@ -7,15 +7,15 @@ use topcoat::{
 };
 
 use crate::{
-    Subtitle, citation,
+    Subtitle,
+    auth::{permissions, roles},
+    citation,
     components::navigation_menu::*,
     context::require_user_with_permission,
     crumb::{Crumb, crumbs},
     propagation, users,
 };
 
-mod permissions;
-mod roles;
 #[layout(
     "/admin",
     with(Crumb::new(
