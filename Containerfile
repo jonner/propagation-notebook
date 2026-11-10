@@ -28,7 +28,7 @@ EXPOSE 3000
 ENV PN_DB_URI=sqlite:/data/propagation-notebook.sqlite
 ENV RUST_LOG=trace
 ENV PN_ENABLE_BACKGROUND_TASKS=1
-ENV PN_BASE_URL=http://propagation.quotidian.org
+# ENV PN_BASE_URL=http://your-url-here.com
 ENV PN_PORT=3000
 ENV PN_HOST=0.0.0.0
 ENTRYPOINT ["/app/propagation-web"]
