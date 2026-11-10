@@ -152,6 +152,7 @@ async fn shell(cx: &Cx, slot: Slot<'_>) -> topcoat::Result<impl View> {
             ))
         >
             <head>
+                topcoat::metadata::tags()
                 topcoat::runtime::script()
                 topcoat::dev::script()
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
