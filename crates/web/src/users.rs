@@ -16,7 +16,10 @@ use topcoat::{
 use crate::{
     Subtitle,
     assets::mdi,
-    components::{avatar::*, button::button, card::*, field::*, input::input, textarea::textarea},
+    components::{
+        avatar::*, button::*, card::*, field::*, input::input, pn::item_term, pn::item_value,
+        textarea::textarea,
+    },
     context::{db, require_user},
 };
 
@@ -135,45 +138,26 @@ pub(crate) async fn account(cx: &Cx) -> topcoat::Result<impl View> {
                         card_description("Your personal profile on this website")
                     )
                     card_content(
-                        setting_row(
-                            setting_name("Display Name")
-                            setting_value(
-                                if let Some(s) = prof
-                                    .as_ref()
-                                    .and_then(|p| p.name.as_ref()) {
-                                    (&s)
-                                } else {
-                                    <span class="italic">"None"</span>
-                                }
-                                edit_icon(
-                                    attrs: attributes! { href=(href!(profile_edit)) }
-                                )
+                        attrs: attributes! { class="flex flex-col gap-6" },
+                        <div>
+                            item_term("Display Name")
+                            item_value(
                             )
-                        )
-                        setting_row(
-                            setting_name("Description")
-                            setting_value(
-                                if let Some(s) = prof
-                                    .as_ref()
-                                    .and_then(|p| p.description.as_ref()) {
-                                    (&s)
-                                } else {
-                                    <span class="italic">"None"</span>
-                                }
-                                edit_icon(
-                                    attrs: attributes! { href=(href!(profile_edit)) }
-                                )
+                        </div>
+                        <div>
+                            item_term("Description")
+                            item_value(
                             )
-                        )
-                        setting_row(
-                            setting_name("Picture")
-                            setting_value(
+                        </div>
+                        <div>
+                            item_term("Picture")
+                            item_value(
                                 avatar(
                                     attrs: attributes! { class="inline-block" },
                                     avatar_fallback(icon(data: mdi::ACCOUNT))
                                 )
                             )
-                        )
+                        </div>
                     )
                 )
             </section>
@@ -186,14 +170,15 @@ pub(crate) async fn account(cx: &Cx) -> topcoat::Result<impl View> {
                         )
                     )
                     card_content(
-                        setting_row(
-                            setting_name("Username")
-                            setting_value((&user.username))
-                        )
-                        setting_row(
-                            setting_name("Password")
-                            setting_value(<a href=(href!(change_password))>"Change"</a>)
-                        )
+                        attrs: attributes! { class="flex flex-col gap-6" },
+                        <div>
+                            item_term("Username")
+                            item_value((&user.username))
+                        </div>
+                        <div>
+                            item_term("Password")
+                            item_value(<a href=(href!(change_password))>"Change"</a>)
+                        </div>
                     )
                 )
             </section>
@@ -204,9 +189,10 @@ pub(crate) async fn account(cx: &Cx) -> topcoat::Result<impl View> {
                         card_description("Ways to contact you")
                     )
                     card_content(
-                        setting_row(
-                            setting_name("Email Addresses")
-                            setting_value(
+                        attrs: attributes! { class="flex flex-col gap-6" },
+                        <div>
+                            item_term("Email Addresses")
+                            item_value(
                                 if !emails.is_empty() {
                                     for email in emails {
                                         email_address(
@@ -218,7 +204,7 @@ pub(crate) async fn account(cx: &Cx) -> topcoat::Result<impl View> {
                                     <span class="italic">"None"</span>
                                 }
                             )
-                        )
+                        </div>
                     )
                 )
             </section>
