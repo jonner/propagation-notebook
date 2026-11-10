@@ -1,4 +1,4 @@
-FROM fedora-minimal AS base
+FROM registry.fedoraproject.org/fedora-minimal:latest AS base
 RUN dnf install -y rust cargo
 RUN \
   --mount=type=cache,target=/root/.cargo/registry \
@@ -18,7 +18,7 @@ RUN \
   cp /build/target/release/pn ./
 
 
-FROM fedora-minimal
+FROM registry.fedoraproject.org/fedora-minimal:latest
 WORKDIR /app
 VOLUME /data
 COPY --from=builder /build/pn /app/pn
