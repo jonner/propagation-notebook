@@ -1,10 +1,6 @@
-use serde::Serialize;
+use topcoat::{context::Cx, router::request::uri};
 
 pub const PER_PAGE: usize = 50;
-
-pub trait ModifyOffset: Serialize + std::fmt::Debug {
-    fn modify_offset(&mut self, new_offset: usize) -> ();
-}
 
 #[derive(Debug, Clone)]
 pub struct PageState {
@@ -37,10 +33,19 @@ impl PageState {
     pub fn current_page(&self) -> usize {
         self.offset.div_euclid(self.per_page) + 1
     }
+}
 
-    pub fn query_with_offset<T: ModifyOffset>(&self, offset: usize, mut params: T) -> String {
-        params.modify_offset(offset);
-        serde_urlencoded::to_string(&params)
+pub struct Query(Vec<(String, String)>);
+
+impl Query {
+    pub fn from_cx(cx: &Cx) -> Self {
+        Self(serde_urlencoded::from_str(uri(cx).query().unwrap_or("")).unwrap_or_default())
+    }
+    pub fn with(&self, key: &str, value: impl ToString) -> String {
+        let mut pairs = self.0.clone();
+        pairs.retain(|(k, _)| k != key);
+        pairs.push((key.into(), value.to_string()));
+        serde_urlencoded::to_string(&pairs)
             .map(|qs| format!("?{qs}"))
             .unwrap_or_default()
     }

@@ -8,7 +8,7 @@ use topcoat::{
 use crate::{
     assets::mdi,
     components::{pagination::*, tooltip::*},
-    util::{ModifyOffset, PageState},
+    util::{PageState, Query},
 };
 
 #[component]
@@ -96,10 +96,9 @@ fn pagination_pages(state: &PageState, context: Option<usize>) -> Vec<Pagination
 }
 
 #[component]
-pub async fn pagination_control<T: ModifyOffset + Clone + Sync + Send>(
+pub async fn pagination_control(
     cx: &Cx,
     state: &PageState,
-    params: T,
     #[default(Some(2))] context: Option<usize>,
     #[default] mut attrs: Attributes,
 ) -> topcoat::Result<impl View> {
@@ -119,9 +118,9 @@ pub async fn pagination_control<T: ModifyOffset + Clone + Sync + Send>(
                                     pagination_link(
                                         active: n == cur,
                                         attrs: attributes! {
-                                            href=(state.query_with_offset(
+                                            href=(Query::from_cx(cx).with(
+                                                "offset",
                                                 state.offset_for_page(n).unwrap_or_default(),
-                                                params.clone(),
                                             ))
                                         },
                                         (n.to_string())
@@ -130,9 +129,9 @@ pub async fn pagination_control<T: ModifyOffset + Clone + Sync + Send>(
                                 PaginationItemType::Next(n) => {
                                     pagination_next(
                                         attrs: attributes! {
-                                            href=(state.query_with_offset(
+                                            href=(Query::from_cx(cx).with(
+                                                "offset",
                                                 state.offset_for_page(n).unwrap_or_default(),
-                                                params.clone(),
                                             ))
                                         }
                                     )
@@ -140,9 +139,9 @@ pub async fn pagination_control<T: ModifyOffset + Clone + Sync + Send>(
                                 PaginationItemType::Previous(n) => {
                                     pagination_previous(
                                         attrs: attributes! {
-                                            href=(state.query_with_offset(
+                                            href=(Query::from_cx(cx).with(
+                                                "offset",
                                                 state.offset_for_page(n).unwrap_or_default(),
-                                                params.clone(),
                                             ))
                                         }
                                     )

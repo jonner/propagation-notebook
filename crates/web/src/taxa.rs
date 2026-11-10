@@ -5,6 +5,7 @@ use libpropagation::{
     region::{ConservationStatus, Origin, Region, RegionalHarvestWindow, RegionalTaxonStatus},
     taxonomy::{Taxon, TaxonHierarchy, TaxonNote, TaxonNoteCategory},
 };
+use serde::Serialize;
 use topcoat::{
     context::{Cx, memoize},
     icon::icon,
@@ -36,7 +37,7 @@ use crate::{
         pn::{origin_badge, pagination_control, taxon_icon},
     },
     context::{current_user, db, require_user_with_permission},
-    util::{ModifyOffset, PER_PAGE, PageState},
+    util::{PER_PAGE, PageState},
 };
 
 mod cleaning;
@@ -172,19 +173,13 @@ pub enum ResultsFormat {
     Grid,
 }
 
-#[derive(Debug, Clone, serde::Serialize, Default)]
+#[derive(Debug, Clone, Default, Serialize)]
 #[query_params(error = bad_request)]
 pub struct TaxaListParams {
     pub offset: Option<usize>,
     pub parent: Option<u64>,
     pub region: Option<u64>,
     pub fmt: Option<ResultsFormat>,
-}
-
-impl ModifyOffset for TaxaListParams {
-    fn modify_offset(&mut self, new_offset: usize) {
-        self.offset = Some(new_offset);
-    }
 }
 
 #[page("/taxa/explore", with(Metadata::new().subtitle("Taxonomy Explorer")))]
@@ -330,7 +325,7 @@ pub(crate) async fn explore(cx: &Cx) -> topcoat::Result<impl View> {
                 </div>
             </hgroup>
             if page_state.total_pages() > 1 {
-                pagination_control(state: &page_state, params: params.clone())
+                pagination_control(state: &page_state)
             }
             match params.fmt {
                 Some(ResultsFormat::List) => {
@@ -406,24 +401,18 @@ pub(crate) async fn explore(cx: &Cx) -> topcoat::Result<impl View> {
                 }
             }
             if page_state.total_pages() > 1 {
-                pagination_control(state: &page_state, params: params.clone())
+                pagination_control(state: &page_state)
             }
         </div>
     })
 }
 
-#[derive(Debug, Clone, serde::Serialize)]
+#[derive(Debug, Clone)]
 #[query_params(error = bad_request)]
 pub struct TaxaSearchParams {
     pub offset: Option<usize>,
     pub q: Option<String>,
     pub fmt: Option<ResultsFormat>,
-}
-
-impl ModifyOffset for TaxaSearchParams {
-    fn modify_offset(&mut self, new_offset: usize) {
-        self.offset = Some(new_offset);
-    }
 }
 
 #[page("/taxa/search", with(Metadata::new().subtitle("Taxon Search")))]
@@ -480,7 +469,7 @@ pub(crate) async fn search(cx: &Cx) -> topcoat::Result<impl View> {
                         <div>(format!("No taxa found for search term '{q}'"))</div>
                     }
                     if page_state.total_pages() > 1 {
-                        pagination_control(state: &page_state, params: params.clone())
+                        pagination_control(state: &page_state)
                     }
                     <div class="my-3">
                         match params.fmt {
@@ -521,7 +510,7 @@ pub(crate) async fn search(cx: &Cx) -> topcoat::Result<impl View> {
                         }
                     </div>
                     if page_state.total_pages() > 1 {
-                        pagination_control(state: &page_state, params: params.clone())
+                        pagination_control(state: &page_state)
                     }
                 </section>
             }

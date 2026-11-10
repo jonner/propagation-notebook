@@ -3,7 +3,6 @@ use libpropagation::{
     region::{HarvestFilter, OriginFilter, Region, RegionCategory, RegionalTaxonStatus},
     taxonomy::{Rank, Taxon, TaxonHierarchy},
 };
-use serde::Serialize;
 use topcoat::{
     context::{Cx, memoize},
     metadata::Metadata,
@@ -26,7 +25,7 @@ use crate::{
     context::db,
     crumb::{Crumb, crumbs},
     taxa::{self, TaxaListParams},
-    util::{ModifyOffset, PER_PAGE, PageState},
+    util::{PER_PAGE, PageState},
 };
 
 path_param!(pub region_id: u64 else bad_request);
@@ -349,17 +348,11 @@ pub(crate) async fn overview(cx: &Cx) -> topcoat::Result<impl View> {
     })
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone)]
 #[query_params(error = bad_request)]
 struct HarvestParams {
     date: Option<jiff::civil::Date>,
     offset: Option<usize>,
-}
-
-impl ModifyOffset for HarvestParams {
-    fn modify_offset(&mut self, new_offset: usize) {
-        self.offset = Some(new_offset);
-    }
 }
 
 #[layout(
@@ -421,11 +414,11 @@ pub(crate) async fn fruiting_soon(cx: &Cx) -> topcoat::Result<impl View> {
                 week_navigator(date: date)
             </hgroup>
             if page_state.total_pages() > 1 {
-                pagination_control(state: &page_state, params: params.clone())
+                pagination_control(state: &page_state)
             }
             regional_taxa_table(taxa: &starting_soon, current_doy: Some(doy))
             if page_state.total_pages() > 1 {
-                pagination_control(state: &page_state, params: params.clone())
+                pagination_control(state: &page_state)
             }
             <div class="disclaimer">(SEED_DISCLAIMER)</div>
         </div>
@@ -473,11 +466,11 @@ pub(crate) async fn fruiting_done(cx: &Cx) -> topcoat::Result<impl View> {
                 week_navigator(date: date)
             </hgroup>
             if page_state.total_pages() > 1 {
-                pagination_control(state: &page_state, params: params.clone())
+                pagination_control(state: &page_state)
             }
             regional_taxa_table(taxa: &ending, current_doy: Some(doy))
             if page_state.total_pages() > 1 {
-                pagination_control(state: &page_state, params: params.clone())
+                pagination_control(state: &page_state)
             }
             <div class="disclaimer">(SEED_DISCLAIMER)</div>
         </div>
@@ -525,30 +518,24 @@ pub(crate) async fn fruiting_now(cx: &Cx) -> topcoat::Result<impl View> {
                 )
             </hgroup>
             if page_state.total_pages() > 1 {
-                pagination_control(state: &page_state, params: params.clone())
+                pagination_control(state: &page_state)
             }
             regional_taxa_table(taxa: &ending, current_doy: Some(doy))
             if page_state.total_pages() > 1 {
-                pagination_control(state: &page_state, params: params.clone())
+                pagination_control(state: &page_state)
             }
             <div class="disclaimer">(SEED_DISCLAIMER)</div>
         </div>
     })
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone)]
 #[query_params(error = bad_request)]
 pub struct RegionalTaxaListParams {
     pub offset: Option<usize>,
     pub ready: Option<bool>,
     pub native: Option<bool>,
     pub q: Option<String>,
-}
-
-impl ModifyOffset for RegionalTaxaListParams {
-    fn modify_offset(&mut self, new_offset: usize) {
-        self.offset = Some(new_offset)
-    }
 }
 
 #[page(
@@ -610,11 +597,11 @@ pub async fn fruiting_all(cx: &Cx) -> topcoat::Result<impl View> {
                 <h2>(format!("Results for '{q}'"))</h2>
             }
             if page_state.total_pages() > 1 {
-                pagination_control(state: &page_state, params: params.clone())
+                pagination_control(state: &page_state)
             }
             regional_taxa_table(taxa: &taxa)
             if page_state.total_pages() > 1 {
-                pagination_control(state: &page_state, params: params.clone())
+                pagination_control(state: &page_state)
             }
             <div class="disclaimer">(SEED_DISCLAIMER)</div>
         </div>
