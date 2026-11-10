@@ -1,4 +1,15 @@
-use topcoat::{context::Cx, router::request::uri};
+use topcoat::{
+    context::Cx,
+    icon::icon,
+    router::request::uri,
+    runtime::{Event, Signal},
+    view::{Attributes, View, attributes, component, view},
+};
+
+use crate::{
+    assets::mdi,
+    components::{button::*, input::input, textarea::textarea},
+};
 
 pub const PER_PAGE: usize = 50;
 
@@ -49,4 +60,54 @@ impl Query {
             .map(|qs| format!("?{qs}"))
             .unwrap_or_default()
     }
+}
+
+/// must provide a @handler in 'attrs' to actually set the value
+#[component]
+pub(crate) async fn editable_text(
+    cx: &Cx,
+    editable: Signal<bool>,
+    val: Option<&String>,
+    #[default] multiline: bool,
+    #[default] attrs: Attributes,
+) -> topcoat::Result<impl View> {
+    let default_attrs = attributes! {
+        @change=$(|_e: Event| editable.set(false))
+        @keydown=$(|e: Event| {
+            if e.key == "Escape" {
+                editable.set(false)
+            }
+        })
+    };
+    Ok(view! {
+        <div class="flex items-center gap-2">
+            if editable.get() {
+                if multiline {
+                    textarea(attrs: attributes! { (default_attrs) (attrs) }, (val))
+                } else {
+                    input(
+                        attrs: attributes! { (default_attrs) (attrs) type="text" value=(val) }
+                    )
+                }
+            } else {
+                if let Some(s) = val {
+                    (s)
+                } else {
+                    <span class="italic">"None"</span>
+                }
+            }
+            button(
+                variant: ButtonVariant::Ghost,
+                size: ButtonSize::Sm,
+                attrs: attributes! {
+                    type="button"
+                    @click=$(|e: Event| {
+                        e.prevent_default();
+                        editable.toggle()
+                    })
+                },
+                icon(data: mdi::EDIT, label: "Edit")
+            )
+        </div>
+    })
 }

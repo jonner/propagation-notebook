@@ -10,7 +10,8 @@ use topcoat::{
         error::{RouterErrorExt, SeeOther, rewrite, see_other},
         href, page, route,
     },
-    view::{Attributes, Child, View, attributes, class, component, view},
+    runtime::{Event, procedure, signal},
+    view::{Attributes, View, attributes, component, view},
 };
 
 use crate::{
@@ -21,6 +22,7 @@ use crate::{
         textarea::textarea,
     },
     context::{db, require_user},
+    util::editable_text,
 };
 
 pub(crate) mod admin;
@@ -46,58 +48,6 @@ pub(crate) async fn update_profile(
 }
 
 #[component]
-async fn edit_icon(cx: &Cx, #[default] mut attrs: Attributes) -> topcoat::Result<impl View> {
-    Ok(view! {
-        <a class=(class! { "mx-2", attrs.remove("class") }) (attrs)>
-            icon(
-                data: mdi::EDIT,
-                label: "Edit",
-                attrs: attributes! { class="inline-block" }
-            )
-        </a>
-    })
-}
-#[component]
-async fn setting_row(
-    cx: &Cx,
-    #[default] mut attrs: Attributes,
-    #[default] child: Child<'_>,
-) -> topcoat::Result<impl View> {
-    Ok(view! {
-        <div class=(class! { "py-3", attrs.remove("class") }) (attrs)>(child)</div>
-    })
-}
-
-#[component]
-async fn setting_name(
-    cx: &Cx,
-    #[default] mut attrs: Attributes,
-    #[default] child: Child<'_>,
-) -> topcoat::Result<impl View> {
-    Ok(view! {
-        <div class=(class! { "font-bold text-lg", attrs.remove("class") }) (attrs)>
-            (child)
-        </div>
-    })
-}
-
-#[component]
-async fn setting_value(
-    cx: &Cx,
-    #[default] mut attrs: Attributes,
-    #[default] child: Child<'_>,
-) -> topcoat::Result<impl View> {
-    Ok(view! {
-        <div
-            class=(class! { "text-muted-foreground px-2", attrs.remove("class") })
-            (attrs)
-        >
-            (child)
-        </div>
-    })
-}
-
-#[component]
 async fn email_address(cx: &Cx, address: String, confirmed: bool) -> topcoat::Result<impl View> {
     Ok(view! {
         (address)
@@ -111,19 +61,80 @@ async fn email_address(cx: &Cx, address: String, confirmed: bool) -> topcoat::Re
     })
 }
 
+#[procedure("/api/user/display-name")]
+pub(crate) async fn set_display_name(cx: &Cx, name: String) -> topcoat::Result<()> {
+    tracing::debug!(?name);
+    let user = require_user(cx).await?;
+    UserProfile::upsert_by_user_id(user.id)
+        .name(name)
+        .exec(&mut db(cx))
+        .await?;
+    Ok(())
+}
+
+#[component]
+pub(crate) async fn display_name(cx: &Cx) -> topcoat::Result<impl View> {
+    let user = require_user(cx).await?;
+    let profiles = UserProfile::filter_by_user_id(user.id)
+        .exec(&mut db(cx))
+        .await?;
+    let editable = signal(cx, || false);
+    Ok(view! {
+        let dname = profiles.first().and_then(|profile| profile.name.as_ref());
+        editable_text(
+            val: dname,
+            editable: editable.clone(),
+            attrs: attributes! {
+                id="name-input"
+                name="name"
+                @change=$(async |e: Event| {
+                    set_display_name(e.target.value).await;
+                    editable.set(false);
+                })
+            }
+        )
+    })
+}
+
+#[procedure("/api/user/description")]
+pub(crate) async fn set_description(cx: &Cx, value: String) -> topcoat::Result<()> {
+    let user = require_user(cx).await?;
+    UserProfile::upsert_by_user_id(user.id)
+        .description(value)
+        .exec(&mut db(cx))
+        .await?;
+    Ok(())
+}
+
+#[component]
+pub(crate) async fn description(cx: &Cx) -> topcoat::Result<impl View> {
+    let user = require_user(cx).await?;
+    let profiles = UserProfile::filter_by_user_id(user.id)
+        .exec(&mut db(cx))
+        .await?;
+    let editable = signal(cx, || false);
+
+    Ok(view! {
+        let desc = profiles.first().and_then(|profile| profile.description.as_ref());
+        editable_text(
+            val: desc,
+            editable: editable.clone(),
+            multiline: true,
+            attrs: attributes! {
+                id="description-input"
+                name="description"
+                @change=$(async |e: Event| {
+                    set_description(e.target.value).await;
+                    editable.set(false);
+                })
+            }
+        )
+    })
+}
+
 #[page("/user/account", with(Metadata::new().subtitle("User Account")))]
 pub(crate) async fn account(cx: &Cx) -> topcoat::Result<impl View> {
     let user = require_user(cx).await?;
-    let prof = UserProfile::get_by_user_id(&mut db(cx), user.id)
-        .await
-        .map(Some)
-        .or_else(|e| {
-            if e.is_record_not_found() {
-                Ok(None)
-            } else {
-                Err(e)
-            }
-        })?;
     let emails = UserEmail::filter_by_user_id(user.id)
         .exec(&mut db(cx))
         .await?;
@@ -141,13 +152,11 @@ pub(crate) async fn account(cx: &Cx) -> topcoat::Result<impl View> {
                         attrs: attributes! { class="flex flex-col gap-6" },
                         <div>
                             item_term("Display Name")
-                            item_value(
-                            )
+                            item_value(display_name())
                         </div>
                         <div>
                             item_term("Description")
-                            item_value(
-                            )
+                            item_value(description())
                         </div>
                         <div>
                             item_term("Picture")
