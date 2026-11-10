@@ -1,0 +1,83 @@
+name: Build and Push 'latest' Image
+
+# 1. Trigger only on pushes to the 'main' branch
+on:
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: ghcr.io/${{ github.repository }}
+
+jobs:
+  build:
+    name: Build container image for ${{ matrix.platform }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux/amd64
+            runner: ubuntu-latest
+            arch-suffix: "amd64"
+          - platform: linux/arm64
+            runner: ubuntu-24.04-arm
+            arch-suffix: "arm64"
+    
+    # Grant permissions to write to GHCR
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build and push platform-specific image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ./Containerfile
+          load: true
+          push: false
+          tags: ${{ env.IMAGE_NAME }}:latest-${{ matrix.arch-suffix }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Push platform-specific image
+        run: docker push ${{ env.IMAGE_NAME }}:latest-${{ matrix.arch-suffix }}
+
+  # 4. MERGE AND PUBLISH THE FINAL 'latest' MANIFEST
+  publish-manifest:
+    name: Publish 'latest' container image manifest
+    needs: [ build ] # Run after both 'build' jobs succeed
+    runs-on: ubuntu-latest
+
+    permissions:
+      packages: write # Permission to push the manifest
+
+    steps:
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create and push 'latest' manifest
+        run: |
+          # Create the manifest list for "ghcr.io/user/repo:latest"
+          docker manifest create ${{ env.IMAGE_NAME }}:latest \
+            "${{ env.IMAGE_NAME }}:latest-amd64" \
+            "${{ env.IMAGE_NAME }}:latest-arm64"
+            
+          # Push the final manifest list
+          docker manifest push ${{ env.IMAGE_NAME }}:latest
