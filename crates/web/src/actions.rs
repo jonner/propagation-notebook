@@ -7,6 +7,7 @@ pub enum ActionItemType {
     Button,
 }
 
+#[derive(Debug, Clone)]
 pub struct Action {
     pub name: String,
     pub permission: Option<PermissionCode>,
@@ -14,7 +15,7 @@ pub struct Action {
     pub item_type: ActionItemType,
 }
 
-pub fn permitted_actions<'a>(user: Option<&User>, actions: &'a [Action]) -> Vec<&'a Action> {
+pub fn permitted_actions(user: Option<&User>, actions: &[Action]) -> Vec<Action> {
     actions
         .iter()
         .filter(|a| match a.permission {
@@ -24,5 +25,6 @@ pub fn permitted_actions<'a>(user: Option<&User>, actions: &'a [Action]) -> Vec<
                 None => false,
             },
         })
+        .cloned()
         .collect()
 }

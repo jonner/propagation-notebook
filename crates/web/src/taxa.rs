@@ -24,7 +24,7 @@ use tracing::{debug, warn};
 
 use crate::{
     Subtitle,
-    actions::{Action, ActionItemType, permitted_actions},
+    actions::{Action, ActionItemType},
     assets::mdi,
     citation,
     components::{
@@ -705,19 +705,23 @@ async fn detailed_taxon(cx: &Cx) -> topcoat::Result<Taxon> {
         .ok_or_not_found()?)
 }
 
-#[page(
-    "/taxa/{taxon_id}",
-    with(Metadata::from_fn(
-        async |cx| {
-            let taxon = detailed_taxon(cx).await?;
-            Ok(Metadata::new().subtitle(&taxon.complete_name))
-        },
-    ))
-)]
-pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
-    let taxon = detailed_taxon(cx).await?;
-    let id = taxon.id;
-    let menu_actions = [
+#[component]
+async fn note_actions(cx: &Cx) -> topcoat::Result<impl View> {
+    let id = *taxon_id(cx)?;
+    let actions = [Action {
+        name: "Add Note".to_string(),
+        permission: Some(PermissionCode::TaxonNoteCreate),
+        item_type: ActionItemType::Link,
+        attrs: attributes! { href=(href!(note::create, taxon_id: id)) },
+    }];
+
+    Ok(view! { action_menu(actions: &actions) })
+}
+
+#[component]
+async fn menu_actions(cx: &Cx) -> topcoat::Result<impl View> {
+    let id = *taxon_id(cx)?;
+    let actions = [
         Action {
             name: "Sync Image".to_string(),
             permission: Some(PermissionCode::TaxonSync),
@@ -739,12 +743,22 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
             },
         },
     ];
-    let note_actions = [Action {
-        name: "Add Note".to_string(),
-        permission: Some(PermissionCode::TaxonNoteCreate),
-        item_type: ActionItemType::Link,
-        attrs: attributes! { href=(href!(note::create, taxon_id: taxon.id)) },
-    }];
+
+    Ok(view! { action_menu(actions: &actions) })
+}
+
+#[page(
+    GET "/taxa/{taxon_id}",
+    with(Metadata::from_fn(
+        async |cx| {
+            let taxon = detailed_taxon(cx).await?;
+            Ok(Metadata::new().subtitle(&taxon.complete_name))
+        },
+    ))
+)]
+pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
+    let taxon = detailed_taxon(cx).await?;
+    let id = taxon.id;
 
     Ok(view! {
         let ancestors = taxon
@@ -766,10 +780,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                 attrs: attributes! { class="mx-3" },
                 (taxon.rank.to_string())
             )
-            let actions = permitted_actions(current_user(cx).await, &menu_actions);
-            if !actions.is_empty() {
-                <div class="ms-auto">action_menu(actions: actions.as_slice())</div>
-            }
+            <div class="ms-auto">menu_actions()</div>
         </h1>
         <div class="flex flex-col gap-4">
             if let Some(photo) = taxon.photo.get() {
@@ -895,15 +906,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
             <section>
                 <h2 class="flex items-center">
                     "Notes"
-                    let permitted = permitted_actions(
-                        current_user(cx).await,
-                        &note_actions,
-                    );
-                    if !permitted.is_empty() {
-                        <div class="ms-auto">
-                            action_menu(actions: permitted.as_slice())
-                        </div>
-                    }
+                    <div class="ms-auto">note_actions()</div>
                 </h2>
                 if !taxon.notes.get().is_empty() {
                     let notes: HashMap<TaxonNoteCategory, Vec<&TaxonNote>> = taxon
