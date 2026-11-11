@@ -1,11 +1,16 @@
 use clap::Parser;
+use libpropagation::region::Region;
+use serde::Serialize;
 use tokio::net::TcpListener;
 use topcoat::{
     asset::{AssetBundle, RouterBuilderAssetExt},
     context::{BaseUrl, Cx},
     cookie::{CookieLayer, Key},
     metadata::Metadata,
-    router::{Compression, Router, RouterBuilderDiscoverExt, href, not_found, page},
+    router::{
+        Compression, Router, RouterBuilderDiscoverExt, StatusCode, content::Json, href, not_found,
+        page, route,
+    },
     runtime::RuntimeLayer,
     view::{View, attributes, view},
 };
@@ -14,6 +19,7 @@ use tracing::debug;
 use crate::{
     components::{button::*, input::input},
     config::AppConfig,
+    context::db,
     error::Error,
     tasks::background_tasks,
 };
@@ -241,5 +247,40 @@ async fn about(cx: &Cx) -> topcoat::Result<impl View> {
                 </div>
             </div>
         </div>
+    })
+}
+
+#[derive(Debug, Serialize)]
+enum HealthStatus {
+    Healthy,
+    Unhealthy,
+}
+
+#[derive(Debug, Serialize)]
+struct HealthResponse {
+    status: HealthStatus,
+    version: &'static str,
+    message: Option<String>,
+}
+
+#[route(GET "/api/health")]
+async fn health(cx: &Cx) -> topcoat::Result<(StatusCode, Json<HealthResponse>)> {
+    Ok(match Region::all().one().exec(&mut db(cx)).await {
+        Ok(_) => (
+            StatusCode::OK,
+            Json(HealthResponse {
+                status: HealthStatus::Healthy,
+                version: env!("CARGO_PKG_VERSION"),
+                message: None,
+            }),
+        ),
+        Err(e) => (
+            StatusCode::SERVICE_UNAVAILABLE,
+            Json(HealthResponse {
+                status: HealthStatus::Unhealthy,
+                version: env!("CARGO_PKG_VERSION"),
+                message: Some(e.to_string()),
+            }),
+        ),
     })
 }
