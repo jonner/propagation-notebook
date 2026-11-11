@@ -14,7 +14,7 @@ use topcoat::{
         error::{RouterErrorExt, redirect},
         href, page, path_param, query_params,
     },
-    runtime::{Event, procedure},
+    runtime::{Event, Signal, procedure, signal},
     view::{
         AttributeValueViewParts, Attributes, Child, View, attributes, class, component,
         error_boundary, suspense, view,
@@ -706,6 +706,18 @@ async fn detailed_taxon(cx: &Cx) -> topcoat::Result<Taxon> {
 }
 
 #[component]
+async fn propagation_actions(cx: &Cx, open_signal: Signal<bool>) -> topcoat::Result<impl View> {
+    let actions = [Action {
+        name: "Add Propagation Procedure".to_string(),
+        permission: Some(PermissionCode::TaxonPropagationCreate),
+        item_type: ActionItemType::Button,
+        attrs: attributes! { @click=$(|_e: Event| open_signal.set(true)) },
+    }];
+
+    Ok(view! { action_menu(actions: &actions) })
+}
+
+#[component]
 async fn note_actions(cx: &Cx) -> topcoat::Result<impl View> {
     let id = *taxon_id(cx)?;
     let actions = [Action {
@@ -759,6 +771,7 @@ async fn menu_actions(cx: &Cx) -> topcoat::Result<impl View> {
 pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
     let taxon = detailed_taxon(cx).await?;
     let id = taxon.id;
+    let show_add_propagation = signal(cx, || false);
 
     Ok(view! {
         let ancestors = taxon
@@ -869,7 +882,14 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
             }
             if !taxon.propagation_procedures.get().is_empty() {
                 <section>
-                    <h2>"Propagation Procedures"</h2>
+                    <h2 class="flex items-center">
+                        "Propagation Procedures"
+                        <div class="ms-auto">
+                            propagation_actions(
+                                open_signal: show_add_propagation.clone()
+                            )
+                        </div>
+                    </h2>
                     <div>
                         <ul>
                             for tp in taxon.propagation_procedures.get() {
@@ -1038,6 +1058,17 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                 </div>
             </section>
         </div>
+        if let Some(user) = current_user(cx).await {
+            if user.has_permission(PermissionCode::TaxonPropagationCreate) {
+                propagation::add_propagation_procedure_dialog(
+                    form_attrs: attributes! {
+                        method="POST"
+                        action=(href!(propagation::add_propagation_procedure, taxon_id: taxon.id))
+                    },
+                    open_sig: show_add_propagation
+                )
+            }
+        }
     })
 }
 

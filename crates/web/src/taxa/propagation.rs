@@ -1,6 +1,7 @@
 use libpropagation::{
     auth::PermissionCode,
     citation::{Citation, TaxonPropagationProcedureCitation},
+    propagation::PropagationProcedure,
     taxonomy::TaxonPropagationProcedure,
 };
 use serde::Deserialize;
@@ -14,8 +15,8 @@ use topcoat::{
         error::{RouterErrorExt, SeeOther, rewrite, see_other},
         href, page, path_param, route,
     },
-    runtime::{Event, signal},
-    view::{View, attributes, view},
+    runtime::{Event, Signal, shard, signal},
+    view::{Attributes, View, attributes, component, element_id, view},
 };
 
 use crate::{
@@ -33,11 +34,15 @@ use crate::{
         cited_object::*,
         dialog::*,
         field::*,
+        input::*,
+        label::*,
         pn::{item_term, item_value},
+        radio_group::*,
         select::*,
         textarea::*,
     },
     context::{current_user, db, require_user_with_permission},
+    flash::{self, FlashMessage},
     taxa,
 };
 
@@ -568,4 +573,148 @@ pub async fn delete(cx: &Cx) -> topcoat::Result<SeeOther> {
     Ok(see_other(
         href!(taxa::details, taxa::taxon_id: taxon_id).resolve(cx),
     ))
+}
+#[derive(Debug, Deserialize)]
+struct AddPropagationParams {
+    propagation_id: u64,
+}
+
+#[route(POST "/taxa/{taxon_id}/propagation/new")]
+pub async fn add_propagation_procedure(
+    cx: &Cx,
+    Form(params): Form<AddPropagationParams>,
+) -> topcoat::Result<SeeOther> {
+    let _ = require_user_with_permission(cx, PermissionCode::TaxonPropagationCreate).await?;
+
+    let taxon_id = *taxa::taxon_id(cx)?;
+    flash::push_message(
+        cx,
+        match TaxonPropagationProcedure::create()
+            .taxon_id(taxon_id)
+            .propagation_id(params.propagation_id)
+            .exec(&mut db(cx))
+            .await
+        {
+            Ok(proc) => FlashMessage::Success(format!(
+                "Added propagation procedure {} to taxon {}",
+                proc.propagation_id, taxon_id
+            )),
+            Err(e) => {
+                tracing::warn!(
+                    "failed to add propagation procedure {} to taxon {taxon_id}: {e}",
+                    params.propagation_id
+                );
+                FlashMessage::Failure(
+                    "Failed to add propagation procedure to this taxon".to_string(),
+                )
+            }
+        },
+    )?;
+    Ok(see_other(
+        href!(taxa::details, taxa::taxon_id: taxon_id).resolve(cx),
+    ))
+}
+
+#[shard]
+async fn propagation_procedure_options(cx: &Cx, query: String) -> topcoat::Result<impl View> {
+    let n_procs = PropagationProcedure::all()
+        .count()
+        .exec(&mut db(cx))
+        .await?;
+    let procs = if query.is_empty() {
+        Vec::default()
+    } else {
+        PropagationProcedure::filter(
+            PropagationProcedure::fields()
+                .name()
+                .like(format!("%{query}%")),
+        )
+        .exec(&mut db(cx))
+        .await?
+    };
+    Ok(view! {
+        <div>(format!("{} / {n_procs} results shown", procs.len()))</div>
+        if !procs.is_empty() {
+            radio_group(
+                for proc in procs {
+                    let id = format!("propagation-{}", proc.id);
+                    <div class="flex items-center gap-2">
+                        radio_group_item(
+                            attrs: attributes! { id=(&id) name="propagation_id" value=(proc.id) }
+                        )
+                        label(attrs: attributes! { for=(&id) }, (&proc.name))
+                    </div>
+                }
+            )
+        }
+        // <a class="inline-flex items-center gap-2" href=(href!(propagation::create))>
+        //     icon(data: mdi::ADD)
+        //     "Create a new propagation procedure"
+        // </a>
+    })
+}
+
+#[component]
+async fn add_propagation_procedure_form(
+    cx: &Cx,
+    #[default] attrs: Attributes,
+) -> topcoat::Result<impl View> {
+    let query = signal(cx, String::new);
+    Ok(view! {
+        <form (attrs)>
+            field_set(
+                field(
+                    input(
+                        attrs: attributes! {
+                            type="text"
+                            name="query"
+                            value=(query.get())
+                            placeholder="Search for an existing propagation procedure"
+                            @input=$(|e: Event| query.set(e.target.value))
+                        }
+                    )
+                )
+                field(propagation_procedure_options(query: query.get()))
+            )
+        </form>
+    })
+}
+
+#[component]
+pub async fn add_propagation_procedure_dialog(
+    cx: &Cx,
+    open_sig: Signal<bool>,
+    #[default] form_attrs: Attributes,
+) -> topcoat::Result<impl View> {
+    let form_id = element_id(cx);
+    Ok(view! {
+        dialog(
+            open: open_sig.get(),
+            dialog_content(
+                dialog_header(
+                    dialog_title("Add a new propagation procedure to this taxon")
+                )
+                add_propagation_procedure_form(
+                    attrs: attributes! { id=(&form_id) (form_attrs) }
+                )
+                dialog_footer(
+                    button(
+                        variant: ButtonVariant::Secondary,
+                        attrs: attributes! {
+                            @click=$(|e: topcoat::runtime::Event| {
+                                e.prevent_default();
+                                open_sig.set(false)
+                            })
+                        },
+                        "Cancel"
+                    )
+                    button(
+                        variant: ButtonVariant::Primary,
+                        attrs: attributes! { form=(&form_id) },
+                        "Add"
+                    )
+                )
+            )
+        )
+    })
 }
