@@ -948,11 +948,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                                     for note in notes {
                                         <li>
                                             <a
-                                                href=(href!(
-                                                    note::details,
-                                                    taxon_id: taxon.id,
-                                                    note::note_id: note.id,
-                                                ))
+                                                href=(href!(note::details, taxon_id: taxon.id, note::note_id: note.id))
                                             >
                                                 (&note.title)
                                             </a>
