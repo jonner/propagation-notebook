@@ -37,7 +37,7 @@ use crate::{
         pn::{origin_badge, pagination_control, taxon_icon},
     },
     context::{current_user, db, require_user_with_permission},
-    util::{PER_PAGE, PageState},
+    util::{PER_PAGE, PageState, missing_content},
 };
 
 mod cleaning;
@@ -812,23 +812,25 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                     </a>
                 }
             }
-            if !taxon.vernaculars.get().is_empty() {
-                <section>
-                    <h2>"Common Name(s)"</h2>
-                    <div>
+            <section>
+                <h2>"Common Name(s)"</h2>
+                <div>
+                    if !taxon.vernaculars.get().is_empty() {
                         <ul>
                             for cn in taxon.vernaculars.get() {
                                 <li>(&cn.name)</li>
                             }
                         </ul>
-                    </div>
-                </section>
-            }
+                    } else {
+                        missing_content()
+                    }
+                </div>
+            </section>
 
-            if !taxon.children.get().is_empty() {
-                <section>
-                    <h2>"Child taxa"</h2>
-                    <div>
+            <section>
+                <h2>"Child taxa"</h2>
+                <div>
+                    if !taxon.children.get().is_empty() {
                         <ul>
                             for child in taxon.children.get() {
                                 <li>
@@ -840,14 +842,16 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                                 </li>
                             }
                         </ul>
-                    </div>
-                </section>
-            }
+                    } else {
+                        missing_content()
+                    }
+                </div>
+            </section>
 
-            if !taxon.cleaning_procedures.get().is_empty() {
-                <section>
-                    <h2>"Seed Cleaning"</h2>
-                    <div>
+            <section>
+                <h2>"Seed Cleaning"</h2>
+                <div>
+                    if !taxon.cleaning_procedures.get().is_empty() {
                         <ul>
                             for procedure in taxon.cleaning_procedures.get() {
                                 <li>
@@ -877,20 +881,20 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                                 </li>
                             }
                         </ul>
+                    } else {
+                        missing_content()
+                    }
+                </div>
+            </section>
+            <section>
+                <h2 class="flex items-center">
+                    "Propagation Procedures"
+                    <div class="ms-auto">
+                        propagation_actions(open_signal: show_add_propagation.clone())
                     </div>
-                </section>
-            }
-            if !taxon.propagation_procedures.get().is_empty() {
-                <section>
-                    <h2 class="flex items-center">
-                        "Propagation Procedures"
-                        <div class="ms-auto">
-                            propagation_actions(
-                                open_signal: show_add_propagation.clone()
-                            )
-                        </div>
-                    </h2>
-                    <div>
+                </h2>
+                <div>
+                    if !taxon.propagation_procedures.get().is_empty() {
                         <ul>
                             for tp in taxon.propagation_procedures.get() {
                                 <li>
@@ -920,27 +924,30 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                                 </li>
                             }
                         </ul>
-                    </div>
-                </section>
-            }
+                    } else {
+                        missing_content()
+                    }
+                </div>
+            </section>
+
             <section>
                 <h2 class="flex items-center">
                     "Notes"
                     <div class="ms-auto">note_actions()</div>
                 </h2>
-                if !taxon.notes.get().is_empty() {
-                    let notes: BTreeMap<TaxonNoteCategory, Vec<&TaxonNote>> = taxon
-                        .notes
-                        .get()
-                        .iter()
-                        .fold(
-                            BTreeMap::new(),
-                            |mut acc, member| {
-                                acc.entry(member.category).or_default().push(member);
-                                acc
-                            },
-                        );
-                    <div class="flex flex-col gap-3">
+                <div class="flex flex-col gap-3">
+                    if !taxon.notes.get().is_empty() {
+                        let notes: BTreeMap<TaxonNoteCategory, Vec<&TaxonNote>> = taxon
+                            .notes
+                            .get()
+                            .iter()
+                            .fold(
+                                BTreeMap::new(),
+                                |mut acc, member| {
+                                    acc.entry(member.category).or_default().push(member);
+                                    acc
+                                },
+                            );
                         for (category, notes) in notes {
                             <div>
                                 <h4 class="mb-1">(category.to_string())</h4>
@@ -971,8 +978,10 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                                 </ul>
                             </div>
                         }
-                    </div>
-                }
+                    } else {
+                        missing_content()
+                    }
+                </div>
             </section>
 
             <section>
@@ -1013,19 +1022,20 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                     )
                 </div>
             </section>
-            if !taxon.synonyms.get().is_empty() {
-                <section>
-                    <h2>"Synonyms"</h2>
-                    <div>
+            <section>
+                <h2>"Synonyms"</h2>
+                <div>
+                    if !taxon.synonyms.get().is_empty() {
                         <ul>
                             for syn in taxon.synonyms.get() {
                                 <li><span class="latin">(&syn.complete_name)</span></li>
                             }
                         </ul>
-                    </div>
-                </section>
-            }
-
+                    } else {
+                        missing_content()
+                    }
+                </div>
+            </section>
             <section>
                 <h2>"External Resources"</h2>
                 <div>

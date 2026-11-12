@@ -111,3 +111,11 @@ pub(crate) async fn editable_text(
         </div>
     })
 }
+
+#[component]
+pub async fn missing_content(
+    cx: &Cx,
+    #[default] message: Option<&str>,
+) -> topcoat::Result<impl View> {
+    Ok(view! { <span class="text-muted-foreground">(message.unwrap_or("None"))</span> })
+}

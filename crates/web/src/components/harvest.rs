@@ -13,6 +13,7 @@ use crate::{
     components::pn::{conservation_status_badge, origin_badge},
     regions,
     taxa::{self, RegionHarvestWindowSummary},
+    util::missing_content,
 };
 
 /// Renders a 52-week harvest window timeline component with week blocks, active
@@ -121,7 +122,7 @@ pub async fn taxon_regional_table(
 ) -> topcoat::Result<impl View> {
     Ok(view! {
         if regions.is_empty() {
-            <div class="text-muted-foreground">"None"</div>
+            missing_content()
         } else {
             harvest_table(
                 attrs: attrs,
