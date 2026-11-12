@@ -1,4 +1,4 @@
-use std::{cmp::Ordering, collections::HashMap};
+use std::{cmp::Ordering, collections::BTreeMap};
 
 use libpropagation::{
     auth::PermissionCode,
@@ -630,8 +630,8 @@ pub async fn descendant_region_statuses(cx: &Cx, parent_id: u64) -> topcoat::Res
         .await?
         .into_iter()
         .fold(
-            HashMap::new(),
-            |mut accum: HashMap<u64, (Region, RegionHarvestWindowSummary)>, item| {
+            BTreeMap::new(),
+            |mut accum: BTreeMap<u64, (Region, RegionHarvestWindowSummary)>, item| {
                 accum
                     .entry(item.region_id)
                     .and_modify(|e| {

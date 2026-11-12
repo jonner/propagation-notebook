@@ -570,6 +570,8 @@ pub struct TaxonPropagationProcedure {
     Eq,
     strum::EnumIter,
     strum::IntoStaticStr,
+    PartialOrd,
+    Ord,
 )]
 #[serde(rename_all = "snake_case")]
 #[strum(serialize_all = "snake_case")]
