@@ -795,7 +795,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
             )
             <div class="ms-auto">menu_actions()</div>
         </h1>
-        <div class="flex flex-col gap-4">
+        <div class="flex flex-col gap-8">
             if let Some(photo) = taxon.photo.get() {
                 if let Some(photo_url) = photo.medium_url.as_ref() {
                     <a
@@ -886,6 +886,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                     }
                 </div>
             </section>
+
             <section>
                 <h2 class="flex items-center">
                     "Propagation Procedures"
@@ -1022,6 +1023,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                     )
                 </div>
             </section>
+
             <section>
                 <h2>"Synonyms"</h2>
                 <div>
@@ -1036,6 +1038,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                     }
                 </div>
             </section>
+
             <section>
                 <h2>"External Resources"</h2>
                 <div>
@@ -1064,6 +1067,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                 </div>
             </section>
         </div>
+
         if let Some(user) = current_user(cx).await {
             if user.has_permission(PermissionCode::TaxonPropagationCreate) {
                 propagation::add_propagation_procedure_dialog(
