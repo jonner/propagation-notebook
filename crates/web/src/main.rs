@@ -29,6 +29,7 @@ mod admin;
 mod assets;
 mod auth;
 mod citation;
+#[allow(dead_code)]
 mod components;
 mod config;
 mod context;
