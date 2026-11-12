@@ -929,12 +929,12 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                     <div class="ms-auto">note_actions()</div>
                 </h2>
                 if !taxon.notes.get().is_empty() {
-                    let notes: HashMap<TaxonNoteCategory, Vec<&TaxonNote>> = taxon
+                    let notes: BTreeMap<TaxonNoteCategory, Vec<&TaxonNote>> = taxon
                         .notes
                         .get()
                         .iter()
                         .fold(
-                            HashMap::new(),
+                            BTreeMap::new(),
                             |mut acc, member| {
                                 acc.entry(member.category).or_default().push(member);
                                 acc
