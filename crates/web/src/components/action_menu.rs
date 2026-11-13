@@ -1,7 +1,7 @@
 use topcoat::{
     context::Cx,
     icon::icon,
-    view::{Attributes, View, component, element_id, view},
+    view::{Attributes, View, attributes, component, element_id, view},
 };
 
 use crate::{
@@ -24,7 +24,13 @@ pub async fn action_menu(
         if !permitted.is_empty() {
             dropdown_menu(
                 attrs: attrs,
-                dropdown_menu_trigger(target: &menu_id, icon(data: mdi::DOTS_VERTICAL))
+                dropdown_menu_trigger(
+                    attrs: attributes! {
+                        class="hover:bg-foreground/5 active:bg-foreground/10 rounded-md"
+                    },
+                    target: &menu_id,
+                    icon(data: mdi::DOTS_VERTICAL)
+                )
                 dropdown_menu_content(
                     id: &menu_id,
                     align: FloatingAlign::End,
