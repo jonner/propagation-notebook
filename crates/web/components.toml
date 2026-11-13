@@ -56,6 +56,10 @@ file = "src/components/field.rs"
 hash = "sha256:66636f7861a3eb370ee736de1a40aff889ec15e491d7aae57b64ad05e25d5cdd"
 file = "src/components/floating.rs"
 
+[registries.topcoat.components.hover_card]
+hash = "sha256:ac6f9a2207d0d7294f1972830092debe1e2c4a1674bbe015c3d2ec4045ec6a57"
+file = "src/components/hover_card.rs"
+
 [registries.topcoat.components.input]
 hash = "sha256:22c01bc78089bfc7e22406af86cfd1e9ba6074f60a169b331dfe3e3882e93912"
 file = "src/components/input.rs"

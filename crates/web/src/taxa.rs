@@ -26,7 +26,7 @@ use crate::{
     Subtitle,
     actions::{Action, ActionItemType},
     assets::mdi,
-    citation,
+    citation::citation_reference,
     components::{
         action_menu::*,
         badge::{BadgeVariant, badge},
@@ -853,6 +853,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                 <div>
                     if !taxon.cleaning_procedures.get().is_empty() {
                         <ul>
+                            #[key(procedure.id)]
                             for procedure in taxon.cleaning_procedures.get() {
                                 <li>
                                     <a
@@ -864,19 +865,9 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                                     >
                                         (&procedure.name)
                                     </a>
+                                    #[key(citation.citation_id)]
                                     for citation in procedure.citation_links.get() {
-                                        <span class="align-super text-xs ps-1">
-                                            "["
-                                            <a
-                                                href=(href!(
-                                                    citation::details,
-                                                    citation::citation_id: citation.citation_id,
-                                                ))
-                                            >
-                                                (citation.citation_id)
-                                            </a>
-                                            "]"
-                                        </span>
+                                        citation_reference(citation_id: citation.citation_id)
                                     }
                                 </li>
                             }
@@ -897,6 +888,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                 <div>
                     if !taxon.propagation_procedures.get().is_empty() {
                         <ul>
+                            #[key((tp.taxon_id, tp.propagation_id))]
                             for tp in taxon.propagation_procedures.get() {
                                 <li>
                                     <a
@@ -908,19 +900,9 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                                     >
                                         (&tp.propagation.get().name)
                                     </a>
+                                    #[key(citation.citation_id)]
                                     for citation in tp.citation_links.get() {
-                                        <span class="align-super text-xs ps-1">
-                                            "["
-                                            <a
-                                                href=(href!(
-                                                    citation::details,
-                                                    citation::citation_id: citation.citation_id,
-                                                ))
-                                            >
-                                                (citation.citation_id)
-                                            </a>
-                                            "]"
-                                        </span>
+                                        citation_reference(citation_id: citation.citation_id)
                                     }
                                 </li>
                             }
@@ -949,10 +931,12 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                                     acc
                                 },
                             );
+                        #[key(category.to_string())]
                         for (category, notes) in notes {
                             <div>
                                 <h4 class="mb-1">(category.to_string())</h4>
                                 <ul>
+                                    #[key(note.id)]
                                     for note in notes {
                                         <li>
                                             <a
@@ -960,19 +944,9 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                                             >
                                                 (&note.title)
                                             </a>
+                                            #[key(citation.citation_id)]
                                             for citation in note.citation_links.get() {
-                                                <span class="align-super text-xs ps-1">
-                                                    "["
-                                                    <a
-                                                        href=(href!(
-                                                            citation::details,
-                                                            citation::citation_id: citation.citation_id,
-                                                        ))
-                                                    >
-                                                        (citation.citation_id)
-                                                    </a>
-                                                    "]"
-                                                </span>
+                                                citation_reference(citation_id: citation.citation_id)
                                             }
                                         </li>
                                     }

@@ -14,6 +14,7 @@ pub mod dropdown_menu;
 pub mod field;
 pub mod floating;
 pub mod harvest;
+pub mod hover_card;
 pub mod input;
 pub mod label;
 pub mod map;
