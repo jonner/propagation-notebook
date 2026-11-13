@@ -408,8 +408,15 @@ pub async fn edit(cx: &Cx) -> topcoat::Result<impl View> {
                 )
             )
         )
+        let citation_ids = note
+            .citation_links
+            .get()
+            .iter()
+            .map(|link| link.citation_id)
+            .collect::<Vec<_>>();
         add_citation_dialog(
             open_sig: add_citation_dialog_open.clone(),
+            exclude: citation_ids,
             form_attrs: attributes! {
                 method="POST"
                 action=(href!(

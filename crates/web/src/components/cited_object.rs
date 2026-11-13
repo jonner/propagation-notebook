@@ -52,20 +52,22 @@ pub async fn cited_object_layout(cx: &Cx, child: Child<'_>) -> topcoat::Result<i
 }
 
 #[shard]
-async fn citation_options(cx: &Cx, query: String) -> topcoat::Result<impl View> {
+async fn citation_options(cx: &Cx, query: String, exclude: Vec<u64>) -> topcoat::Result<impl View> {
     let n_citations = Citation::all().count().exec(&mut db(cx)).await?;
     let citations = if query.is_empty() {
         Vec::default()
     } else {
         Citation::filter(
-            Citation::fields()
-                .title()
-                .like(format!("%{query}%"))
-                .or(Citation::fields().author().like(format!("%{query}%")))
-                .or(Citation::fields().url().like(format!("%{query}%")))
-                .or(Citation::fields()
-                    .container_title()
-                    .like(format!("%{query}%"))),
+            Citation::fields().id().in_list(exclude).not().and(
+                Citation::fields()
+                    .title()
+                    .like(format!("%{query}%"))
+                    .or(Citation::fields().author().like(format!("%{query}%")))
+                    .or(Citation::fields().url().like(format!("%{query}%")))
+                    .or(Citation::fields()
+                        .container_title()
+                        .like(format!("%{query}%"))),
+            ),
         )
         .exec(&mut db(cx))
         .await?
@@ -93,7 +95,11 @@ async fn citation_options(cx: &Cx, query: String) -> topcoat::Result<impl View> 
 }
 
 #[component]
-async fn add_citation_form(cx: &Cx, #[default] attrs: Attributes) -> topcoat::Result<impl View> {
+async fn add_citation_form(
+    cx: &Cx,
+    #[default] exclude: Vec<u64>,
+    #[default] attrs: Attributes,
+) -> topcoat::Result<impl View> {
     let query = signal(cx, String::new);
     Ok(view! {
         <form (attrs)>
@@ -109,7 +115,7 @@ async fn add_citation_form(cx: &Cx, #[default] attrs: Attributes) -> topcoat::Re
                         }
                     )
                 )
-                field(citation_options(query: query.get()))
+                field(citation_options(query: query.get(), exclude: exclude))
             )
         </form>
     })
@@ -119,6 +125,7 @@ async fn add_citation_form(cx: &Cx, #[default] attrs: Attributes) -> topcoat::Re
 pub async fn add_citation_dialog(
     cx: &Cx,
     open_sig: Signal<bool>,
+    #[default] exclude: Vec<u64>,
     #[default] form_attrs: Attributes,
 ) -> topcoat::Result<impl View> {
     let add_citation_form_id = element_id(cx);
@@ -132,7 +139,8 @@ pub async fn add_citation_dialog(
                     )
                 )
                 add_citation_form(
-                    attrs: attributes! { id=(&add_citation_form_id) (form_attrs) }
+                    attrs: attributes! { id=(&add_citation_form_id) (form_attrs) },
+                    exclude: exclude
                 )
                 dialog_footer(
                     button(
