@@ -353,4 +353,15 @@
   .results-grid {
     @apply grid items-center gap-6 grid-cols-2 sm:grid-cols-5;
   }
+
+  .harvest-timeline {
+    @apply relative flex items-center gap-0 items-stretch w-full h-full select-none min-h-[1em];
+  }
+
+  .harvest-timeline div.block {
+    @apply flex-grow bg-brown/20;
+  }
+  .harvest-timeline div.block.x {
+    @apply bg-leaf/50;
+  }
 }

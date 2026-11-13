@@ -33,11 +33,7 @@ pub async fn harvest_timeline(
 
     Ok(view! {
         <div
-            class=(class!(
-                "relative flex items-center gap-0 items-stretch w-full h-full select-none min-h-[1em]",
-                inactive_class,
-                attrs.remove("class"),
-            ))
+            class=(class!("harvest-timeline", inactive_class, attrs.remove("class")))
             (attrs)
         >
             for w in 1..=52 {
@@ -55,9 +51,7 @@ pub async fn harvest_timeline(
                         false
                     };
 
-                    let bg_class = if in_window { "bg-leaf/50" } else { "bg-brown/20" };
-
-                    <div class=(class!("flex-grow", bg_class))></div>
+                    <div class=(class!("block", "x" if in_window))></div>
                 }
             }
             // Current date vertical indicator
