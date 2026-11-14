@@ -691,11 +691,21 @@ async fn detailed_taxon(cx: &Cx) -> topcoat::Result<Taxon> {
                 .children()
                 .order_by(Taxon::fields().sequence().asc()),
         )
-        .include(Taxon::fields().cleaning_procedures().citation_links())
+        .include(
+            Taxon::fields()
+                .cleaning_procedures()
+                .citation_links()
+                .citation(),
+        )
         .include(Taxon::fields().propagation_procedures().propagation())
-        .include(Taxon::fields().propagation_procedures().citation_links())
+        .include(
+            Taxon::fields()
+                .propagation_procedures()
+                .citation_links()
+                .citation(),
+        )
         .include(Taxon::fields().regional_statuses().region())
-        .include(Taxon::fields().notes().citation_links())
+        .include(Taxon::fields().notes().citation_links().citation())
         .include(Taxon::fields().photo())
         .include(Taxon::fields().ancestor_links().ancestor())
         .include(Taxon::fields().resources())
@@ -867,7 +877,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                                     </a>
                                     #[key(citation.citation_id)]
                                     for citation in procedure.citation_links.get() {
-                                        citation_reference(citation_id: citation.citation_id)
+                                        citation_reference(citation: citation.citation.get())
                                     }
                                 </li>
                             }
@@ -902,7 +912,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                                     </a>
                                     #[key(citation.citation_id)]
                                     for citation in tp.citation_links.get() {
-                                        citation_reference(citation_id: citation.citation_id)
+                                        citation_reference(citation: citation.citation.get())
                                     }
                                 </li>
                             }
@@ -946,7 +956,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                                             </a>
                                             #[key(citation.citation_id)]
                                             for citation in note.citation_links.get() {
-                                                citation_reference(citation_id: citation.citation_id)
+                                                citation_reference(citation: citation.citation.get())
                                             }
                                         </li>
                                     }

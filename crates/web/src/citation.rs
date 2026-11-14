@@ -13,7 +13,7 @@ use topcoat::{
         href, layout, page, path_param, route,
     },
     runtime::signal,
-    view::{Attributes, Child, View, attributes, class, component, suspense, view},
+    view::{Attributes, Child, View, attributes, class, component, view},
 };
 use tracing::debug;
 use url::Url;
@@ -695,17 +695,16 @@ pub async fn admin(cx: &Cx) -> topcoat::Result<impl View> {
 }
 
 #[component]
-pub async fn citation_card(cx: &Cx, citation_id: u64) -> topcoat::Result<impl View> {
-    let citation = Citation::get_by_id(&mut db(cx), citation_id).await?;
-    let primary_link = citation.url.or(citation
+pub async fn citation_card(cx: &Cx, citation: &Citation) -> topcoat::Result<impl View> {
+    let primary_link = citation.url.clone().or(citation
         .doi
         .as_ref()
         .map(|doi| format!("https://doi.org/{doi}")));
     Ok(view! {
-        <div><a href=(primary_link)>(citation.title)</a></div>
+        <div><a href=(primary_link)>(&citation.title)</a></div>
         <div>
-            (citation.author)
-            if let Some(container) = citation.container_title {
+            (&citation.author)
+            if let Some(container) = citation.container_title.as_ref() {
                 icon(attrs: attributes! { class="inline-flex" }, data: mdi::DOT)
                 <em>(&container)</em>
             }
@@ -716,7 +715,7 @@ pub async fn citation_card(cx: &Cx, citation_id: u64) -> topcoat::Result<impl Vi
         </div>
         if citation.doi.is_some() || citation.access_date.is_some() {
             <div class="flex gap-3">
-                if let Some(doi) = citation.doi {
+                if let Some(doi) = citation.doi.as_ref() {
                     <span>
                         "DOI: "
                         <a href=(format!("https://doi.org/{doi}"))>(doi)</a>
@@ -731,18 +730,13 @@ pub async fn citation_card(cx: &Cx, citation_id: u64) -> topcoat::Result<impl Vi
 }
 
 #[component]
-pub async fn citation_reference(cx: &Cx, citation_id: u64) -> topcoat::Result<impl View> {
+pub async fn citation_reference(cx: &Cx, citation: &Citation) -> topcoat::Result<impl View> {
     Ok(view! {
         <span class="align-super text-xs ps-1">
             "["
             hover_card(
-                <a href=(href!(details, citation_id: citation_id))>(citation_id)</a>
-                hover_card_content(
-                    suspense(
-                        fallback: view! { "Loading..." },
-                        citation_card(citation_id: citation_id)
-                    )
-                )
+                <a href=(href!(details, citation_id: citation.id))>(citation.id)</a>
+                hover_card_content(citation_card(citation: citation))
             )
             "]"
         </span>
