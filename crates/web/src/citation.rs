@@ -697,7 +697,6 @@ pub async fn admin(cx: &Cx) -> topcoat::Result<impl View> {
 #[component]
 pub async fn citation_card(cx: &Cx, citation_id: u64) -> topcoat::Result<impl View> {
     let citation = Citation::get_by_id(&mut db(cx), citation_id).await?;
-    tokio::time::sleep(std::time::Duration::from_secs(2)).await;
     let primary_link = citation.url.or(citation
         .doi
         .as_ref()
