@@ -686,7 +686,7 @@ pub async fn add_propagation_procedure_dialog(
     let form_id = element_id(cx);
     Ok(view! {
         dialog(
-            open: open_sig.get(),
+            open: $(open_sig.get()),
             dialog_content(
                 dialog_header(
                     dialog_title("Add a new propagation procedure to this taxon")
