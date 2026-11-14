@@ -623,70 +623,60 @@ pub async fn add_propagation_procedure(
 }
 
 #[shard]
-async fn propagation_procedure_options(cx: &Cx, query: String) -> topcoat::Result<impl View> {
-    let n_procs = PropagationProcedure::all()
-        .count()
-        .exec(&mut db(cx))
-        .await?;
-    let procs = if query.is_empty() {
-        Vec::default()
+async fn add_propagation_procedure_form_fields(cx: &Cx) -> topcoat::Result<impl View> {
+    let query = signal(cx, String::new);
+    let query_value = query.get();
+
+    let procs = if query_value.is_empty() {
+        Vec::new()
     } else {
         PropagationProcedure::filter(
             PropagationProcedure::fields()
                 .name()
-                .like(format!("%{query}%")),
+                .like(format!("%{query_value}%")),
         )
         .exec(&mut db(cx))
         .await?
     };
+
     Ok(view! {
-        <div>(format!("{} / {n_procs} results shown", procs.len()))</div>
-        if !procs.is_empty() {
-            radio_group(
-                for proc in procs {
-                    let id = format!("propagation-{}", proc.id);
-                    <div class="flex items-center gap-2">
-                        radio_group_item(
-                            attrs: attributes! { id=(&id) name="propagation_id" value=(proc.id) }
-                        )
-                        label(attrs: attributes! { for=(&id) }, (&proc.name))
+        field_set(
+            field(
+                input(
+                    attrs: attributes! {
+                        type="text"
+                        name="query"
+                        value=(&query_value)
+                        placeholder="Search for an existing propagation procedure"
+                        @input=$(|e: Event| query.set(e.target.value))
+                    }
+                )
+            )
+            field(
+                if query_value.is_empty() {
+                    <div class="text-muted-foreground">
+                        "Start typing to search for a propagation procedure"
                     </div>
+                } else {
+                    <div>(format!("{} results shown", procs.len()))</div>
+                    if !procs.is_empty() {
+                        radio_group(
+                            for proc in procs {
+                                let id = format!("propagation-{}", proc.id);
+                                <div class="flex items-center gap-2">
+                                    radio_group_item(
+                                        attrs: attributes! { id=(&id) name="propagation_id" value=(proc.id) }
+                                    )
+                                    label(attrs: attributes! { for=(&id) }, (&proc.name))
+                                </div>
+                            }
+                        )
+                    }
                 }
             )
-        }
-        // <a class="inline-flex items-center gap-2" href=(href!(propagation::create))>
-        //     icon(data: mdi::ADD)
-        //     "Create a new propagation procedure"
-        // </a>
+        )
     })
 }
-
-#[component]
-async fn add_propagation_procedure_form(
-    cx: &Cx,
-    #[default] attrs: Attributes,
-) -> topcoat::Result<impl View> {
-    let query = signal(cx, String::new);
-    Ok(view! {
-        <form (attrs)>
-            field_set(
-                field(
-                    input(
-                        attrs: attributes! {
-                            type="text"
-                            name="query"
-                            value=(query.get())
-                            placeholder="Search for an existing propagation procedure"
-                            @input=$(|e: Event| query.set(e.target.value))
-                        }
-                    )
-                )
-                field(propagation_procedure_options(query: query.get()))
-            )
-        </form>
-    })
-}
-
 #[component]
 pub async fn add_propagation_procedure_dialog(
     cx: &Cx,
@@ -701,9 +691,9 @@ pub async fn add_propagation_procedure_dialog(
                 dialog_header(
                     dialog_title("Add a new propagation procedure to this taxon")
                 )
-                add_propagation_procedure_form(
-                    attrs: attributes! { id=(&form_id) (form_attrs) }
-                )
+                <form id=(&form_id) (form_attrs)>
+                    add_propagation_procedure_form_fields()
+                </form>
                 dialog_footer(
                     button(
                         variant: ButtonVariant::Secondary,
