@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use directories::ProjectDirs;
 use toasty::{ModelSet, embed_migrations, migration::MigrationSet};
 use tracing::{debug, trace};
@@ -39,6 +41,7 @@ pub async fn db(migrate: bool) -> Result<toasty::Db, Error> {
     }?;
     trace!(?db_uri);
     let db = toasty::Db::builder()
+        .pool_wait_timeout(Some(Duration::from_secs(30)))
         .models(models())
         .connect(&db_uri)
         .await?;
