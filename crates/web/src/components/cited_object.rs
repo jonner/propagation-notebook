@@ -131,7 +131,7 @@ pub async fn add_citation_dialog(
     let add_citation_form_id = element_id(cx);
     Ok(view! {
         dialog(
-            open: open_sig.get(),
+            open: $(open_sig.get()),
             dialog_content(
                 dialog_header(
                     dialog_title(
