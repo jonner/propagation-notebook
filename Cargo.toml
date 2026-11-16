@@ -26,6 +26,7 @@ jiff = { version = "0.2.24", features = ["serde"] }
 itis = { path = "./crates/itis" }
 libpropagation = { path = "./crates/libpropagation" }
 inaturalist = { path = "./crates/inaturalist" }
+rand = "0.9.5"
 reqwest = { version = "0.13.4", features = ["json", "query"] }
 reqwest-middleware = { version = "0.5.2", features = ["json", "query"] }
 serde = { version = "1.0.228", features = ["derive"] }

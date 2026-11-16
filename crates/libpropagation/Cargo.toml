@@ -14,6 +14,7 @@ itertools = { workspace = true }
 jiff = { workspace = true }
 inaturalist = { workspace = true }
 itis = { workspace = true }
+rand = { workspace = true }
 serde = { workspace = true }
 serde_with = { workspace = true }
 serde_yaml = { workspace = true }

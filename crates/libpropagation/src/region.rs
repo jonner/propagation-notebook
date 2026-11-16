@@ -1,6 +1,7 @@
 use std::{cmp::Ordering, collections::HashMap, fmt::Display};
 
 use geo::BoundingRect;
+use rand::seq::SliceRandom;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 use toasty::{Db, Deferred};
@@ -264,6 +265,90 @@ impl Region {
         offset: Option<usize>,
         limit: Option<usize>,
     ) -> Result<(u64, Vec<Taxon>), toasty::Error> {
+        let mut query = Taxon::filter(self.taxon_filter(query, origin, harvest));
+        let total = query.clone().count().exec(db).await?;
+        query = query
+            .include(
+                Taxon::fields()
+                    .regional_statuses()
+                    .filter(RegionalTaxonStatus::fields().region_id().eq(self.id)),
+            )
+            .order_by(Taxon::fields().sequence().asc());
+        if let Some(limit) = limit {
+            query = query.limit(limit)
+        }
+        if let Some(offset) = offset {
+            query = query.offset(offset)
+        }
+        Ok((total, query.exec(db).await?))
+    }
+
+    /// Returns the total number of matching taxa along with a random sample of
+    /// up to `limit` of them.
+    ///
+    /// Only a small window of candidate ids is loaded, then shuffled, so this
+    /// stays cheap even for large regions and does not need an
+    /// `ORDER BY RANDOM()` database function.
+    pub async fn get_random_taxa(
+        &self,
+        db: &mut Db,
+        query: Option<&String>,
+        origin: Option<OriginFilter>,
+        harvest: Option<HarvestFilter>,
+        limit: usize,
+        include_photo: bool,
+    ) -> Result<(u64, Vec<Taxon>), toasty::Error> {
+        let filter = self.taxon_filter(query, origin, harvest);
+        let total = Taxon::filter(filter.clone()).count().exec(db).await?;
+        if total == 0 || limit == 0 {
+            return Ok((total, Vec::new()));
+        }
+
+        // Draw from a bounded window of the filtered taxa, then shuffle it.
+        // Small regions load every candidate and get a uniform sample; large
+        // regions cap the candidate pool so the query stays cheap.
+        let available = total as usize;
+        let window = available.min((limit * 8).max(512));
+        let offset = if available > window {
+            rand::random_range(0..=available - window)
+        } else {
+            0
+        };
+        let mut ids: Vec<u64> = Taxon::filter(filter)
+            .order_by(Taxon::fields().sequence().asc())
+            .limit(window)
+            .offset(offset)
+            .select(Taxon::fields().id())
+            .exec(db)
+            .await?;
+        ids.shuffle(&mut rand::rng());
+        ids.truncate(limit);
+
+        let mut taxa_query = Taxon::filter(Taxon::fields().id().in_list(ids.clone())).include(
+            Taxon::fields()
+                .regional_statuses()
+                .filter(RegionalTaxonStatus::fields().region_id().eq(self.id)),
+        );
+        if include_photo {
+            taxa_query = taxa_query.include(Taxon::fields().photo());
+        }
+        let taxa = taxa_query.exec(db).await?;
+
+        // Restore the shuffled order; the database may return rows in any order.
+        let mut by_id: HashMap<u64, Taxon> =
+            taxa.into_iter().map(|taxon| (taxon.id, taxon)).collect();
+        let taxa = ids.into_iter().filter_map(|id| by_id.remove(&id)).collect();
+        Ok((total, taxa))
+    }
+
+    /// Builds the taxon filter shared by [`Region::get_taxa`] and
+    /// [`Region::get_random_taxa`].
+    fn taxon_filter(
+        &self,
+        query: Option<&String>,
+        origin: Option<OriginFilter>,
+        harvest: Option<HarvestFilter>,
+    ) -> toasty::stmt::Expr<bool> {
         let mut rts_filter = RegionalTaxonStatus::fields().region_id().eq(self.id);
         let today = jiff::Zoned::now().date().day_of_year();
         if let Some(f) = harvest {
@@ -307,22 +392,7 @@ impl Region {
         if let Some(q) = query {
             filter = filter.and(Taxon::search_filter(q));
         }
-        let mut query = Taxon::filter(filter);
-        let total = query.clone().count().exec(db).await?;
-        query = query
-            .include(
-                Taxon::fields()
-                    .regional_statuses()
-                    .filter(RegionalTaxonStatus::fields().region_id().eq(self.id)),
-            )
-            .order_by(Taxon::fields().sequence().asc());
-        if let Some(limit) = limit {
-            query = query.limit(limit)
-        }
-        if let Some(offset) = offset {
-            query = query.offset(offset)
-        }
-        Ok((total, query.exec(db).await?))
+        filter
     }
 
     pub fn geometry(&self) -> Option<geojson::Geometry> {
