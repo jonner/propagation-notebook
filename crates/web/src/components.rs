@@ -22,6 +22,7 @@ pub mod navigation_menu;
 pub mod pagination;
 pub mod pn;
 pub mod radio_group;
+pub mod search;
 pub mod select;
 pub mod spinner;
 pub mod textarea;
