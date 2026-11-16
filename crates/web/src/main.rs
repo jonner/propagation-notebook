@@ -8,21 +8,16 @@ use topcoat::{
     cookie::{CookieLayer, Key},
     metadata::Metadata,
     router::{
-        Compression, Router, RouterBuilderDiscoverExt, StatusCode, content::Json, href, not_found,
-        page, route,
+        Compression, Router, RouterBuilderDiscoverExt, StatusCode, content::Json, not_found, page,
+        route,
     },
     runtime::RuntimeLayer,
-    view::{View, attributes, view},
+    view::{View, view},
 };
 use tracing::debug;
+use tracing_subscriber::{EnvFilter, fmt::format::FmtSpan};
 
-use crate::{
-    components::{button::*, input::input},
-    config::AppConfig,
-    context::db,
-    error::Error,
-    tasks::background_tasks,
-};
+use crate::{config::AppConfig, context::db, error::Error, tasks::background_tasks};
 
 mod actions;
 mod admin;
@@ -36,6 +31,7 @@ mod context;
 mod crumb;
 mod error;
 mod flash;
+mod home;
 mod propagation;
 mod regions;
 mod shell;
@@ -134,47 +130,6 @@ async fn run() -> Result<(), Error> {
 }
 
 not_found!("/");
-
-#[page("/")]
-async fn home(cx: &Cx) -> topcoat::Result<impl View> {
-    Ok(view! {
-        <div class="flex flex-col gap-4">
-            <hgroup>
-                <h1>"Propagation Notebook"</h1>
-                <p>
-                    "A comprehensive reference guide for growing and collecting native plants for ecological restoration."
-                </p>
-            </hgroup>
-            <section>
-                <h2>"Growing Native Plants"</h2>
-                <p>"Find propagation information for a particular species:"</p>
-                <form
-                    method="get"
-                    action=(href!(taxa::search))
-                    class="flex my-6 w-full md:w-xl"
-                >
-                    input(
-                        attrs: attributes! {
-                            type="text"
-                            name="q"
-                            placeholder="Search for a taxon"
-                            class="me-2 grow"
-                        }
-                    )
-                    button(attrs: attributes! { type="submit" }, "Search")
-                </form>
-            </section>
-            <section>
-                <h2>"Regional Information"</h2>
-                <p>
-                    "Find out which plants are in your "
-                    <a href=(href!(regions::list))>"region"</a>
-                    " and when they are bearing fruit."
-                </p>
-            </section>
-        </div>
-    })
-}
 
 #[page("/about")]
 async fn about(cx: &Cx) -> topcoat::Result<impl View> {

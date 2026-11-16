@@ -26,7 +26,7 @@ use crate::{
 #[route(POST "/auth/logout")]
 pub(crate) async fn do_logout(cx: &Cx) -> topcoat::Result<SeeOther> {
     delete_session(cx).await?;
-    Ok(see_other(href!(home).resolve(cx)))
+    Ok(see_other(href!(home::index).resolve(cx)))
 }
 
 #[derive(Debug, Deserialize, Clone, Default)]
@@ -39,7 +39,7 @@ struct LoginParams {
 #[page("/auth/logout", with(Metadata::new().subtitle("Log out")))]
 pub(crate) async fn logout(cx: &Cx) -> topcoat::Result<impl View> {
     if current_user(cx).await.is_none() {
-        return Err(redirect(href!(home).resolve(cx)).into());
+        return Err(redirect(href!(home::index).resolve(cx)).into());
     };
 
     Ok(view! {
@@ -63,7 +63,8 @@ pub(crate) async fn do_login(cx: &Cx, Form(data): Form<LoginParams>) -> topcoat:
     {
         persist_session(cx, &mut user).await?;
         return Ok(see_other(
-            data.redirect.unwrap_or_else(|| href!(home).resolve(cx)),
+            data.redirect
+                .unwrap_or_else(|| href!(home::index).resolve(cx)),
         ));
     }
 
@@ -84,7 +85,7 @@ pub(crate) async fn login(cx: &Cx) -> topcoat::Result<impl View> {
     let user = current_user(cx).await;
     let params = query_params::<LoginFormParams>(cx)?;
     if user.is_some() {
-        return Err(see_other(href!(crate::home).resolve(cx)).into());
+        return Err(see_other(href!(crate::home::index).resolve(cx)).into());
     }
     let rejected = try_context::<LoginRejected>(cx);
     let data = rejected.map(|r| r.data.clone()).unwrap_or_default();

@@ -1,6 +1,6 @@
 use std::hash::{DefaultHasher, Hash, Hasher};
 
-use libpropagation::{auth::PermissionCode, taxonomy::Taxon};
+use libpropagation::auth::PermissionCode;
 use topcoat::{
     asset::{Asset, asset_config},
     context::Cx,
@@ -35,7 +35,7 @@ use crate::{
 // image.
 fn header_image_for_page(cx: &Cx) -> &Asset {
     let uri = uri(cx);
-    if href!(home).is_current(cx) || href!(auth::login).is_current(cx) {
+    if href!(home::index).is_current(cx) || href!(auth::login).is_current(cx) {
         return &HYDRASTIS_CANADENSIS;
     }
     let mut hasher = DefaultHasher::new();
@@ -159,16 +159,24 @@ async fn full_page_layout(cx: &Cx, child: Child<'_>) -> topcoat::Result<impl Vie
     let uri = uri(cx);
     let flash_msg = flash::pop_message(cx)?;
 
+    let height = if href!(home::index).is_current(cx) {
+        "h-[12rem] md:h-[16rem]"
+    } else {
+        "h-[8rem] md:h-[12rem]"
+    };
     Ok(view! {
         <header
-            class="dark flex flex-col items-start justify-between font-bold flex-wrap bg-(image:--background-image) bg-center bg-cover h-[8rem] md:h-[12rem]"
+            class=(class!(
+                "dark flex flex-col items-start justify-between font-bold flex-wrap bg-(image:--background-image) bg-center bg-cover",
+                height,
+            ))
         >
             <nav
                 class="text-foreground bg-background/70 w-full block shrink flex items-center gap-6 md:gap-4 px-3 md:px-6 py-2"
             >
                 <ul class="contents">
                     <li>
-                        <a class="block" href=(href!(home))>
+                        <a class="block" href=(href!(home::index))>
                             icon(
                                 data: mdi::FLOWER_POPPY,
                                 label: "Home",

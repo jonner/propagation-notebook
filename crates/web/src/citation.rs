@@ -265,7 +265,7 @@ pub async fn delete_citation(cx: &Cx) -> topcoat::Result<SeeOther> {
                 cx,
                 FlashMessage::Success(format!("Deleted cited work {id}")),
             )?;
-            Ok(see_other(href!(crate::home).resolve(cx)))
+            Ok(see_other(href!(crate::home::index).resolve(cx)))
         }
         Err(e) => {
             flash::push_message(
