@@ -43,9 +43,17 @@ pub async fn load_session(cx: &Cx) -> topcoat::Result<Option<Session>> {
             ?db_session.id,
             ?db_session.user_id, "Found session in the database"
         );
+
+        // don't accept an expired session
+        let now = jiff::Timestamp::now();
+        if db_session.expires_at < now {
+            debug!(?db_session.expires_at, "Session has expired. deleting...");
+            db_session.delete().exec(&mut db(cx)).await?;
+            return Ok(None);
+        }
+
         // refresh the session if it's near expiration
-        if (jiff::Timestamp::now().duration_until(db_session.expires_at))
-            < SignedDuration::from_hours(7 * 24)
+        if (now.duration_until(db_session.expires_at)) < SignedDuration::from_hours(7 * 24)
             && let Some(topcoat_session) = session::refresh(cx).await?
         {
             debug!("Refreshing session token that is nearing expiration");
