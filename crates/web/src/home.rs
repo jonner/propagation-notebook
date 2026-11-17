@@ -274,7 +274,7 @@ async fn seasonal_data(cx: &Cx, region: Region) -> topcoat::Result<impl View> {
 
     Ok(view! {
         <div class="flex flex-col gap-6">
-            <div class="grid gap-4 sm:grid-cols-3">
+            <div class="grid gap-4 grid-cols-3">
                 <a
                     class="block h-full no-underline text-foreground"
                     href=(href!(regions::fruiting_now, regions::region_id: region.id))
@@ -282,7 +282,7 @@ async fn seasonal_data(cx: &Cx, region: Region) -> topcoat::Result<impl View> {
                     card(
                         attrs: attributes! { class="h-full transition-colors hover:bg-foreground/5" },
                         card_content(
-                            attrs: attributes! { class="flex flex-col gap-1" },
+                            attrs: attributes! { class="flex flex-col gap-1 text-center" },
                             <div class="text-4xl font-bold text-header">
                                 (fruiting_now)
                             </div>
@@ -299,7 +299,7 @@ async fn seasonal_data(cx: &Cx, region: Region) -> topcoat::Result<impl View> {
                     card(
                         attrs: attributes! { class="h-full transition-colors hover:bg-foreground/5" },
                         card_content(
-                            attrs: attributes! { class="flex flex-col gap-1" },
+                            attrs: attributes! { class="flex flex-col gap-1 text-center" },
                             <div class="text-4xl font-bold text-header">
                                 (winding_down)
                             </div>
@@ -316,7 +316,7 @@ async fn seasonal_data(cx: &Cx, region: Region) -> topcoat::Result<impl View> {
                     card(
                         attrs: attributes! { class="h-full transition-colors hover:bg-foreground/5" },
                         card_content(
-                            attrs: attributes! { class="flex flex-col gap-1" },
+                            attrs: attributes! { class="flex flex-col gap-1 text-center" },
                             <div class="text-4xl font-bold text-header">
                                 (ramping_up)
                             </div>
