@@ -297,16 +297,62 @@ impl CitationParams {
         if self.author.trim().is_empty() {
             errors.author = Some("Author cannot be empty".to_string())
         }
-        if let Some(url_str) = self.url.as_ref()
-            && let Err(e) = Url::parse(url_str)
-        {
-            errors.url = Some(e.to_string())
+        if let Some(url_str) = self.url.as_ref() {
+            match Url::parse(url_str) {
+                Err(e) => errors.url = Some(e.to_string()),
+                Ok(url) => match url.scheme() {
+                    "http" | "https" => (),
+                    s => errors.url = Some(format!("Invalid URL scheme '{s}'")),
+                },
+            }
         }
         if errors.is_empty() {
             None
         } else {
             Some(errors)
         }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_citation_params_validate() {
+        // invalid url scheme
+        let errors = CitationParams {
+            title: "title".to_string(),
+            author: "author".to_string(),
+            url: Some("javascript:foo".to_string()),
+            ..Default::default()
+        }
+        .validate()
+        .expect("Expected validation to fail");
+        assert!(errors.url.is_some());
+
+        // valid url scheme
+        assert!(
+            CitationParams {
+                title: "title".to_string(),
+                author: "author".to_string(),
+                url: Some("https://foo".to_string()),
+                ..Default::default()
+            }
+            .validate()
+            .is_none()
+        );
+
+        // no url
+        assert!(
+            CitationParams {
+                title: "title".to_string(),
+                author: "author".to_string(),
+                ..Default::default()
+            }
+            .validate()
+            .is_none()
+        );
     }
 }
 
