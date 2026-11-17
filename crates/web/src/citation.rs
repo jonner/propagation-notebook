@@ -153,7 +153,9 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                                 item_term("Url")
                                 item_value(
                                     if let Some(url) = citation.url.as_ref() {
-                                        <a href=(&url)>(&url)</a>
+                                        <a target="_blank" rel="noopener noreferrer" href=(&url)>
+                                            (&url)
+                                        </a>
                                     } else {
                                         <span class="text-muted-foreground">"Not specified"</span>
                                     }
@@ -747,7 +749,11 @@ pub async fn citation_card(cx: &Cx, citation: &Citation) -> topcoat::Result<impl
         .as_ref()
         .map(|doi| format!("https://doi.org/{doi}")));
     Ok(view! {
-        <div><a href=(primary_link)>(&citation.title)</a></div>
+        <div>
+            <a target="_blank" rel="noopener noreferrer" href=(primary_link)>
+                (&citation.title)
+            </a>
+        </div>
         <div>
             (&citation.author)
             if let Some(container) = citation.container_title.as_ref() {

@@ -1045,7 +1045,15 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                             }
                         </li>
                         for resource in taxon.resources.get() {
-                            <li><a href=(&resource.url)>(&resource.name)</a></li>
+                            <li>
+                                <a
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    href=(&resource.url)
+                                >
+                                    (&resource.name)
+                                </a>
+                            </li>
                         }
                     </ul>
                 </div>
