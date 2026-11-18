@@ -60,9 +60,9 @@ impl User {
     /// does not do any verification of the existing password, it is merely
     /// a data update. The caller is tasked with verifying that the user is
     /// allowed to change the password, etc.
-    pub async fn change_password(
+    pub async fn change_password<E: toasty::Executor>(
         &mut self,
-        db: &mut Db,
+        db: &mut E,
         new_password: &str,
     ) -> Result<(), ChangePasswordError> {
         let entropy = zxcvbn::zxcvbn(new_password, &[&self.username]);
@@ -407,4 +407,61 @@ pub fn verify_password(pw: &str, expected_pwhash: &str) -> Result<(), AuthError>
     hasher
         .verify_password(pw.as_bytes(), &expected_hash)
         .map_err(|e| e.into())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const OLD_PASSWORD: &str = "correct horse battery staple";
+    const NEW_PASSWORD: &str = "Tr0ub4dor&3 parakeet";
+
+    async fn test_user() -> (Db, User) {
+        let mut db = crate::connect("sqlite::memory:", true)
+            .await
+            .expect("test database should connect");
+        let user = User::create()
+            .username("alice".to_string())
+            .pwhash(hash_password(OLD_PASSWORD).expect("password should hash"))
+            .exec(&mut db)
+            .await
+            .expect("user should be created");
+        (db, user)
+    }
+
+    #[tokio::test]
+    async fn weak_passwords_are_rejected_without_touching_the_hash() {
+        let (mut db, mut user) = test_user().await;
+        let original_hash = user.pwhash.clone();
+
+        let error = user
+            .change_password(&mut db, "password")
+            .await
+            .expect_err("a weak password should be rejected");
+        assert!(matches!(error, ChangePasswordError::InvalidPassword(..)));
+
+        let stored = User::get_by_id(&mut db, user.id)
+            .await
+            .expect("user should still exist");
+        assert_eq!(stored.pwhash, original_hash);
+        assert!(stored.verify_password(OLD_PASSWORD).is_ok());
+    }
+
+    #[tokio::test]
+    async fn password_change_rolls_back_with_the_transaction() {
+        let (mut db, mut user) = test_user().await;
+
+        let mut txn = db.transaction().await.expect("transaction should begin");
+        user.change_password(&mut txn, NEW_PASSWORD)
+            .await
+            .expect("a strong password should be accepted");
+        // Drop without committing: the update must not be visible.
+        drop(txn);
+
+        let stored = User::get_by_id(&mut db, user.id)
+            .await
+            .expect("user should still exist");
+        assert!(stored.verify_password(OLD_PASSWORD).is_ok());
+        assert!(stored.verify_password(NEW_PASSWORD).is_err());
+    }
 }

@@ -39,11 +39,17 @@ pub async fn db(migrate: bool) -> Result<toasty::Db, Error> {
         }
         Err(e) => Err(Error::Runtime(error::Runtime::InvalidEnvVar(e.to_string()))),
     }?;
+    connect(&db_uri, migrate).await
+}
+
+/// Connect to the database at `db_uri`, optionally applying any pending
+/// migrations.
+pub async fn connect(db_uri: &str, migrate: bool) -> Result<toasty::Db, Error> {
     trace!(?db_uri);
     let db = toasty::Db::builder()
         .pool_wait_timeout(Some(Duration::from_secs(30)))
         .models(models())
-        .connect(&db_uri)
+        .connect(db_uri)
         .await?;
     if migrate {
         let report = MIGRATIONS.apply(&db).await?;

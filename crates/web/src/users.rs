@@ -1,4 +1,4 @@
-use libpropagation::auth::{UserEmail, UserProfile};
+use libpropagation::auth::{Session, UserEmail, UserProfile};
 use serde::Deserialize;
 use topcoat::{
     context::{Cx, try_context},
@@ -7,7 +7,7 @@ use topcoat::{
     router::{
         Body, Method, StatusCode,
         content::Form,
-        error::{RouterErrorExt, SeeOther, rewrite, see_other},
+        error::{RouterErrorExt, SeeOther, internal_server_error, rewrite, see_other},
         href, page, route,
     },
     runtime::{Event, procedure, signal},
@@ -292,6 +292,10 @@ struct ChangePasswordParams {
     new_password_confirm: String,
 }
 
+#[derive(Debug, thiserror::Error)]
+#[error("Failed to rotate the session")]
+struct SessionRotationError;
+
 #[route(POST "/user/password")]
 pub(crate) async fn do_change_password(
     cx: &Cx,
@@ -305,11 +309,10 @@ pub(crate) async fn do_change_password(
     if params.new_password != params.new_password_confirm {
         errors.new_password_confirm = Some("Passwords do not match".to_string());
     }
+    let mut db = db(cx);
+    let mut txn = db.transaction().await?;
     if !errors.has_error() {
-        match user
-            .change_password(&mut db(cx), &params.new_password)
-            .await
-        {
+        match user.change_password(&mut txn, &params.new_password).await {
             Ok(()) => (),
             Err(e) => match e {
                 libpropagation::auth::ChangePasswordError::InvalidPassword(msg, suggestions) => {
@@ -325,6 +328,21 @@ pub(crate) async fn do_change_password(
             .with(errors)
             .into());
     }
+    if let Some(rotation) = topcoat::session::rotate(cx).await? {
+        // remove all existing sessions
+        Session::delete_by_user_id(&mut txn, user.id).await?;
+        let timestamp: jiff::Timestamp = rotation.session.expires_at.try_into()?;
+        // remember the new hash
+        Session::create()
+            .token_hash(Vec::from(&*rotation.session.token_hash))
+            .expires_at(timestamp)
+            .user_id(user.id)
+            .exec(&mut txn)
+            .await?;
+    } else {
+        return Err(internal_server_error(SessionRotationError).into());
+    }
+    txn.commit().await?;
 
     Ok(see_other(href!(account).resolve(cx)))
 }
@@ -430,4 +448,206 @@ pub(crate) async fn change_password(cx: &Cx) -> topcoat::Result<impl View> {
             )
         )
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use libpropagation::auth::{Session, User, hash_password};
+    use topcoat::{
+        context::BaseUrl,
+        cookie::{CookieLayer, Key},
+        router::{
+            Router, RouterBuilderDiscoverExt, header, request::Request as HttpRequest,
+            response::Response as HttpResponse,
+        },
+        runtime::RuntimeLayer,
+        session::Token,
+    };
+
+    use super::*;
+
+    const OLD_PASSWORD: &str = "correct horse battery staple";
+    const NEW_PASSWORD: &str = "Tr0ub4dor&3 parakeet";
+
+    /// A web application backed by an in-memory SQLite database.
+    ///
+    /// The tests deliberately stick to routes that never render a page (login,
+    /// password change, profile update): those answer with redirects or 401s,
+    /// so the harness does not need an asset bundle for the shell layout.
+    struct TestApp {
+        router: Router,
+        db: toasty::Db,
+    }
+
+    impl TestApp {
+        async fn start() -> Self {
+            let db = libpropagation::connect("sqlite::memory:", true)
+                .await
+                .expect("test database should connect");
+            let router = Router::builder()
+                .discover()
+                .with(db.clone())
+                .with(Key::generate())
+                .with(BaseUrl::new("http://localhost"))
+                .layer(RuntimeLayer::new())
+                .layer(CookieLayer::new())
+                .build();
+            Self { router, db }
+        }
+
+        async fn create_user(&self, username: &str, password: &str) -> User {
+            User::create()
+                .username(username.to_string())
+                .pwhash(hash_password(password).expect("password should hash"))
+                .exec(&mut self.db.clone())
+                .await
+                .expect("user should be created")
+        }
+
+        async fn post_form(
+            &self,
+            uri: &str,
+            cookie: Option<&str>,
+            form: &[(&str, &str)],
+        ) -> HttpResponse {
+            let body = serde_urlencoded::to_string(form).expect("form should encode");
+            let mut request = HttpRequest::builder()
+                .method(Method::POST)
+                .uri(uri)
+                .header(header::CONTENT_TYPE, "application/x-www-form-urlencoded");
+            if let Some(cookie) = cookie {
+                request = request.header(header::COOKIE, cookie);
+            }
+            self.router
+                .handle(request.body(Body::from(body)).expect("request should build"))
+                .await
+        }
+
+        async fn login(&self, username: &str, password: &str) -> String {
+            let response = self
+                .post_form(
+                    "/auth/login",
+                    None,
+                    &[("username", username), ("password", password)],
+                )
+                .await;
+            assert_eq!(
+                response.status(),
+                StatusCode::SEE_OTHER,
+                "login as {username} should succeed"
+            );
+            session_cookie(&response).expect("login should issue a session cookie")
+        }
+
+        /// Whether `cookie` still authenticates, without rendering a page.
+        async fn auth_status(&self, cookie: &str) -> StatusCode {
+            self.post_form("/user/profile", Some(cookie), &[])
+                .await
+                .status()
+        }
+
+        async fn sessions(&self) -> Vec<Session> {
+            Session::all()
+                .exec(&mut self.db.clone())
+                .await
+                .expect("sessions should load")
+        }
+
+        async fn password_works(&self, username: &str, password: &str) -> bool {
+            let user = User::get_by_username(&mut self.db.clone(), username)
+                .await
+                .expect("user should exist");
+            user.verify_password(password).is_ok()
+        }
+    }
+
+    /// Returns the `name=value` part of the session cookie set by `response`.
+    fn session_cookie(response: &HttpResponse) -> Option<String> {
+        response
+            .headers()
+            .get_all(header::SET_COOKIE)
+            .iter()
+            .filter_map(|value| value.to_str().ok())
+            .find_map(|value| {
+                let pair = value.split(';').next()?.trim();
+                let (name, token) = pair.split_once('=')?;
+                (name.ends_with("session") && !token.is_empty()).then(|| pair.to_string())
+            })
+    }
+
+    fn cookie_token(cookie: &str) -> Token {
+        let parsed = topcoat::cookie::Cookie::parse_encoded(cookie.to_string())
+            .expect("session cookie should parse");
+        Token::decode(parsed.value_trimmed()).unwrap_or_else(|error| {
+            panic!("session cookie {cookie:?} should hold a token: {error}")
+        })
+    }
+
+    async fn change_password(
+        app: &TestApp,
+        cookie: &str,
+        current: &str,
+        new: &str,
+    ) -> HttpResponse {
+        app.post_form(
+            "/user/password",
+            Some(cookie),
+            &[
+                ("current_password", current),
+                ("new_password", new),
+                ("new_password_confirm", new),
+            ],
+        )
+        .await
+    }
+
+    #[tokio::test]
+    async fn changing_password_revokes_other_sessions_and_rotates_the_current_one() {
+        let app = TestApp::start().await;
+        let user = app.create_user("alice", OLD_PASSWORD).await;
+        let current = app.login("alice", OLD_PASSWORD).await;
+        let other_device = app.login("alice", OLD_PASSWORD).await;
+        assert_ne!(current, other_device);
+        assert_eq!(app.sessions().await.len(), 2);
+
+        let response = change_password(&app, &current, OLD_PASSWORD, NEW_PASSWORD).await;
+        assert_eq!(response.status(), StatusCode::SEE_OTHER);
+
+        // the current device keeps working under a fresh token
+        let rotated =
+            session_cookie(&response).expect("password change should rotate the session cookie");
+        assert_ne!(rotated, current);
+
+        // every other session is gone, and the rotated one is stored
+        let sessions = app.sessions().await;
+        assert_eq!(sessions.len(), 1, "all other sessions should be revoked");
+        assert_eq!(sessions[0].user_id, user.id);
+        assert_eq!(sessions[0].token_hash, Vec::from(*cookie_token(&rotated).hash()));
+
+        // the old tokens no longer authenticate, the rotated one does
+        assert_eq!(app.auth_status(&current).await, StatusCode::UNAUTHORIZED);
+        assert_eq!(
+            app.auth_status(&other_device).await,
+            StatusCode::UNAUTHORIZED
+        );
+        assert_eq!(app.auth_status(&rotated).await, StatusCode::SEE_OTHER);
+
+        // the stored password changed: the old one no longer verifies
+        assert!(app.password_works("alice", NEW_PASSWORD).await);
+        assert!(!app.password_works("alice", OLD_PASSWORD).await);
+    }
+
+    #[tokio::test]
+    async fn password_change_requires_authentication() {
+        let app = TestApp::start().await;
+        app.create_user("carol", OLD_PASSWORD).await;
+
+        let response = change_password(&app, "", OLD_PASSWORD, NEW_PASSWORD).await;
+        assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
+        assert!(app.sessions().await.is_empty());
+        assert!(
+            app.password_works("carol", OLD_PASSWORD).await,
+            "the password should be unchanged"
+        );
+    }
 }
