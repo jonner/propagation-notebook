@@ -576,7 +576,7 @@ pub async fn add_citation(
     cx: &Cx,
     Form(params): Form<AddCitationParams>,
 ) -> topcoat::Result<SeeOther> {
-    let _ = require_user_with_permission(cx, PermissionCode::TaxonCleaningEdit).await?;
+    let _ = require_user_with_permission(cx, PermissionCode::TaxonNoteEdit).await?;
 
     let taxon_id = *taxa::taxon_id(cx)?;
     let note_id = *note_id(cx)?;
@@ -592,7 +592,7 @@ pub async fn add_citation(
 
 #[route(POST "/taxa/{taxon_id}/note/{note_id}/citations/{citation_id}/delete")]
 pub async fn remove_citation(cx: &Cx) -> topcoat::Result<SeeOther> {
-    let _ = require_user_with_permission(cx, PermissionCode::TaxonCleaningEdit).await?;
+    let _ = require_user_with_permission(cx, PermissionCode::TaxonNoteEdit).await?;
     let taxon_id = *taxa::taxon_id(cx)?;
     let note_id = *note_id(cx)?;
     let citation_id = *citation_id(cx)?;

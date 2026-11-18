@@ -135,7 +135,7 @@ pub async fn do_create(
     cx: &Cx,
     Form(params): Form<PropagationProcedureParams>,
 ) -> topcoat::Result<SeeOther> {
-    let _user = require_user_with_permission(cx, PermissionCode::PropagationEdit).await?;
+    let _user = require_user_with_permission(cx, PermissionCode::PropagationCreate).await?;
 
     let proc = PropagationProcedure::create()
         .name(params.name)
