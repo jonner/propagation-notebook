@@ -99,7 +99,7 @@ pub async fn edit(cx: &Cx) -> topcoat::Result<impl View> {
                     attrs: attributes! { class="flex flex-col gap-6" },
                     <div>
                         item_term("User ID")
-                        item_value((user.id.to_string()))
+                        item_value((user_to_edit.id.to_string()))
                     </div>
                     <div>
                         item_term("Username")
@@ -114,7 +114,7 @@ pub async fn edit(cx: &Cx) -> topcoat::Result<impl View> {
                         attrs: attributes! {
                             class="flex flex-col gap-4"
                             method="POST"
-                            action=(href!(update_profile, user_id: user.id))
+                            action=(href!(update_profile, user_id: user_to_edit.id))
                         },
                         profile: user_to_edit.profile.get().as_ref()
                     )
@@ -127,7 +127,7 @@ pub async fn edit(cx: &Cx) -> topcoat::Result<impl View> {
                         user_roles_form(
                             attrs: attributes! {
                                 method="POST"
-                                action=(href!(update_roles, user_id: user.id))
+                                action=(href!(update_roles, user_id: user_to_edit.id))
                             },
                             user: &user_to_edit
                         )
