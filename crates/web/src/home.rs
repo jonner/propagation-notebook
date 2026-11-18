@@ -121,7 +121,7 @@ pub async fn index(cx: &Cx) -> topcoat::Result<impl View> {
                             </form>
                         }
                         <a
-                            class="ml-auto text-sm inline-flex items-baseline gap-2"
+                            class="ml-auto text-sm inline-flex items-center"
                             href=(href!(regions::list))
                         >
                             "Browse all regions"
@@ -146,7 +146,13 @@ pub async fn index(cx: &Cx) -> topcoat::Result<impl View> {
                                         card_content(
                                             <p>
                                                 "Seasonal data isn't available right now. "
-                                                <a href=(href!(regions::list))>"Browse all regions →"</a>
+                                                <a
+                                                    href=(href!(regions::list))
+                                                    class="inline-flex items-center"
+                                                >
+                                                    "Browse all regions"
+                                                    icon(data: mdi::CHEVRON_DOUBLE_RIGHT)
+                                                </a>
                                             </p>
                                         )
                                     )
@@ -348,7 +354,7 @@ async fn seasonal_data(cx: &Cx, region: Region) -> topcoat::Result<impl View> {
                     }
                 </div>
                 <a
-                    class="inline-flex items-baseline gap-2"
+                    class="inline-flex items-center"
                     href=(href!(regions::fruiting_now, regions::region_id: region.id))
                 >
                     (format!(
