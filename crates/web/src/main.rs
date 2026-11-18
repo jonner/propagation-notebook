@@ -69,7 +69,10 @@ trait Subtitle {
 
 #[tokio::main]
 async fn main() {
-    tracing_subscriber::fmt::init();
+    tracing_subscriber::fmt()
+        .with_env_filter(EnvFilter::from_default_env())
+        .with_span_events(FmtSpan::CLOSE)
+        .init();
     let options = Options::parse();
 
     let res = match options.command {

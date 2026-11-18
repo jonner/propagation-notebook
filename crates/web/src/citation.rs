@@ -742,6 +742,7 @@ pub async fn admin(cx: &Cx) -> topcoat::Result<impl View> {
     })
 }
 
+#[tracing::instrument(skip_all)]
 #[component]
 pub async fn citation_card(cx: &Cx, citation: &Citation) -> topcoat::Result<impl View> {
     let primary_link = citation.url.clone().or(citation
@@ -781,6 +782,7 @@ pub async fn citation_card(cx: &Cx, citation: &Citation) -> topcoat::Result<impl
     })
 }
 
+#[tracing::instrument(skip_all)]
 #[component]
 pub async fn citation_reference(cx: &Cx, citation: &Citation) -> topcoat::Result<impl View> {
     Ok(view! {

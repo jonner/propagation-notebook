@@ -608,6 +608,7 @@ pub enum ChildRegionError {
 
 // Look up the regional statuses for all descendant taxa of this taxon and
 // return regional status information that encapsulates all  descendant taxa
+#[tracing::instrument(skip_all)]
 #[component]
 pub async fn descendant_region_statuses(cx: &Cx, parent_id: u64) -> topcoat::Result<impl View> {
     let mut db = db(cx);
@@ -679,6 +680,7 @@ pub async fn descendant_region_statuses(cx: &Cx, parent_id: u64) -> topcoat::Res
     Ok(view! { taxon_regional_table(regions: &regions) })
 }
 
+#[tracing::instrument(skip_all)]
 #[memoize(as_ref)]
 async fn detailed_taxon(cx: &Cx) -> topcoat::Result<Taxon> {
     let id = *taxon_id(cx)?;
@@ -769,6 +771,7 @@ async fn menu_actions(cx: &Cx) -> topcoat::Result<impl View> {
     Ok(view! { action_menu(actions: &actions) })
 }
 
+#[tracing::instrument(skip_all)]
 #[page(
     GET "/taxa/{taxon_id}",
     with(Metadata::from_fn(
