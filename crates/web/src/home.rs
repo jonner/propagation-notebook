@@ -189,21 +189,22 @@ pub async fn index(cx: &Cx) -> topcoat::Result<impl View> {
                     )
                 }
             </section>
+
             // explore_section()
-            // <section class="flex flex-col gap-2 pt-6 text-sm text-muted-foreground">
-            //     <h2>"About the notebook"</h2>
-            //     <p>
-            //         "The goal of this site is to become a comprehensive reference for \
-            //         collecting seeds and propagating native plants for ecological restoration."
-            //     </p>
-            //     <p>
-            //         "Taxonomy from "
-            //         <a href="https://www.itis.gov">"ITIS"</a>
-            //         " · Phenology from "
-            //         <a href="https://inaturalist.org">"iNaturalist"</a>
-            //     </p>
-            //     <p><a href=(href!(crate::about))>"Read the mission →"</a></p>
-            // </section>
+
+            <section class="flex flex-col gap-2 pt-6 text-sm text-muted-foreground">
+                <h2>"About this site"</h2>
+                <p>
+                    "The goal of this site is to become a comprehensive reference for \
+                    collecting seeds and propagating native plants for ecological restoration."
+                </p>
+                <p>
+                    <a href=(href!(crate::about)) class="inline-flex items-center">
+                        "Read more"
+                        icon(data: mdi::CHEVRON_DOUBLE_RIGHT)
+                    </a>
+                </p>
+            </section>
         </div>
     })
 }
