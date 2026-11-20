@@ -11,7 +11,7 @@ use topcoat::{
         error::{RouterErrorExt, SeeOther, see_other},
         href, page, path_param, route,
     },
-    runtime::{Event, signal},
+    runtime::{Event, Signal, shard, signal},
     view::{Attributes, View, attributes, component, view},
 };
 use tracing::trace;
@@ -23,9 +23,11 @@ use crate::{
     components::{
         action_menu::*,
         breadcrumb::*,
+        button::{ButtonVariant, button},
         card::*,
         citations::citation_list,
         cited_object::*,
+        dialog::*,
         field::*,
         input::*,
         pn::{item_term, item_value},
@@ -372,6 +374,97 @@ pub async fn add_citation(
     Ok(see_other(
         href!(modify, taxa::taxon_id: taxon_id, cleaning_id: cleaning_id).resolve(cx),
     ))
+}
+
+#[route(POST "/taxa/{taxon_id}/cleaning/{cleaning_id}/delete")]
+pub async fn delete(cx: &Cx) -> topcoat::Result<SeeOther> {
+    let _ = require_user_with_permission(cx, PermissionCode::TaxonCleaningDelete).await?;
+    let mut db = db(cx);
+    let taxon_id = *taxa::taxon_id(cx)?;
+    let cleaning_id = *cleaning_id(cx)?;
+    _ = CleaningProcedure::filter(
+        CleaningProcedure::fields()
+            .taxon_id()
+            .eq(taxon_id)
+            .and(CleaningProcedure::fields().id().eq(cleaning_id)),
+    )
+    .one()
+    .exec(&mut db)
+    .await
+    .ok_or_not_found()?;
+    CleaningProcedure::delete_by_id(&mut db, cleaning_id).await?;
+    Ok(see_other(
+        href!(taxa::details, taxa::taxon_id: taxon_id).resolve(cx),
+    ))
+}
+
+/// Content for the dialog confirming deletion of a cleaning procedure.
+///
+/// Renders nothing while `cleaning_id` is `None` (dialog closed). When set, the
+/// shard re-renders with details of the procedure and a form that POSTs to
+/// [`delete`]. The shard has its own endpoint, so it checks permissions itself.
+#[shard]
+pub async fn delete_confirmation(
+    cx: &Cx,
+    cleaning_id: Option<u64>,
+    delete_signal: Signal<Option<u64>>,
+) -> topcoat::Result<impl View> {
+    let procedure = match cleaning_id {
+        Some(id) => {
+            require_user_with_permission(cx, PermissionCode::TaxonCleaningDelete).await?;
+            Some(
+                CleaningProcedure::filter_by_id(id)
+                    .include(CleaningProcedure::fields().taxon())
+                    .one()
+                    .exec(&mut db(cx))
+                    .await
+                    .ok_or_not_found()?,
+            )
+        }
+        None => None,
+    };
+
+    Ok(view! {
+        if let Some(procedure) = procedure {
+            let taxon = procedure.taxon.get();
+            <section class="flex flex-col gap-3">
+                <div>
+                    item_term("Taxon")
+                    item_value(
+                        attrs: attributes! { class="latin" },
+                        (&taxon.complete_name)
+                    )
+                </div>
+                <div>
+                    item_term("Cleaning Procedure")
+                    item_value((format!("{}: {}", procedure.id, procedure.name)))
+                </div>
+            </section>
+            dialog_footer(
+                button(
+                    variant: ButtonVariant::Secondary,
+                    attrs: attributes! {
+                        @click=$(|e: Event| {
+                            e.prevent_default();
+                            delete_signal.set(None)
+                        })
+                    },
+                    "Cancel"
+                )
+                <form
+                    method="POST"
+                    action=(href!(
+                        delete,
+                        taxa::taxon_id: procedure.taxon_id,
+                        cleaning_id: procedure.id,
+                    ))
+                    @submit=$(|_e: Event| delete_signal.set(None))
+                >
+                    button(variant: ButtonVariant::Destructive, "Delete")
+                </form>
+            )
+        }
+    })
 }
 
 #[route(POST "/taxa/{taxon_id}/cleaning/{cleaning_id}/citations/{citation_id}/delete")]

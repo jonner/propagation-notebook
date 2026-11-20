@@ -29,9 +29,11 @@ use crate::{
     citation::citation_reference,
     components::{
         action_menu::*,
+        alert_dialog::alert_dialog,
         badge::{BadgeVariant, badge},
         breadcrumb::*,
-        button::button,
+        button::*,
+        dialog::*,
         harvest::taxon_regional_table,
         input::input,
         pn::{origin_badge, pagination_control, taxon_icon},
@@ -798,6 +800,9 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
     });
 
     let user = current_user(cx).await;
+    let delete_cleaning = signal(cx, || None::<u64>);
+    let delete_propagation = signal(cx, || None::<(u64, u64)>);
+    let delete_note = signal(cx, || None::<u64>);
 
     Ok(view! {
         let ancestors = taxon
@@ -896,14 +901,30 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                                         citation_reference(citation: citation.citation.get())
                                     }
                                     if let Some(user) = user {
-                                        if user.has_permission(PermissionCode::TaxonCleaningEdit) {
-                                            <a
-                                                class="p-2 inline-flex invisible group-hover/item:visible"
-                                                href=(href!(cleaning::modify, taxon_id: procedure.taxon_id, cleaning::cleaning_id: procedure.id))
-                                            >
-                                                icon(data: mdi::EDIT)
-                                            </a>
-                                        } // FIXME: add delete button/dialog
+                                        <span
+                                            class="invisible group-hover/item:visible ps-2 inline-flex gap-2"
+                                        >
+                                            if user.has_permission(PermissionCode::TaxonCleaningEdit) {
+                                                <a
+                                                    class=(button_variants(
+                                                        ButtonVariant::Outline,
+                                                        ButtonSize::Sm,
+                                                    ))
+                                                    href=(href!(cleaning::modify, taxon_id: procedure.taxon_id, cleaning::cleaning_id: procedure.id))
+                                                >
+                                                    icon(data: mdi::EDIT)
+                                                </a>
+                                            }
+                                            if user.has_permission(PermissionCode::TaxonCleaningDelete) {
+                                                let id = procedure.id;
+                                                button(
+                                                    size: ButtonSize::Sm,
+                                                    variant: ButtonVariant::Destructive,
+                                                    attrs: attributes! { @click=$(|_e: Event| delete_cleaning.set(Some(id))) },
+                                                    icon(data: mdi::MINUS_THICK)
+                                                )
+                                            }
+                                        </span>
                                     }
                                 </li>
                             }
@@ -941,14 +962,32 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                                         citation_reference(citation: citation.citation.get())
                                     }
                                     if let Some(user) = user {
-                                        if user.has_permission(PermissionCode::TaxonPropagationEdit) {
-                                            <a
-                                                class="p-2 inline-flex invisible group-hover/item:visible"
-                                                href=(href!(propagation::modify, taxon_id: tp.taxon_id, propagation::propagation_id: tp.propagation_id))
-                                            >
-                                                icon(data: mdi::EDIT)
-                                            </a>
-                                        } // FIXME: add delete button/dialog
+                                        <span
+                                            class="invisible group-hover/item:visible ps-2 inline-flex gap-2"
+                                        >
+                                            if user.has_permission(PermissionCode::TaxonPropagationEdit) {
+                                                <a
+                                                    class=(button_variants(
+                                                        ButtonVariant::Outline,
+                                                        ButtonSize::Sm,
+                                                    ))
+                                                    href=(href!(propagation::modify, taxon_id: tp.taxon_id, propagation::propagation_id: tp.propagation_id))
+                                                >
+                                                    icon(data: mdi::EDIT)
+                                                </a>
+                                            }
+                                            if user.has_permission(
+                                                PermissionCode::TaxonPropagationDelete,
+                                            ) {
+                                                let id = (tp.taxon_id, tp.propagation_id);
+                                                button(
+                                                    size: ButtonSize::Sm,
+                                                    variant: ButtonVariant::Destructive,
+                                                    attrs: attributes! { @click=$(|_e: Event| delete_propagation.set(Some(id))) },
+                                                    icon(data: mdi::MINUS_THICK)
+                                                )
+                                            }
+                                        </span>
                                     }
                                 </li>
                             }
@@ -995,14 +1034,30 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                                                 citation_reference(citation: citation.citation.get())
                                             }
                                             if let Some(user) = user {
-                                                if user.has_permission(PermissionCode::TaxonNoteEdit) {
-                                                    <a
-                                                        class="p-2 inline-flex invisible group-hover/item:visible"
-                                                        href=(href!(note::edit, taxon_id: taxon.id, note::note_id: note.id))
-                                                    >
-                                                        icon(data: mdi::EDIT)
-                                                    </a>
-                                                } // FIXME: add delete button/dialog
+                                                <span
+                                                    class="invisible group-hover/item:visible ps-2 inline-flex gap-2"
+                                                >
+                                                    if user.has_permission(PermissionCode::TaxonNoteEdit) {
+                                                        <a
+                                                            class=(button_variants(
+                                                                ButtonVariant::Outline,
+                                                                ButtonSize::Sm,
+                                                            ))
+                                                            href=(href!(note::edit, taxon_id: taxon.id, note::note_id: note.id))
+                                                        >
+                                                            icon(data: mdi::EDIT)
+                                                        </a>
+                                                    }
+                                                    if user.has_permission(PermissionCode::TaxonNoteDelete) {
+                                                        let id = note.id;
+                                                        button(
+                                                            size: ButtonSize::Sm,
+                                                            variant: ButtonVariant::Destructive,
+                                                            attrs: attributes! { @click=$(|_e: Event| delete_note.set(Some(id))) },
+                                                            icon(data: mdi::MINUS_THICK)
+                                                        )
+                                                    }
+                                                </span>
                                             }
                                         </li>
                                     }
@@ -1106,7 +1161,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
             </section>
         </div>
 
-        if let Some(user) = current_user(cx).await {
+        if let Some(user) = user {
             if user.has_permission(PermissionCode::TaxonPropagationCreate) {
                 propagation::add_propagation_procedure_dialog(
                     form_attrs: attributes! {
@@ -1114,6 +1169,41 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                         action=(href!(propagation::add_propagation_procedure, taxon_id: taxon.id))
                     },
                     open_sig: show_add_propagation
+                )
+            }
+            if user.has_permission(PermissionCode::TaxonCleaningDelete) {
+                alert_dialog(
+                    open: $(delete_cleaning.get().is_some()),
+                    dialog_content(
+                        dialog_header(
+                            dialog_title("Delete this cleaning procedure?")
+                            dialog_description("This action cannot be undone")
+                        )
+                        cleaning::delete_confirmation(
+                            cleaning_id: $(delete_cleaning.get()),
+                            delete_signal: delete_cleaning.clone()
+                        )
+                    )
+                )
+            }
+            if user.has_permission(PermissionCode::TaxonPropagationDelete) {
+                propagation::delete_confirmation_dialog(
+                    delete_signal: delete_propagation.clone()
+                )
+            }
+            if user.has_permission(PermissionCode::TaxonNoteDelete) {
+                alert_dialog(
+                    open: $(delete_note.get().is_some()),
+                    dialog_content(
+                        dialog_header(
+                            dialog_title("Delete this taxon note?")
+                            dialog_description("This action cannot be undone")
+                        )
+                        note::delete_confirmation(
+                            note_id: $(delete_note.get()),
+                            delete_signal: delete_note.clone()
+                        )
+                    )
                 )
             }
         }

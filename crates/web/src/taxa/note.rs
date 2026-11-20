@@ -15,7 +15,7 @@ use topcoat::{
         error::{RouterErrorExt, SeeOther, rewrite, see_other},
         href, page, path_param, route,
     },
-    runtime::{Event, signal},
+    runtime::{Event, Signal, shard, signal},
     view::{Attributes, Child, View, attributes, component, element_id, view},
 };
 use tracing::trace;
@@ -564,6 +564,75 @@ pub async fn delete(cx: &Cx) -> topcoat::Result<SeeOther> {
     Ok(see_other(
         href!(taxa::details, taxa::taxon_id: taxon_id).resolve(cx),
     ))
+}
+
+/// Content for the dialog confirming deletion of a taxon note.
+///
+/// Renders nothing while `note_id` is `None` (dialog closed). When set, the
+/// shard re-renders with details of the note and a form that POSTs to
+/// [`delete`]. The shard has its own endpoint, so it checks permissions itself.
+#[shard]
+pub async fn delete_confirmation(
+    cx: &Cx,
+    note_id: Option<u64>,
+    delete_signal: Signal<Option<u64>>,
+) -> topcoat::Result<impl View> {
+    let note = match note_id {
+        Some(id) => {
+            require_user_with_permission(cx, PermissionCode::TaxonNoteDelete).await?;
+            Some(
+                TaxonNote::filter_by_id(id)
+                    .include(TaxonNote::fields().taxon())
+                    .one()
+                    .exec(&mut db(cx))
+                    .await
+                    .ok_or_not_found()?,
+            )
+        }
+        None => None,
+    };
+
+    Ok(view! {
+        if let Some(note) = note {
+            let taxon = note.taxon.get();
+            <section class="flex flex-col gap-3">
+                <div>
+                    item_term("Taxon")
+                    item_value(
+                        attrs: attributes! { class="latin" },
+                        (&taxon.complete_name)
+                    )
+                </div>
+                <div>
+                    item_term("Note")
+                    item_value((format!("{}: {}", note.id, note.title)))
+                </div>
+                <div>
+                    item_term("Category")
+                    item_value((note.category.to_string()))
+                </div>
+            </section>
+            dialog_footer(
+                button(
+                    variant: ButtonVariant::Secondary,
+                    attrs: attributes! {
+                        @click=$(|e: Event| {
+                            e.prevent_default();
+                            delete_signal.set(None)
+                        })
+                    },
+                    "Cancel"
+                )
+                <form
+                    method="POST"
+                    action=(href!(delete, taxa::taxon_id: note.taxon_id, note_id: note.id))
+                    @submit=$(|_e: Event| delete_signal.set(None))
+                >
+                    button(variant: ButtonVariant::Destructive, "Delete")
+                </form>
+            )
+        }
+    })
 }
 
 #[derive(Debug, Deserialize)]

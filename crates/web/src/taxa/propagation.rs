@@ -90,8 +90,9 @@ async fn taxon_propagation_procedure(cx: &Cx) -> topcoat::Result<TaxonPropagatio
     ))
 )]
 pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
-    let delete_dialog_open = signal(cx, || false);
     let tp = taxon_propagation_procedure(cx).await?;
+    let delete_ids = (tp.taxon_id, tp.propagation_id);
+    let delete_dialog = signal(cx, || None::<(u64, u64)>);
 
     let menu_actions = [
         Action {
@@ -111,7 +112,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
             permission: Some(PermissionCode::TaxonPropagationDelete),
             attrs: attributes! {
                 @click=$(|_e: topcoat::runtime::Event| {
-                    delete_dialog_open.set(true);
+                    delete_dialog.set(Some(delete_ids));
                 })
                 class="text-destructive"
             },
@@ -185,40 +186,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                 </div>
             </section>
         </div>
-        alert_dialog(
-            open: delete_dialog_open.get(),
-            dialog_content(
-                dialog_header(
-                    dialog_title("Delete this taxon propagation procedure?")
-                    dialog_description("This action is not reversible")
-                )
-                dialog_footer(
-                    button(
-                        attrs: attributes! {
-                            @click=$(|e: topcoat::runtime::Event| {
-                                e.prevent_default();
-                                delete_dialog_open.set(false)
-                            })
-                        },
-                        "Cancel"
-                    )
-                    <form
-                        action=(href!(
-                            delete,
-                            taxa::taxon_id: tp.taxon_id,
-                            propagation_id: tp.propagation_id,
-                        ))
-                        method="POST"
-                    >
-                        button(
-                            variant: ButtonVariant::Destructive,
-                            attrs: attributes! {},
-                            "Delete"
-                        )
-                    </form>
-                )
-            )
-        )
+        delete_confirmation_dialog(delete_signal: delete_dialog.clone())
     })
 }
 
@@ -580,6 +548,107 @@ pub async fn delete(cx: &Cx) -> topcoat::Result<SeeOther> {
     Ok(see_other(
         href!(taxa::details, taxa::taxon_id: taxon_id).resolve(cx),
     ))
+}
+
+/// Content for the dialog confirming deletion of a propagation procedure.
+///
+/// Renders nothing while `ids` is `None` (dialog closed). When set, the shard
+/// re-renders with details of the procedure and a form that POSTs to
+/// [`delete`]. The shard has its own endpoint, so it checks permissions itself.
+#[shard]
+pub async fn delete_confirmation(
+    cx: &Cx,
+    ids: Option<(u64, u64)>,
+    delete_signal: Signal<Option<(u64, u64)>>,
+) -> topcoat::Result<impl View> {
+    let tp = match ids {
+        Some((taxon_id, propagation_id)) => {
+            require_user_with_permission(cx, PermissionCode::TaxonPropagationDelete).await?;
+            Some(
+                TaxonPropagationProcedure::filter_by_taxon_id_and_propagation_id(
+                    taxon_id,
+                    propagation_id,
+                )
+                .include(TaxonPropagationProcedure::fields().propagation())
+                .include(TaxonPropagationProcedure::fields().taxon())
+                .one()
+                .exec(&mut db(cx))
+                .await
+                .ok_or_not_found()?,
+            )
+        }
+        None => None,
+    };
+
+    Ok(view! {
+        if let Some(tp) = tp {
+            let taxon = tp.taxon.get();
+            let procedure = tp.propagation.get();
+            <section class="flex flex-col gap-3">
+                <div>
+                    item_term("Taxon")
+                    item_value(
+                        attrs: attributes! { class="latin" },
+                        (&taxon.complete_name)
+                    )
+                </div>
+                <div>
+                    item_term("Propagation Procedure")
+                    item_value((format!("{}: {}", procedure.id, procedure.name)))
+                </div>
+            </section>
+            dialog_footer(
+                button(
+                    variant: ButtonVariant::Secondary,
+                    attrs: attributes! {
+                        @click=$(|e: Event| {
+                            e.prevent_default();
+                            delete_signal.set(None)
+                        })
+                    },
+                    "Cancel"
+                )
+                <form
+                    method="POST"
+                    action=(href!(
+                        delete,
+                        taxa::taxon_id: tp.taxon_id,
+                        propagation_id: tp.propagation_id,
+                    ))
+                    @submit=$(|_e: Event| delete_signal.set(None))
+                >
+                    button(variant: ButtonVariant::Destructive, "Delete")
+                </form>
+            )
+        }
+    })
+}
+
+/// Alert dialog for confirming deletion of a propagation procedure.
+///
+/// Opens client-side as soon as `delete_signal` is set; the
+/// [`delete_confirmation`] shard populates the dialog's content (procedure
+/// details and the delete form) from the ids in the signal.
+#[component]
+pub async fn delete_confirmation_dialog(
+    cx: &Cx,
+    delete_signal: Signal<Option<(u64, u64)>>,
+) -> topcoat::Result<impl View> {
+    Ok(view! {
+        alert_dialog(
+            open: $(delete_signal.get().is_some()),
+            dialog_content(
+                dialog_header(
+                    dialog_title("Delete this taxon propagation procedure?")
+                    dialog_description("This action cannot be undone")
+                )
+                delete_confirmation(
+                    ids: $(delete_signal.get()),
+                    delete_signal: delete_signal.clone()
+                )
+            )
+        )
+    })
 }
 #[derive(Debug, Deserialize)]
 struct AddPropagationParams {
