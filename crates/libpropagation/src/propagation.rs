@@ -18,6 +18,10 @@ pub mod dto;
     strum::EnumIter,
     Deserialize,
     Serialize,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
 )]
 #[clap(rename_all = "kebab-case")]
 #[serde(rename_all = "kebab-case")]

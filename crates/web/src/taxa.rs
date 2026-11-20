@@ -786,6 +786,19 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
     let id = taxon.id;
     let show_add_propagation = signal(cx, || false);
 
+    // FIXME: sorting here because toasty doesn't yet allow to order by embed enums
+    let mut sorted_propagation = taxon.propagation_procedures.get().clone();
+    sorted_propagation.sort_by(|a, b| {
+        let type_compare = a.propagation.get().r#type.cmp(&b.propagation.get().r#type);
+        if type_compare == Ordering::Equal {
+            a.propagation.get().name.cmp(&b.propagation.get().name)
+        } else {
+            type_compare
+        }
+    });
+
+    let user = current_user(cx).await;
+
     Ok(view! {
         let ancestors = taxon
             .ancestor_links
@@ -909,10 +922,10 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                     </div>
                 </h2>
                 <div>
-                    if !taxon.propagation_procedures.get().is_empty() {
+                    if !sorted_propagation.is_empty() {
                         <ul>
                             #[key((tp.taxon_id, tp.propagation_id))]
-                            for tp in taxon.propagation_procedures.get() {
+                            for tp in sorted_propagation {
                                 <li class="group/item">
                                     <a
                                         href=(href!(
