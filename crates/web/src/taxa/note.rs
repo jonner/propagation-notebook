@@ -22,7 +22,7 @@ use tracing::trace;
 
 use crate::{
     Subtitle,
-    actions::{Action, ActionItemType, permitted_actions},
+    actions::{Action, ActionItemType},
     assets::mdi,
     components::{
         action_menu::action_menu,
@@ -39,7 +39,7 @@ use crate::{
         select::select,
         textarea::textarea,
     },
-    context::{current_user, db, require_user_with_permission},
+    context::{db, require_user_with_permission},
     taxa,
 };
 
@@ -125,13 +125,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                 )
                 <h1 class="flex items-baseline">
                     (&note.title)
-                    let actions = permitted_actions(
-                        current_user(cx).await,
-                        &menu_actions,
-                    );
-                    if !actions.is_empty() {
-                        <div class="ms-auto">action_menu(actions: &actions)</div>
-                    }
+                    <div class="ms-auto">action_menu(actions: &menu_actions)</div>
                 </h1>
                 <div class="text-2xl">(&note.text)</div>
             </section>

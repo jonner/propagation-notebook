@@ -18,7 +18,7 @@ use tracing::trace;
 
 use crate::{
     Subtitle,
-    actions::{Action, ActionItemType, permitted_actions},
+    actions::{Action, ActionItemType},
     assets::mdi,
     components::{
         action_menu::*,
@@ -127,12 +127,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                         " for "
                         <span class="latin">(&taxon.complete_name)</span>
                     </span>
-                    let permitted_actions = permitted_actions(user, &actions);
-                    if !permitted_actions.is_empty() {
-                        <div class="ms-auto">
-                            action_menu(actions: permitted_actions.as_slice())
-                        </div>
-                    }
+                    <div class="ms-auto">action_menu(actions: actions.as_slice())</div>
                 </h1>
             </hgroup>
             <section>

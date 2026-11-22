@@ -23,7 +23,7 @@ use tracing::trace;
 
 use crate::{
     Subtitle,
-    actions::{Action, ActionItemType, permitted_actions},
+    actions::{Action, ActionItemType},
     assets::mdi,
     citation::citation_id,
     components::{
@@ -40,7 +40,7 @@ use crate::{
         select::*,
         textarea::*,
     },
-    context::{current_user, db, require_user_with_permission},
+    context::{db, require_user_with_permission},
     crumb::{Crumb, crumbs},
     flash::{self, FlashMessage, push_message},
     taxa,
@@ -416,10 +416,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
         <div class="flex flex-col gap-6">
             <div class="flex">
                 <h1>(&procedure.name)</h1>
-                let actions = permitted_actions(current_user(cx).await, &actions);
-                if !actions.is_empty() {
-                    <div class="ms-auto">action_menu(actions: actions.as_slice())</div>
-                }
+                <div class="ms-auto">action_menu(actions: actions.as_slice())</div>
             </div>
             <div class="grid gap-6 lg:grid-cols-3">
                 <section class="lg:col-span-2">

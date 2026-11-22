@@ -20,7 +20,7 @@ use url::Url;
 
 use crate::{
     Subtitle,
-    actions::{Action, ActionItemType, permitted_actions},
+    actions::{Action, ActionItemType},
     assets::mdi,
     components::{
         action_menu::*,
@@ -34,7 +34,7 @@ use crate::{
         input::input,
         pn::{item_term, item_value},
     },
-    context::{current_user, db, require_user_with_permission},
+    context::{db, require_user_with_permission},
     crumb::{Crumb, crumbs},
     flash::{self, FlashMessage},
     propagation, taxa,
@@ -126,12 +126,9 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                     )
                     <h1 class="flex items-baseline">
                         "Cited Work"
-                        let actions = permitted_actions(current_user(cx).await, &actions);
-                        if !actions.is_empty() {
-                            <div class="ms-auto">
-                                action_menu(actions: actions.as_slice())
-                            </div>
-                        }
+                        <div class="ms-auto">
+                            action_menu(actions: actions.as_slice())
+                        </div>
                     </h1>
                 </hgroup>
                 card(

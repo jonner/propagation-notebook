@@ -19,7 +19,7 @@ use topcoat::{
 
 use crate::{
     Subtitle,
-    actions::{Action, ActionItemType, permitted_actions},
+    actions::{Action, ActionItemType},
     assets::mdi,
     components::{
         action_menu::*,
@@ -169,7 +169,6 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
     Ok(view! {
         let procedure = tp.propagation.get();
         let taxon = tp.taxon.get();
-        let permitted_actions = permitted_actions(current_user(cx).await, &menu_actions);
         <div class="flex flex-col gap-6">
             <section class="flex flex-col gap-4">
                 breadcrumb(
@@ -202,11 +201,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                             </span>
                         </p>
                     </div>
-                    if !permitted_actions.is_empty() {
-                        <div class="ms-auto">
-                            action_menu(actions: &permitted_actions)
-                        </div>
-                    }
+                    <div class="ms-auto">action_menu(actions: &menu_actions)</div>
                 </div>
             </section>
 
