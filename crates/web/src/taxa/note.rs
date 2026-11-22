@@ -123,10 +123,10 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                         breadcrumb_item(breadcrumb_page((format!("Note {}", note.id))))
                     )
                 )
-                <h1 class="flex items-baseline">
-                    (&note.title)
+                <div class="flex items-baseline">
+                    <h1>(&note.title)</h1>
                     <div class="ms-auto">action_menu(actions: &menu_actions)</div>
-                </h1>
+                </div>
                 <div class="text-2xl">(&note.text)</div>
             </section>
             <section>

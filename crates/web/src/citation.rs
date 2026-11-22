@@ -124,12 +124,12 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                             breadcrumb_item(breadcrumb_page((citation.id)))
                         )
                     )
-                    <h1 class="flex items-baseline">
-                        "Cited Work"
+                    <div class="flex items-baseline">
+                        <h1>"Cited Work"</h1>
                         <div class="ms-auto">
                             action_menu(actions: actions.as_slice())
                         </div>
-                    </h1>
+                    </div>
                 </hgroup>
                 card(
                     card_content(

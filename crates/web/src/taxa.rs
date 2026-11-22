@@ -817,15 +817,17 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
             link_fn: |taxon| { href!(crate::taxa::details, taxon_id: taxon.id) },
             link_final: true
         )
-        <h1 class="flex items-baseline">
-            <span class="latin">(&taxon.complete_name)</span>
-            badge(
-                variant: BadgeVariant::Secondary,
-                attrs: attributes! { class="mx-3" },
-                (taxon.rank.to_string())
-            )
+        <div class="flex items-baseline">
+            <h1>
+                <span class="latin">(&taxon.complete_name)</span>
+                badge(
+                    variant: BadgeVariant::Secondary,
+                    attrs: attributes! { class="mx-3" },
+                    (taxon.rank.to_string())
+                )
+            </h1>
             <div class="ms-auto">menu_actions()</div>
-        </h1>
+        </div>
         <div class="flex flex-col gap-8">
             if let Some(photo) = taxon.photo.get() {
                 if let Some(photo_url) = photo.medium_url.as_ref() {
@@ -936,12 +938,12 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
             </section>
 
             <section>
-                <h2 class="flex items-baseline">
-                    "Propagation Procedures"
+                <div class="flex items-baseline">
+                    <h2>"Propagation Procedures"</h2>
                     <div class="ms-auto">
                         propagation_actions(open_signal: show_add_propagation.clone())
                     </div>
-                </h2>
+                </div>
                 <div>
                     if !sorted_propagation.is_empty() {
                         <ul>
@@ -999,10 +1001,10 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
             </section>
 
             <section>
-                <h2 class="flex items-baseline">
-                    "Notes"
+                <div class="flex items-baseline">
+                    <h2>"Notes"</h2>
                     <div class="ms-auto">note_actions()</div>
-                </h2>
+                </div>
                 <div class="flex flex-col gap-3">
                     if !taxon.notes.get().is_empty() {
                         let notes: BTreeMap<TaxonNoteCategory, Vec<&TaxonNote>> = taxon

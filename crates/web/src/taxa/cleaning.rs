@@ -121,14 +121,14 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                         )
                     )
                 )
-                <h1 class="flex items-baseline">
-                    <span>
+                <div class="flex items-baseline">
+                    <h1>
                         <span>(&proc.name)</span>
                         " for "
                         <span class="latin">(&taxon.complete_name)</span>
-                    </span>
+                    </h1>
                     <div class="ms-auto">action_menu(actions: actions.as_slice())</div>
-                </h1>
+                </div>
             </hgroup>
             <section>
                 <h2>"Instructions"</h2>
