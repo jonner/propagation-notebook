@@ -320,35 +320,37 @@ pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
                         let citation = citation_link.citation.get();
                         cited_object_citation_item(
                             let citation_data = (citation.id, citation.format_cse());
-                            <a
-                                class="text-destructive"
-                                href="#"
-                                @click=$(|e: Event| {
-                                    e.prevent_default();
-                                    delete_citation_data.set(Some(citation_data));
-                                })
-                            >
-                                icon(data: mdi::DELETE)
-                            </a>
                             <span class="text-muted-foreground">
                                 (citation.id)
                                 "."
                             </span>
                             <span class="text-wrap">(citation.format_cse())</span>
+                            button(
+                                size: ButtonSize::Sm,
+                                variant: ButtonVariant::Destructive,
+                                attrs: attributes! {
+                                    @click=$(|e: Event| {
+                                        e.prevent_default();
+                                        delete_citation_data.set(Some(citation_data));
+                                    })
+                                },
+                                icon(data: mdi::REMOVE)
+                            )
                         )
                     }
                     cited_object_citation_item(
-                        <a
-                            class="flex items-baseline gap-2"
-                            href="#"
-                            @click=$(|e: Event| {
-                                e.prevent_default();
-                                add_citation_dialog_open.set(true);
-                            })
-                        >
+                        button(
+                            size: ButtonSize::Sm,
+                            variant: ButtonVariant::Outline,
+                            attrs: attributes! {
+                                @click=$(|e: Event| {
+                                    e.prevent_default();
+                                    add_citation_dialog_open.set(true);
+                                })
+                            },
                             icon(data: mdi::ADD)
-                            "Add citation"
-                        </a>
+                        )
+                        <span>"Add citation"</span>
                     )
                 )
             )
