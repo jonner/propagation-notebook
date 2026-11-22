@@ -896,7 +896,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
 
             <section>
                 <div class="flex items-baseline">
-                    <h2>"Seed Cleaning"</h2>
+                    <h2>"Seed Processing"</h2>
                     <div class="ms-auto">
                         cleaning_actions(open_signal: show_add_cleaning.clone())
                     </div>
@@ -1204,7 +1204,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                     open: $(delete_cleaning.get().is_some()),
                     dialog_content(
                         dialog_header(
-                            dialog_title("Delete this cleaning procedure?")
+                            dialog_title("Delete this seed processing procedure?")
                             dialog_description("This action cannot be undone")
                         )
                         cleaning::delete_confirmation(

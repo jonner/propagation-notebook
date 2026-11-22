@@ -67,7 +67,7 @@ async fn cleaning_procedure(cx: &Cx) -> topcoat::Result<CleaningProcedure> {
             Ok(
                 Metadata::new().subtitle(
                     format!(
-                        "Cleaning procedure {} for {}",
+                        "Seed processing procedure {} for {}",
                         proc.id,
                         proc.taxon.get().complete_name,
                     ),
@@ -116,43 +116,64 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                             )
                         )
                         breadcrumb_separator()
-                        breadcrumb_item(
-                            breadcrumb_page((format!("Cleaning Procedure {}", proc.id)))
-                        )
+                        breadcrumb_item(breadcrumb_page(("Seed Processing")))
+                        breadcrumb_separator()
+                        breadcrumb_item(breadcrumb_page((proc.id.to_string())))
                     )
                 )
                 <div class="flex items-baseline">
-                    <h1>
-                        <span>(&proc.name)</span>
-                        " for "
-                        <span class="latin">(&taxon.complete_name)</span>
-                    </h1>
+                    <div>
+                        <h1 class="mb-0"><span>(&proc.name)</span></h1>
+                        <div class="text-muted-foreground">
+                            "A seed processing procedure for "
+                            <span class="latin text-foreground">
+                                (&taxon.complete_name)
+                            </span>
+                        </div>
+                    </div>
                     <div class="ms-auto">action_menu(actions: actions.as_slice())</div>
                 </div>
             </hgroup>
-            <section>
-                <h2>"Instructions"</h2>
-                <div class="text-2xl">(&proc.instructions)</div>
-            </section>
-            if let Some(notes) = proc.notes.as_ref() {
-                <section>
-                    <h2>"Additional Notes"</h2>
-                    <div>(notes)</div>
-                </section>
-            }
-            <section>
-                <h2>"Citations"</h2>
-                <div>
-                    citation_list(
-                        citations: proc
-                            .citation_links
-                            .get()
-                            .iter()
-                            .map(|cl| cl.citation.get())
-                            .collect()
-                    )
-                </div>
-            </section>
+            card(
+                card_content(
+                    <div class="flex flex-col gap-6">
+                        <section>
+                            <h3>"Instructions"</h3>
+                            <div class="text-lg leading-7">(&proc.instructions)</div>
+                        </section>
+                        <section>
+                            <h3>"Additional Notes"</h3>
+                            <div>
+                                if let Some(notes) = proc.notes.as_ref() {
+                                    (notes)
+                                } else {
+                                    <span class="text-muted-foregound text-sm">
+                                        "No notes for this procedure"
+                                    </span>
+                                }
+                            </div>
+                        </section>
+                        <section>
+                            <h3>"Citations"</h3>
+                            let citations = proc
+                                .citation_links
+                                .get()
+                                .iter()
+                                .map(|cl| cl.citation.get())
+                                .collect::<Vec<_>>();
+                            <div>
+                                if citations.is_empty() {
+                                    <span class="text-muted-foregound text-sm">
+                                        "No citations for this procedure"
+                                    </span>
+                                } else {
+                                    citation_list(citations: citations)
+                                }
+                            </div>
+                        </section>
+                    </div>
+                )
+            )
         </div>
     })
 }
@@ -199,7 +220,7 @@ async fn cleaning_procedure_form(
             Ok(
                 Metadata::new().subtitle(
                     format!(
-                        "Edit cleaning procedure {} for {}",
+                        "Edit seed processing procedure {} for {}",
                         proc.id,
                         proc.taxon.get().complete_name,
                     ),
@@ -228,7 +249,7 @@ pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
                             )
                         )
                         breadcrumb_separator()
-                        breadcrumb_item(breadcrumb_page("Cleaning procedures"))
+                        breadcrumb_item(breadcrumb_page("Seed Processing"))
                         breadcrumb_separator()
                         breadcrumb_item(
                             breadcrumb_link(
@@ -246,7 +267,7 @@ pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
                         breadcrumb_item(breadcrumb_page("Edit"))
                     )
                 )
-                <h1>"Edit cleaning procedure"</h1>
+                <h1>"Edit Seed Processing Procedure"</h1>
             </hgroup>
         </section>
         cited_object_layout(
@@ -339,7 +360,7 @@ pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
                     )
                 )
                 remove_citation_dialog_context_item(
-                    item_term("Cleaning Procedure")
+                    item_term("Seed Processing Procedure")
                     item_value(
                         (format!(
                             "{}: {}",
