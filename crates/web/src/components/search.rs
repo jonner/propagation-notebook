@@ -57,11 +57,12 @@ pub async fn taxon_search_results(
             <ul class="contents">
                 for taxon in taxa.iter() {
                     <li class="py-1">
-                        <span class="latin">
-                            <a href=(href!(taxa::details, taxa::taxon_id: taxon.id))>
-                                (&taxon.complete_name)
-                            </a>
-                        </span>
+                        <a
+                            class="block latin"
+                            href=(href!(taxa::details, taxa::taxon_id: taxon.id))
+                        >
+                            (&taxon.complete_name)
+                        </a>
                     </li>
                 }
                 if total > LIMIT {
