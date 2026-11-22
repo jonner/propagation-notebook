@@ -720,6 +720,18 @@ async fn detailed_taxon(cx: &Cx) -> topcoat::Result<Taxon> {
 }
 
 #[component]
+async fn cleaning_actions(cx: &Cx, open_signal: Signal<bool>) -> topcoat::Result<impl View> {
+    let actions = [Action {
+        name: "Add Seed Processing Procedure".to_string(),
+        permission: Some(PermissionCode::TaxonCleaningCreate),
+        item_type: ActionItemType::Button,
+        attrs: attributes! { @click=$(|_e: Event| open_signal.set(true)) },
+    }];
+
+    Ok(view! { action_menu(actions: &actions) })
+}
+
+#[component]
 async fn propagation_actions(cx: &Cx, open_signal: Signal<bool>) -> topcoat::Result<impl View> {
     let actions = [Action {
         name: "Add Propagation Procedure".to_string(),
@@ -787,6 +799,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
     let taxon = detailed_taxon(cx).await?;
     let id = taxon.id;
     let show_add_propagation = signal(cx, || false);
+    let show_add_cleaning = signal(cx, || false);
 
     // FIXME: sorting here because toasty doesn't yet allow to order by embed enums
     let mut sorted_propagation = taxon.propagation_procedures.get().clone();
@@ -882,7 +895,12 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
             </section>
 
             <section>
-                <h2>"Seed Cleaning"</h2>
+                <div class="flex items-baseline">
+                    <h2>"Seed Cleaning"</h2>
+                    <div class="ms-auto">
+                        cleaning_actions(open_signal: show_add_cleaning.clone())
+                    </div>
+                </div>
                 <div>
                     if !taxon.cleaning_procedures.get().is_empty() {
                         <ul>
@@ -1206,6 +1224,15 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                             delete_signal: delete_note.clone()
                         )
                     )
+                )
+            }
+            if user.has_permission(PermissionCode::TaxonCleaningCreate) {
+                cleaning::add_cleaning_procedure_dialog(
+                    form_attrs: attributes! {
+                        method="POST"
+                        action=(href!(cleaning::add_cleaning_procedure, taxon_id: taxon.id))
+                    },
+                    open_sig: show_add_cleaning
                 )
             }
         }

@@ -12,7 +12,7 @@ use topcoat::{
         href, page, path_param, route,
     },
     runtime::{Event, Signal, shard, signal},
-    view::{Attributes, View, attributes, component, view},
+    view::{Attributes, View, attributes, component, element_id, view},
 };
 use tracing::trace;
 
@@ -33,7 +33,8 @@ use crate::{
         pn::{item_term, item_value},
         textarea::*,
     },
-    context::{current_user, db, require_user_with_permission},
+    context::{db, require_user_with_permission},
+    flash::{self, FlashMessage},
     taxa,
 };
 
@@ -76,7 +77,6 @@ async fn cleaning_procedure(cx: &Cx) -> topcoat::Result<CleaningProcedure> {
     ))
 )]
 pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
-    let user = current_user(cx).await;
     let delete_dialog_open = signal(cx, || false);
 
     let proc = cleaning_procedure(cx).await?;
@@ -161,27 +161,29 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
 async fn cleaning_procedure_form(
     cx: &Cx,
     #[default] attrs: Attributes,
-    procedure: &CleaningProcedure,
+    procedure: Option<&CleaningProcedure>,
 ) -> topcoat::Result<impl View> {
     Ok(view! {
         <form (attrs)>
             field_set(
                 field(
                     field_label("Name")
-                    input(attrs: attributes! { name="name" value=(&procedure.name) })
+                    input(
+                        attrs: attributes! { name="name" value=(procedure.map(|p| &p.name)) }
+                    )
                 )
                 field(
                     field_label("Instructions")
                     textarea(
                         attrs: attributes! { rows="8" name="instructions" },
-                        (&procedure.instructions)
+                        (procedure.map(|p| &p.instructions))
                     )
                 )
                 field(
                     field_label("Additional Notes")
                     textarea(
                         attrs: attributes! { rows="5" name="notes" },
-                        (procedure.notes.as_deref().unwrap_or_default())
+                        (procedure.map(|p| p.notes.as_deref().unwrap_or_default()))
                     )
                 )
             )
@@ -250,7 +252,9 @@ pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
         cited_object_layout(
             cited_object_main_content(
                 card_header(card_title("Procedure Details"))
-                card_content(cleaning_procedure_form(procedure: &cleaning_procedure))
+                card_content(
+                    cleaning_procedure_form(procedure: Some(cleaning_procedure))
+                )
             )
             cited_object_citation_section(
                 for citation_link in cleaning_procedure.citation_links.get() {
@@ -479,4 +483,86 @@ pub async fn remove_citation(cx: &Cx) -> topcoat::Result<SeeOther> {
     Ok(see_other(
         href!(modify, taxa::taxon_id: taxon_id, cleaning_id: cleaning_id).resolve(cx),
     ))
+}
+
+#[derive(Debug, Deserialize)]
+struct AddCleaningParams {
+    name: String,
+    instructions: String,
+    notes: Option<String>,
+}
+
+#[route(POST "/taxa/{taxon_id}/cleaning/new")]
+pub async fn add_cleaning_procedure(
+    cx: &Cx,
+    Form(params): Form<AddCleaningParams>,
+) -> topcoat::Result<SeeOther> {
+    let _ = require_user_with_permission(cx, PermissionCode::TaxonCleaningCreate).await?;
+
+    let taxon_id = *taxa::taxon_id(cx)?;
+    flash::push_message(
+        cx,
+        match CleaningProcedure::create()
+            .taxon_id(taxon_id)
+            .name(params.name)
+            .instructions(params.instructions)
+            .notes(params.notes)
+            .exec(&mut db(cx))
+            .await
+        {
+            Ok(proc) => FlashMessage::Success(format!(
+                "Added seed processing procedure {} to taxon {}",
+                proc.id, taxon_id
+            )),
+            Err(e) => {
+                tracing::warn!("failed to add seed processing procedure to taxon {taxon_id}: {e}",);
+                FlashMessage::Failure(
+                    "Failed to add seed processing procedure to this taxon".to_string(),
+                )
+            }
+        },
+    )?;
+    Ok(see_other(
+        href!(taxa::details, taxa::taxon_id: taxon_id).resolve(cx),
+    ))
+}
+
+#[component]
+pub async fn add_cleaning_procedure_dialog(
+    cx: &Cx,
+    open_sig: Signal<bool>,
+    #[default] form_attrs: Attributes,
+) -> topcoat::Result<impl View> {
+    let form_id = element_id(cx);
+    Ok(view! {
+        dialog(
+            open: $(open_sig.get()),
+            dialog_content(
+                dialog_header(
+                    dialog_title("Add a new seed processing procedure to this taxon")
+                )
+                cleaning_procedure_form(
+                    attrs: attributes! { id=(&form_id) (form_attrs) },
+                    procedure: None
+                )
+                dialog_footer(
+                    button(
+                        variant: ButtonVariant::Secondary,
+                        attrs: attributes! {
+                            @click=$(|e: topcoat::runtime::Event| {
+                                e.prevent_default();
+                                open_sig.set(false)
+                            })
+                        },
+                        "Cancel"
+                    )
+                    button(
+                        variant: ButtonVariant::Primary,
+                        attrs: attributes! { form=(&form_id) },
+                        "Add"
+                    )
+                )
+            )
+        )
+    })
 }
