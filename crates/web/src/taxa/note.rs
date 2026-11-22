@@ -232,7 +232,7 @@ struct TaxonNoteRejected {
 pub async fn note_form(
     cx: &Cx,
     #[default] attrs: Attributes,
-    note: Option<&TaxonNote>,
+    #[default] note: Option<&TaxonNote>,
     child: Child<'_>,
 ) -> topcoat::Result<impl View> {
     let rejected = try_context::<TaxonNoteRejected>(cx);

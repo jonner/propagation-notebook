@@ -16,7 +16,7 @@ use topcoat::{
     },
     runtime::{Event, Signal, procedure, signal},
     view::{
-        AttributeValueViewParts, Attributes, Child, View, attributes, class, component,
+        AttributeValueViewParts, Attributes, Child, View, attributes, class, component, element_id,
         error_boundary, suspense, view,
     },
 };
@@ -744,13 +744,12 @@ async fn propagation_actions(cx: &Cx, open_signal: Signal<bool>) -> topcoat::Res
 }
 
 #[component]
-async fn note_actions(cx: &Cx) -> topcoat::Result<impl View> {
-    let id = *taxon_id(cx)?;
+async fn note_actions(cx: &Cx, open_signal: Signal<bool>) -> topcoat::Result<impl View> {
     let actions = [Action {
         name: "Add Note".to_string(),
         permission: Some(PermissionCode::TaxonNoteCreate),
-        item_type: ActionItemType::Link,
-        attrs: attributes! { href=(href!(note::create, taxon_id: id)) },
+        item_type: ActionItemType::Button,
+        attrs: attributes! { @click=$(|_e: Event| open_signal.set(true)) },
     }];
 
     Ok(view! { action_menu(actions: &actions) })
@@ -800,6 +799,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
     let id = taxon.id;
     let show_add_propagation = signal(cx, || false);
     let show_add_cleaning = signal(cx, || false);
+    let show_add_note = signal(cx, || false);
 
     // FIXME: sorting here because toasty doesn't yet allow to order by embed enums
     let mut sorted_propagation = taxon.propagation_procedures.get().clone();
@@ -1029,7 +1029,9 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
             <section>
                 <div class="flex items-baseline">
                     <h2>"Notes"</h2>
-                    <div class="ms-auto">note_actions()</div>
+                    <div class="ms-auto">
+                        note_actions(open_signal: show_add_note.clone())
+                    </div>
                 </div>
                 <div class="flex flex-col gap-3">
                     if !taxon.notes.get().is_empty() {
@@ -1217,6 +1219,46 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
             if user.has_permission(PermissionCode::TaxonPropagationDelete) {
                 propagation::delete_confirmation_dialog(
                     delete_signal: delete_propagation.clone()
+                )
+            }
+            if user.has_permission(PermissionCode::TaxonNoteCreate) {
+                let form_id = element_id(cx);
+                dialog(
+                    attrs: attributes! {
+                        @keydown=$(|e: Event| {
+                            if e.key == "Escape" {
+                                show_add_note.set(false)
+                            }
+                        })
+                    },
+                    open: $(show_add_note.get()),
+                    dialog_content(
+                        dialog_header(dialog_title("Add a new note to this taxon"))
+                        note::note_form(
+                            attrs: attributes! {
+                                id=(form_id.clone())
+                                action=(href!(note::do_create, taxon_id: taxon.id))
+                                method="POST"
+                            },
+                            <div class="flex gap-2 mt-6 justify-end">
+                                button(
+                                    variant: ButtonVariant::Secondary,
+                                    attrs: attributes! {
+                                        @click=$(|e: Event| {
+                                            e.prevent_default();
+                                            show_add_note.set(false)
+                                        })
+                                        type="button"
+                                    },
+                                    "Cancel"
+                                )
+                                button(
+                                    attrs: attributes! { form=(form_id) type="submit" },
+                                    "Create"
+                                )
+                            </div>
+                        )
+                    )
                 )
             }
             if user.has_permission(PermissionCode::TaxonNoteDelete) {
