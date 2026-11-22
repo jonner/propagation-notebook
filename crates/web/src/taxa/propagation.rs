@@ -1,8 +1,6 @@
 use libpropagation::{
-    auth::PermissionCode,
-    citation::{Citation, TaxonPropagationProcedureCitation},
-    propagation::PropagationProcedure,
-    taxonomy::TaxonPropagationProcedure,
+    auth::PermissionCode, citation::TaxonPropagationProcedureCitation,
+    propagation::PropagationProcedure, taxonomy::TaxonPropagationProcedure,
 };
 use serde::Deserialize;
 use topcoat::{
@@ -16,7 +14,7 @@ use topcoat::{
         href, page, path_param, route,
     },
     runtime::{Event, Signal, shard, signal},
-    view::{Attributes, View, attributes, component, element_id, view},
+    view::{Attributes, Child, View, attributes, class, component, element_id, view},
 };
 
 use crate::{
@@ -26,7 +24,7 @@ use crate::{
     components::{
         action_menu::*,
         alert_dialog::*,
-        badge::badge,
+        badge::{BadgeVariant, badge},
         breadcrumb::*,
         button::*,
         card::*,
@@ -48,6 +46,53 @@ use crate::{
 
 path_param!(pub propagation_id: u64 else bad_request);
 path_param!(pub citation_id: u64 else bad_request);
+
+/// Shows a 0-10 confidence score as a labelled meter.
+#[component]
+async fn confidence_meter(
+    cx: &Cx,
+    confidence: Option<u8>,
+    #[default] mut attrs: Attributes,
+) -> topcoat::Result<impl View> {
+    let value = confidence.unwrap_or_default().min(10);
+    let (label, label_class) = match confidence {
+        None => ("Not rated", "text-muted-foreground"),
+        Some(0..=3) => ("Low confidence", "text-muted-foreground"),
+        Some(4..=6) => ("Moderate confidence", "text-muted-foreground"),
+        Some(7..=8) => ("Good confidence", "text-primary"),
+        Some(9..=10) => ("High confidence", "text-primary"),
+        Some(_) => ("Not rated", "text-muted-foreground"),
+    };
+    let aria_label = confidence.map_or_else(
+        || "Confidence: not rated".to_string(),
+        |c| format!("Confidence: {c} out of 10"),
+    );
+
+    Ok(view! {
+        <div class=(class!("flex flex-col gap-2", attrs.remove("class"))) (attrs)>
+            <div class="flex items-baseline justify-between gap-4">
+                <span class="text-sm font-medium">"Confidence"</span>
+                if let Some(confidence) = confidence {
+                    <span class="text-sm font-semibold tabular-nums">
+                        (format!("{confidence} / 10"))
+                    </span>
+                } else {
+                    <span class="text-sm text-muted-foreground">"Not rated"</span>
+                }
+            </div>
+            <div class="flex gap-1" role="img" aria-label=(aria_label)>
+                for i in 0..10 {
+                    if i < value {
+                        <span class="h-2 flex-1 rounded-full bg-primary"></span>
+                    } else {
+                        <span class="h-2 flex-1 rounded-full bg-foreground/10"></span>
+                    }
+                }
+            </div>
+            <div class=(class!("text-xs", label_class))>(label)</div>
+        </div>
+    })
+}
 
 #[memoize(as_ref)]
 async fn taxon_propagation_procedure(cx: &Cx) -> topcoat::Result<TaxonPropagationProcedure> {
@@ -72,6 +117,7 @@ async fn taxon_propagation_procedure(cx: &Cx) -> topcoat::Result<TaxonPropagatio
             .ok_or_not_found()?,
     )
 }
+
 #[page(
     "/taxa/{taxon_id}/propagation/{propagation_id}",
     with(Metadata::from_fn(
@@ -123,8 +169,9 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
     Ok(view! {
         let procedure = tp.propagation.get();
         let taxon = tp.taxon.get();
-        <div class="flex flex-col gap-4">
-            <hgroup>
+        let permitted_actions = permitted_actions(current_user(cx).await, &menu_actions);
+        <div class="flex flex-col gap-6">
+            <section class="flex flex-col gap-4">
                 breadcrumb(
                     breadcrumb_list(
                         breadcrumb_item(
@@ -136,55 +183,125 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                         breadcrumb_separator()
                         breadcrumb_item(breadcrumb_page("Propagation Procedures"))
                         breadcrumb_separator()
-                        breadcrumb_item(breadcrumb_page((tp.propagation_id)))
+                        breadcrumb_item(breadcrumb_page((&procedure.name)))
                     )
                 )
-                <h1 class="flex items-center">
-                    (&procedure.name)
-                    let permitted_actions = permitted_actions(
-                        current_user(cx).await,
-                        &menu_actions,
-                    );
+                <div class="flex items-start gap-4">
+                    <div class="flex min-w-0 flex-col">
+                        <div class="flex flex-wrap items-center gap-3">
+                            <h1 class="mb-0">(&procedure.name)</h1>
+                            badge(
+                                variant: BadgeVariant::Secondary,
+                                (procedure.r#type.to_string())
+                            )
+                        </div>
+                        <p class="text-muted-foreground">
+                            "Propagation guidance for "
+                            <span class="latin text-foreground">
+                                (&taxon.complete_name)
+                            </span>
+                        </p>
+                    </div>
                     if !permitted_actions.is_empty() {
                         <div class="ms-auto">
                             action_menu(actions: &permitted_actions)
                         </div>
                     }
-                </h1>
-                <div>badge((procedure.r#type.to_string()))</div>
-            </hgroup>
-            <section>
-                <h2>"Instructions"</h2>
-                <div class="text-2xl">(&procedure.instructions)</div>
-            </section>
-            <section>
-                <h2>"Confidence"</h2>
-                <div>
-                    (tp.confidence.map(|v| v.to_string()).unwrap_or("Unknown".into()))
                 </div>
             </section>
-            <section>
-                <h2>"Notes"</h2>
-                <div>(procedure.notes.as_deref().unwrap_or_default())</div>
-                if let Some(taxon_notes) = tp.notes.as_ref() {
-                    <div>(taxon_notes)</div>
-                }
-            </section>
-            <section>
-                <h2>"Citations"</h2>
-                <div>
-                    let citations: Vec<&Citation> = tp
-                        .citation_links
-                        .get()
-                        .iter()
-                        .map(|cl| cl.citation.get())
-                        .chain(procedure.citations.get().iter())
-                        .collect();
-                    if !citations.is_empty() {
-                        citation_list(citations: citations)
-                    }
+
+            <div class="grid items-start gap-12 lg:grid-cols-3">
+                card(
+                    attrs: attributes! { class="lg:col-span-2" },
+                    card_content(
+                        <div class="flex flex-col gap-6">
+                            <div class="flex items-start gap-3">
+                                <div class="flex flex-col">
+                                    <h2 class="mb-0">"General instructions"</h2>
+                                    <div class="text-muted-foreground text-sm">
+                                        "Shared guidance that applies to every taxon using this procedure."
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex flex-col gap-6">
+                                <p class="whitespace-pre-line text-lg leading-7">
+                                    (&procedure.instructions)
+                                </p>
+                                if let Some(notes) = procedure.notes.as_ref() {
+                                    <div>
+                                        <h3>"Additional notes"</h3>
+                                        <p class="whitespace-pre-line text-sm leading-6">
+                                            (notes)
+                                        </p>
+                                    </div>
+                                }
+                                <div>
+                                    <h3>"Citations"</h3>
+                                    let general_citations = procedure.citations.get();
+                                    if general_citations.is_empty() {
+                                        <p class="text-sm text-muted-foreground">
+                                            "No sources have been listed for this procedure."
+                                        </p>
+                                    } else {
+                                        <div>
+                                            citation_list(
+                                                citations: general_citations.iter().collect()
+                                            )
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    )
+                )
+                <div class="flex flex-col gap-6">
+                    <div class="flex flex-col">
+                        <h3 class="mb-0">"Notes for this taxon"</h3>
+                        <div class="text-muted-foreground text-sm">
+                            "Details that apply only to "
+                            <span class="latin text-foreground">
+                                (&taxon.complete_name)
+                            </span>
+                            "."
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-6">
+                        confidence_meter(confidence: tp.confidence)
+                        <div>
+                            <h4>"Notes"</h4>
+                            if let Some(notes) = tp.notes.as_ref() {
+                                <p
+                                    class="mt-2 whitespace-pre-line text-sm leading-6 text-foreground/90"
+                                >
+                                    (notes)
+                                </p>
+                            } else {
+                                <p class="mt-2 text-sm text-muted-foreground italic">
+                                    "No taxon-specific notes have been added yet."
+                                </p>
+                            }
+                        </div>
+                        <div>
+                            <h4>"Taxon-specific Citations"</h4>
+                            let taxon_citations = tp.citation_links.get();
+                            if taxon_citations.is_empty() {
+                                <p class="mt-3 text-sm text-muted-foreground">
+                                    "No sources are attached to this taxon."
+                                </p>
+                            } else {
+                                <div>
+                                    citation_list(
+                                        citations: taxon_citations
+                                            .iter()
+                                            .map(|link| link.citation.get())
+                                            .collect()
+                                    )
+                                </div>
+                            }
+                        </div>
+                    </div>
                 </div>
-            </section>
+            </div>
         </div>
         delete_confirmation_dialog(delete_signal: delete_dialog.clone())
     })
@@ -247,20 +364,27 @@ pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
                                             propagation_id: tp.propagation_id,
                                         ))
                                     },
-                                    (tp.propagation_id)
+                                    (&proc.name)
                                 )
                             )
                             breadcrumb_separator()
                             breadcrumb_item(breadcrumb_page("Edit"))
                         )
                     )
-                    <h1>"Edit Propagation Procedure"</h1>
+                    <h1>"Edit taxon-specific propagation guidance"</h1>
+                    <p class="text-muted-foreground">
+                        "Update the details that apply only to "
+                        <span class="latin font-semibold text-foreground">
+                            (&taxon.complete_name)
+                        </span>
+                        "."
+                    </p>
                 </hgroup>
             </section>
             cited_object_layout(
                 cited_object_main_content(
-                    card_header(card_title("Taxon procedure details"))
                     card_content(
+                        <h3>"Taxon-specific details"</h3>
                         <form
                             action=(href!(
                                 do_modify,
@@ -272,49 +396,61 @@ pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
                         >
                             field_set(
                                 field(
-                                    field_label("Propagation Procedure")
-                                    <span class="text-muted-foreground">
-                                        (proc.id)
-                                        ": "
+                                    field_label("General procedure")
+                                    <div class="flex flex-wrap items-center gap-2">
                                         (&proc.name)
-                                    </span>
+                                        badge(
+                                            variant: BadgeVariant::Secondary,
+                                            (proc.r#type.to_string())
+                                        )
+                                    </div>
+                                    field_description(
+                                        "The general instructions and notes for this procedure are shared by all taxa and are not edited here."
+                                    )
                                 )
-                            )
-                            field(
-                                field_label("Confidence")
-                                select(
-                                    attrs: attributes! { name="confidence" },
-                                    <option></option>
-                                    for i in 0..=10 {
-                                        <option
-                                            value=(i)
-                                            if params.confidence == Some(i) {
-                                                selected=(true)
-                                            }
-                                        >
-                                            (i)
-                                        </option>
+                                field(
+                                    field_label("Confidence")
+                                    select(
+                                        attrs: attributes! { name="confidence" },
+                                        <option></option>
+                                        for i in 0..=10 {
+                                            <option
+                                                value=(i)
+                                                if params.confidence == Some(i) {
+                                                    selected=(true)
+                                                }
+                                            >
+                                                (i)
+                                            </option>
+                                        }
+                                    )
+                                    field_description(
+                                        "How confident are you that this procedure applies to this taxon? 0 is unknown and 10 is certain."
+                                    )
+                                    if let Some(msg) = errors.confidence {
+                                        field_error((msg))
                                     }
                                 )
-                                if let Some(msg) = errors.confidence {
-                                    field_error((msg))
-                                }
-                            )
-                            field(
-                                field_label("Taxon-specific procedure notes")
-                                textarea(
-                                    attrs: attributes! { name="notes" },
-                                    (params.notes)
+                                field(
+                                    field_label("Taxon-specific notes")
+                                    textarea(
+                                        attrs: attributes! { name="notes" },
+                                        (params.notes)
+                                    )
+                                    field_description(
+                                        "Notes that apply only to this taxon. General notes belong on the shared procedure."
+                                    )
+                                    if let Some(msg) = errors.notes {
+                                        field_error((msg))
+                                    }
                                 )
-                                if let Some(msg) = errors.notes {
-                                    field_error((msg))
-                                }
+                                button("Save taxon-specific details")
                             )
-                            button("Update")
                         </form>
                     )
                 )
                 cited_object_citation_section(
+                    title: "Taxon-specific citations",
                     let citations = tp.citation_links.get();
                     for citation_link in citations {
                         let citation = citation_link.citation.get();
