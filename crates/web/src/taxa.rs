@@ -909,10 +909,10 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                                 <li class="group/item">
                                     <a
                                         href=(href!(
-                                                    cleaning::details,
-                                                    taxon_id: procedure.taxon_id,
-                                                    cleaning::cleaning_id: procedure.id,
-                                                ))
+                                            cleaning::details,
+                                            taxon_id: procedure.taxon_id,
+                                            cleaning::cleaning_id: procedure.id,
+                                        ))
                                     >
                                         (&procedure.name)
                                     </a>
@@ -930,7 +930,11 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                                                         ButtonVariant::Outline,
                                                         ButtonSize::Sm,
                                                     ))
-                                                    href=(href!(cleaning::modify, taxon_id: procedure.taxon_id, cleaning::cleaning_id: procedure.id))
+                                                    href=(href!(
+                                                        cleaning::modify,
+                                                        taxon_id: procedure.taxon_id,
+                                                        cleaning::cleaning_id: procedure.id,
+                                                    ))
                                                 >
                                                     icon(data: mdi::EDIT)
                                                 </a>
@@ -970,10 +974,10 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                                 <li class="group/item">
                                     <a
                                         href=(href!(
-                                                    propagation::details,
-                                                    taxon_id: tp.taxon_id,
-                                                    propagation::propagation_id: tp.propagation_id,
-                                                ))
+                                            propagation::details,
+                                            taxon_id: tp.taxon_id,
+                                            propagation::propagation_id: tp.propagation_id,
+                                        ))
                                     >
                                         (&tp.propagation.get().name)
                                     </a>
@@ -991,7 +995,11 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                                                         ButtonVariant::Outline,
                                                         ButtonSize::Sm,
                                                     ))
-                                                    href=(href!(propagation::modify, taxon_id: tp.taxon_id, propagation::propagation_id: tp.propagation_id))
+                                                    href=(href!(
+                                                        propagation::modify,
+                                                        taxon_id: tp.taxon_id,
+                                                        propagation::propagation_id: tp.propagation_id,
+                                                    ))
                                                 >
                                                     icon(data: mdi::EDIT)
                                                 </a>

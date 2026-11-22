@@ -14,7 +14,7 @@ use topcoat::{
         href, page, path_param, route,
     },
     runtime::{Event, Signal, shard, signal},
-    view::{Attributes, Child, View, attributes, class, component, element_id, view},
+    view::{Attributes, View, attributes, class, component, element_id, view},
 };
 
 use crate::{
@@ -39,7 +39,7 @@ use crate::{
         select::*,
         textarea::*,
     },
-    context::{current_user, db, require_user_with_permission},
+    context::{db, require_user_with_permission},
     flash::{self, FlashMessage},
     taxa,
 };

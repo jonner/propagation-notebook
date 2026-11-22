@@ -12,7 +12,7 @@ use crate::{
     citation,
     components::{
         button::{ButtonVariant, button},
-        card::{card, card_title},
+        card::card,
         dialog::*,
         field::*,
         input::input,
