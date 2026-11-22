@@ -25,17 +25,18 @@ use crate::{
 
 #[component]
 pub async fn cited_object_main_content(cx: &Cx, child: Child<'_>) -> topcoat::Result<impl View> {
-    Ok(view! { card(attrs: attributes! { class="grow" }, (child)) })
+    Ok(view! { <div class="lg:col-span-2">card((child))</div> })
 }
 
 #[component]
 pub async fn cited_object_citation_section(
     cx: &Cx,
+    #[default("Citations")] title: &'static str,
     child: Child<'_>,
 ) -> topcoat::Result<impl View> {
     Ok(view! {
-        <section class="shrink min-w-0 md:w-md p-6">
-            card_title("Citations")
+        <section class="p-6">
+            <h3>(title)</h3>
             <ul class="ps-2 flex flex-col gap-2">(child)</ul>
         </section>
     })
@@ -48,7 +49,7 @@ pub async fn cited_object_citation_item(cx: &Cx, child: Child<'_>) -> topcoat::R
 
 #[component]
 pub async fn cited_object_layout(cx: &Cx, child: Child<'_>) -> topcoat::Result<impl View> {
-    Ok(view! { <div class="flex gap-4 flex-wrap">(child)</div> })
+    Ok(view! { <div class="grid gap-6 lg:grid-cols-3">(child)</div> })
 }
 
 #[shard]
