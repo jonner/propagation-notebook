@@ -1,5 +1,6 @@
 use libpropagation::{
     auth::PermissionCode,
+    citation::PropagationProcedureCitation,
     propagation::{ProcedureType, PropagationProcedure},
     taxonomy::{Taxon, TaxonPropagationProcedure},
 };
@@ -15,7 +16,7 @@ use topcoat::{
         error::{SeeOther, see_other},
         href, layout, page, path_param, route,
     },
-    runtime::signal,
+    runtime::{Event, signal},
     view::{Attributes, Child, View, attributes, class, component, view},
 };
 use tracing::trace;
@@ -24,12 +25,14 @@ use crate::{
     Subtitle,
     actions::{Action, ActionItemType, permitted_actions},
     assets::mdi,
+    citation::citation_id,
     components::{
         action_menu::action_menu,
         alert_dialog::alert_dialog,
         button::*,
         card::*,
         citations::citation_list,
+        cited_object::*,
         dialog::*,
         field::*,
         input::*,
@@ -223,19 +226,109 @@ async fn propagation_procedure_form(
 pub async fn modify(cx: &Cx) -> topcoat::Result<impl View> {
     let _user = require_user_with_permission(cx, PermissionCode::PropagationEdit).await?;
     let id = *propagation_id(cx)?;
-    let propagation = PropagationProcedure::get_by_id(&mut db(cx), id).await?;
+    let propagation = PropagationProcedure::filter_by_id(id)
+        .include(PropagationProcedure::fields().citation_links().citation())
+        .one()
+        .exec(&mut db(cx))
+        .await?;
+
+    let delete_citation_data = signal(cx, || None::<(u64, String)>);
+    let add_citation_dialog_open = signal(cx, || false);
+
     Ok(view! {
         <hgroup>
             crumbs()
             <h1>"Edit a Propagation Procedure"</h1>
         </hgroup>
-        propagation_procedure_form(
-            procedure: Some(&propagation),
-            attrs: attributes! {
+        cited_object_layout(
+            cited_object_main_content(
+                card_content(
+                    propagation_procedure_form(
+                        procedure: Some(&propagation),
+                        attrs: attributes! {
+                            method="POST"
+                            action=(href!(do_modify, propagation_id: id))
+                        },
+                        button("Update")
+                    )
+                )
+            )
+            cited_object_citation_section(
+                title: "Citations",
+                let citations = propagation.citation_links.get();
+                for citation_link in citations {
+                    let citation = citation_link.citation.get();
+                    cited_object_citation_item(
+                        let citation_data = (citation.id, citation.format_cse());
+                        <span class="text-muted-foreground">
+                            (citation.id)
+                            "."
+                        </span>
+                        <span class="text-wrap">(citation.format_cse())</span>
+                        button(
+                            size: ButtonSize::Sm,
+                            variant: ButtonVariant::Destructive,
+                            attrs: attributes! {
+                                @click=$(|e: Event| {
+                                    e.prevent_default();
+                                    delete_citation_data.set(Some(citation_data));
+                                })
+                            },
+                            icon(data: mdi::REMOVE)
+                        )
+                    )
+                }
+                cited_object_citation_item(
+                    button(
+                        size: ButtonSize::Sm,
+                        variant: ButtonVariant::Outline,
+                        attrs: attributes! {
+                            @click=$(|e: Event| {
+                                e.prevent_default();
+                                add_citation_dialog_open.set(true);
+                            })
+                        },
+                        icon(data: mdi::ADD)
+                    )
+                    <span>"Add citation"</span>
+                )
+            )
+        )
+        let citation_ids = propagation
+            .citation_links
+            .get()
+            .iter()
+            .map(|link| link.citation_id)
+            .collect::<Vec<_>>();
+        add_citation_dialog(
+            open_sig: add_citation_dialog_open.clone(),
+            exclude: citation_ids,
+            form_attrs: attributes! {
                 method="POST"
-                action=(href!(do_modify, propagation_id: id))
+                action=(href!(add_citation, propagation_id: propagation.id))
+            }
+        )
+        remove_citation_dialog(
+            remove_signal: delete_citation_data.clone(),
+            form_attrs: attributes! {
+                method="POST"
+                action=(delete_citation_data
+                    .get()
+                    .map(
+                        |d|
+                            href!(
+                                remove_citation,
+                                propagation_id: propagation.id,
+                                citation_id: d.0,
+                            ),
+                    ))
             },
-            button("Update")
+            remove_citation_dialog_context(
+                remove_citation_dialog_context_item(
+                    item_term("Propagation Procedure")
+                    item_value((format!("{}: {}", propagation.id, propagation.name)))
+                )
+            )
         )
     })
 }
@@ -442,4 +535,43 @@ pub async fn delete_propagation(cx: &Cx) -> topcoat::Result<SeeOther> {
             Err(see_other(href!(details, propagation_id: id).resolve(cx)).into())
         }
     }
+}
+
+#[derive(Debug, Deserialize)]
+struct AddCitationParams {
+    citation_id: u64,
+}
+
+#[route(POST "/propagation/{propagation_id}/citations")]
+pub async fn add_citation(
+    cx: &Cx,
+    Form(params): Form<AddCitationParams>,
+) -> topcoat::Result<SeeOther> {
+    let _ = require_user_with_permission(cx, PermissionCode::PropagationEdit).await?;
+
+    let propagation_id = *propagation_id(cx)?;
+    PropagationProcedureCitation::create()
+        .propagation_id(propagation_id)
+        .citation_id(params.citation_id)
+        .exec(&mut db(cx))
+        .await?;
+    Ok(see_other(
+        href!(modify, propagation_id: propagation_id).resolve(cx),
+    ))
+}
+
+#[route(POST "/propagation/{propagation_id}/citations/{citation_id}/delete")]
+pub async fn remove_citation(cx: &Cx) -> topcoat::Result<SeeOther> {
+    let _ = require_user_with_permission(cx, PermissionCode::PropagationEdit).await?;
+    let propagation_id = *propagation_id(cx)?;
+    let citation_id = *citation_id(cx)?;
+    PropagationProcedureCitation::delete_by_citation_id_and_propagation_id(
+        &mut db(cx),
+        citation_id,
+        propagation_id,
+    )
+    .await?;
+    Ok(see_other(
+        href!(modify, propagation_id: propagation_id).resolve(cx),
+    ))
 }
