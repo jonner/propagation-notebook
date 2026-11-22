@@ -7,7 +7,7 @@ use topcoat::{
 use crate::{
     actions::{Action, ActionItemType, permitted_actions},
     assets::mdi,
-    components::{dropdown_menu::*, floating::FloatingAlign},
+    components::{button::*, dropdown_menu::*, floating::FloatingAlign},
     context::current_user,
 };
 
@@ -26,7 +26,7 @@ pub async fn action_menu(
                 attrs: attrs,
                 dropdown_menu_trigger(
                     attrs: attributes! {
-                        class="hover:bg-foreground/5 active:bg-foreground/10 rounded-md"
+                        class=(button_variants(ButtonVariant::Outline, ButtonSize::Md))
                     },
                     target: &menu_id,
                     icon(data: mdi::DOTS_VERTICAL)

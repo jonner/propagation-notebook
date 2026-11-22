@@ -123,7 +123,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                         breadcrumb_item(breadcrumb_page((format!("Note {}", note.id))))
                     )
                 )
-                <h1 class="flex items-center">
+                <h1 class="flex items-baseline">
                     (&note.title)
                     let actions = permitted_actions(
                         current_user(cx).await,

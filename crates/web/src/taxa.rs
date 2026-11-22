@@ -817,7 +817,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
             link_fn: |taxon| { href!(crate::taxa::details, taxon_id: taxon.id) },
             link_final: true
         )
-        <h1 class="flex items-center">
+        <h1 class="flex items-baseline">
             <span class="latin">(&taxon.complete_name)</span>
             badge(
                 variant: BadgeVariant::Secondary,
@@ -936,7 +936,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
             </section>
 
             <section>
-                <h2 class="flex items-center">
+                <h2 class="flex items-baseline">
                     "Propagation Procedures"
                     <div class="ms-auto">
                         propagation_actions(open_signal: show_add_propagation.clone())
@@ -999,7 +999,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
             </section>
 
             <section>
-                <h2 class="flex items-center">
+                <h2 class="flex items-baseline">
                     "Notes"
                     <div class="ms-auto">note_actions()</div>
                 </h2>

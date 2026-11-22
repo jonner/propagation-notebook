@@ -124,7 +124,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                             breadcrumb_item(breadcrumb_page((citation.id)))
                         )
                     )
-                    <h1 class="flex items-center">
+                    <h1 class="flex items-baseline">
                         "Cited Work"
                         let actions = permitted_actions(current_user(cx).await, &actions);
                         if !actions.is_empty() {
