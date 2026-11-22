@@ -15,26 +15,31 @@ use topcoat::{
         error::{SeeOther, see_other},
         href, layout, page, path_param, route,
     },
+    runtime::signal,
     view::{Attributes, Child, View, attributes, class, component, view},
 };
 use tracing::trace;
 
 use crate::{
     Subtitle,
+    actions::{Action, ActionItemType, permitted_actions},
     assets::mdi,
     components::{
+        action_menu::action_menu,
+        alert_dialog::alert_dialog,
         button::*,
         card::*,
         citations::citation_list,
+        dialog::*,
         field::*,
         input::*,
         pn::{item_term, item_value},
         select::*,
         textarea::*,
     },
-    context::{db, require_user_with_permission},
+    context::{current_user, db, require_user_with_permission},
     crumb::{Crumb, crumbs},
-    flash::{FlashMessage, push_message},
+    flash::{self, FlashMessage, push_message},
     taxa,
 };
 
@@ -293,11 +298,39 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
     )
     .exec(&mut db(cx))
     .await?;
-    trace!(?procedure);
+
+    let delete_dialog_open = signal(cx, || false);
+    let actions = [
+        Action {
+            name: "Edit".to_string(),
+            permission: Some(PermissionCode::PropagationEdit),
+            item_type: ActionItemType::Link,
+            attrs: attributes! { href=(href!(modify, propagation_id: procedure.id)) },
+        },
+        Action {
+            name: "Delete".to_string(),
+            permission: Some(PermissionCode::PropagationDelete),
+            item_type: ActionItemType::Button,
+            attrs: attributes! {
+                @click=$(|_e: topcoat::runtime::Event| {
+                    delete_dialog_open.set(true);
+                })
+                class="text-destructive"
+            },
+        },
+    ];
     Ok(view! {
         <div class="flex flex-col gap-6">
             <section>
-                <h1>(&procedure.name)</h1>
+                <div class="flex">
+                    <h1>(&procedure.name)</h1>
+                    let actions = permitted_actions(current_user(cx).await, &actions);
+                    if !actions.is_empty() {
+                        <div class="ms-auto">
+                            action_menu(actions: actions.as_slice())
+                        </div>
+                    }
+                </div>
                 <section class="flex flex-col gap-6">
                     <div>
                         item_term("Type")
@@ -349,5 +382,57 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                 )
             </section>
         </div>
+        alert_dialog(
+            open: delete_dialog_open.get(),
+            dialog_content(
+                dialog_header(
+                    dialog_title("Delete this procedure?")
+                    dialog_description("This action is not reversible")
+                )
+                dialog_footer(
+                    button(
+                        attrs: attributes! {
+                            @click=$(|e: topcoat::runtime::Event| {
+                                e.prevent_default();
+                                delete_dialog_open.set(false)
+                            })
+                        },
+                        "Cancel"
+                    )
+                    <form
+                        action=(href!(delete_propagation, propagation_id: procedure.id))
+                        method="POST"
+                    >
+                        button(
+                            variant: ButtonVariant::Destructive,
+                            attrs: attributes! {},
+                            "Delete"
+                        )
+                    </form>
+                )
+            )
+        )
     })
+}
+
+#[route(POST "/admin/propagation/{propagation_id}/delete")]
+pub async fn delete_propagation(cx: &Cx) -> topcoat::Result<SeeOther> {
+    let _ = require_user_with_permission(cx, PermissionCode::PropagationDelete).await?;
+    let id = *propagation_id(cx)?;
+    match PropagationProcedure::delete_by_id(&mut db(cx), id).await {
+        Ok(_) => {
+            flash::push_message(
+                cx,
+                FlashMessage::Success(format!("Deleted propagation procedure {id}")),
+            )?;
+            Ok(see_other(href!(crate::home::index).resolve(cx)))
+        }
+        Err(e) => {
+            flash::push_message(
+                cx,
+                FlashMessage::Failure(format!("Failed to delete propagation procedure : {e}")),
+            )?;
+            Err(see_other(href!(details, propagation_id: id).resolve(cx)).into())
+        }
+    }
 }
