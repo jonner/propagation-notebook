@@ -321,52 +321,59 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
     ];
     Ok(view! {
         <div class="flex flex-col gap-6">
-            <section>
-                <div class="flex">
-                    <h1>(&procedure.name)</h1>
-                    let actions = permitted_actions(current_user(cx).await, &actions);
-                    if !actions.is_empty() {
-                        <div class="ms-auto">
-                            action_menu(actions: actions.as_slice())
-                        </div>
-                    }
-                </div>
-                <section class="flex flex-col gap-6">
-                    <div>
-                        item_term("Type")
-                        item_value((procedure.r#type.to_string()))
-                    </div>
-                    <div>
-                        item_term("Notes")
-                        item_value((procedure.notes.as_deref().unwrap_or_default()))
-                    </div>
-                    <div>
-                        item_term("Instructions")
-                        item_value((&procedure.instructions))
-                    </div>
-                    <div>
-                        item_term("Citations")
-                        item_value(
-                            if !procedure.citations.get().is_empty() {
-                                citation_list(
-                                    citations: procedure.citations.get().iter().collect()
-                                )
-                            } else {
-                                "None"
-                            }
+            <div class="flex">
+                <h1>(&procedure.name)</h1>
+                let actions = permitted_actions(current_user(cx).await, &actions);
+                if !actions.is_empty() {
+                    <div class="ms-auto">action_menu(actions: actions.as_slice())</div>
+                }
+            </div>
+            <div class="grid gap-6 lg:grid-cols-3">
+                <section class="lg:col-span-2">
+                    card(
+                        card_header(card_title("Procedure details"))
+                        card_content(
+                            <div class="flex flex-col gap-6">
+                                <div>
+                                    item_term("Type")
+                                    item_value((procedure.r#type.to_string()))
+                                </div>
+                                <div>
+                                    item_term("Notes")
+                                    item_value(
+                                        (procedure.notes.as_deref().unwrap_or_default())
+                                    )
+                                </div>
+                                <div>
+                                    item_term("Instructions")
+                                    item_value(
+                                        attrs: attributes! { class="text-lg leading-7" },
+                                        (&procedure.instructions)
+                                    )
+                                </div>
+                                <div>
+                                    item_term("Citations")
+                                    item_value(
+                                        if !procedure.citations.get().is_empty() {
+                                            citation_list(
+                                                citations: procedure.citations.get().iter().collect()
+                                            )
+                                        } else {
+                                            "None"
+                                        }
+                                    )
+                                </div>
+                            </div>
                         )
-                    </div>
+                    )
                 </section>
-            </section>
-            <section>
-                card(
-                    card_header(card_title("Taxa"))
-                    card_content(
+                <section>
+                    <h3>"Associated Taxa"</h3>
+                    <div>
                         if !taxa.is_empty() {
                             <ul>
                                 for taxon in taxa {
                                     <li class="flex items-baseline gap-2">
-                                        <span>(taxon.id)</span>
                                         <span class="latin">
                                             <a href=(href!(taxa::details, taxa::taxon_id: taxon.id))>
                                                 (&taxon.complete_name)
@@ -378,9 +385,9 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                         } else {
                             "None"
                         }
-                    )
-                )
-            </section>
+                    </div>
+                </section>
+            </div>
         </div>
         alert_dialog(
             open: delete_dialog_open.get(),
