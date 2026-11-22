@@ -928,7 +928,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                                                 <a
                                                     class=(button_variants(
                                                         ButtonVariant::Outline,
-                                                        ButtonSize::Sm,
+                                                        ButtonSize::Icon,
                                                     ))
                                                     href=(href!(
                                                         cleaning::modify,
@@ -942,7 +942,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                                             if user.has_permission(PermissionCode::TaxonCleaningDelete) {
                                                 let id = procedure.id;
                                                 button(
-                                                    size: ButtonSize::Sm,
+                                                    size: ButtonSize::Icon,
                                                     variant: ButtonVariant::Destructive,
                                                     attrs: attributes! { @click=$(|_e: Event| delete_cleaning.set(Some(id))) },
                                                     icon(data: mdi::MINUS_THICK)
@@ -993,7 +993,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                                                 <a
                                                     class=(button_variants(
                                                         ButtonVariant::Outline,
-                                                        ButtonSize::Sm,
+                                                        ButtonSize::Icon,
                                                     ))
                                                     href=(href!(
                                                         propagation::modify,
@@ -1009,7 +1009,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                                             ) {
                                                 let id = (tp.taxon_id, tp.propagation_id);
                                                 button(
-                                                    size: ButtonSize::Sm,
+                                                    size: ButtonSize::Icon,
                                                     variant: ButtonVariant::Destructive,
                                                     attrs: attributes! { @click=$(|_e: Event| delete_propagation.set(Some(id))) },
                                                     icon(data: mdi::MINUS_THICK)
@@ -1069,7 +1069,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                                                         <a
                                                             class=(button_variants(
                                                                 ButtonVariant::Outline,
-                                                                ButtonSize::Sm,
+                                                                ButtonSize::Icon,
                                                             ))
                                                             href=(href!(note::edit, taxon_id: taxon.id, note::note_id: note.id))
                                                         >
@@ -1079,7 +1079,7 @@ pub async fn details(cx: &Cx) -> topcoat::Result<impl View> {
                                                     if user.has_permission(PermissionCode::TaxonNoteDelete) {
                                                         let id = note.id;
                                                         button(
-                                                            size: ButtonSize::Sm,
+                                                            size: ButtonSize::Icon,
                                                             variant: ButtonVariant::Destructive,
                                                             attrs: attributes! { @click=$(|_e: Event| delete_note.set(Some(id))) },
                                                             icon(data: mdi::MINUS_THICK)

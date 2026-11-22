@@ -26,7 +26,7 @@ pub async fn action_menu(
                 attrs: attrs,
                 dropdown_menu_trigger(
                     attrs: attributes! {
-                        class=(button_variants(ButtonVariant::Outline, ButtonSize::Md))
+                        class=(button_variants(ButtonVariant::Outline, ButtonSize::Icon))
                     },
                     target: &menu_id,
                     icon(data: mdi::DOTS_VERTICAL)
