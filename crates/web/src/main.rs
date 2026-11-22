@@ -154,10 +154,11 @@ async fn about(cx: &Cx) -> topcoat::Result<impl View> {
             <div>
                 <h3>"What You'll Find"</h3>
                 <div class="my-4">
-                    r#"Search out taxonomic database based by scientific or
-                    common name, then explore propagation protocols assigned to
-                    individual species. Protocols cover collecting, cleaning,
-                    and germinating seed, with citations where available."#
+                    r#"Search our taxonomic database by scientific or common
+                    name, then explore propagation protocols assigned to
+                    individual species. Available information includes
+                    collecting, cleaning, and germinating seed, with citations
+                    where available."#
                 </div>
                 <div class="my-4">
                     r#"Because seed timing depends on location, species are also
